@@ -1,2 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Environmental Engg. Index</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #e8f5e9; margin: 0; padding: 0; }
+        
+        /* Green Header for Environment */
+        header { background: linear-gradient(135deg, #2e7d32, #1b5e20); color: white; padding: 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        h1 { margin: 0; font-size: 22px; }
+        p { margin: 5px 0 0; font-size: 14px; opacity: 0.9; }
+        
+        .back-btn { position: absolute; left: 15px; top: 20px; color: white; text-decoration: none; font-size: 24px; font-weight: bold; }
 
-        gfyugh
+        .chapter-list { max-width: 800px; margin: 20px auto; padding: 0 15px; }
+
+        /* Card Design */
+        .chapter-card { 
+            background: white; 
+            margin-bottom: 15px; 
+            padding: 15px; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+            display: flex; 
+            align-items: center; 
+            text-decoration: none; 
+            color: #333; 
+            border-left: 6px solid #4caf50; /* Green Border */
+            transition: transform 0.2s;
+        }
+
+        .chapter-card:hover { transform: translateX(5px); background-color: #f1f8e9; }
+
+        /* Number Circle */
+        .num { 
+            background: #e8f5e9; 
+            color: #2e7d32; 
+            min-width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: bold; 
+            margin-right: 15px; 
+            font-size: 18px;
+            border: 1px solid #c8e6c9;
+        }
+
+        .details h3 { margin: 0; font-size: 16px; color: #1b5e20; }
+        .details span { font-size: 12px; color: #666; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="index.html" class="back-btn">⬅</a>
+    <h1>Environmental Engineering</h1>
+    <p>Select a Chapter</p>
+</header>
+
+<div class="chapter-list">
+
+    <a href="env_ch1.html" class="chapter-card">
+        <div class="num">1</div>
+        <div class="details">
+            <h3>Water Demand, Source & Conveyance</h3>
+            <span>Well Hydraulics</span>
+        </div>
+    </a>
+
+    <a href="env_ch2.html" class="chapter-card">
+        <div class="num">2</div>
+        <div class="details">
+            <h3>Water Quality Parameter</h3>
+            <span>Physical, Chemical & Biological</span>
+        </div>
+    </a>
+
+    <a href="env_ch3.html" class="chapter-card">
+        <div class="num">3</div>
+        <div class="details">
+            <h3>Raw Water Treatment</h3>
+            <span>Sedimentation, Filtration</span>
+        </div>
+    </a>
+
+    <a href="env_ch4.html" class="chapter-card">
+        <div class="num">4</div>
+        <div class="details">
+            <h3>Distribution System</h3>
+            <span>Rural Development</span>
+        </div>
+    </a>
+
+    <a href="env_ch5.html" class="chapter-card">
+        <div class="num">5</div>
+        <div class="details">
+            <h3>Properties of Waste Water</h3>
+            <span>BOD, COD & Characteristics</span>
+        </div>
+    </a>
+
+    <a href="env_ch6.html" class="chapter-card">
+        <div class="num">6</div>
+        <div class="details">
+            <h3>Design of Sewerage System</h3>
+            <span>Sewers & Appurtenances</span>
+        </div>
+    </a>
+
+    <a href="env_ch7.html" class="chapter-card">
+        <div class="num">7</div>
+        <div class="details">
+            <h3>Sewage Treatment</h3>
+            <span>ASP, Trickling Filter</span>
+        </div>
+    </a>
+
+    <a href="env_ch8.html" class="chapter-card">
+        <div class="num">8</div>
+        <div class="details">
+            <h3>Disposal of Sewage Effluent</h3>
+            <span>Dilution & Land Treatment</span>
+        </div>
+    </a>
+
+    <a href="env_ch9.html" class="chapter-card">
+        <div class="num">9</div>
+        <div class="details">
+            <h3>Solid Waste Management</h3>
+            <span>Landfill & Composting</span>
+        </div>
+    </a>
+
+    <a href="env_ch10.html" class="chapter-card">
+        <div class="num">10</div>
+        <div class="details">
+            <h3>Air & Noise Pollution</h3>
+            <span>Sources & Control</span>
+        </div>
+    </a>
+
+    <a href="env_ch11.html" class="chapter-card">
+        <div class="num">11</div>
+        <div class="details">
+            <h3>Miscellaneous</h3>
+            <span>Plumbing & Ventilation</span>
+        </div>
+    </a>
+
+</div>
+
+</body>
+</html>
