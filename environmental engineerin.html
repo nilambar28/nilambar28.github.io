@@ -3,100 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Page</title> 
+    <title>Irrigation Chapters</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; text-align: center; padding: 20px; }
-        .quiz-container { background: white; max-width: 600px; margin: auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        .question { font-size: 18px; margin-bottom: 10px; font-weight: bold; color: #333; }
-        .options { list-style: none; padding: 0; text-align: left; }
-        .options label { display: block; background: #e9ecef; padding: 10px; margin: 5px 0; border-radius: 5px; cursor: pointer; }
-        .options label:hover { background: #ced4da; }
-        button { background-color: #007bff; color: white; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; margin-top: 20px; }
-        button:hover { background-color: #0056b3; }
-        #result { margin-top: 20px; font-size: 20px; font-weight: bold; color: #333; }
-        .back-btn { display: inline-block; margin-top: 20px; text-decoration: none; color: #555; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #e0f7fa; margin: 0; padding: 0; text-align: center; }
+        
+        /* Header */
+        header { background: linear-gradient(135deg, #00bcd4, #00838f); color: white; padding: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 100; }
+        .header-content { display: flex; align-items: center; justify-content: center; position: relative; max-width: 800px; margin: auto; }
+        .back-btn { position: absolute; left: 0; color: white; text-decoration: none; font-size: 24px; font-weight: bold; padding: 5px 10px; }
+        h1 { margin: 0; font-size: 22px; }
+        
+        /* Grid Layout */
+        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; max-width: 900px; margin: 30px auto; padding: 0 20px; }
+        
+        /* Card Design */
+        .card { background: white; padding: 15px 20px; border-radius: 12px; box-shadow: 0 3px 6px rgba(0,0,0,0.05); text-decoration: none; color: #333; display: flex; align-items: center; transition: transform 0.2s; border-left: 6px solid #00bcd4; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); background-color: #fafffb; }
+        
+        /* Number Circle */
+        .num-circle { background: #e0f7fa; color: #00838f; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; margin-right: 15px; flex-shrink: 0; }
+        
+        .text { text-align: left; }
+        .text h3 { margin: 0; font-size: 16px; font-weight: 600; color: #006064; }
+        .text p { margin: 3px 0 0; font-size: 13px; color: #666; }
     </style>
 </head>
 <body>
 
-<div class="quiz-container">
-    <h1 id="subjectName">Subject Name</h1>
-    <div id="quiz"></div>
-    <button id="submit">Result Dekho</button>
-    <div id="result"></div>
-    <br>
-    <a href="index.html" class="back-btn">⬅ Home Page par wapas jayen</a>
+<header>
+    <div class="header-content">
+        <a href="index.html" class="back-btn">⬅</a>
+        <h1>Irrigation Engineering (Index)</h1>
+    </div>
+</header>
+
+<div class="dashboard">
+
+    <a href="irrigation_ch1.html" class="card">
+        <div class="num-circle">1</div>
+        <div class="text">
+            <h3>Irrigation & its Methods</h3>
+            <p>Techniques & Introduction</p>
+        </div>
+    </a>
+
+    <a href="irrigation_ch2.html" class="card">
+        <div class="num-circle">2</div>
+        <div class="text">
+            <h3>Soil Moisture & Relationship</h3>
+            <p>Water Holding Capacity</p>
+        </div>
+    </a>
+
+    <a href="irrigation_ch3.html" class="card">
+        <div class="num-circle">3</div>
+        <div class="text">
+            <h3>Water Logging & Reclamation</h3>
+            <p>Salinity & Drainage</p>
+        </div>
+    </a>
+
+    <a href="irrigation_ch4.html" class="card">
+        <div class="num-circle">4</div>
+        <div class="text">
+            <h3>Canal Design & Lining</h3>
+            <p>Lacey, Kennedy Theory</p>
+        </div>
+    </a>
+
+    <a href="irrigation_ch5.html" class="card">
+        <div class="num-circle">5</div>
+        <div class="text">
+            <h3>Seepage Theory</h3>
+            <p>Bligh's & Khosla's Theory</p>
+        </div>
+    </a>
+
+    <a href="irrigation_ch6.html" class="card">
+        <div class="num-circle">6</div>
+        <div class="text">
+            <h3>River Training Work</h3>
+            <p>Guide Banks & Groynes</p>
+        </div>
+    </a>
+
+    <a href="irrigation_ch7.html" class="card">
+        <div class="num-circle">7</div>
+        <div class="text">
+            <h3>Canal Regulation & CD Work</h3>
+            <p>Falls & Cross Regulators</p>
+        </div>
+    </a>
+
+    <a href="irrigation_ch8.html" class="card">
+        <div class="num-circle">8</div>
+        <div class="text">
+            <h3>Dams & Reservoirs</h3>
+            <p>Gravity & Earthen Dams</p>
+        </div>
+    </a>
+
+    <a href="irrigation_ch9.html" class="card">
+        <div class="num-circle">9</div>
+        <div class="text">
+            <h3>Spillway, Energy Descriptor</h3>
+            <p>Energy Dissipators</p>
+        </div>
+    </a>
+
+    <a href="irrigation_ch10.html" class="card">
+        <div class="num-circle">10</div>
+        <div class="text">
+            <h3>Miscellaneous</h3>
+            <p>Other Important Topics</p>
+        </div>
+    </a>
+
 </div>
-
-<script>
-    // --- YAHAN APNE SAWAL TYPE KAREIN ---
-    const myQuestions = [
-        {
-            question: "Yahan apna sawal likhein?",
-            answers: {
-                a: "Option A",
-                b: "Option B",
-                c: "Option C"
-            },
-            correctAnswer: "a"
-        },
-        {
-            question: "Dusra sawal yahan likhein?",
-            answers: {
-                a: "Option A",
-                b: "Option B",
-                c: "Option C"
-            },
-            correctAnswer: "b"
-        } 
-        // Aur sawal add karne ke liye upar wala bracket copy-paste karein
-    ];
-
-    // --- ISKE NICHE KUCH CHANGE MAT KARNA ---
-    function buildQuiz(){
-        const output = [];
-        myQuestions.forEach((currentQuestion, questionNumber) => {
-            const answers = [];
-            for(letter in currentQuestion.answers){
-                answers.push(
-                    `<label>
-                        <input type="radio" name="question${questionNumber}" value="${letter}">
-                        ${letter} : ${currentQuestion.answers[letter]}
-                    </label>`
-                );
-            }
-            output.push(
-                `<div class="question"> ${currentQuestion.question} </div>
-                <div class="options"> ${answers.join('')} </div><hr>`
-            );
-        });
-        document.getElementById('quiz').innerHTML = output.join('');
-    }
-
-    function showResults(){
-        const answerContainers = quizContainer.querySelectorAll('.options');
-        let numCorrect = 0;
-        myQuestions.forEach((currentQuestion, questionNumber) => {
-            const answerContainer = answerContainers[questionNumber];
-            const selector = `input[name=question${questionNumber}]:checked`;
-            const userAnswer = (answerContainer.querySelector(selector) || {}).value;
-            if(userAnswer === currentQuestion.correctAnswer){
-                numCorrect++;
-                answerContainers[questionNumber].style.color = 'green';
-            } else {
-                answerContainers[questionNumber].style.color = 'red';
-            }
-        });
-        resultsContainer.innerHTML = `Score: ${numCorrect} / ${myQuestions.length}`;
-    }
-
-    const quizContainer = document.getElementById('quiz');
-    const resultsContainer = document.getElementById('result');
-    const submitButton = document.getElementById('submit');
-
-    buildQuiz();
-    submitButton.addEventListener('click', showResults);
-</script>
 
 </body>
 </html>
