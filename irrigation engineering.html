@@ -3,159 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Irrigation Engineering Chapters</title>
+    <title>Irrigation Engineering Index</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #e0f7fa; margin: 0; padding: 0; text-align: center; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #e0f7fa; margin: 0; padding: 0; }
         
         /* Header Design */
-        header { background: linear-gradient(135deg, #0097a7, #006064); color: white; padding: 25px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); position: relative; }
-        h1 { margin: 0; font-size: 24px; }
-        .back-btn { position: absolute; left: 20px; top: 25px; color: white; text-decoration: none; font-size: 20px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; }
-        .back-btn:hover { background: rgba(255,255,255,0.4); }
+        header { background: linear-gradient(135deg, #0097a7, #006064); color: white; padding: 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        h1 { margin: 0; font-size: 22px; }
+        p { margin: 5px 0 0; font-size: 14px; opacity: 0.9; }
+        
+        .back-btn { position: absolute; left: 15px; top: 20px; color: white; text-decoration: none; font-size: 24px; font-weight: bold; }
 
-        /* Icon Grid Layout */
-        .grid-container { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-            gap: 20px; 
-            max-width: 1000px; 
-            margin: 30px auto; 
-            padding: 20px; 
-        }
+        /* Chapter List Layout */
+        .chapter-list { max-width: 800px; margin: 20px auto; padding: 0 15px; }
 
-        /* Card (Icon) Design */
+        /* Card Design */
         .chapter-card { 
             background: white; 
-            padding: 20px; 
-            border-radius: 15px; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05); 
-            text-decoration: none; 
-            color: #333; 
+            margin-bottom: 15px; 
+            padding: 15px; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
             display: flex; 
             align-items: center; 
-            transition: transform 0.2s, box-shadow 0.2s; 
-            border-left: 8px solid #00bcd4; /* Irrigation Blue Theme */
-        }
-        
-        .chapter-card:hover { 
-            transform: translateY(-5px); 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15); 
-            background-color: #f1fdff;
+            text-decoration: none; 
+            color: #333; 
+            border-left: 6px solid #00bcd4; /* Blue border */
+            transition: transform 0.2s;
         }
 
-        /* Number Icon */
-        .icon-box { 
+        .chapter-card:hover { transform: translateX(5px); background-color: #f0fdff; }
+
+        /* Number Circle */
+        .num { 
             background: #e0f7fa; 
             color: #00838f; 
-            width: 50px; 
-            height: 50px; 
+            min-width: 40px; 
+            height: 40px; 
             border-radius: 50%; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            font-size: 22px; 
             font-weight: bold; 
             margin-right: 15px; 
-            flex-shrink: 0;
-            border: 2px solid #b2ebf2;
+            font-size: 18px;
         }
 
-        .text-content h3 { margin: 0; font-size: 16px; font-weight: 700; color: #006064; text-align: left; }
-        .text-content p { margin: 5px 0 0; font-size: 13px; color: #666; text-align: left; }
+        .details h3 { margin: 0; font-size: 16px; color: #006064; }
+        .details span { font-size: 12px; color: #777; }
 
     </style>
 </head>
 <body>
 
 <header>
-    <a href="index.html" class="back-btn">⬅ Home</a>
-    <h1>💧 Irrigation Engineering</h1>
+    <a href="index.html" class="back-btn">⬅</a>
+    <h1>Irrigation Engineering</h1>
     <p>Select a Chapter to Start Quiz</p>
 </header>
 
-<div class="grid-container">
+<div class="chapter-list">
 
     <a href="irrigation_ch1.html" class="chapter-card">
-        <div class="icon-box">1</div>
-        <div class="text-content">
+        <div class="num">1</div>
+        <div class="details">
             <h3>Irrigation & its Methods</h3>
-            <p>Techniques & Quality of Water</p>
+            <span>Techniques & Introduction</span>
         </div>
     </a>
 
     <a href="irrigation_ch2.html" class="chapter-card">
-        <div class="icon-box">2</div>
-        <div class="text-content">
+        <div class="num">2</div>
+        <div class="details">
             <h3>Soil Moisture & Relationship</h3>
-            <p>Water Holding Capacity</p>
+            <span>Water Holding Capacity</span>
         </div>
     </a>
 
     <a href="irrigation_ch3.html" class="chapter-card">
-        <div class="icon-box">3</div>
-        <div class="text-content">
+        <div class="num">3</div>
+        <div class="details">
             <h3>Water Logging & Reclamation</h3>
-            <p>Saline & Alkaline Soils</p>
+            <span>Salinity & Drainage</span>
         </div>
     </a>
 
     <a href="irrigation_ch4.html" class="chapter-card">
-        <div class="icon-box">4</div>
-        <div class="text-content">
+        <div class="num">4</div>
+        <div class="details">
             <h3>Canal Design & Lining</h3>
-            <p>Lacey's & Kennedy's Theory</p>
+            <span>Lacey's & Kennedy's Theory</span>
         </div>
     </a>
 
     <a href="irrigation_ch5.html" class="chapter-card">
-        <div class="icon-box">5</div>
-        <div class="text-content">
+        <div class="num">5</div>
+        <div class="details">
             <h3>Seepage Theory</h3>
-            <p>Bligh's Creep & Khosla's Theory</p>
+            <span>Bligh's & Khosla's Theory</span>
         </div>
     </a>
 
     <a href="irrigation_ch6.html" class="chapter-card">
-        <div class="icon-box">6</div>
-        <div class="text-content">
+        <div class="num">6</div>
+        <div class="details">
             <h3>River Training Work</h3>
-            <p>Guide Banks & Groynes</p>
+            <span>Guide Banks & Groynes</span>
         </div>
     </a>
 
     <a href="irrigation_ch7.html" class="chapter-card">
-        <div class="icon-box">7</div>
-        <div class="text-content">
-            <h3>Canal Regulation & CD Works</h3>
-            <p>Falls, Regulators & Syphons</p>
+        <div class="num">7</div>
+        <div class="details">
+            <h3>Canal Regulation & Cross Drainage</h3>
+            <span>Falls & Regulators</span>
         </div>
     </a>
 
     <a href="irrigation_ch8.html" class="chapter-card">
-        <div class="icon-box">8</div>
-        <div class="text-content">
+        <div class="num">8</div>
+        <div class="details">
             <h3>Dams & Reservoirs</h3>
-            <p>Gravity, Earthen & Arch Dams</p>
+            <span>Gravity & Earthen Dams</span>
         </div>
     </a>
 
     <a href="irrigation_ch9.html" class="chapter-card">
-        <div class="icon-box">9</div>
-        <div class="text-content">
+        <div class="num">9</div>
+        <div class="details">
             <h3>Spillway & Energy Dissipators</h3>
-            <p>Ogee Spillway & Hydraulic Jump</p>
+            <span>Hydraulic Jump & Energy Loss</span>
         </div>
     </a>
 
     <a href="irrigation_ch10.html" class="chapter-card">
-        <div class="icon-box">10</div>
-        <div class="text-content">
+        <div class="num">10</div>
+        <div class="details">
             <h3>Miscellaneous</h3>
-            <p>Other Important Topics</p>
+            <span>Other Important Topics</span>
         </div>
     </a>
 
 </div>
 
 </body>
-</html>
+</html>       
+           
