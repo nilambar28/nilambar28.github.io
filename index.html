@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mera Quiz Portal</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; text-align: center; padding: 20px; }
+        .quiz-container { background: white; max-width: 600px; margin: auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .question { font-size: 18px; margin-bottom: 10px; font-weight: bold; }
+        .options { list-style: none; padding: 0; }
+        .options li { margin: 10px 0; }
+        button { background-color: #28a745; color: white; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; }
+        button:hover { background-color: #218838; }
+        #result { margin-top: 20px; font-size: 20px; font-weight: bold; color: #333; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <h1>General Knowledge Quiz</h1>
+    <div id="quiz"></div>
+    <button id="submit">Result Dekho</button>
+    <div id="result"></div>
+</div>
+
+<script>
+    // YAHAN APNE QUESTIONS CHANGE KAREIN
+    const myQuestions = [
+        {
+            question: "1. Bharat ki rajdhani kya hai?",
+            answers: {
+                a: "Mumbai",
+                b: "New Delhi",
+                c: "Kolkata"
+            },
+            correctAnswer: "b"
+        },
+        {
+            question: "2. Sabse bada planet kaunsa hai?",
+            answers: {
+                a: "Earth",
+                b: "Mars",
+                c: "Jupiter"
+            },
+            correctAnswer: "c"
+        },
+        {
+            question: "3. Cricket world cup 2011 kisne jeeta tha?",
+            answers: {
+                a: "India",
+                b: "Australia",
+                c: "Sri Lanka"
+            },
+            correctAnswer: "a"
+        }
+    ];
+
+    function buildQuiz(){
+        const output = [];
+        myQuestions.forEach((currentQuestion, questionNumber) => {
+            const answers = [];
+            for(letter in currentQuestion.answers){
+                answers.push(
+                    `<label>
+                        <input type="radio" name="question${questionNumber}" value="${letter}">
+                        ${letter} : ${currentQuestion.answers[letter]}
+                    </label><br>`
+                );
+            }
+            output.push(
+                `<div class="question"> ${currentQuestion.question} </div>
+                <div class="options"> ${answers.join('')} </div><hr>`
+            );
+        });
+        document.getElementById('quiz').innerHTML = output.join('');
+    }
+
+    function showResults(){
+        const answerContainers = quizContainer.querySelectorAll('.options');
+        let numCorrect = 0;
+
+        myQuestions.forEach((currentQuestion, questionNumber) => {
+            const answerContainer = answerContainers[questionNumber];
+            const selector = `input[name=question${questionNumber}]:checked`;
+            const userAnswer = (answerContainer.querySelector(selector) || {}).value;
+
+            if(userAnswer === currentQuestion.correctAnswer){
+                numCorrect++;
+                answerContainers[questionNumber].style.color = 'green';
+            } else {
+                answerContainers[questionNumber].style.color = 'red';
+            }
+        });
+
+        resultsContainer.innerHTML = `Aapke Marks: ${numCorrect} / ${myQuestions.length}`;
+    }
+
+    const quizContainer = document.getElementById('quiz');
+    const resultsContainer = document.getElementById('result');
+    const submitButton = document.getElementById('submit');
+
+    buildQuiz();
+    submitButton.addEventListener('click', showResults);
+</script>
+
+</body>
+</html>
