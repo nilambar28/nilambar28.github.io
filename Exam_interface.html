@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSC JE Mock Test</title>
+    <style>
+        /* --- CSS (DESIGN) --- */
+        body { margin: 0; font-family: 'Arial', sans-serif; background: #f2f2f2; height: 100vh; display: flex; flex-direction: column; }
+        
+        /* Header */
+        header { background: #007bff; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; height: 50px; }
+        .timer { font-size: 20px; font-weight: bold; background: white; color: #333; padding: 5px 15px; border-radius: 5px; }
+
+        /* Main Layout */
+        .container { display: flex; flex: 1; height: calc(100vh - 70px); }
+        
+        /* Left Side: Question Area */
+        .question-area { flex: 3; background: white; padding: 20px; overflow-y: auto; border-right: 2px solid #ddd; position: relative; }
+        .q-header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px; font-weight: bold; color: #555; }
+        .question-text { font-size: 18px; margin-bottom: 20px; line-height: 1.5; }
+        
+        /* Options */
+        .options label { display: block; border: 1px solid #ccc; padding: 12px; margin-bottom: 10px; border-radius: 5px; cursor: pointer; transition: 0.2s; }
+        .options label:hover { background: #f9f9f9; }
+        .options input { margin-right: 10px; }
+        
+        /* Footer Buttons */
+        .footer-btns { position: absolute; bottom: 0; left: 0; right: 0; padding: 15px; background: #fff; border-top: 1px solid #ddd; display: flex; justify-content: space-between; }
+        .btn { padding: 10px 20px; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; }
+        .btn-save { background: #28a745; color: white; }
+        .btn-clear { background: #dc3545; color: white; }
+        .btn-review { background: #ffc107; color: black; }
+
+        /* Right Side: Question Palette */
+        .sidebar { flex: 1; background: #eef1f5; padding: 10px; overflow-y: auto; max-width: 300px; }
+        .palette-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
+        .palette-btn { width: 40px; height: 40px; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        
+        /* Palette Colors */
+        .answered { background: #28a745; color: white; border-color: #28a745; }
+        .not-answered { background: #dc3545; color: white; border-color: #dc3545; }
+        .review { background: #ffc107; border-color: #ffc107; }
+        .not-visited { background: white; }
+        .current-q { border: 2px solid #007bff; box-shadow: 0 0 5px #007bff; }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .container { flex-direction: column; }
+            .sidebar { max-width: 100%; height: 150px; border-top: 2px solid #ddd; }
+            .footer-btns { position: relative; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div>SSC JE Civil Mock Test</div>
+    <div class="timer" id="timer">02:00:00</div>
+</header>
+
+<div class="container">
+    <div class="question-area">
+        <div class="q-header">
+            <span>Question No. <span id="q-no">1</span></span>
+            <span>Marks: +1, -0.25</span>
+        </div>
+        <div class="question-text" id="q-text">Loading...</div>
+        <div class="options" id="options-container"></div>
+        
+        <div class="footer-btns">
+            <button class="btn btn-clear" onclick="clearResponse()">Clear Response</button>
+            <button class="btn btn-review" onclick="markReview()">Mark for Review</button>
+            <button class="btn btn-save" onclick="saveAndNext()">Save & Next</button>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <h4>Questions Palette</h4>
+        <div class="palette-grid" id="palette-box">
+            </div>
+        <br>
+        <button class="btn btn-save" style="width:100%" onclick="submitExam()">Submit Exam</button>
+    </div>
+</div>
+
+<script>
+    /* --- JAVASCRIPT (LOGIC) --- */
+    
+    // Sample Data (Yahan aap apne sawal add karein)
+    const questions = [
+        { q: "Standard brick size kya hota hai (mm)?", opts: ["190x90x90", "200x100x100", "190x190x90", "None"], ans: 0 },
+        { q: "Concrete ki tensile strength kis test se mapte hain?", opts: ["Slump Test", "Split Cylinder Test", "Vicat Apparatus", "Core Cutter"], ans: 1 },
+        { q: "Hooke's Law kahan tak valid hai?", opts: ["Elastic Limit", "Proportional Limit", "Yield Point", "Fracture Point"], ans: 1 },
+        { q: "Reynolds number kiske liye hota hai?", opts: ["Pipe Flow", "Open Channel", "Weir", "Dam"], ans: 0 },
+        { q: "Soil ka void ratio (e) kya ho sakta hai?", opts: ["e > 0", "e < 0", "e = 0", "e = 1"], ans: 0 }
+    ];
+
+    let currentQIndex = 0;
+    let userAnswers = new Array(questions.length).fill(null); // Save user selection
+    let questionStatus = new Array(questions.length).fill('not-visited'); // Track status
+
+    // Initialize
+    function loadQuestion(index) {
+        currentQIndex = index;
+        document.getElementById('q-no').innerText = index + 1;
+        document.getElementById('q-text').innerText = questions[index].q;
+        
+        const optsContainer = document.getElementById('options-container');
+        optsContainer.innerHTML = "";
+        
+        questions[index].opts.forEach((opt, i) => {
+            const checked = userAnswers[index] === i ? 'checked' : '';
+            optsContainer.innerHTML += `
+                <label>
+                    <input type="radio" name="opt" value="${i}" ${checked} onchange="selectOption(${i})"> ${opt}
+                </label>`;
+        });
+        
+        updatePalette();
+    }
+
+    function createPalette() {
+        const paletteBox = document.getElementById('palette-box');
+        paletteBox.innerHTML = "";
+        questions.forEach((_, i) => {
+            let btnClass = 'palette-btn ' + questionStatus[i];
+            if (i === currentQIndex) btnClass += ' current-q';
+            paletteBox.innerHTML += `<div class="${btnClass}" onclick="loadQuestion(${i})">${i + 1}</div>`;
+        });
+    }
+
+    function selectOption(optIndex) {
+        userAnswers[currentQIndex] = optIndex;
+    }
+
+    function saveAndNext() {
+        if (userAnswers[currentQIndex] !== null) {
+            questionStatus[currentQIndex] = 'answered';
+        } else {
+            questionStatus[currentQIndex] = 'not-answered';
+        }
+        nextQuestion();
+    }
+
+    function markReview() {
+        questionStatus[currentQIndex] = 'review';
+        nextQuestion();
+    }
+
+    function clearResponse() {
+        userAnswers[currentQIndex] = null;
+        questionStatus[currentQIndex] = 'not-visited';
+        loadQuestion(currentQIndex);
+    }
+
+    function nextQuestion() {
+        if (currentQIndex < questions.length - 1) {
+            currentQIndex++;
+            loadQuestion(currentQIndex);
+        } else {
+            alert("Last question reached!");
+            updatePalette();
+        }
+    }
+
+    function updatePalette() {
+        createPalette(); // Re-render palette to update colors
+    }
+    
+    function submitExam() {
+        let score = 0;
+        userAnswers.forEach((ans, i) => {
+            if(ans === questions[i].ans) score++;
+        });
+        alert("Exam Over! Your Score: " + score + "/" + questions.length);
+    }
+
+    // Timer Logic
+    let time = 7200; // 2 hours in seconds
+    setInterval(() => {
+        let h = Math.floor(time / 3600);
+        let m = Math.floor((time % 3600) / 60);
+        let s = time % 60;
+        document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+        time--;
+    }, 1000);
+
+    // Start
+    questionStatus[0] = 'not-answered'; // First Q visited
+    createPalette();
+    loadQuestion(0);
+
+</script>
+</body>
+</html>
