@@ -3,116 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Irrigation Engineering Quiz</title>
+    <title>Irrigation Engineering Chapters</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #e0f7fa; text-align: center; padding: 20px; }
-        .quiz-container { background: white; max-width: 600px; margin: auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        .question { font-size: 18px; margin-bottom: 10px; font-weight: bold; color: #006064; }
-        .options { list-style: none; padding: 0; text-align: left; }
-        .options label { display: block; background: #ffffff; border: 1px solid #b2ebf2; padding: 10px; margin: 5px 0; border-radius: 5px; cursor: pointer; }
-        .options label:hover { background: #b2ebf2; }
-        button { background-color: #0097a7; color: white; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; margin-top: 20px; }
-        button:hover { background-color: #00838f; }
-        #result { margin-top: 20px; font-size: 20px; font-weight: bold; color: #333; }
-        .back-btn { display: inline-block; margin-top: 20px; text-decoration: none; color: #555; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #e0f7fa; margin: 0; padding: 0; text-align: center; }
+        
+        /* Header Design */
+        header { background: linear-gradient(135deg, #0097a7, #006064); color: white; padding: 25px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); position: relative; }
+        h1 { margin: 0; font-size: 24px; }
+        .back-btn { position: absolute; left: 20px; top: 25px; color: white; text-decoration: none; font-size: 20px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; }
+        .back-btn:hover { background: rgba(255,255,255,0.4); }
+
+        /* Icon Grid Layout */
+        .grid-container { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 20px; 
+            max-width: 1000px; 
+            margin: 30px auto; 
+            padding: 20px; 
+        }
+
+        /* Card (Icon) Design */
+        .chapter-card { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 15px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); 
+            text-decoration: none; 
+            color: #333; 
+            display: flex; 
+            align-items: center; 
+            transition: transform 0.2s, box-shadow 0.2s; 
+            border-left: 8px solid #00bcd4; /* Irrigation Blue Theme */
+        }
+        
+        .chapter-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15); 
+            background-color: #f1fdff;
+        }
+
+        /* Number Icon */
+        .icon-box { 
+            background: #e0f7fa; 
+            color: #00838f; 
+            width: 50px; 
+            height: 50px; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 22px; 
+            font-weight: bold; 
+            margin-right: 15px; 
+            flex-shrink: 0;
+            border: 2px solid #b2ebf2;
+        }
+
+        .text-content h3 { margin: 0; font-size: 16px; font-weight: 700; color: #006064; text-align: left; }
+        .text-content p { margin: 5px 0 0; font-size: 13px; color: #666; text-align: left; }
+
     </style>
 </head>
 <body>
 
-<div class="quiz-container">
+<header>
+    <a href="index.html" class="back-btn">⬅ Home</a>
     <h1>💧 Irrigation Engineering</h1>
-    <div id="quiz"></div>
-    <button id="submit">Result Dekho</button>
-    <div id="result"></div>
-    <br>
-    <a href="index.html" class="back-btn">⬅ Home Page par wapas jayen</a>
+    <p>Select a Chapter to Start Quiz</p>
+</header>
+
+<div class="grid-container">
+
+    <a href="irrigation_ch1.html" class="chapter-card">
+        <div class="icon-box">1</div>
+        <div class="text-content">
+            <h3>Irrigation & its Methods</h3>
+            <p>Techniques & Quality of Water</p>
+        </div>
+    </a>
+
+    <a href="irrigation_ch2.html" class="chapter-card">
+        <div class="icon-box">2</div>
+        <div class="text-content">
+            <h3>Soil Moisture & Relationship</h3>
+            <p>Water Holding Capacity</p>
+        </div>
+    </a>
+
+    <a href="irrigation_ch3.html" class="chapter-card">
+        <div class="icon-box">3</div>
+        <div class="text-content">
+            <h3>Water Logging & Reclamation</h3>
+            <p>Saline & Alkaline Soils</p>
+        </div>
+    </a>
+
+    <a href="irrigation_ch4.html" class="chapter-card">
+        <div class="icon-box">4</div>
+        <div class="text-content">
+            <h3>Canal Design & Lining</h3>
+            <p>Lacey's & Kennedy's Theory</p>
+        </div>
+    </a>
+
+    <a href="irrigation_ch5.html" class="chapter-card">
+        <div class="icon-box">5</div>
+        <div class="text-content">
+            <h3>Seepage Theory</h3>
+            <p>Bligh's Creep & Khosla's Theory</p>
+        </div>
+    </a>
+
+    <a href="irrigation_ch6.html" class="chapter-card">
+        <div class="icon-box">6</div>
+        <div class="text-content">
+            <h3>River Training Work</h3>
+            <p>Guide Banks & Groynes</p>
+        </div>
+    </a>
+
+    <a href="irrigation_ch7.html" class="chapter-card">
+        <div class="icon-box">7</div>
+        <div class="text-content">
+            <h3>Canal Regulation & CD Works</h3>
+            <p>Falls, Regulators & Syphons</p>
+        </div>
+    </a>
+
+    <a href="irrigation_ch8.html" class="chapter-card">
+        <div class="icon-box">8</div>
+        <div class="text-content">
+            <h3>Dams & Reservoirs</h3>
+            <p>Gravity, Earthen & Arch Dams</p>
+        </div>
+    </a>
+
+    <a href="irrigation_ch9.html" class="chapter-card">
+        <div class="icon-box">9</div>
+        <div class="text-content">
+            <h3>Spillway & Energy Dissipators</h3>
+            <p>Ogee Spillway & Hydraulic Jump</p>
+        </div>
+    </a>
+
+    <a href="irrigation_ch10.html" class="chapter-card">
+        <div class="icon-box">10</div>
+        <div class="text-content">
+            <h3>Miscellaneous</h3>
+            <p>Other Important Topics</p>
+        </div>
+    </a>
+
 </div>
-
-<script>
-    // Yahan aap apne Irrigation ke sawal badal sakte hain
-    const myQuestions = [
-        {
-            question: "1. Duty (D), Delta (Δ) aur Base Period (B) ka sahi relation kya hai?",
-            answers: {
-                a: "Δ = 8.64 B / D",
-                b: "D = 8.64 Δ / B",
-                c: "Δ = 8.64 D / B"
-            },
-            correctAnswer: "a"
-        },
-        {
-            question: "2. Kharif ki fasal (crop) kaunsi hai?",
-            answers: {
-                a: "Wheat (Gehu)",
-                b: "Rice (Chawal)",
-                c: "Mustard (Sarson)"
-            },
-            correctAnswer: "b"
-        },
-        {
-            question: "3. Sprinkler irrigation sabse best kahan hoti hai?",
-            answers: {
-                a: "Jahan zameen uneven (oonchi-niche) ho",
-                b: "Jahan chawal ki kheti ho",
-                c: "Jahan heavy clay soil ho"
-            },
-            correctAnswer: "a"
-        },
-        {
-            question: "4. Canal lining ka main fayda kya hai?",
-            answers: {
-                a: "Cost kam karna",
-                b: "Seepage loss kam karna",
-                c: "Width badhana"
-            },
-            correctAnswer: "b"
-        }
-    ];
-
-    function buildQuiz(){
-        const output = [];
-        myQuestions.forEach((currentQuestion, questionNumber) => {
-            const answers = [];
-            for(letter in currentQuestion.answers){
-                answers.push(
-                    `<label>
-                        <input type="radio" name="question${questionNumber}" value="${letter}">
-                        ${letter} : ${currentQuestion.answers[letter]}
-                    </label>`
-                );
-            }
-            output.push(
-                `<div class="question"> ${currentQuestion.question} </div>
-                <div class="options"> ${answers.join('')} </div><hr>`
-            );
-        });
-        document.getElementById('quiz').innerHTML = output.join('');
-    }
-
-    function showResults(){
-        const answerContainers = quizContainer.querySelectorAll('.options');
-        let numCorrect = 0;
-        myQuestions.forEach((currentQuestion, questionNumber) => {
-            const answerContainer = answerContainers[questionNumber];
-            const selector = `input[name=question${questionNumber}]:checked`;
-            const userAnswer = (answerContainer.querySelector(selector) || {}).value;
-            if(userAnswer === currentQuestion.correctAnswer){
-                numCorrect++;
-                answerContainers[questionNumber].style.color = 'green';
-            } else {
-                answerContainers[questionNumber].style.color = 'red';
-            }
-        });
-        resultsContainer.innerHTML = `Score: ${numCorrect} / ${myQuestions.length}`;
-    }
-
-    const quizContainer = document.getElementById('quiz');
-    const resultsContainer = document.getElementById('result');
-    const submitButton = document.getElementById('submit');
-
-    buildQuiz();
-    submitButton.addEventListener('click', showResults);
-</script>
 
 </body>
 </html>
