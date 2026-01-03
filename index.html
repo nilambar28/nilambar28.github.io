@@ -5,74 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Civil Engineering Quiz Portal</title>
     <style>
-        /* --- DESIGN SETTINGS --- */
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            background-color: #f0f2f5; 
-            text-align: center; 
-        }
-
-        /* Header Design */
-        header { 
-            background: linear-gradient(135deg, #007bff, #0056b3); 
-            color: white; 
-            padding: 30px 20px; 
-            margin-bottom: 30px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        header h1 { margin: 0; font-size: 28px; }
-        header p { margin: 10px 0 0; opacity: 0.9; }
-
-        /* Grid Container for Buttons */
-        .dashboard { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
-            gap: 20px; 
-            max-width: 1000px; 
-            margin: 0 auto; 
-            padding: 20px; 
-        }
-
-        /* Card/Button Design */
-        .card { 
-            background: white; 
-            padding: 20px; 
-            border-radius: 15px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
-            text-decoration: none; 
-            color: #333; 
-            display: flex; 
-            align-items: center; 
-            transition: transform 0.2s, box-shadow 0.2s; 
-            border-left: 5px solid #007bff; /* Default border color */
-        }
-
-        .card:hover { 
-            transform: translateY(-5px); 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
-        }
-
-        /* Icons inside Card */
-        .icon { 
-            font-size: 40px; 
-            margin-right: 20px; 
-        }
-        
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f0f2f5; text-align: center; }
+        header { background: linear-gradient(135deg, #007bff, #0056b3); color: white; padding: 30px 20px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-decoration: none; color: #333; display: flex; align-items: center; transition: transform 0.2s; border-left: 5px solid #007bff; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        .icon { font-size: 40px; margin-right: 20px; }
         .card-text h3 { margin: 0; font-size: 18px; color: #333; }
         .card-text p { margin: 5px 0 0; font-size: 14px; color: #666; }
-
-        /* Specific Colors for Subjects */
-        .water { border-left-color: #00bcd4; } /* Irrigation */
-        .env { border-left-color: #4caf50; }   /* Environment */
-        .rcc { border-left-color: #ff9800; }   /* RCC */
-        .survey { border-left-color: #9c27b0; } /* Survey */
-        .est { border-left-color: #795548; }    /* Estimation */
-        .test { border-left-color: #f44336; }   /* Full Mock Test */
-
-        /* Footer */
-        footer { margin-top: 50px; padding: 20px; color: #777; font-size: 14px; }
+        
+        /* Border Colors */
+        .water { border-left-color: #00bcd4; }
+        .env { border-left-color: #4caf50; }
+        .test { border-left-color: #f44336; }
+        .future { border-left-color: #ccc; background-color: #f9f9f9; cursor: not-allowed; } 
     </style>
 </head>
 <body>
@@ -84,7 +30,7 @@
 
 <div class="dashboard">
 
-    <a href="irrigation.html" class="card water">
+    <a href="irrigation engineering.html" class="card water">
         <div class="icon">💧</div>
         <div class="card-text">
             <h3>Irrigation Engineering</h3>
@@ -92,7 +38,7 @@
         </div>
     </a>
 
-    <a href="environment.html" class="card env">
+    <a href="environmental engineerin.html" class="card env">
         <div class="icon">🍃</div>
         <div class="card-text">
             <h3>Environmental Engg.</h3>
@@ -100,37 +46,29 @@
         </div>
     </a>
 
-    <a href="rcc.html" class="card rcc">
-        <div class="icon">🏗️</div>
-        <div class="card-text">
-            <h3>RCC Design</h3>
-            <p>Beams, Slabs & Columns</p>
-        </div>
-    </a>
-
-    <a href="survey.html" class="card survey">
-        <div class="icon">📷</div>
-        <div class="card-text">
-            <h3>Surveying</h3>
-            <p>Theodolite & Levelling</p>
-        </div>
-    </a>
-
-    <a href="estimating.html" class="card est">
-        <div class="icon">💰</div>
-        <div class="card-text">
-            <h3>Estimating & Costing</h3>
-            <p>Valuation & Tenders</p>
-        </div>
-    </a>
-
-    <a href="exam_interface.html" class="card test">
+    <a href="Exam_interface.html" class="card test">
         <div class="icon">🚀</div>
         <div class="card-text">
             <h3>Full Mock Test</h3>
             <p>Real Exam Interface (Timer)</p>
         </div>
     </a>
+
+    <div class="card future">
+        <div class="icon">🏗️</div>
+        <div class="card-text">
+            <h3>RCC Design</h3>
+            <p>Coming Soon...</p>
+        </div>
+    </div>
+
+    <div class="card future">
+        <div class="icon">📷</div>
+        <div class="card-text">
+            <h3>Surveying</h3>
+            <p>Coming Soon...</p>
+        </div>
+    </div>
 
 </div>
 
@@ -140,4 +78,6 @@
 
 </body>
 </html>
+
+    
        
