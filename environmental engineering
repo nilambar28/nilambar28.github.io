@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Page</title> 
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; text-align: center; padding: 20px; }
+        .quiz-container { background: white; max-width: 600px; margin: auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .question { font-size: 18px; margin-bottom: 10px; font-weight: bold; color: #333; }
+        .options { list-style: none; padding: 0; text-align: left; }
+        .options label { display: block; background: #e9ecef; padding: 10px; margin: 5px 0; border-radius: 5px; cursor: pointer; }
+        .options label:hover { background: #ced4da; }
+        button { background-color: #007bff; color: white; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; margin-top: 20px; }
+        button:hover { background-color: #0056b3; }
+        #result { margin-top: 20px; font-size: 20px; font-weight: bold; color: #333; }
+        .back-btn { display: inline-block; margin-top: 20px; text-decoration: none; color: #555; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <h1 id="subjectName">Subject Name</h1>
+    <div id="quiz"></div>
+    <button id="submit">Result Dekho</button>
+    <div id="result"></div>
+    <br>
+    <a href="index.html" class="back-btn">⬅ Home Page par wapas jayen</a>
+</div>
+
+<script>
+    // --- YAHAN APNE SAWAL TYPE KAREIN ---
+    const myQuestions = [
+        {
+            question: "Yahan apna sawal likhein?",
+            answers: {
+                a: "Option A",
+                b: "Option B",
+                c: "Option C"
+            },
+            correctAnswer: "a"
+        },
+        {
+            question: "Dusra sawal yahan likhein?",
+            answers: {
+                a: "Option A",
+                b: "Option B",
+                c: "Option C"
+            },
+            correctAnswer: "b"
+        } 
+        // Aur sawal add karne ke liye upar wala bracket copy-paste karein
+    ];
+
+    // --- ISKE NICHE KUCH CHANGE MAT KARNA ---
+    function buildQuiz(){
+        const output = [];
+        myQuestions.forEach((currentQuestion, questionNumber) => {
+            const answers = [];
+            for(letter in currentQuestion.answers){
+                answers.push(
+                    `<label>
+                        <input type="radio" name="question${questionNumber}" value="${letter}">
+                        ${letter} : ${currentQuestion.answers[letter]}
+                    </label>`
+                );
+            }
+            output.push(
+                `<div class="question"> ${currentQuestion.question} </div>
+                <div class="options"> ${answers.join('')} </div><hr>`
+            );
+        });
+        document.getElementById('quiz').innerHTML = output.join('');
+    }
+
+    function showResults(){
+        const answerContainers = quizContainer.querySelectorAll('.options');
+        let numCorrect = 0;
+        myQuestions.forEach((currentQuestion, questionNumber) => {
+            const answerContainer = answerContainers[questionNumber];
+            const selector = `input[name=question${questionNumber}]:checked`;
+            const userAnswer = (answerContainer.querySelector(selector) || {}).value;
+            if(userAnswer === currentQuestion.correctAnswer){
+                numCorrect++;
+                answerContainers[questionNumber].style.color = 'green';
+            } else {
+                answerContainers[questionNumber].style.color = 'red';
+            }
+        });
+        resultsContainer.innerHTML = `Score: ${numCorrect} / ${myQuestions.length}`;
+    }
+
+    const quizContainer = document.getElementById('quiz');
+    const resultsContainer = document.getElementById('result');
+    const submitButton = document.getElementById('submit');
+
+    buildQuiz();
+    submitButton.addEventListener('click', showResults);
+</script>
+
+</body>
+</html>
