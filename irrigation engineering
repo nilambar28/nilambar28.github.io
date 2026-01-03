@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GK Quiz</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #e3f2fd; text-align: center; padding: 20px; }
+        .quiz-container { background: white; max-width: 600px; margin: auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .question { font-size: 18px; margin-bottom: 10px; font-weight: bold; color: #0d47a1; }
+        .options { list-style: none; padding: 0; text-align: left; }
+        .options label { display: block; background: #f1f8e9; padding: 10px; margin: 5px 0; border-radius: 5px; cursor: pointer; }
+        .options label:hover { background: #c5e1a5; }
+        button { background-color: #1976d2; color: white; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; margin-top: 20px; }
+        button:hover { background-color: #1565c0; }
+        #result { margin-top: 20px; font-size: 20px; font-weight: bold; color: #333; }
+        .back-btn { display: inline-block; margin-top: 20px; text-decoration: none; color: #555; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <h1>📘 General Knowledge Quiz</h1>
+    <div id="quiz"></div>
+    <button id="submit">Result Dekho</button>
+    <div id="result"></div>
+    <br>
+    <a href="index.html" class="back-btn">⬅ Home Page par wapas jayen</a>
+</div>
+
+<script>
+    const myQuestions = [
+        {
+            question: "1. Bharat ka rashtriya khel kaunsa hai?",
+            answers: { a: "Cricket", b: "Hockey", c: "Football" },
+            correctAnswer: "b"
+        },
+        {
+            question: "2. Gandhi ji ka janm kab hua tha?",
+            answers: { a: "2 October", b: "15 August", c: "26 January" },
+            correctAnswer: "a"
+        },
+        {
+            question: "3. Computer ka dimaag kise kehte hain?",
+            answers: { a: "Monitor", b: "Keyboard", c: "CPU" },
+            correctAnswer: "c"
+        }
+    ];
+
+    function buildQuiz(){
+        const output = [];
+        myQuestions.forEach((currentQuestion, questionNumber) => {
+            const answers = [];
+            for(letter in currentQuestion.answers){
+                answers.push(
+                    `<label>
+                        <input type="radio" name="question${questionNumber}" value="${letter}">
+                        ${letter} : ${currentQuestion.answers[letter]}
+                    </label>`
+                );
+            }
+            output.push(
+                `<div class="question"> ${currentQuestion.question} </div>
+                <div class="options"> ${answers.join('')} </div><hr>`
+            );
+        });
+        document.getElementById('quiz').innerHTML = output.join('');
+    }
+
+    function showResults(){
+        const answerContainers = quizContainer.querySelectorAll('.options');
+        let numCorrect = 0;
+        myQuestions.forEach((currentQuestion, questionNumber) => {
+            const answerContainer = answerContainers[questionNumber];
+            const selector = `input[name=question${questionNumber}]:checked`;
+            const userAnswer = (answerContainer.querySelector(selector) || {}).value;
+            if(userAnswer === currentQuestion.correctAnswer){
+                numCorrect++;
+                answerContainers[questionNumber].style.color = 'green';
+            } else {
+                answerContainers[questionNumber].style.color = 'red';
+            }
+        });
+        resultsContainer.innerHTML = `Aapke Marks: ${numCorrect} / ${myQuestions.length}`;
+    }
+
+    const quizContainer = document.getElementById('quiz');
+    const resultsContainer = document.getElementById('result');
+    const submitButton = document.getElementById('submit');
+
+    buildQuiz();
+    submitButton.addEventListener('click', showResults);
+</script>
+
+</body>
+</html>
