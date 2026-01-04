@@ -10,7 +10,7 @@
             --bg: #f8fafc;
             --text: #1e293b;
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); min-height: 100vh; position: relative; padding-bottom: 50px; }
 
         /* --- HEADER --- */
         .header {
@@ -84,38 +84,40 @@
         .t-btn:hover { background: #2563eb; color: white; border-color: #2563eb; }
         .t-lbl { font-size: 10px; text-transform: uppercase; color: #94a3b8; display: block; font-weight: 600; }
         .t-val { font-size: 18px; font-weight: 800; }
-        .t-btn:hover .t-lbl { color: #e0e7ff; }
 
-        /* --- MODAL --- */
+        /* --- CONTACT MODAL --- */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1000;
         }
         .modal-content {
             background: white; padding: 25px; border-radius: 15px; width: 85%; max-width: 350px;
-            text-align: center; animation: popUp 0.3s ease-out;
+            text-align: center;
         }
         .input-box {
             width: 100%; height: 100px; padding: 10px; border: 2px solid #e2e8f0;
             border-radius: 10px; margin: 15px 0; font-family: inherit; resize: none;
-            box-sizing: border-box; font-size: 14px;
+            box-sizing: border-box;
         }
-        .input-box:focus { border-color: #2563eb; outline: none; }
+        .email-btn { background: #EA4335; color: white; padding: 12px; width: 100%; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .close-btn { background: #f1f5f9; color: #64748b; padding: 10px; width: 100%; border: none; border-radius: 8px; margin-top: 5px; cursor: pointer; }
 
-        .contact-btn {
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            width: 100%; padding: 12px; margin-top: 10px; border: none; border-radius: 8px;
-            font-weight: bold; color: white; cursor: pointer; text-decoration: none; box-sizing: border-box;
+        /* --- OWNER NAME FOOTER --- */
+        .footer-name {
+            position: fixed;
+            bottom: 10px;
+            right: 15px;
+            font-weight: 800;
+            font-size: 14px;
+            color: #1e293b;
+            text-shadow: 0px 0px 1px rgba(255,255,255,0.8);
+            z-index: 99;
         }
-        .email-btn { background: #EA4335; }
-        .close-btn { background: #f1f5f9; color: #64748b; }
-        
-        @keyframes popUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .screen { display: none; animation: fadeIn 0.3s ease-out; }
+
+        .screen { display: none; }
         .active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Colors */
+        /* Theme Colors */
         .theme-blue { border-bottom-color: #3b82f6; } .theme-blue .icon-box { background: #eff6ff; color: #3b82f6; }
         .theme-green { border-bottom-color: #10b981; } .theme-green .icon-box { background: #ecfdf5; color: #10b981; }
         .theme-orange { border-bottom-color: #f59e0b; } .theme-orange .icon-box { background: #fffbeb; color: #f59e0b; }
@@ -144,79 +146,47 @@
         <div id="screen-test" class="screen"><div class="grid-test" id="test-list"></div></div>
     </div>
 
+    <div class="footer-name">Er.Nilambar Yadav</div>
+
     <div id="contact-modal" class="modal">
         <div class="modal-content">
             <h3 style="margin-top:0;">Ask Your Doubt</h3>
-            <p style="font-size:12px; color:#666;">Type your question below:</p>
             <textarea id="user-msg" class="input-box" placeholder="Write your doubt here..."></textarea>
-            <button class="contact-btn email-btn" onclick="sendToEmail()"><span>📧</span> Send via Email</button>
-            <button class="contact-btn close-btn" onclick="closeContact()">Cancel</button>
+            <button class="email-btn" onclick="sendToEmail()">📧 Send via Email</button>
+            <button class="close-btn" onclick="closeContact()">Cancel</button>
         </div>
     </div>
 
     <script>
-        // ============================================
-        // ⚙️ USER DATA
-        // ============================================
         const myEmail = "nilambar28@gmail.com"; 
 
         function sendToEmail() {
             let msg = document.getElementById('user-msg').value;
-            if(!msg) { alert("Please type your doubt first!"); return; }
+            if(!msg) { alert("Please type something!"); return; }
             window.location.href = "mailto:" + myEmail + "?subject=App%20Doubt&body=" + encodeURIComponent(msg);
         }
 
         function openContact() { document.getElementById('contact-modal').style.display = 'flex'; }
         function closeContact() { document.getElementById('contact-modal').style.display = 'none'; }
 
-        // ============================================
-        // 📚 SYLLABUS DATABASE (UPDATED: 4-Letter Codes)
-        // ============================================
         const db = [
-            // Code: irri (4 letters)
             { code: "irri", name: "Irrigation Engg.", icon: "💧", theme: "theme-blue", topics: ["Introduction & Methods", "Soil Moisture Plant Relation", "Water Requirement of Crops", "Canal Irrigation System", "Design of Lined/Unlined Canals", "Water Logging & Reclamation", "River Training Works", "Diversion Head Works", "Canal Regulation Works", "Cross Drainage Works", "Dams & Reservoirs", "Spillways & Energy Dissipators"] },
-            
-            // Code: envi (4 letters)
             { code: "envi", name: "Environmental Engg.", icon: "🌳", theme: "theme-green", topics: ["Water Demand & Population", "Quality Control of Water", "Water Treatment", "Disinfection & Softening", "Distribution System", "System of Sanitation", "Characteristics of Sewage", "Sewage Treatment", "Disposal of Sewage", "Solid Waste Management", "Air & Noise Pollution"] },
-            
-            // Code: stre (Strength - 4 letters)
             { code: "stre", name: "Strength of Materials", icon: "🔨", theme: "theme-red", topics: ["Properties of Materials", "Simple Stress & Strain", "SFD & BMD", "Principal Stress & Strain", "Bending Stresses", "Shear Stresses", "Torsion of Shafts", "Slope & Deflection", "Columns & Struts", "Thin & Thick Cylinders", "Springs"] },
-            
-            // Code: soil (Already 4 letters)
             { code: "soil", name: "Soil Mechanics", icon: "🏜️", theme: "theme-orange", topics: ["Origin & Properties", "Soil Water Relationship", "Classification of Soil", "Permeability & Seepage", "Effective Stress", "Compaction of Soil", "Consolidation", "Shear Strength", "Earth Pressure", "Stability of Slopes", "Shallow Foundation", "Deep Foundation (Piles)", "Soil Exploration"] },
-            
-            // Code: rccd (RCC Design - 4 letters)
             { code: "rccd", name: "RCC Design", icon: "🏗️", theme: "theme-purple", topics: ["Introduction (LSM & WSM)", "Shear, Torsion & Bond", "Analysis of Beams", "Design of Slabs", "Design of Columns", "Design of Footings", "Retaining Walls", "Prestressed Concrete", "Water Tanks"] },
-            
-            // Code: flui (Fluid - 4 letters)
             { code: "flui", name: "Fluid Mechanics", icon: "🌊", theme: "theme-blue", topics: ["Properties of Fluid", "Pressure & Measurement", "Hydrostatic Forces", "Buoyancy", "Fluid Kinematics", "Fluid Dynamics", "Flow Through Pipes", "Laminar & Turbulent Flow", "Boundary Layer", "Open Channel Flow", "Hydraulic Machines"] },
-            
-            // Code: surv (Surveying - 4 letters)
             { code: "surv", name: "Surveying", icon: "📷", theme: "theme-green", topics: ["Introduction & Scale", "Linear Measurement", "Compass Surveying", "Theodolite Surveying", "Traversing", "Leveling & Contouring", "Plane Table Surveying", "Tacheometry", "Curves", "Photogrammetry"] },
-            
-            // Code: high (Highway - 4 letters)
             { code: "high", name: "Highway Engg.", icon: "🛣️", theme: "theme-orange", topics: ["Highway Planning", "Geometric Design", "Traffic Engineering", "Highway Materials", "Design of Pavements", "Highway Construction", "Highway Maintenance"] },
-            
-            // Code: stee (Steel - 4 letters)
             { code: "stee", name: "Steel Structure", icon: "🔩", theme: "theme-red", topics: ["Connections (Riveted/Bolted)", "Welded Connections", "Tension Members", "Compression Members", "Column Bases", "Beams & Girders", "Roof Trusses", "Plastic Analysis"] },
-            
-            // Code: buil (Building - 4 letters)
             { code: "buil", name: "Building Material", icon: "🧱", theme: "theme-purple", topics: ["Cement", "Concrete Technology", "Bricks & Masonry", "Stones & Aggregates", "Timber & Wood", "Lime & Mortar", "Paints & Varnishes", "Metals & Glass"] },
-            
-            // Code: rail (Railway - 4 letters)
             { code: "rail", name: "Railway Engg.", icon: "🚂", theme: "theme-blue", topics: ["Introduction & Rails", "Sleepers & Ballast", "Rail Fastenings", "Geometric Design of Track", "Points & Crossings", "Signalling"] },
-            
-            // Code: cons (Construction - 4 letters)
             { code: "cons", name: "CPM & PERT", icon: "📋", theme: "theme-orange", topics: ["Project Management", "PERT Analysis", "CPM Analysis", "Cost Analysis", "Resource Allocation", "Construction Equipments", "Tenders"] }
         ];
 
-        // ============================================
-        // 🚀 APP LOGIC
-        // ============================================
         let currSub = null;
         const subList = document.getElementById('sub-list');
 
-        // Init Subjects
         db.forEach(sub => {
             subList.innerHTML += `
             <div class="card ${sub.theme}" onclick="openTopics('${sub.code}')">
@@ -233,14 +203,8 @@
             document.getElementById('page-subtitle').innerText = subtitle;
 
             const btnBack = document.getElementById('btn-back');
-            const btnHome = document.getElementById('btn-home');
-            if (id === 'screen-sub') {
-                btnBack.classList.add('hidden-btn');
-                btnHome.style.opacity = '0.7';
-            } else {
-                btnBack.classList.remove('hidden-btn');
-                btnHome.style.opacity = '1';
-            }
+            if (id === 'screen-sub') btnBack.classList.add('hidden-btn');
+            else btnBack.classList.remove('hidden-btn');
         }
 
         function openTopics(code) {
@@ -248,8 +212,7 @@
             const list = document.getElementById('top-list');
             list.innerHTML = '';
             
-            let color = "#ccc";
-            if(currSub.theme.includes("blue")) color="#3b82f6";
+            let color = "#3b82f6"; // Default
             if(currSub.theme.includes("green")) color="#10b981";
             if(currSub.theme.includes("orange")) color="#f59e0b";
             if(currSub.theme.includes("red")) color="#ef4444";
@@ -272,7 +235,6 @@
                 const a = document.createElement('a');
                 a.className = 't-btn';
                 a.innerHTML = `<span class="t-lbl">TEST</span><span class="t-val">${i}</span>`;
-                // 🔥 NEW FORMULA: irri.1.1.html
                 a.href = `${currSub.code}.${index+1}.${i}.html`;
                 list.appendChild(a);
             }
