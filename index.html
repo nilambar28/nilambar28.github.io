@@ -60,13 +60,18 @@
         .card-content h3 { font-size: 1.1rem; margin-bottom: 3px; font-weight: 600; color: #2c3e50; }
         .card-content span { font-size: 0.8rem; color: #888; }
 
-        /* --- DISCUSSION AREA (DISQUS) --- */
+        /* --- DISCUSSION AREA --- */
         .discussion-area {
             background: white; margin-top: 30px; padding: 25px;
             border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             min-height: 200px;
         }
         .discussion-area h3 { margin-bottom: 20px; color: #333; border-bottom: 2px solid #f0f4f8; padding-bottom: 10px; }
+
+        /* --- Styling for the new Comment Box --- */
+        #HCB_comment_box textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 10px; }
+        #HCB_comment_box .submit { background-color: #007bff; color: white; border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer; }
+        #HCB_comment_box .hcb-link { font-size: 0.8rem; color: #999; }
 
         /* --- Responsive --- */
         @media (max-width: 900px) { .subject-grid { grid-template-columns: repeat(2, 1fr); } }
@@ -125,30 +130,7 @@
         <div class="discussion-area" id="comments">
             <h3>💬 Discussion & Doubts</h3>
             
-            <div id="disqus_thread"></div>
-            
-            <script>
-                /**
-                * RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
-                * LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
-                
-                var disqus_config = function () {
-                this.page.url = window.location.href;  // Replace PAGE_URL with your page's canonical URL variable
-                this.page.identifier = window.location.pathname; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
-                };
-                
-                (function() { // DON'T EDIT BELOW THIS LINE
-                var d = document, s = d.createElement('script');
-                
-                // IMPORTANT: Yahan niche "example" ko hata kar apna SHORTNAME daalna padega (Step 2 dekhein)
-                s.src = 'https://civil-engineering-hub-demo.disqus.com/embed.js'; 
-                
-                s.setAttribute('data-timestamp', +new Date());
-                (d.head || d.body).appendChild(s);
-                })();
-            </script>
-            <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-        </div>
+            </div>
 
         <div style="text-align: center; margin-top: 30px; color: #888; font-size: 0.85rem;">
             &copy; 2026 Developed by:- Er. Nilambar Yadav
