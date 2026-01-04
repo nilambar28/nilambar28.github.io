@@ -7,7 +7,7 @@
     <style>
         /* --- Reset & Base Styles --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: #f0f4f8; padding-bottom: 40px; }
+        body { background-color: #f0f4f8; padding-bottom: 60px; }
 
         /* --- Header --- */
         header {
@@ -60,13 +60,32 @@
         .card-content h3 { font-size: 1.1rem; margin-bottom: 3px; font-weight: 600; color: #2c3e50; }
         .card-content span { font-size: 0.8rem; color: #888; }
 
-        /* --- DISCUSSION AREA --- */
+        /* --- COMMENT SECTION STYLING --- */
         .discussion-area {
-            background: white; margin-top: 30px; padding: 25px;
-            border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            min-height: 200px;
+            margin-top: 40px;
+            padding: 25px;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
-        .discussion-area h3 { margin-bottom: 20px; color: #333; border-bottom: 2px solid #f0f4f8; padding-bottom: 10px; }
+
+        /* Styling the internal comment box to look good */
+        #HCB_comment_box textarea {
+            width: 100%;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 1rem;
+        }
+        #HCB_comment_box .submit {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            margin-top: 5px;
+            cursor: pointer;
+        }
 
         /* --- Responsive --- */
         @media (max-width: 900px) { .subject-grid { grid-template-columns: repeat(2, 1fr); } }
@@ -123,9 +142,10 @@
         </div>
 
         <div class="discussion-area" id="comments">
-            <h3>💬 Discussion & Doubts</h3>
+            <h3 style="margin-bottom: 15px; color:#333;">💬 Discussion Board</h3>
+            <p style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">Apna naam likhein aur comment karein. Login ki zarurat nahi hai.</p>
             
-            <div id="HCB_comment_box"><a href="http://www.htmlcommentbox.com">Civil Hub Comments</a> is loading comments...</div>
+            <div id="HCB_comment_box"><a href="http://www.htmlcommentbox.com">Loading Comments...</a></div>
             <link rel="stylesheet" type="text/css" href="https://www.htmlcommentbox.com/static/skins/bootstrap/twitter-bootstrap.css?v=0" />
             <script type="text/javascript" id="hcb"> /**/ </script>
             </div>
