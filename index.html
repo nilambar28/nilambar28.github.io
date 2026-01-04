@@ -5,228 +5,283 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Civil Engineering Hub</title>
     <style>
-        /* --- Reset & Base Styles --- */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: #f0f4f8; padding-bottom: 60px; }
+        :root { --primary: #007bff; --bg: #f8f9fa; --text: #333; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); height: 100vh; display: flex; flex-direction: column; }
 
-        /* --- Header --- */
-        header {
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: white;
-            padding-top: 30px;
-            border-bottom-left-radius: 30px;
-            border-bottom-right-radius: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            margin-bottom: 30px;
-        }
+        /* HEADER */
+        .header { background: var(--primary); color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .back-btn { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 24px; cursor: pointer; display: none; background: none; border: none; color: white; }
+        .header h1 { margin: 0; font-size: 20px; }
+        .header p { margin: 2px 0 0; font-size: 12px; opacity: 0.9; }
 
-        .header-content { text-align: center; padding: 0 20px 20px; }
-        header h1 { font-size: 2.2rem; margin-bottom: 5px; font-weight: 700; }
-        header p { font-size: 1rem; opacity: 0.9; margin-bottom: 25px; }
+        /* CONTENT */
+        .content { flex: 1; overflow-y: auto; padding: 15px; }
+        .screen { display: none; animation: fadeEffect 0.3s; }
+        .active { display: block; }
+        @keyframes fadeEffect { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- TOP NAVIGATION --- */
-        .top-nav {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(5px);
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            padding: 15px 10px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-        .nav-link {
-            text-decoration: none; color: white; font-weight: 500; font-size: 0.95rem;
-            display: flex; align-items: center; gap: 8px; padding: 8px 16px;
-            border-radius: 20px; transition: all 0.3s ease;
-        }
-        .nav-link:hover { background-color: white; color: #0056b3; transform: translateY(-2px); }
+        /* GRIDS */
+        .grid-sub { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+        .grid-test { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 10px; }
 
-        /* --- Container --- */
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 15px; }
-
-        /* --- GRID SYSTEM --- */
-        .subject-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-
-        /* --- Card Styling --- */
-        .card {
-            background: white; border-radius: 15px; padding: 20px; display: flex;
-            align-items: center; text-decoration: none; color: #333;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s;
-            position: relative; overflow: hidden; border: 1px solid rgba(0,0,0,0.02);
-        }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
-        .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; }
-        .card-icon { font-size: 2rem; margin-right: 15px; width: 40px; text-align: center; flex-shrink: 0; }
-        .card-content h3 { font-size: 1.1rem; margin-bottom: 3px; font-weight: 600; color: #2c3e50; }
-        .card-content span { font-size: 0.8rem; color: #888; }
-
-        /* --- CONTACT FORM STYLING --- */
-        .contact-form {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            margin-top: 40px;
-        }
+        /* CARDS (Subject/Topic) */
+        .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; align-items: center; cursor: pointer; border-left: 5px solid #ccc; transition: 0.2s; }
+        .card:hover { transform: translateY(-3px); border-left-color: var(--primary); }
+        .icon { font-size: 24px; margin-right: 15px; background: #e3f2fd; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
         
-        .contact-form input, .contact-form textarea {
-            width: 100%;
-            padding: 15px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            font-size: 1rem;
-            background-color: #f9f9f9;
-        }
+        /* TEST BUTTONS */
+        .t-btn { background: white; border: 1px solid #ddd; padding: 12px 5px; border-radius: 8px; text-align: center; cursor: pointer; }
+        .t-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .t-num { display: block; font-weight: bold; font-size: 16px; }
+        .t-lbl { font-size: 10px; text-transform: uppercase; color: #777; }
+        .t-btn:hover .t-lbl { color: #e0e0e0; }
 
-        .button-group {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
+        /* EXAM INTERFACE */
+        .q-box { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 70px; }
+        .option { padding: 12px; border: 1px solid #ddd; margin: 10px 0; border-radius: 5px; cursor: pointer; display: flex; align-items: center; }
+        .option.selected { background: #e3f2fd; border-color: var(--primary); }
+        .circle { width: 18px; height: 18px; border: 2px solid #999; border-radius: 50%; margin-right: 10px; }
+        .selected .circle { background: var(--primary); border-color: var(--primary); }
         
-        /* Email Button */
-        .btn-email {
-            flex: 1;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            font-weight: 600;
-        }
-        .btn-email:hover { background-color: #0056b3; }
+        .footer { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 12px 20px; display: flex; justify-content: space-between; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-next { background: var(--primary); color: white; }
+        .btn-prev { background: #e0e0e0; color: #333; }
+        .btn-submit { background: #28a745; color: white; }
 
-        /* WhatsApp Button */
-        .btn-whatsapp {
-            flex: 1;
-            background-color: #25D366;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        .btn-whatsapp:hover { background-color: #1ebc59; }
-
-        /* --- Responsive --- */
-        @media (max-width: 900px) { .subject-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 600px) { 
-            .subject-grid { grid-template-columns: 1fr; }
-            .top-nav { flex-wrap: wrap; }
-            .button-group { flex-direction: column; }
-        }
-
-        /* Colors */
-        .c-blue::before { background-color: #3498db; }
-        .c-green::before { background-color: #2ecc71; }
-        .c-red::before { background-color: #e74c3c; }
-        .c-orange::before { background-color: #f39c12; }
-        .c-purple::before { background-color: #9b59b6; }
-        .c-grey::before { background-color: #7f8c8d; }
-        .c-teal::before { background-color: #1abc9c; }
+        /* SUBJECT COLORS */
+        .b-blue { border-left-color: #2196f3; } .b-green { border-left-color: #4caf50; }
+        .b-orange { border-left-color: #ff9800; } .b-red { border-left-color: #f44336; }
+        .b-purple { border-left-color: #9c27b0; } .b-teal { border-left-color: #009688; }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="header-content">
-            <h1>Civil Engineering Hub</h1>
-            <p>SSC JE | State AE/JE Practice Portal</p>
-        </div>
-        <nav class="top-nav">
-            <a href="index.html" class="nav-link"><span>🏠</span> Home</a>
-            <a href="#" class="nav-link"><span>📝</span> Notes</a>
-            <a href="#" class="nav-link"><span>🎥</span> Lectures</a>
-            <a href="#contact" class="nav-link"><span>💬</span> Doubts</a>
-        </nav>
-    </header>
+    <div class="header">
+        <button id="back-btn" class="back-btn" onclick="goBack()">&#8592;</button>
+        <h1 id="title">Civil Engineering Hub</h1>
+        <p id="subtitle">SSC JE | State AE/JE Practice</p>
+    </div>
 
-    <div class="container">
-        <div class="subject-grid">
-            <a href="irrigation engineering.html" class="card c-blue">
-                <div class="card-icon">💧</div>
-                <div class="card-content"><h3>Irrigation Engg.</h3><span>Full test Available</span></div>
-            </a>
-            <a href="environmental engineering.html" class="card c-green">
-                <div class="card-icon">🌳</div>
-                <div class="card-content"><h3>Environmental Engg.</h3><span>Full test Coming Soon</span></div>
-            </a>
-            <a href="#" class="card c-teal"><div class="card-icon">🍃</div><div class="card-content"><h3>Hydrology Engg.</h3><span>Full test Coming Soon</span></div></a>
-            <a href="#" class="card c-blue"><div class="card-icon">🌊</div><div class="card-content"><h3>Fluid Mechanics</h3><span>Full test Coming Soon</span></div></a>
-            <a href="#" class="card c-orange"><div class="card-icon">🏗️</div><div class="card-content"><h3>Construction Mgmt.</h3><span>Full test Coming Soon</span></div></a>
-            <a href="#" class="card c-grey"><div class="card-icon">🔨</div><div class="card-content"><h3>Strength of Material</h3><span>Full test Coming Soon</span></div></a>
-            <a href="#" class="card c-red"><div class="card-icon">🧱</div><div class="card-content"><h3>Building Material</h3><span>Full test Coming Soon</span></div></a>
-            <a href="#" class="card c-grey"><div class="card-icon">🌫️</div><div class="card-content"><h3>Concrete Tech</h3><span>Full test Coming Soon</span></div></a>
-            <a href="#" class="card c-purple"><div class="card-icon">⛰️</div><div class="card-content"><h3>Soil & Foundation</h3><span>Full test Coming Soon</span></div></a>
-            <a href="#" class="card c-green"><div class="card-icon">🛣️</div><div class="card-content"><h3>Highway Engg.</h3><span>Full test Coming Soon</span></div></a>
-            <a href="#" class="card c-orange"><div class="card-icon">🚂</div><div class="card-content"><h3>Railway Engg.</h3><span>Full test Coming Soon</span></div></a>
-            <a href="#" class="card c-red"><div class="card-icon">🚇</div><div class="card-content"><h3>Tunnel Engg.</h3><span>Full test Coming Soon</span></div></a>
+    <div class="content">
+        <div id="screen-sub" class="screen active">
+            <div class="grid-sub" id="sub-list"></div>
         </div>
 
-        <div class="contact-form" id="contact">
-            <h3 style="color:#333; margin-bottom: 20px;">📩 Ask Your Doubt</h3>
-            <p style="margin-bottom: 20px; color: #666;">Aapka doubt seedha Sir ke Email ya WhatsApp par jayega.</p>
-            
-            <form action="https://formsubmit.co/nilambar2802@gmail.com" method="POST">
-                
-                <input type="text" id="userName" name="name" placeholder="Apna Naam (Your Name)" required>
-                <input type="email" name="email" placeholder="Apna Email ID (Optional for WhatsApp)">
-                
-                <textarea id="userMessage" name="message" rows="5" placeholder="Yahan apna doubt ya message likhein..." required></textarea>
-                
-                <input type="hidden" name="_next" value="https://nilambar28.github.io">
-                <input type="hidden" name="_captcha" value="false">
-                <input type="hidden" name="_subject" value="New Doubt from Student!">
+        <div id="screen-top" class="screen">
+            <div class="grid-sub" id="top-list"></div>
+        </div>
 
-                <div class="button-group">
-                    <button type="submit" class="btn-email">📧 Send to Email</button>
-                    
-                    <button type="button" class="btn-whatsapp" onclick="sendToWhatsApp()">
-                        <span>📱</span> Send on WhatsApp
-                    </button>
+        <div id="screen-test" class="screen">
+            <div class="grid-test" id="test-list"></div>
+        </div>
+
+        <div id="screen-exam" class="screen">
+            <div class="q-box">
+                <div style="display:flex; justify-content:space-between; color:#666; font-size:13px; margin-bottom:15px;">
+                    <span id="q-idx">Q 1/10</span>
+                    <span id="q-timer">Time: 00:00</span>
                 </div>
-
-            </form>
-        </div>
-
-        <div style="text-align: center; margin-top: 30px; color: #888; font-size: 0.85rem;">
-            &copy; 2026 Developed by:- Er. Nilambar Yadav
+                <div id="q-txt" style="font-size:16px; font-weight:bold; margin-bottom:20px;">Loading...</div>
+                <div id="opt-box"></div>
+            </div>
         </div>
     </div>
 
-    <script>
-        function sendToWhatsApp() {
-            // 1. Get values from the input boxes
-            var name = document.getElementById("userName").value;
-            var message = document.getElementById("userMessage").value;
+    <div id="exam-nav" class="footer" style="display:none;">
+        <button class="btn btn-prev" onclick="prevQ()">Prev</button>
+        <button class="btn btn-next" id="next-btn" onclick="nextQ()">Next</button>
+        <button class="btn btn-submit" id="sub-btn" style="display:none;" onclick="submitExam()">Submit</button>
+    </div>
 
-            // 2. Validation (Check if empty)
-            if (message.trim() === "") {
-                alert("Please write a message first!");
-                return;
-            }
-
-            // 3. Create the WhatsApp Message Link
-            // Format: Name: [Name] | Message: [Message]
-            var formattedText = "Student Name: " + (name ? name : "Anonymous") + "%0A" + 
-                                "Doubt: " + message;
-
-            var phoneNumber = "918987331285"; // Your Number
-            
-            // 4. Open WhatsApp
-            var url = "https://wa.me/" + phoneNumber + "?text=" + formattedText;
-            window.open(url, '_blank');
+<script>
+    // ==========================================
+    // 1. DATA STRUCTURE (12 Subjects & Topics)
+    // ==========================================
+    const db = {
+        "irr": {
+            name: "Irrigation Engg.", icon: "💧", color: "b-blue",
+            topics: [
+                "Irrigation & its Methods", "Soil Moisture & Relationship", "Water Logging & Reclamation",
+                "Canal Design & Lining", "Seepage Theory", "River Training Work",
+                "Canal Regulation & Cross Drainage", "Dams & Reservoirs", "Spillway & Energy Dissipators", "Miscellaneous"
+            ]
+        },
+        "env": {
+            name: "Environmental Engg.", icon: "🌳", color: "b-green",
+            topics: ["Water Demand", "Quality Control", "Water Treatment", "Distribution System", "Sewage System", "Waste Water Treatment", "Solid Waste Mgmt", "Air & Noise Pollution"]
+        },
+        "hydro": {
+            name: "Hydrology Engg.", icon: "🌧️", color: "b-teal",
+            topics: ["Precipitation", "Abstractions", "Stream Flow", "Runoff", "Hydrographs", "Floods", "Flood Routing", "Ground Water"]
+        },
+        "fm": {
+            name: "Fluid Mechanics", icon: "🌊", color: "b-blue",
+            topics: ["Properties of Fluid", "Pressure Measurement", "Hydrostatic Forces", "Buoyancy", "Fluid Kinematics", "Fluid Dynamics", "Flow Through Pipes", "Open Channel Flow", "Hydraulic Machines"]
+        },
+        "cpm": {
+            name: "Construction Mgmt.", icon: "🏗️", color: "b-orange",
+            topics: ["Project Management", "PERT & CPM", "Crashing", "Resource Allocation", "Construction Equipments", "Earthwork"]
+        },
+        "som": {
+            name: "Strength of Material", icon: "🔨", color: "b-red",
+            topics: ["Properties of Metals", "Stress & Strain", "SFD & BMD", "Bending Stresses", "Shear Stresses", "Torsion", "Slopes & Deflection", "Columns", "Thin Cylinders"]
+        },
+        "bmc": {
+            name: "Building Material", icon: "🧱", color: "b-orange",
+            topics: ["Cement", "Concrete", "Bricks", "Timber", "Stone", "Lime", "Mortar", "Paints & Varnishes", "Metals", "Miscellaneous"]
+        },
+        "conc": {
+            name: "Concrete Tech", icon: "🥛", color: "b-purple",
+            topics: ["Ingredients of Concrete", "Workability", "Strength of Concrete", "Admixtures", "Special Concrete", "Concrete Mix Design"]
+        },
+        "soil": {
+            name: "Soil & Foundation", icon: "🏜️", color: "b-orange",
+            topics: ["Origin of Soil", "Soil Water Relation", "Index Properties", "Classification", "Permeability", "Seepage Analysis", "Compaction", "Consolidation", "Shear Strength", "Earth Pressure", "Foundation"]
+        },
+        "highway": {
+            name: "Highway Engg.", icon: "🛣️", color: "b-green",
+            topics: ["Introduction", "Geometric Design", "Traffic Engineering", "Pavement Materials", "Pavement Design", "Highway Construction", "Maintenance"]
+        },
+        "rail": {
+            name: "Railway Engg.", icon: "🚂", color: "b-red",
+            topics: ["Introduction", "Rails", "Sleepers", "Ballast", "Geometric Design", "Points & Crossings", "Track Stresses"]
+        },
+        "tunnel": {
+            name: "Tunnel Engg.", icon: "🚇", color: "b-purple",
+            topics: ["Tunnel Surveying", "Tunneling Methods (Soil)", "Tunneling Methods (Rock)", "Ventilation & Lighting", "Drainage"]
         }
-    </script>
+    };
 
+    // ==========================================
+    // 2. QUESTION REPOSITORY
+    // ==========================================
+    // ID Format: subjectKey_topicIndex_testIndex (e.g., irr_0_1)
+    
+    const questions = {
+        // Sample: Irrigation -> Topic 1 -> Test 1
+        "irr_0_1": [
+            { q: "Water supplied throughout the crop period is called:", o: ["Inundation", "Perennial", "Lift", "Drip"], a: 1 },
+            { q: "Best method for irregular topography:", o: ["Sprinkler", "Furrow", "Basin", "Flooding"], a: 0 }
+        ],
+        // You can add more like: "irr_0_2": [...], "som_1_5": [...]
+    };
+
+    // ==========================================
+    // 3. LOGIC & NAVIGATION
+    // ==========================================
+    let state = { view: 'sub', sub: null, top: null, test: null };
+    let currData = [], userAns = [], currIdx = 0;
+
+    // --- Init Subjects ---
+    const subList = document.getElementById('sub-list');
+    for(let k in db) {
+        subList.innerHTML += `
+        <div class="card ${db[k].color}" onclick="openTopics('${k}')">
+            <div class="icon">${db[k].icon}</div>
+            <div>
+                <div style="font-weight:bold; font-size:16px;">${db[k].name}</div>
+                <div style="font-size:12px; color:#777;">${db[k].topics.length} Chapters</div>
+            </div>
+        </div>`;
+    }
+
+    function switchScreen(id, title, subtitle, showBack) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.getElementById('title').innerText = title;
+        document.getElementById('subtitle').innerText = subtitle;
+        document.getElementById('back-btn').style.display = showBack ? 'block' : 'none';
+        document.getElementById('exam-nav').style.display = (id === 'screen-exam') ? 'flex' : 'none';
+        state.view = id.split('-')[1]; // sub, top, test, exam
+    }
+
+    function openTopics(key) {
+        state.sub = key;
+        const topList = document.getElementById('top-list');
+        topList.innerHTML = '';
+        db[key].topics.forEach((t, i) => {
+            topList.innerHTML += `
+            <div class="card ${db[key].color}" onclick="openTests(${i})">
+                <div class="icon" style="background:${getComputedStyle(document.documentElement).getPropertyValue('--primary')}20; color:#333; font-weight:bold;">${i+1}</div>
+                <div style="font-weight:600;">${t}</div>
+            </div>`;
+        });
+        switchScreen('screen-top', db[key].name, "Select a Chapter", true);
+    }
+
+    function openTests(idx) {
+        state.top = idx;
+        const testList = document.getElementById('test-list');
+        testList.innerHTML = '';
+        // LOOP 1 to 100 TESTS
+        for(let i=1; i<=100; i++) {
+            testList.innerHTML += `
+            <div class="t-btn" onclick="startExam(${i})">
+                <span class="t-lbl">TEST</span>
+                <span class="t-num">${i}</span>
+            </div>`;
+        }
+        switchScreen('screen-test', "Select Test", db[state.sub].topics[idx], true);
+    }
+
+    function startExam(num) {
+        state.test = num;
+        let id = `${state.sub}_${state.top}_${num}`;
+        
+        if(questions[id]) {
+            currData = questions[id];
+            userAns = new Array(currData.length).fill(null);
+            currIdx = 0;
+            loadQ(0);
+            switchScreen('screen-exam', `Test ${num}`, "Practice Mode", true);
+        } else {
+            alert("Questions for Test " + num + " Coming Soon!");
+        }
+    }
+
+    function loadQ(i) {
+        currIdx = i;
+        let q = currData[i];
+        document.getElementById('q-idx').innerText = `Q ${i+1}/${currData.length}`;
+        document.getElementById('q-txt').innerText = q.q;
+        let box = document.getElementById('opt-box');
+        box.innerHTML = '';
+        q.o.forEach((opt, idx) => {
+            let cls = userAns[i] === idx ? 'selected' : '';
+            box.innerHTML += `
+            <div class="option ${cls}" onclick="markAns(${idx})">
+                <div class="circle"></div> ${opt}
+            </div>`;
+        });
+        
+        document.getElementById('next-btn').style.display = (i === currData.length-1) ? 'none' : 'block';
+        document.getElementById('sub-btn').style.display = (i === currData.length-1) ? 'block' : 'none';
+    }
+
+    function markAns(idx) {
+        userAns[currIdx] = idx;
+        loadQ(currIdx);
+    }
+
+    function nextQ() { if(currIdx < currData.length-1) loadQ(currIdx+1); }
+    function prevQ() { if(currIdx > 0) loadQ(currIdx-1); }
+
+    function submitExam() {
+        let score = 0;
+        currData.forEach((q, i) => { if(userAns[i] === q.a) score++; });
+        alert(`You scored: ${score} / ${currData.length}`);
+        goBack(); // Go back to test list
+    }
+
+    function goBack() {
+        if(state.view === 'top') switchScreen('screen-sub', "Civil Engineering Hub", "Select Subject", false);
+        else if(state.view === 'test') switchScreen('screen-top', db[state.sub].name, "Select Chapter", true);
+        else if(state.view === 'exam') {
+            if(confirm("Quit Test?")) switchScreen('screen-test', "Select Test", db[state.sub].topics[state.top], true);
+        }
+    }
+
+</script>
 </body>
 </html>
