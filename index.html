@@ -60,34 +60,39 @@
         .card-content h3 { font-size: 1.1rem; margin-bottom: 3px; font-weight: 600; color: #2c3e50; }
         .card-content span { font-size: 0.8rem; color: #888; }
 
-        /* --- DOUBT SECTION STYLING --- */
-        .doubt-section {
-            margin-top: 40px;
+        /* --- DIRECT EMAIL FORM STYLING --- */
+        .contact-form {
             background: white;
+            padding: 30px;
             border-radius: 15px;
-            padding: 25px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-top: 40px;
         }
-
-        /* Direct Form Styling */
-        .direct-form input, .direct-form textarea {
+        
+        .contact-form input, .contact-form textarea {
             width: 100%;
-            padding: 12px;
-            margin-bottom: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
             border: 1px solid #ddd;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 1rem;
+            background-color: #f9f9f9;
         }
-        .direct-form button {
-            background-color: #28a745;
+        
+        .contact-form button {
+            background-color: #007bff;
             color: white;
             border: none;
-            padding: 12px 25px;
+            padding: 12px 30px;
             border-radius: 8px;
+            font-size: 1rem;
             cursor: pointer;
             font-weight: 600;
+            transition: background 0.3s;
             width: 100%;
         }
+        
+        .contact-form button:hover { background-color: #0056b3; }
 
         /* --- Responsive --- */
         @media (max-width: 900px) { .subject-grid { grid-template-columns: repeat(2, 1fr); } }
@@ -143,35 +148,30 @@
             <a href="#" class="card c-red"><div class="card-icon">🚇</div><div class="card-content"><h3>Tunnel Engg.</h3><span>Full test Coming Soon</span></div></a>
         </div>
 
-        <div class="doubt-section" id="doubts">
-            <h2 style="margin-bottom: 20px; color:#333;">💬 Ask Your Doubts</h2>
-
-            <div style="background: #f9f9f9; padding: 15px; border-radius: 10px; margin-bottom: 30px;">
-                <h4 style="margin-bottom: 10px;">👇 Public Discussion Board</h4>
-                <div id="HCB_comment_box"><a href="http://www.htmlcommentbox.com">Loading Comments...</a></div>
-                <link rel="stylesheet" type="text/css" href="https://www.htmlcommentbox.com/static/skins/bootstrap/twitter-bootstrap.css?v=0" />
-                <script type="text/javascript" id="hcb"> /**/ </script>
+        <div class="contact-form" id="doubts">
+            <h3 style="color:#333; margin-bottom: 20px;">📩 Ask Your Doubt (Directly to Sir)</h3>
+            <p style="margin-bottom: 20px; color: #666;">Jo bhi doubt likhenge, wo seedha mere Email par aayega.</p>
+            
+            <form action="https://formsubmit.co/nilambar2802@gmail.com" method="POST">
+                
+                <input type="text" name="name" placeholder="Apna Naam (Your Name)" required>
+                <input type="email" name="email" placeholder="Apna Email ID" required>
+                
+                <textarea name="message" rows="5" placeholder="Yahan apna doubt ya message likhein..." required></textarea>
+                
+                <input type="hidden" name="_next" value="https://nilambar28.github.io">
+                <input type="hidden" name="_captcha" value="false">
+                <input type="hidden" name="_subject" value="New Doubt from Civil Hub Student!">
+                
+                <button type="submit">Send Message 🚀</button>
+            </form>
             </div>
-
-            <hr style="border: 1px solid #eee; margin: 30px 0;">
-
-            <div style="background: #fff; padding: 10px;">
-                <h4 style="margin-bottom: 10px;">📩 Send Direct Message to Teacher</h4>
-                <form action="https://formsubmit.co/nilambar2802@gmail.com" method="POST" class="direct-form">
-                    <input type="text" name="name" placeholder="Your Name" required>
-                    <textarea name="message" rows="3" placeholder="Write your doubt here..." required></textarea>
-                    <button type="submit">Send Message</button>
-                    <input type="hidden" name="_next" value="https://nilambar28.github.io">
-                    <input type="hidden" name="_captcha" value="false">
-                </form>
-            </div>
-
-        </div>
 
         <div style="text-align: center; margin-top: 30px; color: #888; font-size: 0.85rem;">
             &copy; 2026 𝘿𝙚𝙫𝙚𝙡𝙤𝙥𝙚𝙙 𝙗𝙮:- 𝙀𝙧. 𝙉𝙞𝙡𝙖𝙢𝙗𝙖𝙧 𝙔𝙖𝙙𝙖𝙫
+                                        Er.Sachin yadav
         </div>
-    </div>v
+    </div>
 
 </body>
 </html>
