@@ -3,163 +3,251 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Civil Engineering Quiz Portal</title>
+    <title>Civil Engineering Hub</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f0f2f5; text-align: center; }
-        header { background: linear-gradient(135deg, #007bff, #0056b3); color: white; padding: 30px 20px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-decoration: none; color: #333; display: flex; align-items: center; transition: transform 0.2s; border-left: 5px solid #007bff; }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
-        .icon { font-size: 40px; margin-right: 20px; }
-        .card-text h3 { margin: 0; font-size: 18px; color: #333; }
-        .card-text p { margin: 5px 0 0; font-size: 14px; color: #666; }
-        
-        /* Border Colors */
-        .water { border-left-color: #00bcd4; }
-        .env { border-left-color: #4caf50; }
-        .test { border-left-color: #f44336; }
-        .future { border-left-color: #ccc; background-color: #f9f9f9; cursor: not-allowed; } 
+        /* --- General Reset & Fonts --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0f4f8; /* Light professional grey-blue */
+        }
+
+        /* --- Header Section --- */
+        header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        /* --- Container for Layout --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* --- Section Titles --- */
+        .section-title {
+            color: #444;
+            margin: 20px 0 10px;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 5px;
+        }
+
+        /* --- CARD STYLING --- */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none; /* Remove underline from links */
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 15px; /* Spacing for vertical items */
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        /* The colored strip on the left side */
+        .card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 6px;
+        }
+
+        /* Icons */
+        .card-icon {
+            font-size: 2.5rem;
+            margin-right: 20px;
+            width: 50px;
+            text-align: center;
+        }
+
+        .card-content h3 {
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .card-content span {
+            font-size: 0.85rem;
+            color: #777;
+        }
+
+        /* --- LAYOUT CLASSES (Your Requirement) --- */
+
+        /* 1. Horizontal Grid (For Top and Bottom 3 items) */
+        .grid-row-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3 items side by side */
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* 2. Vertical Stack (For Middle items) */
+        .vertical-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        /* --- Responsive Design (Mobile) --- */
+        @media (max-width: 768px) {
+            .grid-row-3 {
+                grid-template-columns: 1fr; /* On mobile, stack them anyway */
+            }
+        }
+
+        /* --- Color Themes based on screenshots --- */
+        .blue-border::before { background-color: #00bcd4; } /* Water/Irrigation */
+        .green-border::before { background-color: #4caf50; } /* Env/Highway */
+        .red-border::before { background-color: #f44336; } /* Structure/Brick */
+        .orange-border::before { background-color: #ff9800; } /* Construction */
+        .grey-border::before { background-color: #607d8b; } /* Soil/Concrete */
+
     </style>
 </head>
 <body>
 
-<header>
-    <h1>Civil Engineering Hub</h1>
-    <p>SSC JE | State AE/JE Practice Portal</p>
-</header>
+    <header>
+        <h1>Civil Engineering Hub</h1>
+        <p>SSC JE | State AE/JE Practice Portal</p>
+    </header>
 
-<div class="dashboard">
-                                      <a href="irrigation engineering.html" class="card water">
-        <div class="icon">💧</div>
-        <div class="card-text">
-            <h3>Irrigation Engineering</h3>
-        </div>Full test</p>
-        </div>
-    
-    </a>
-                                            <a href="environmental engineering.html" class="card env">
-                                                               <div class="icon">🌳</div>
-                                                                       <div class="card-text">
-                                                                    <h3>Environmental Engg.</h3>
-                                                                     <p>Full test Coming Soon...</p>
-                                                                                      </div>
-                                                                                      </a>
-                                                   <a href="Hydrology engineering.html" class="card env">
-        <div class="icon">🍃</div>
-        <div class="card-text">
-            <h3>Hydrology Engg.</h3>
-            <p>full test Coming Soon...</p>
-        </div>
-    </a>
-    <a href="Fluid mechanics.html" class="card env">
-        <div class="icon">💧</div>
-        <div class="card-text">
-            <h3>fluid mechanics.</h3>
-            <p>full test Coming Soon...</p>
-        </div>
-    </a>
- <a href="Construction management.html" class="card test">
-        <div class="icon"></👷div>
-        <div class="card-text">
-            <h3>Construction management</h3>
-            <p>full testComing Soon...</p>
-        </div>
-    </a>
-    <a href="Strength of material.html" class="card env">
-        <div class="icon">🔨</div>
-        <div class="card-text">
-            <h3>strength of material.</h3>
-            <p>Full test Coming Soon...</p>
-        </div>
-    </a>
-    <a href="Building material.html" class="card env">
-        <div class="icon">🧱</div>
-        <div class="card-text">
-            <h3>Building material.</h3>
-            <p>full test Coming Soon...</p>
-        </div>
-    </a>
-    <a href="Concrete technology.html" class="card env">
-        <div class="icon"></div>
-        <div class="card-text">
-            <h3>Concrete technology.</h3>
-            <p>full test Coming Soon...</p>
-        </div>
-    </a>
-    <a href="Soil mechanics and foundation.html" class="card env">
-        <div class="icon">⛰️</div>
-        <div class="card-text">
-            <h3>soil mechanics and foundation.</h3>
-            <p>full test Coming Soon...</p>
-        </div>
-    </a>
-    <a href="Highway engineering.html" class="card env">
-        <div class="icon">🛣️</div>
-        <div class="card-text">
-            <h3>highway Engg.</h3>
-            <p>full test Coming Soon...</p>
-        </div>
-    </a>
-    <a href="Building construction & maintenance engineering.html" class="card env">
-        <div class="icon">🏗</div>
-        <div class="card-text">
-            <h3>Environmental Engg.</h3>
-            <p>full test Coming Soon...</p>
-        </div>
-    </a>
-    <a href="Railway engineering.html" class="card env">
-        <div class="icon">🚊</div>
-        <div class="card-text">
-            <h3>Railway Engg.</h3>
-            <p>full test Coming Soon...</p>
-        </div>
-    </a>
-    <a href="Bridge engineering.html" class="card env">
-        <div class="icon">🌉</div>
-        <div class="card-text">
-            <h3>Bridgel Engg.</h3>
-            <pfull test</p>
-        </div>
-    </a>
-    <a href="Airpot engineering.html" class="card env">
-        <div class="icon">✈️</div>
-        <div class="card-text">
-            <h3>Airpot Engg.</h3>
-            <p>full test Coming Soon...</p>
-        </div>
-    </a>
-    <a href="Tunnel engineering.html" class="card env">
-        <div class="icon">🧲</div>
-        <div class="card-text">
-            <h3>TunnelEngg.</h3>
-            <p>full test Coming Soon...</p>
-        </div>
-    </a>
+    <div class="container">
 
-    <div class="card future">
-        <div class="icon">🏗️</div>
-        <div class="card-text">
-            <h3>RCC Design</h3>
-            <p>Coming Soon...</p>
+        <h4 class="section-title">Core Subjects (Horizontal)</h4>
+        <div class="grid-row-3">
+            
+            <a href="irrigation engineering.html" class="card blue-border">
+                <div class="card-icon">💧</div>
+                <div class="card-content">
+                    <h3>Irrigation Engineering</h3>
+                    <span>Full test Available</span>
+                </div>
+            </a>
+
+            <a href="environmental engineering.html" class="card green-border">
+                <div class="card-icon">🌳</div>
+                <div class="card-content">
+                    <h3>Environmental Engg.</h3>
+                    <span>Full test Coming Soon...</span>
+                </div>
+            </a>
+
+            <a href="#" class="card blue-border">
+                <div class="card-icon">🍃</div>
+                <div class="card-content">
+                    <h3>Hydrology Engg.</h3>
+                    <span>Full test Coming Soon...</span>
+                </div>
+            </a>
         </div>
+
+
+        <h4 class="section-title">General Engineering (Vertical)</h4>
+        <div class="vertical-stack">
+            
+            <a href="#" class="card blue-border">
+                <div class="card-icon">💧</div>
+                <div class="card-content">
+                    <h3>Fluid Mechanics</h3>
+                    <span>Full test Coming Soon...</span>
+                </div>
+            </a>
+
+            <a href="#" class="card red-border">
+                <div class="card-icon">🧱</div>
+                <div class="card-content">
+                    <h3>Building Material</h3>
+                    <span>Full test Coming Soon...</span>
+                </div>
+            </a>
+
+            <a href="#" class="card orange-border">
+                <div class="card-icon">🏗️</div>
+                <div class="card-content">
+                    <h3>Construction Mgmt.</h3>
+                    <span>Full test Coming Soon...</span>
+                </div>
+            </a>
+
+            <a href="#" class="card grey-border">
+                <div class="card-icon">🔨</div>
+                <div class="card-content">
+                    <h3>Strength of Material</h3>
+                    <span>Full test Coming Soon...</span>
+                </div>
+            </a>
+        </div>
+
+
+        <h4 class="section-title">Specialization (Horizontal)</h4>
+        <div class="grid-row-3">
+            
+            <a href="#" class="card green-border">
+                <div class="card-icon">🛣️</div>
+                <div class="card-content">
+                    <h3>Highway Engg.</h3>
+                    <span>Full test Coming Soon...</span>
+                </div>
+            </a>
+
+            <a href="#" class="card grey-border">
+                <div class="card-icon">⛰️</div>
+                <div class="card-content">
+                    <h3>Soil Mechanics</h3>
+                    <span>Full test Coming Soon...</span>
+                </div>
+            </a>
+
+            <a href="#" class="card orange-border">
+                <div class="card-icon">🚂</div>
+                <div class="card-content">
+                    <h3>Railway Engg.</h3>
+                    <span>Full test Coming Soon...</span>
+                </div>
+            </a>
+
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; color: #666; font-size: 0.9rem; padding-bottom: 20px;">
+            &copy; 2026 Developed by:- Er. Nilambar Yadav
+        </div>
+
     </div>
-
-    <div class="card future">
-        <div class="icon">📷</div>
-        <div class="card-text">
-            <h3>Surveying</h3>
-            <p>Coming Soon...</p>
-        </div>
-    </div>
-
-</div>
-
-<footer>
-    <p>&copy; 2026 Developed by:-Er.Nilambar yadav</p>
-</footer>
 
 </body>
 </html>
-
-    
-       
