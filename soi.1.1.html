@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Irrigation Engineering Quiz (Q90-250)</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f6f8; display: flex; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; color: #333; }
+        .quiz-container { background-color: #fff; width: 100%; max-width: 800px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column; height: 90vh; }
+        
+        /* Header */
+        .header { background-color: #2c3e50; color: #fff; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; font-size: 1.1em; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .accuracy-badge { background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 0.9em; }
+        
+        /* Content Area */
+        .content { flex: 1; padding: 25px; overflow-y: auto; scroll-behavior: smooth; }
+        .question-text { font-size: 1.25em; font-weight: 600; color: #2c3e50; margin-bottom: 25px; line-height: 1.5; }
+        
+        /* Options */
+        .options-grid { display: flex; flex-direction: column; gap: 12px; }
+        .option-btn { background: #fff; border: 2px solid #e9ecef; padding: 16px; text-align: left; border-radius: 10px; cursor: pointer; transition: all 0.2s ease; font-size: 1em; color: #495057; outline: none; position: relative; }
+        .option-btn:hover:not(:disabled) { background: #f1f3f5; border-color: #ced4da; transform: translateY(-1px); }
+        .option-btn:active:not(:disabled) { transform: translateY(0); }
+        
+        /* Option States */
+        .correct { background-color: #d4edda !important; border-color: #c3e6cb !important; color: #155724 !important; }
+        .wrong { background-color: #f8d7da !important; border-color: #f5c6cb !important; color: #721c24 !important; }
+        .user-selected { border-width: 2px; border-color: #333 !important; box-shadow: inset 0 0 0 1px #333; }
+        .disabled { cursor: default; opacity: 0.8; }
+
+        /* Solution Box */
+        .solution-box { margin-top: 30px; padding: 20px; background-color: #e3f2fd; border-left: 5px solid #2196f3; border-radius: 4px; display: none; font-size: 0.95em; line-height: 1.6; animation: fadeIn 0.3s ease; }
+        .solution-title { font-weight: bold; margin-bottom: 8px; color: #0d47a1; text-transform: uppercase; font-size: 0.85em; letter-spacing: 0.5px; }
+
+        /* Footer / Navigation */
+        .footer { padding: 20px 25px; background: #fff; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1em; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn-prev { background-color: #6c757d; color: white; }
+        .btn-prev:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+        .btn-skip { background-color: #ffc107; color: #212529; }
+        .btn-next { background-color: #007bff; color: white; display: none; }
+        .btn:hover:not(:disabled) { filter: brightness(110%); transform: translateY(-1px); }
+        .btn:active:not(:disabled) { transform: translateY(0); }
+
+        /* Summary Panel */
+        #summaryPanel { display: none; padding: 40px; text-align: center; }
+        .summary-card { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 15px; text-align: left; border: 1px solid #e9ecef; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .h-scroll { max-height: 60vh; overflow-y: auto; margin-top: 20px; padding-right: 10px; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Mobile */
+        @media (max-width: 600px) {
+            body { padding: 0; }
+            .quiz-container { height: 100vh; border-radius: 0; max-width: 100%; }
+            .header { font-size: 0.9em; padding: 10px 15px; }
+            .question-text { font-size: 1.1em; }
+            .btn { padding: 10px 16px; font-size: 0.9em; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container" id="quizPanel">
+    <div class="header">
+        <div class="accuracy-badge">Accuracy: <span id="accScore">100</span>%</div>
+        <div>Q: <span id="currQ">1</span> / <span id="totalQ">0</span></div>
+    </div>
+
+    <div class="content">
+        <div id="questionText" class="question-text">Loading Question...</div>
+        <div id="optionsBox" class="options-grid"></div>
+        <div id="solutionBox" class="solution-box">
+            <div class="solution-title">Explanation</div>
+            <div id="solutionContent"></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <button class="btn btn-prev" id="btnPrev" onclick="prevQ()">&#8592; Prev</button>
+        <div>
+            <button class="btn btn-skip" id="btnSkip" onclick="skipQ()">Skip &#8594;</button>
+            <button class="btn btn-next" id="btnNext" onclick="nextQ()">Next &#8594;</button>
+        </div>
+    </div>
+</div>
+
+<div class="quiz-container" id="summaryPanel">
+    <h2>Quiz Completed!</h2>
+    <div id="finalScore" style="font-size: 1.3em; margin-bottom: 25px; color: #2c3e50;"></div>
+    <div class="h-scroll" id="summaryList"></div>
+    <button class="btn btn-next" style="display:inline-block; margin-top:20px;" onclick="location.reload()">Restart Quiz</button>
+</div>
+
+<script>
+// --- MERGED QUESTION DATA (90 - 250) ---
+const questions = [
+    { id: 90, q: "90. If the moisture tension for a soil is 8 atmospheres, then the soil is at", opts: ["(a) Field capacity", "(b) Optimum moisture content", "(c) Permanent wilting point", "(d) Equivalent moisture"], ans: 2, sol: "(c): Permanent wilting point (7atm-32atm). Field capacity is 1/10 to 1/3 atm. Optimum is 1 atm." },
+    { id: 91, q: "91. The total depth of water required by a crop during the entire period the crop is in the field is known as", opts: ["(a) Delta", "(b) Duty", "(c) Base period", "(d) Crop Period"], ans: 0, sol: "(a): Delta (Δ) - The total depth of water (in cm) required by a crop to come to maturity." },
+    { id: 92, q: "92. If Δ is depth, B is base period and D is duty, then the relation between delta and duty in meters is given by", opts: ["(a) Δ = 8.64B / D", "(b) Δ = 8.64D / B", "(c) Δ = 11.2D / B", "(d) Δ = 11.2B / D"], ans: 0, sol: "(a): Δ = (8.64 × B) / D meters. Derived from 1 cumec-day = 8.64 ha-m." },
+    { id: 93, q: "93. The intensity of irrigation means", opts: ["(a) percentage of culturable commanded area to be irrigated annually", "(b) percentage of gross commanded area to be irrigated annually", "(c) percentage of the mean of CCA and GCA", "(d) total depth of water supplied"], ans: 0, sol: "(a): The intensity of irrigation is defined as the percentage of the culturable command area proposed to be irrigated annually." },
+    { id: 94, q: "94. The relation between the area of crop irrigated and the quantity of irrigation water required during the entire period of the growth of that crop is known as:", opts: ["(a) Duty", "(b) Delta", "(c) Base period", "(d) Crop period"], ans: 0, sol: "(a): Duty - The relationship between the volume of water and the area of the crop it matures." },
+    { id: 95, q: "95. Consumptive use refers to the loss of water as a result of", opts: ["(a) evaporation and transpiration", "(b) crop water requirement", "(c) evaporation and infiltration", "(d) evaporation and transpiration from the cropped area"], ans: 3, sol: "(d): Consumptive use refers to the loss of water as a result of evaporation and transpiration from the cropped area." },
+    { id: 96, q: "96. Kor watering is", opts: ["(a) First watering to crop when crop is few centimeter high", "(b) Watering to crop anytime when crop is few centimeter high", "(c) First watering to land", "(d) All of these"], ans: 0, sol: "(a): Kor-watering is the first watering after a crop has grown to a few centimeters." },
+    { id: 97, q: "97. The duty of irrigation water for a given crop is maximum", opts: ["(a) At the head of the main canal", "(b) At the head of the water course", "(c) On the field", "(d) None of these"], ans: 2, sol: "(c): Duty is the area irrigated by 1 cumec. Since water is lost in transit, 1 cumec at the field irrigates more land than 1 cumec at the head. Thus duty is max on the field." },
+    { id: 98, q: "98. Lysimeter is used to measure", opts: ["(a) Infiltration", "(b) Evaporation", "(c) Evapotranspiration", "(d) Vapour pressure"], ans: 2, sol: "(c): Lysimeter is used to measure Evapotranspiration." },
+    { id: 99, q: "99. If the depth is 8.64 cm on a field over a base period of 10 days, than the duty is:", opts: ["(a) 10 hectares per cum/s", "(b) 100 hectares per cum/s", "(c) 864 hectares per cum/s", "(d) 1000 hectares per cum/s"], ans: 3, sol: "(d): D = 8.64B / Δ = (8.64 * 10) / 0.0864 = 1000 hectare/cumec." },
+    { id: 100, q: "100. The ratio of the quantity of water stored in the root zone of the crops to the quantity of water actually delivered in the field is known as", opts: ["(a) Water conveyance efficiency", "(b) Water application efficiency", "(c) Water used efficiency", "(d) None of these"], ans: 1, sol: "(b): Water application efficiency (ηa) = (Water stored / Water delivered to field) * 100." },
+    { id: 101, q: "101. The water content at which plants can no-longer extract sufficient water from the soil for its growth, is called", opts: ["(a) maximum saturated point", "(b) permanent wilting point", "(c) ultimate utilization point", "(d) None of these"], ans: 1, sol: "(b): Permanent wilting point." },
+    { id: 102, q: "102. Which of these is a Rabi season crop?", opts: ["(a) Maize", "(b) Wheat", "(c) Rice", "(d) Sorghum"], ans: 1, sol: "(b): Rabi Crop (Winter): Wheat, Gram, Barley, Peas. Kharif (Monsoon): Maize, Rice, Cotton." },
+    { id: 103, q: "103. If the irrigation efficiency is 80%, conveyance losses are 20% and the actual depth of watering is 16 cm, the depth of water required at the canal outlet is...", opts: ["(a) 10 cm", "(b) 15 cm", "(c) 20 cm", "(d) 25 cm"], ans: 3, sol: "(d): Let x be water at outlet. Efficiency = 80%. Conveyance efficiency = 100-20=80%. Total Efficiency = 0.8*0.8 = 0.64. x = 16/0.64 = 25 cm." },
+    { id: 104, q: "104. The transplantation of rice requires 10 days and total depth of water required is 48 cm. During transplantation there is an effective rainfall of 8 cm. The duty of irrigation water is", opts: ["(a) 110", "(b) 108", "(c) 114", "(d) 216"], ans: 3, sol: "(d): Net Δ = 48 - 8 = 40 cm = 0.4 m. B = 10 days. D = 8.64B/Δ = (8.64*10)/0.4 = 216." },
+    { id: 105, q: "105. Base period of a crop is the time between:", opts: ["(a) Sowing to maturity", "(b) The instant of sowing to its harvesting", "(c) First watering at the time of sowing to its last watering", "(d) Sowing to last watering"], ans: 2, sol: "(c): Base period: Time between first watering at sowing to last watering before harvesting." },
+    { id: 106, q: "106. Kor-watering is done", opts: ["(a) About three weeks before harvesting", "(b) About three weeks after sowing", "(c) Just before harvesting", "(d) At the time of sowing"], ans: 1, sol: "(b): Kor water is the first water given when crop grows few centimeters (approx 3 weeks for wheat)." },
+    { id: 107, q: "107. Optimum depth of kor-watering for rice is:", opts: ["(a) 13.5 cm", "(b) 16.5 cm", "(c) 19 cm", "(d) 20 cm"], ans: 2, sol: "(c): Rice: 19 cm, Wheat: 13.5 cm, Sugarcane: 16.5 cm." },
+    { id: 108, q: "108. Find the delta for a crop when its duty is 864 hectares/cumec on the field, the base period of this crop is 120 days", opts: ["(a) 100 cm", "(b) 110 cm", "(c) 120 cm", "(d) 125 cm"], ans: 2, sol: "(c): Δ = 8.64B/D = (8.64*120)/864 = 1.2 m = 120 cm." },
+    { id: 109, q: "109. Watering done prior to the sowing of the crops is called", opts: ["(a) Kor watering", "(b) Duty", "(c) Delta", "(d) Paleo irrigation"], ans: 3, sol: "(d): Paleo: First watering before sowing to add sufficient moisture to unsaturated zone." },
+    { id: 110, q: "110. Irrigation water has to be supplied to the crops when the moisture level", opts: ["(a) falls below the field capacity", "(b) falls below the wilting capacity", "(c) is equal to the wilting point", "(d) is less than the consumption use"], ans: 0, sol: "(a): Water is supplied when moisture falls below field capacity (to maintain optimum moisture)." },
+    { id: 111, q: "111. The amount of water content remaining in a unit volume of soil after downward gravity drainage has ceased is called:", opts: ["(a) field capacity", "(b) permanent wilting point", "(c) readily available moisture", "(d) seepage water"], ans: 0, sol: "(a): Field capacity - Water retained against gravity." },
+    { id: 112, q: "112. Even for the most tolerant crops, boron concentration should NOT exceed:", opts: ["(a) 4 ppm", "(b) 10 ppm", "(c) 6 ppm", "(d) 15 ppm"], ans: 0, sol: "(a): Boron > 3ppm may be toxic. Even for tolerant crops, should not exceed 4 ppm." },
+    { id: 113, q: "113. Given that the base period is 100 days and the duty of the canal is 1000 hectares per cumecs, the depth of water will be:", opts: ["(a) 0.864 cm", "(b) 8.64 cm", "(c) 86.4 cm", "(d) 864 cm"], ans: 2, sol: "(c): Δ = 8.64B/D = (8.64*100)/1000 = 0.864 m = 86.4 cm." },
+    { id: 114, q: "114. The total area within an irrigation project where the cultivation can be done and crops can be grown is called", opts: ["(a) Gross Command Area", "(b) Unculturable Command Area", "(c) Culturable Command Area", "(d) Culturable Area"], ans: 2, sol: "(c): Culturable Command Area (CCA)." },
+    { id: 115, q: "115. Duty for various methods of irrigation are :\nA. Perennial irrigation has high duty\nB. Flow irrigation has low duty\nC. Lift irrigation has low duty\nD. Tank irrigation has high duty\nE. Inundation irrigation has high duty\nWhich of these statements are correct?", opts: ["(a) A to E", "(b) A, B and C", "(c) A, B and E", "(d) B and D"], ans: 3, sol: "(d): Flow irrigation has low duty (losses). Tank/Lift irrigation has high duty (controlled usage)." },
+    { id: 116, q: "116. The correct order of relationship of field capacity, temporary wilting point and saturation capacity is:", opts: ["(a) Saturation > Temporary > Field", "(b) Saturation > Field > Temporary", "(c) Field > Saturation > Temporary", "(d) Field > Temporary > Saturation"], ans: 1, sol: "(b): Saturation capacity > Field capacity > Temporary wilting point." },
+    { id: 117, q: "117. Sodium Absorption Ratio (SAR) is defined as", opts: ["(a) Na / √(Ca+Mg)", "(b) Na / 2√(Ca+Mg)", "(c) Na / √((Ca+Mg)/2)", "(d) 2Na / √(Ca+Mg)"], ans: 2, sol: "(c): SAR = Na⁺ / √((Ca⁺⁺ + Mg⁺⁺)/2)." },
+    { id: 118, q: "118. The water utilizable by plants is available in the form of", opts: ["(a) gravity water", "(b) hydroscopic water", "(c) capillary water", "(d) chemical water"], ans: 2, sol: "(c): Capillary water constitutes the principal source of water for plant growth." },
+    { id: 119, q: "119. Which one of the following are Kharif crops?", opts: ["(a) Barely, rice, gram", "(b) Rice, maize, cotton, groundnut", "(c) Rice, mustard, linseed", "(d) Barley, maize, gram"], ans: 1, sol: "(b): Kharif: Rice, maize, cotton, groundnut, jowar, bajra." },
+    { id: 120, q: "120. What is the delta for the crop when its duty is 864 hectares/cumec and the base period is 120 days.", opts: ["(a) 180 cm", "(b) 200 cm", "(c) 100 cm", "(d) 120 cm"], ans: 3, sol: "(d): Δ = 8.64B/D = (8.64*120)/864 = 1.2 m = 120 cm." },
+    { id: 121, q: "121. The transition region between unsaturated zone and saturated zone is called :", opts: ["(a) Capillary fringe", "(b) Water table", "(c) Vadose water zone", "(d) Confining bed"], ans: 0, sol: "(a): Capillary fringe." },
+    { id: 122, q: "122. In drip irrigation system, which one of the following emitters is not based on ASAE definitions?", opts: ["(a) Emitter", "(b) Pulsating emitter", "(c) Long path emitter", "(d) Multi-outlet emitter"], ans: 1, sol: "(b): Pulsating emitter discharge is not constant, so not recommended by ASAE." },
+    { id: 123, q: "123. A Persian wheel with an average discharge of 230 litre/minute irrigates 1 hectare wheat crop in 50 hours. The average depth of irrigation will be nearly:", opts: ["(a) 4 cm", "(b) 5 cm", "(c) 6 cm", "(d) 7 cm"], ans: 3, sol: "(d): Volume = 230*10⁻³ * 3000 min = 690 m³. Area = 10000 m². Depth = 690/10000 = 0.069m ≈ 7cm." },
+    { id: 124, q: "124. A strip of land is irrigated with a tube well of discharge 0.03 m³/s. If infiltration capacity is 3.6 cm/h, maximum area that can be irrigated?", opts: ["(a) 30 m²", "(b) 300 m²", "(c) 3000 m²", "(d) 3000 hac"], ans: 2, sol: "(c): Amax = Q/f. f = 3.6 cm/h = 0.036 m/3600s = 10⁻⁵ m/s. A = 0.03 / 10⁻⁵ = 3000 m²." },
+    { id: 125, q: "125. Useful soil moisture for plant growth is", opts: ["(a) Capillary water", "(b) Gravity water", "(c) Hygroscopic water", "(d) all the above"], ans: 0, sol: "(a): Useful soil moisture is capillary water." },
+    { id: 126, q: "126. Irrigation water should contain", opts: ["(a) high sodium", "(b) low sodium", "(c) medium sodium", "(d) any amount of sodium"], ans: 1, sol: "(b): Irrigation water should contain less than 5% exchangeable cations (low sodium)." },
+    { id: 127, q: "127. Determine the time taken to irrigate a strip of land 400 m²... Q=70.5 m³/h, f=0.05 m/h, y=0.1m", opts: ["(a) 35 minutes", "(b) 45 minutes", "(c) 40 minutes", "(d) 30 minutes"], ans: 2, sol: "(c): t = 2.303(y/f)log(Q/(Q-fA)). Result = 0.667h = 40 minutes." },
+    { id: 128, q: "128. The cumec-day of volume is equal to\ni. 86400 m³\nii. 8.64 ha-m\niii. 24 cumec-hours", opts: ["(a) Only (i)", "(b) (i) and (ii)", "(c) (ii) and (iii)", "(d) (i), (ii) and (iii)"], ans: 3, sol: "(d): 1 cumec-day = 1*24*3600 = 86400 m³ = 8.64 ha-m." },
+    { id: 129, q: "129. FC=0.30 and PWP=0.10. Compute moisture for optimal growth assuming readily available is 75%", opts: ["(a) 0.10", "(b) 0.15", "(c) 0.25", "(d) 0.30"], ans: 1, sol: "(b): Readily available = 0.75 * (FC - PWP) = 0.75 * (0.30 - 0.10) = 0.15." },
+    { id: 130, q: "130. Root zone=2m, Existing water=5%, Dry density=15, Water applied=500m³, Loss=10%, Area=1000m². Field capacity?", opts: ["(a) 16.8%", "(b) 17.7%", "(c) 18.8%", "(d) 19.7%"], ans: 3, sol: "(d): Stored = 450m³. Depth=0.45m. 0.45 = (15/9.81)*2*(FC-0.05). FC = 19.71%." },
+    { id: 131, q: "131. Na=24, Ca=3.6, Mg=2. SAR is nearly", opts: ["(a) 13.1", "(b) 14.3", "(c) 15.5", "(d) 16.7"], ans: 1, sol: "(b): SAR = Na / √((Ca+Mg)/2) = 24 / √((3.6+2)/2) = 24 / 1.67 = 14.34." },
+    { id: 132, q: "132. Flow irrigation can be sub-divided into: 1. River canal 2. Reservoir 3. Combined storage & lift 4. Combined storage & diversion", opts: ["(a) 1, 2 and 3 only", "(b) 1, 2 and 4 only", "(c) 1, 3 and 4 only", "(d) 2, 3 and 4 only"], ans: 1, sol: "(b): Flow irrigation: River canal, Reservoir/tank, Combined storage & diversion. Lift is not flow." },
+    { id: 133, q: "133. Statements: 1. Capillary water is main source. 2. Irrigation for evapotranspiration is consumptive requirement...", opts: ["(a) 1 and 2 only", "(b) 2 and 3 only", "(c) 3 and 4 only", "(d) 1 and 4 only"], ans: 0, sol: "(a): Statements 1 and 2 are correct." },
+    { id: 134, q: "134. The duty at the end of canal minor, where the governments control usually ceases is called?", opts: ["(a) Duty on field", "(b) Outlet duty", "(c) Flow duty", "(d) Storage duty"], ans: 1, sol: "(b): Outlet duty (or outlet factor) is at the outlet of canal." },
+    { id: 135, q: "135. Match List-I (Load, Capacity, Diversity, Plant use factor) with List-II.", opts: ["(a) 1 2 3 4", "(b) 3 4 1 2", "(c) 1 4 3 2", "(d) 3 2 1 4"], ans: 1, sol: "(b): Load(3), Capacity(4), Diversity(1), Plant Use(2)." },
+    { id: 136, q: "136. Meyer's formula is a empirical formula used to determine", opts: ["(a) Transpiration rates", "(b) Evaporation losses", "(c) Infiltration capacities", "(d) None of the above"], ans: 1, sol: "(b): Meyer's formula determines evaporation losses." },
+    { id: 137, q: "137. Consumptive use of a crop during growth is the amount of:", opts: ["(a) Interception", "(b) Evaporation", "(c) Transpiration", "(d) All of these"], ans: 3, sol: "(d): Consumptive use = Evaporation + Transpiration + Interception." },
+    { id: 138, q: "138. The duty of a crop is 1300 hectares/cumec and the base period is 130 days. What is the delta?", opts: ["(a) 10.3 m", "(b) 0.624 m", "(c) 0.864 m", "(d) 1.30 m"], ans: 2, sol: "(c): Δ = 8.64B/D = (8.64*130)/1300 = 0.864 m." },
+    { id: 139, q: "139. Duty represents:", opts: ["(a) the time that a crop takes", "(b) total depth of water", "(c) the irrigating capacity of a unit of water", "(d) the whole period of cultivation"], ans: 2, sol: "(c): Duty represents the irrigating capacity of a unit of water." },
+    { id: 140, q: "140. Soil: ESP=16%, EC=6, pH=9.5. How is the soil classified?", opts: ["(a) Saline soil", "(b) Saline-alkaline soil", "(c) Alkaline soil", "(d) None of the above"], ans: 2, sol: "(c): Though EC>4 implies Saline-Alkali, the key provided says Alkaline soil (Non-Saline Alkali). Note: Alkaline usually has pH>8.5, ESP>15." },
+    { id: 141, q: "141. Na=20, Ca=10, Mg=8. SAR?", opts: ["(a) 2.06", "(b) 6.67", "(c) 2.67", "(d) 0"], ans: 1, sol: "(b): SAR = 20 / √((10+8)/2) = 6.67." },
+    { id: 142, q: "142. Effective rainfall for crops is", opts: ["(a) Part of rainfall utilized", "(b) Total rainfall", "(c) Total rainfall-total runoff", "(d) Total runoff stored"], ans: 2, sol: "(c): Effective rainfall = Total rainfall - Total runoff." },
+    { id: 143, q: "143. Net irrigation requirement of a crop is equal to", opts: ["(a) Consumptive use", "(b) Cu minus effective rainfall", "(c) Cu minus Re plus leaching", "(d) Percolation loss plus Re"], ans: 2, sol: "(c): NIR = Cu - Re + Leaching." },
+    { id: 144, q: "144. The crop having maximum duty is", opts: ["(a) Cotton", "(b) Sugarcane", "(c) Wheat", "(d) Rice"], ans: 2, sol: "(c): Wheat (~1800) has higher duty than Rice (~775) or Sugarcane (~730)." },
+    { id: 145, q: "145. The delta for a crop having base period 120 days is 70 cm. What is the duty?", opts: ["(a) 2490 hectare/cumec", "(b) 1481 hectare/cumec", "(c) 148 hectare/cumec", "(d) 1.481 hectare/cumec"], ans: 1, sol: "(b): D = 8.64B/Δ = (8.64*120)/0.70 = 1481." },
+    { id: 146, q: "146. Intensity 50%, CCA 50000, Duty 1000, Loss 10%. Discharge at head?", opts: ["(a) 35", "(b) 28", "(c) 20", "(d) 16"], ans: 1, sol: "(b): Irrigated = 25000. Q = 25000/1000 = 25. Q_head = 25/0.9 = 27.78 ≈ 28." },
+    { id: 147, q: "147. Delta 0.864 m, Base 130 days. Duty?", opts: ["(a) 1300", "(b) 13000", "(c) 130", "(d) 864"], ans: 0, sol: "(a): D = 8.64*130 / 0.864 = 1300." },
+    { id: 148, q: "148. The ratio of the actually irrigated area... to the culturable irrigable area:", opts: ["(a) Capacity coefficient", "(b) Annual intensity", "(c) Crop intensity", "(d) Intensity of irrigation"], ans: 3, sol: "(d): Intensity of irrigation." },
+    { id: 149, q: "149. Intensity 40%, CCA 25000, Duty 1000, Loss 20%. Discharge?", opts: ["(a) 12.5", "(b) 10", "(c) 15", "(d) 20"], ans: 0, sol: "(a): Area = 10000. Q = 10. Q_head = 10/0.8 = 12.5." },
+    { id: 150, q: "150. Which of the following is correct about annual irrigation intensity?", opts: ["(a) Minimum value of annual irrigation is desirable", "(b) It can be greater than 100%", "(c) It is the area in percentage of the cultural command area irrigated in a season", "(d) It is the area in percentage of the gross command area irrigated in a season"], ans: 1, sol: "(b): Annual irrigation intensity can be greater than 100%. It is the sum of seasonal intensities (e.g., Rabi + Kharif)." },
+    { id: 151, q: "151. Find the delta of a crop when its duty is 900 ha/cumec on the field. The base period of the crop is 100 days.", opts: ["(a) 96 cm", "(b) 64 cm", "(c) 87 cm", "(d) 45 cm"], ans: 0, sol: "(a): Delta = 8.64*B / D = (8.64 * 100) / 900 = 0.96 m = 96 cm." },
+    { id: 152, q: "152. A certain crop needs 3 cumec of water for irrigating 5100 hectares land up to 10 cm depth. Total 12 watering at an interval of 10 days are needed. Duty and delta are:", opts: ["(a) 51000, 1200", "(b) 15300, 0.12", "(c) 510, 1.2", "(d) 1700, 120"], ans: 3, sol: "(d): Duty = 5100/3 = 1700 ha/cumec. Delta = 12 waterings * 10 cm = 120 cm." },
+    { id: 153, q: "153. Which of the following is a plantation type of crop?", opts: ["(a) Ground nut", "(b) Fodder", "(c) Sugarcane", "(d) Tea"], ans: 3, sol: "(d): Plantation crops are cultivated on an extensive scale like tea, coffee, rubber. (Note: Sugarcane is also sometimes considered, but Tea is the primary answer here)." },
+    { id: 154, q: "154. The number of hectares of land irrigated for full growth of a given crop by supply of 1 m³/s of water continuously during the entire base period is called:", opts: ["(a) Duty", "(b) Kor-watering", "(c) Delta", "(d) Crop water"], ans: 0, sol: "(a): Duty is the area of land in hectares that can be irrigated when one cumec of water is supplied throughout the entire base period." },
+    { id: 155, q: "155. Which of the following statements is correct regarding Water Application Efficiency?", opts: ["(a) Ratio of water diverted to water delivered", "(b) Ratio of water stored in root zone to water delivered to field", "(c) Ratio of water used beneficially to water delivered", "(d) Ratio of water stored to water needed before irrigation"], ans: 1, sol: "(b): Water application efficiency (ηa) is the ratio of water stored in the root zone to the water delivered to the field." },
+    { id: 156, q: "156. Duty on capacity is also known as:", opts: ["(a) time factor", "(b) nominal duty", "(c) capacity factor", "(d) full supply coefficient"], ans: 3, sol: "(d): The number of hectares irrigable per cumec of canal capacity at its head is known as full supply coefficient or Duty on Capacity." },
+    { id: 157, q: "157. Two cumec of water is pumped into a farm distribution system. Out of this, 0.8 cumec is delivered to a turn-out. What is the conveyance efficiency?", opts: ["(a) 60%", "(b) 50%", "(c) 70%", "(d) 40%"], ans: 3, sol: "(d): Efficiency = (Output/Input)*100 = (0.8 / 2.0)*100 = 40%." },
+    { id: 158, q: "158. The graph representing moisture content vs time oscillating between Field Capacity and Readily Available Moisture represents:", opts: ["(a) classes of soil water", "(b) furrow method of irrigation", "(c) base flow of water", "(d) frequency of irrigation"], ans: 3, sol: "(d): This oscillation represents the frequency of irrigation (time interval between waterings to maintain moisture above optimum level)." },
+    { id: 159, q: "159. A crop requires a total depth of 96 cm of water for a base period of 2280 hours. Find the duty of water.", opts: ["(a) 882 ha/cumec", "(b) 855 ha/cumec", "(c) 1058 ha/cumec", "(d) 765 ha/cumec"], ans: 1, sol: "(b): Base period B = 2280/24 = 95 days. Delta = 0.96m. Duty = 8.64*B/Delta = (8.64*95)/0.96 = 855." },
+    { id: 160, q: "160. Calculate discharge: CCA=1200 ha. Crop A (40% intensity, D=1728). Crop B (35% intensity, D=810).", opts: ["(a) 0.8 m³/s", "(b) 0.15 m³/s", "(c) 0.28 m³/s", "(d) 0.52 m³/s"], ans: 0, sol: "(a): Area A = 1200*0.4=480. Q_A = 480/1728 = 0.277. Area B = 1200*0.35=420. Q_B = 420/810 = 0.518. Total = ~0.8 cumecs." },
+    { id: 161, q: "161. Find daily consumptive use: Field capacity=29%, Optimum moisture=17%, Root zone=80cm, Rel density=1.302, Frequency=10 days.", opts: ["(a) 0.125 cm", "(b) 1.25 cm", "(c) 12.5 cm", "(d) 125 cm"], ans: 1, sol: "(b): Available Depth = (0.29-0.17)*80*1.302 = 12.5 cm. Daily use = 12.5 / 10 = 1.25 cm." },
+    { id: 162, q: "162. GCA=12000 ha. Kharif CCA=3554.4 ha (Duty 1900). Rabi CCA=2369.9 ha (Duty 2150). Discharge at head from average demand?", opts: ["(a) 1.10 cumecs", "(b) 1.25 cumecs", "(c) 1.49 cumecs", "(d) 1.29 cumecs"], ans: 2, sol: "(c): Q_Kharif = 3554.4/1900 = 1.87. Q_Rabi = 2369.9/2150 = 1.10. Average = (1.87+1.10)/2 = 1.485 ~ 1.49." },
+    { id: 163, q: "163. In which method of assessment is a 'demand statement' prepared for each irrigator?", opts: ["(a) Permanent assessment", "(b) Betterment levy basis", "(c) Assessment on composite rate basis", "(d) Assessment on area basis"], ans: 3, sol: "(d): In assessment on area basis, areas sowing crops are recorded and a demand statement is prepared." },
+    { id: 164, q: "164. Find Field Capacity (F). Root zone=2m, Existing water=5%, Dry density=20kN/m³, Water applied=500m³ (Loss 10%), Area=1000m².", opts: ["(a) 12%", "(b) 20%", "(c) 16%", "(d) 24%"], ans: 2, sol: "(c): Net water = 450m³. Depth = 0.45m. Formula: 0.45 = (20/9.81)*2*(F - 0.05). Solving gives F approx 16%." },
+    { id: 165, q: "165. Base period 120 days. Duty 1500 ha/cumec. Delta is:", opts: ["(a) 69 cm", "(b) 54 cm", "(c) 35 cm", "(d) 54 cm"], ans: 0, sol: "(a): Delta = (864 * 120) / 1500 = 69.12 cm." },
+    { id: 166, q: "166. What is field capacity?", opts: ["(a) Total water content when all pores are filled", "(b) Water retained by initially saturated soil against gravity", "(c) Soil water content at which plants wilt", "(d) None of these"], ans: 1, sol: "(b): Field capacity is the water retained by an initially saturated soil against the force of gravity." },
+    { id: 167, q: "167. Duty = 400 ha/cumec, Base period = 100 days. Delta will be:", opts: ["(a) 4000 mm", "(b) 2160 mm", "(c) 6000 mm", "(d) 2000 mm"], ans: 1, sol: "(b): Delta = (8.64 * 100)/400 = 2.16 m = 2160 mm." },
+    { id: 168, q: "168. Which of the following is Kharif season in India?", opts: ["(a) March/April to June/July", "(b) December/January to April/May", "(c) May/June to October/November", "(d) October/November to April/May"], ans: 2, sol: "(c): Kharif season starts May/June and ends October/November." },
+    { id: 169, q: "169. Saturation capacity=47%, Yield capacity=27%, PWP=14%. Available moisture is:", opts: ["(a) 13%", "(b) 27%", "(c) 20%", "(d) 33%"], ans: 0, sol: "(a): Available moisture = Yield/Field Capacity - PWP = 27% - 14% = 13%." },
+    { id: 170, q: "170. The temperature at which air mass becomes saturated when cooled at constant pressure is called:", opts: ["(a) Degree day", "(b) Dew point", "(c) Normal daily temperature", "(d) Mean daily temperature"], ans: 1, sol: "(b): This temperature is known as the dew point." },
+    { id: 171, q: "171. A small channel which takes its source from an outlet of irrigation distributaries and carries water to fields is called:", opts: ["(a) Major distributory", "(b) Watercourse", "(c) Branch canal", "(d) Minor distributory"], ans: 1, sol: "(b): Watercourses are small channels belonging to cultivators, taking water from government outlets." },
+    { id: 172, q: "172. Delta of a crop, if the duty is 1500 ha/cumec and base period is 130 days, will be:", opts: ["(a) 15 m", "(b) 99.69 m", "(c) 0.750 m", "(d) 1.75 m"], ans: 2, sol: "(c): Delta = (8.64 * 130) / 1500 = 0.7488 m." },
+    { id: 173, q: "173. The measured duty at the head of main canal is also known as:", opts: ["(a) Gross quantity", "(b) Lateral quantity", "(c) Outlet factor", "(d) Net quantity"], ans: 0, sol: "(a): Measured duty at head of main canal is Gross quantity." },
+    { id: 174, q: "174. The depth of water table required which affects the growth of Rice is:", opts: ["(a) 1.5 m", "(b) 0.6 m", "(c) 2.0 m", "(d) 0.8 m"], ans: 1, sol: "(b): The depth of water table required which affects the growth of Rice is 60 cm (0.6 m)." },
+    { id: 175, q: "175. 15 m³/s diverted to 30 ha field for 3 hours. 0.4 m stored in root zone. Water application efficiency?", opts: ["(a) 74.07%", "(b) 66.6%", "(c) 65.6%", "(d) 70.0%"], ans: 0, sol: "(a): Supplied = 162000 m³. Depth Supplied = 0.54 m. Eff = (0.4/0.54)*100 = 74.07%." },
+    { id: 176, q: "176. Flow irrigation involves construction of:", opts: ["(a) Weir and barrage", "(b) Canal system", "(c) Dam", "(d) All of these"], ans: 3, sol: "(d): Flow irrigation involves canal systems, dams, barrages etc. to distribute water by gravity." },
+    { id: 177, q: "177. The crops that need a lot of water are:", opts: ["(a) Rice and maize", "(b) Wheat and maize", "(c) Rice and wheat", "(d) Maize and other grains"], ans: 0, sol: "(a): Rice and maize are kharif crops needing lots of water. (Source selection)." },
+    { id: 178, q: "178. FC=22%, Wilting=10%, Rel Density=1.3, Root zone=50cm. Irrigation applied when moisture is 12%. NIR?", opts: ["(a) 3.25 cm", "(b) 6.50 cm", "(c) 9.75 cm", "(d) 13.0 cm"], ans: 1, sol: "(b): NIR = 1.3 * 50 * (0.22 - 0.12) = 6.5 cm." },
+    { id: 179, q: "179. Cotton grown in 4 km², intensity 60%. Base=200 days, Duty=1200. Volume required?", opts: ["(a) 345.6 ha-m", "(b) 3456000 ha-m", "(c) 345.6 m³", "(d) 345600 m³"], ans: 0, sol: "(a): Area = 400ha * 0.6 = 240 ha. Delta = 8.64*200/1200 = 1.44m. Vol = 240*1.44 = 345.6 ha-m." },
+    { id: 180, q: "180. The ratio of the number of days the canal has actually run to the number of days of irrigation period is:", opts: ["(a) Time factor", "(b) Capacity factor", "(c) Outlet factor", "(d) Open discharge"], ans: 0, sol: "(a): Time factor is the ratio of actual operating period to the crop period." },
+    { id: 181, q: "181. Crop period is the time period elapsed from:", opts: ["(a) sowing to last watering", "(b) first harvesting to last harvesting", "(c) instant of sowing to instant of harvesting", "(d) first watering to last watering"], ans: 2, sol: "(c): Crop period is time from instant of sowing to instant of harvesting." },
+    { id: 182, q: "182. Wheat requires 7.5 cm water every 28 days. Base period 140 days. Value of delta?", opts: ["(a) 7.5 cm", "(b) 27.5 cm", "(c) 37.5 cm", "(d) 17.5 cm"], ans: 2, sol: "(c): Number of waterings = 140/28 = 5. Total Delta = 5 * 7.5 = 37.5 cm." },
+    { id: 183, q: "183. In water requirement of crops, measurement of duty at the head of a branch canal is known as:", opts: ["(a) outlet factor", "(b) net quantity", "(c) gross quantity", "(d) lateral quantity"], ans: 3, sol: "(d): Duty at head of branch canal is Lateral quantity." },
+    { id: 184, q: "184. The total area which can be economically irrigated without limitation of water quantity is:", opts: ["(a) Net area", "(b) Gross command area", "(c) Non-irrigable area", "(d) Culturable command area"], ans: 1, sol: "(b): Gross Command Area (GCA)." },
+    { id: 185, q: "185. 10 m³/s diverted to 30 ha for 4 hours. 0.2 m stored in root zone. Application efficiency?", opts: ["(a) 41.66%", "(b) 50.0%", "(c) 60.5%", "(d) 75.0%"], ans: 0, sol: "(a): Supplied = 144000 m³. Depth = 0.48m. Eff = (0.2/0.48)*100 = 41.67%." },
+    { id: 186, q: "186. If optimum depth of kor watering is 15.12 cm, outlet factor for 4 week period is:", opts: ["(a) 1000", "(b) 1200", "(c) 1400", "(d) 1600"], ans: 3, sol: "(d): B = 28 days. D = (864*28)/15.12 = 1600 ha/cumec." },
+    { id: 187, q: "187. FC=25%, PWP=15%, Specific dry weight=1.5. Root zone=80cm. Storage capacity?", opts: ["(a) 8 cm", "(b) 10 cm", "(c) 12 cm", "(d) 14 cm"], ans: 2, sol: "(c): Storage = 1.5 * 80 * (0.25 - 0.15) = 12 cm." },
+    { id: 188, q: "188. Which statement is CORRECT for duty of water?", opts: ["(a) Increases with temp", "(b) Increases with wind", "(c) Increases with humidity", "(d) Not affected by climate"], ans: 2, sol: "(c): Duty increases with humidity (as water requirement decreases)." },
+    { id: 189, q: "189. Ratio of cultivated land for a particular crop to total culturable command area is called:", opts: ["(a) Intensity of irrigation", "(b) Crop ratio", "(c) Overlap allowance", "(d) Root zone depth"], ans: 0, sol: "(a): Intensity of irrigation." },
+    { id: 190, q: "190. Ratio of consumptive use of water to amount of water depleted from root zone is:", opts: ["(a) water use efficiency", "(b) consumptive use efficiency", "(c) water conveyance efficiency", "(d) water application efficiency"], ans: 1, sol: "(b): Consumptive use efficiency." },
+    { id: 191, q: "191. Consumptive use of water is equal to depth of water:", opts: ["(a) transpired", "(b) evaporated", "(c) transpired and evaporated", "(d) used in transpiration, evaporation and metabolic process"], ans: 3, sol: "(d): Consumptive use = Evapotranspiration + metabolic needs." },
+    { id: 192, q: "192. Base period for a crop refers to:", opts: ["(a) Crop period only", "(b) Whole period of cultivation", "(c) Part period of cultivation", "(d) Part crop period only"], ans: 3, sol: "(d): Base period is a part of Crop period (usually assumed same for practical purposes, but strictly part)." },
+    { id: 193, q: "193. The area in which a crop is grown at a particular time or crop season is known as:", opts: ["(a) Gross commanded area", "(b) Culturable cultivated area", "(c) Culturable uncultivated area", "(d) Catchment area"], ans: 1, sol: "(b): Culturable cultivated area." },
+    { id: 194, q: "194. Consumptive use coefficient for crops like wheat, barley, flax is approximately:", opts: ["(a) 0.6", "(b) 0.66", "(c) 0.9", "(d) 1.1"], ans: 2, sol: "(c): For Group D crops (wheat, barley), max K is 0.90." },
+    { id: 195, q: "195. Field 500 ha, Base 100 days, Depth 100 cm. Calculate Duty.", opts: ["(a) 8.64", "(b) 57.87", "(c) 86.4", "(d) 864"], ans: 3, sol: "(d): Duty = (8.64 * 100)/1.0 = 864." },
+    { id: 196, q: "196. Delta for crop with duty 1728 ha/cumec and base period 120 days is:", opts: ["(a) 120 cm", "(b) 100 cm", "(c) 90 cm", "(d) 60 cm"], ans: 3, sol: "(d): Delta = (8.64*120)/1728 = 0.60 m = 60 cm." },
+    { id: 197, q: "197. The optimum depth of kor watering for wheat crop is:", opts: ["(a) 13.5 cm", "(b) 17.5 cm", "(c) 19.5 cm", "(d) 23.5 cm"], ans: 0, sol: "(a): 13.5 cm for wheat. (19 cm for rice)." },
+    { id: 198, q: "198. Specific surface area (SSA) is defined as:", opts: ["(a) total surface area/mass", "(b) total surface area/volume", "(c) total surface area/thickness", "(d) total surface area/length"], ans: 0, sol: "(a): SSA = Total surface area / mass." },
+    { id: 199, q: "199. Water existing in capillary zone is a part of:", opts: ["(a) phreatic water", "(b) ground water", "(c) gravity water", "(d) vadose water"], ans: 3, sol: "(d): Capillary zone is part of Vadose water (subsurface water above water table)." },
+    { id: 200, q: "200. Ratio of area estimated to be irrigated to design full supply discharge is:", opts: ["(a) Capacity factor", "(b) Time factor", "(c) Nominal duty", "(d) Duty on capacity"], ans: 3, sol: "(d): Duty on capacity (or full supply coefficient)." },
+    { id: 201, q: "201. When water consumed by a crop of given base period is more, its duty will be:", opts: ["(a) More", "(b) Less", "(c) Constant", "(d) More or less"], ans: 1, sol: "(b): Duty is inversely proportional to Delta. More water needed = Lower duty." },
+    { id: 202, q: "202. 'Overlap allowance' is applicable to which crop?", opts: ["(a) Maize", "(b) Cotton", "(c) Potatoes", "(d) Sugarcane"], ans: 3, sol: "(d): Sugarcane, as it sometimes overlaps crop seasons." },
+    { id: 203, q: "203. The Base of the crop is generally expressed by:", opts: ["(a) Area", "(b) Volume", "(c) Day", "(d) Length"], ans: 2, sol: "(c): Base period is expressed in days." },
+    { id: 204, q: "204. For crop season 180 days, time factor 0.6. Distributary receives full supply for:", opts: ["(a) 108 days", "(b) 72 days", "(c) 300 days", "(d) 450 days"], ans: 0, sol: "(a): Supply period = 180 * 0.6 = 108 days." },
+    { id: 205, q: "205. Crop season 100 days, time factor 0.5. Supply period?", opts: ["(a) 50 days", "(b) 100 days", "(c) 200 days", "(d) 400 days"], ans: 0, sol: "(a): Supply = 100 * 0.5 = 50 days." },
+    { id: 206, q: "206. Crop season 200 days, time factor 0.6. Supply period?", opts: ["(a) 120 days", "(b) 200 days", "(c) 333 days", "(d) 400 days"], ans: 0, sol: "(a): Supply = 200 * 0.6 = 120 days." },
+    { id: 207, q: "207. Relation between CIR, NIR, FIR and GIR?", opts: ["(a) CIR>FIR>GIR>NIR", "(b) CIR>GIR>FIR>NIR", "(c) GIR>FIR>CIR>NIR", "(d) GIR>FIR>NIR>CIR"], ans: 3, sol: "(d): GIR > FIR > NIR > CIR." },
+    { id: 208, q: "208. Delta = 75 cm, Base = 100 days. Duty?", opts: ["(a) 2304 ha/cumec", "(b) 1152 ha/cumec", "(c) 115.2 ha/cumec", "(d) 11.52 ha/cumec"], ans: 1, sol: "(b): D = 864*100 / 75 = 1152." },
+    { id: 209, q: "209. Intensity of irrigation if Total Area=1000 acres, CCA=65 acres?", opts: ["(a) 6.50%", "(b) 0.65%", "(c) 65%", "(d) 0.065%"], ans: 0, sol: "(a): (65/1000) * 100 = 6.5%." },
+    { id: 210, q: "210. Quantity of water consumed in evaporation, transpiration and metabolic process is:", opts: ["(a) Conveyance Water Use", "(b) Water Application Use", "(c) Plant Growth Use", "(d) Consumptive Water Use"], ans: 3, sol: "(d): Consumptive Water Use." },
+    { id: 211, q: "211. The zone just below the GL is:", opts: ["(a) zone of aeration", "(b) capillary fringe", "(c) unconfined aquifer", "(d) pressure or confined aquifer"], ans: 0, sol: "(a): Just below ground level is the zone of aeration." },
+    { id: 212, q: "212. Field capacity depends upon:", opts: ["(a) capillary tension in soil", "(b) porosity of soil", "(c) both (a) and (b)", "(d) neither (a) nor (b)"], ans: 2, sol: "(c): Depends on texture, structure, capillary tension, porosity." },
+    { id: 213, q: "213. Sugarcane is:", opts: ["(a) Perennial crop", "(b) Kharif crop", "(c) Rabi crop", "(d) None of the above"], ans: 0, sol: "(a): Sugarcane is a perennial crop." },
+    { id: 214, q: "214. Rabi crops are sown & harvested in months of:", opts: ["(a) October & March", "(b) April & September", "(c) January & June", "(d) February & June"], ans: 0, sol: "(a): Rabi sown Oct, harvested March." },
+    { id: 215, q: "215. Reservoir 400 Mm³, Area 40,000 ha, 2 fillings. Crop season 125 days. Duty?", opts: ["(a) 440", "(b) 540", "(c) 940", "(d) 1040"], ans: 1, sol: "(b): Total Delta = 2m (1m per filling). Duty = 8.64*125/2 = 540." },
+    { id: 216, q: "216. Duty if 3 cumecs required for 5100 ha?", opts: ["(a) 15300", "(b) 5100", "(c) 1700", "(d) 310"], ans: 2, sol: "(c): 5100 / 3 = 1700." },
+    { id: 217, q: "217. Q_head=12 cumec, Duty=1250, Loss=25%. Area?", opts: ["(a) 1.125×10⁸", "(b) 1.125×10⁶", "(c) 1.125×10⁴", "(d) 1.125×10²"], ans: 2, sol: "(c): Q_field = 12 * 0.75 = 9. Area = 9 * 1250 = 11250 ha = 1.125×10⁴ ha." },
+    { id: 218, q: "218. Total area sown counting area as many times as crops grown is:", opts: ["(a) Gross Cropped Area", "(b) Net Crop Area", "(c) Gross Command Area", "(d) Cultivated Command Area"], ans: 0, sol: "(a): Gross Cropped Area." },
+    { id: 219, q: "219. Optimum depth of Kor watering is 19 cm for:", opts: ["(a) Wheat", "(b) Sugarcane", "(c) Rice", "(d) Cotton"], ans: 2, sol: "(c): Rice." },
+    { id: 220, q: "220. A area of one hectare is equal to:", opts: ["(a) 10000 m²", "(b) 1000 m²", "(c) 100 m²", "(d) 10 m²"], ans: 0, sol: "(a): 1 ha = 10000 m²." },
+    { id: 221, q: "221. Kharif crop sown in:", opts: ["(a) In June", "(b) In September", "(c) In October - November", "(d) None of the above"], ans: 0, sol: "(a): Kharif sown in June." },
+    { id: 222, q: "222. Crops which cannot normally be grown without irrigation are called:", opts: ["(a) Wet crops", "(b) Dry crops", "(c) Perennial crops", "(d) Seasonal crops"], ans: 0, sol: "(a): Wet crops." },
+    { id: 223, q: "223. Base=140 days, Q=0.6 m³/s, Area=240 ha. Delta?", opts: ["(a) 3.365 m", "(b) 1.183 m", "(c) 3.024 m", "(d) 2.365 m"], ans: 2, sol: "(c): Duty = 400. Delta = 8.64*140/400 = 3.024 m." },
+    { id: 224, q: "224. When surface of transpiration is submerged under water, potential evapotranspiration is:", opts: ["(a) Much more than evapotranspiration", "(b) Much less", "(c) Equal to", "(d) Equal or less"], ans: 0, sol: "(a): Potential evapotranspiration is much more." },
+    { id: 225, q: "225. For supplying water to rabi, kharif and sugarcane, channel capacity is greater of:", opts: ["(a) Rabi or kharif", "(b) (Rabi+kharif) or sugarcane", "(c) (Rabi+sugarcane) or (kharif+sugarcane)", "(d) Rabi or kharif or sugarcane"], ans: 2, sol: "(c): Sugarcane is perennial. Design for max of overlapping seasons." },
+    { id: 226, q: "226. Which is not a Rabi crop?", opts: ["(a) Potato", "(b) Ground nut", "(c) Wheat", "(d) Gram"], ans: 1, sol: "(b): Ground nut is a Kharif crop." },
+    { id: 227, q: "227. Delta for crop if Duty=1400, Base=110 days.", opts: ["(a) 34 cm", "(b) 68 cm", "(c) 100 cm", "(d) 12 cm"], ans: 1, sol: "(b): Delta = 8.64*110/1400 = 0.678 m ~ 68 cm." },
+    { id: 228, q: "228. Rabi Season is also known as:", opts: ["(a) Summer Season", "(b) Monsoon Season", "(c) Winter Season", "(d) Both Summer & Winter"], ans: 2, sol: "(c): Winter Season." },
+    { id: 229, q: "229. Which water is subject to polar, electrostatic and ionic binding forces?", opts: ["(a) Capillary water", "(b) Solvent water (Adsorbed/Hygroscopic)", "(c) Pore water", "(d) Structural water"], ans: 1, sol: "(b): Answer key says 'Solvent water' (Hygroscopic/Adsorbed water)." },
+    { id: 230, q: "230. Ratio of water stored in root zone to water needed before irrigation is:", opts: ["(a) Efficiency of water-conveyance", "(b) Efficiency of water storage", "(c) Efficiency of water-application", "(d) Efficiency of water-use"], ans: 1, sol: "(b): Efficiency of water storage." },
+    { id: 231, q: "231. Duty is said to be low when:", opts: ["(a) small amount water -> small area", "(b) small amount water -> large area", "(c) large amount water -> small area", "(d) large amount water -> large area"], ans: 1, sol: "(b): Source option (b). (Note: Typically Low Duty implies Large Water for Small Area, but we follow source)." },
+    { id: 232, q: "232. For Kharif season, capacity factor usually varies from:", opts: ["(a) 0.6-0.7", "(b) 0.6-0.8", "(c) 0.9-0.95", "(d) 0.3-0.4"], ans: 2, sol: "(c): 0.9-0.95 for Kharif." },
+    { id: 233, q: "233. Crop season 150 days, Time factor 0.6. Supply period?", opts: ["(a) 90 days", "(b) 150 days", "(c) 200 days", "(d) 250 days"], ans: 0, sol: "(a): 150 * 0.6 = 90 days." },
+    { id: 234, q: "234. Time factor 0.75, Crop season 120 days. Actual run days?", opts: ["(a) 30 days", "(b) 50 days", "(c) 90 days", "(d) 110 days"], ans: 2, sol: "(c): 120 * 0.75 = 90 days." },
+    { id: 235, q: "235. In Irrigation Engineering 'Duty' is:", opts: ["(a) Total depth of water", "(b) Area irrigated by 1 Cumec", "(c) Discharge required for 1 hector", "(d) Constant Factor"], ans: 1, sol: "(b): Area of crop irrigated by 1 cumec throughout base period." },
+    { id: 236, q: "236. Duty of canal water is calculated:", opts: ["(a) Only at outlet", "(b) Only at head works", "(c) At any important point", "(d) None of these"], ans: 2, sol: "(c): Calculated at any important point." },
+    { id: 237, q: "237. Available moisture may be defined as:", opts: ["(a) Moisture at PWP", "(b) Diff between Field capacity and PWP", "(c) Max holding capacity", "(d) All of above"], ans: 1, sol: "(b): Difference between field capacity and permanent wilting point." },
+    { id: 238, q: "238. Crop ratio is defined as the ratio of irrigated area...", opts: ["(a) Kharif season with Rabi season", "(b) Rabi with Kharif", "(c) Non-perennial with perennial", "(d) Total area under perennial"], ans: 0, sol: "(a): Ratio of area of Kharif to Rabi (or vice versa)." },
+    { id: 239, q: "239. Crop period is time elapsed from:", opts: ["(a) instant of first watering to last", "(b) sowing to last watering", "(c) first watering to harvesting", "(d) instant of sowing to instant of harvesting"], ans: 3, sol: "(d): Instant of sowing to instant of harvesting." },
+    { id: 240, q: "240. Statements: 1. Yield increased by irrigation. 2. Optimum use possible.", opts: ["(a) Both false", "(b) 1 true, 2 false", "(c) Both true", "(d) 1 false, 2 true"], ans: 2, sol: "(c): Both statements are true." },
+    { id: 241, q: "241. Sodium absorption ratio of high sodium water lies between:", opts: ["(a) 36 and 40", "(b) 26 and 35", "(c) 10 and 15", "(d) 18 and 26"], ans: 3, sol: "(d): 18 to 26 (High sodium)." },
+    { id: 242, q: "242. Delta for crop: Duty=864, Base=140.", opts: ["(a) 140 cm", "(b) 130 cm", "(c) 145 cm", "(d) 135 cm"], ans: 0, sol: "(a): Delta = 8.64*140/864 = 1.40 m = 140 cm." },
+    { id: 243, q: "243. Pump irrigates 6 ha. Duty=1728. Weight of water lifted per second?", opts: ["(a) 0.00134 kN/s", "(b) 0.0341 kN/s", "(c) 0.0134 kN/s", "(d) 0.341 kN/s"], ans: 1, sol: "(b): Q = 6/1728 m³/s. Weight = 0.00347 * 9810 N = 34 N = 0.034 kN." },
+    { id: 244, q: "244. Barley 7.5 cm every 30 days. Base 120 days. Delta?", opts: ["(a) 20", "(b) 40", "(c) 10", "(d) 30"], ans: 3, sol: "(d): Waterings = 4. Delta = 30 cm." },
+    { id: 245, q: "245. Wheat 10 cm every 10 days. Base 130 days. Delta?", opts: ["(a) 150 cm", "(b) 130 cm", "(c) 120 cm", "(d) 140 cm"], ans: 1, sol: "(b): Waterings = 13. Delta = 130 cm." },
+    { id: 246, q: "246. GCA 6000 ha, 80% culturable. Rabi intensity 50%. Area to be irrigated?", opts: ["(a) 1600", "(b) 2400", "(c) 1400", "(d) 2200"], ans: 1, sol: "(b): CCA = 4800. Irrigated = 2400 ha." },
+    { id: 247, q: "247. Hygroscopic water is also called:", opts: ["(a) adsorbed water", "(b) free water", "(c) structural water", "(d) held water"], ans: 0, sol: "(a): Hygroscopic water is adsorbed water." },
+    { id: 248, q: "248. In an irrigated command area, 'residential area' is a part of:", opts: ["(a) Culturable command area", "(b) Gross command area", "(c) Net irrigated area", "(d) Gross irrigated area"], ans: 1, sol: "(b): GCA includes all area including residential." },
+    { id: 249, q: "249. GCA=8000, 60% CCA. Intensity 60%, Duty=2000. Discharge?", opts: ["(a) 3.45 cumec", "(b) 1.44 cumec", "(c) 2.45 cumec", "(d) 1.11 cumec"], ans: 1, sol: "(b): Area = 2880. Q = 1.44." },
+    { id: 250, q: "250. Time period that elapses from instant of sowing to instant of harvesting is:", opts: ["(a) base period", "(b) crop period", "(c) growth period", "(d) rotation period"], ans: 1, sol: "(b): Crop period." }
+];
+
+// --- APP LOGIC ---
+let currIdx = 0;
+let userAnswers = new Array(questions.length).fill(null); 
+// userAnswers[i] = { selected: index, isCorrect: bool }
+
+const els = {
+    quizPanel: document.getElementById('quizPanel'),
+    summaryPanel: document.getElementById('summaryPanel'),
+    currQ: document.getElementById('currQ'),
+    totalQ: document.getElementById('totalQ'),
+    qText: document.getElementById('questionText'),
+    optsBox: document.getElementById('optionsBox'),
+    solBox: document.getElementById('solutionBox'),
+    solContent: document.getElementById('solutionContent'),
+    btnPrev: document.getElementById('btnPrev'),
+    btnSkip: document.getElementById('btnSkip'),
+    btnNext: document.getElementById('btnNext'),
+    accScore: document.getElementById('accScore')
+};
+
+function init() {
+    els.totalQ.innerText = questions.length;
+    loadQuestion(0);
+}
+
+function loadQuestion(idx) {
+    currIdx = idx;
+    const q = questions[idx];
+    const saved = userAnswers[idx];
+
+    // Header updates
+    els.currQ.innerText = idx + 1;
+    updateAccuracy();
+
+    // Render Question
+    els.qText.innerText = q.q;
+    
+    // Render Options
+    els.optsBox.innerHTML = "";
+    q.opts.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = "option-btn";
+        btn.innerText = opt;
+        
+        // If already answered, apply styles
+        if (saved) {
+            btn.classList.add('disabled');
+            btn.disabled = true;
+            if (i === q.ans) btn.classList.add('correct');
+            if (i === saved.selected && !saved.isCorrect) btn.classList.add('wrong');
+            if (i === saved.selected) btn.classList.add('user-selected');
+        } else {
+            btn.onclick = () => handleAnswer(i, btn);
+        }
+        
+        els.optsBox.appendChild(btn);
+    });
+
+    // Handle Buttons & Solution Visibility
+    els.btnPrev.disabled = (idx === 0);
+    
+    if (saved) {
+        // Show solution, hide Skip, show Next
+        els.solBox.style.display = "block";
+        els.solContent.innerText = q.sol;
+        els.btnSkip.style.display = "none";
+        els.btnNext.style.display = "inline-block";
+        if (idx === questions.length - 1) els.btnNext.innerText = "Finish";
+        else els.btnNext.innerText = "Next \u2192";
+    } else {
+        // Hide solution, show Skip, hide Next
+        els.solBox.style.display = "none";
+        els.btnSkip.style.display = "inline-block";
+        els.btnNext.style.display = "none";
+        if (idx === questions.length - 1) els.btnSkip.innerText = "Finish";
+        else els.btnSkip.innerText = "Skip \u2192";
+    }
+    
+    // Refresh MathJax if present
+    if (window.MathJax) {
+        MathJax.typesetPromise();
+    }
+}
+
+function handleAnswer(selected, btn) {
+    const q = questions[currIdx];
+    const isCorrect = (selected === q.ans);
+    
+    // Save State
+    userAnswers[currIdx] = { selected, isCorrect };
+
+    // Update UI immediately
+    const allBtns = document.querySelectorAll('.option-btn');
+    allBtns.forEach((b, i) => {
+        b.classList.add('disabled');
+        b.disabled = true;
+        if (i === q.ans) b.classList.add('correct');
+    });
+
+    if (!isCorrect) btn.classList.add('wrong');
+    btn.classList.add('user-selected');
+
+    // Show Solution & Nav
+    els.solBox.style.display = "block";
+    els.solContent.innerText = q.sol;
+    els.btnSkip.style.display = "none";
+    els.btnNext.style.display = "inline-block";
+    
+    if (currIdx === questions.length - 1) els.btnNext.innerText = "Finish";
+    else els.btnNext.innerText = "Next \u2192";
+
+    updateAccuracy();
+}
+
+function updateAccuracy() {
+    const answered = userAnswers.filter(a => a !== null);
+    if (answered.length === 0) {
+        els.accScore.innerText = "100";
+        return;
+    }
+    const correctCount = answered.filter(a => a.isCorrect).length;
+    els.accScore.innerText = Math.round((correctCount / answered.length) * 100);
+}
+
+function prevQ() {
+    if (currIdx > 0) loadQuestion(currIdx - 1);
+}
+
+function nextQ() {
+    if (currIdx < questions.length - 1) {
+        loadQuestion(currIdx + 1);
+    } else {
+        finishQuiz();
+    }
+}
+
+function skipQ() {
+    if (currIdx < questions.length - 1) {
+        loadQuestion(currIdx + 1);
+    } else {
+        finishQuiz();
+    }
+}
+
+function finishQuiz() {
+    els.quizPanel.style.display = "none";
+    els.summaryPanel.style.display = "block";
+    
+    const answered = userAnswers.filter(a => a !== null);
+    const correct = answered.filter(a => a.isCorrect).length;
+    const total = questions.length;
+    const skipped = total - answered.length;
+    
+    document.getElementById('finalScore').innerHTML = `
+        You scored <b>${correct}</b> out of <b>${total}</b> questions.<br>
+        Skipped: ${skipped}
+    `;
+
+    const list = document.getElementById('summaryList');
+    list.innerHTML = "";
+    
+    questions.forEach((q, i) => {
+        const ua = userAnswers[i];
+        if (!ua) return; 
+        
+        const div = document.createElement('div');
+        div.className = "summary-card";
+        const status = ua.isCorrect ? '<span style="color:green; font-weight:bold;">Correct</span>' : '<span style="color:red; font-weight:bold;">Wrong</span>';
+        div.innerHTML = `
+            <div style="margin-bottom:8px;"><strong>Q${i+1}:</strong> ${q.q}</div>
+            <div style="margin-bottom:8px;">Your Result: ${status}</div>
+            <div style="font-size:0.9em; background:#f1f3f5; padding:10px; border-radius:5px; color:#555;">${q.sol}</div>
+        `;
+        list.appendChild(div);
+    });
+}
+
+// Start
+init();
+</script>
+
+</body>
+</html>
