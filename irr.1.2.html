@@ -3,301 +3,390 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Civil Engineering Hub</title>
+    <title>Irrigation Engineering Quiz (Q58-Q89)</title>
     <style>
-        :root { --primary: #007bff; --bg: #f8f9fa; --text: #333; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); }
-
-        /* --- HEADER DESIGN --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .quiz-container {
+            background-color: white;
+            width: 100%;
+            max-width: 700px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
         .header {
-            background: var(--primary); color: white; padding: 15px; 
-            position: sticky; top: 0; z-index: 100; 
-            display: flex; align-items: center; justify-content: space-between;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            text-align: center;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
         }
-
-        /* Navigation Buttons */
-        .nav-btn {
-            background: none; border: none; color: white; font-size: 26px; 
-            cursor: pointer; width: 40px; height: 40px; display: flex; 
-            align-items: center; justify-content: center; border-radius: 50%;
-            transition: 0.2s;
+        .question-box {
+            margin-bottom: 25px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            background: #fff;
         }
-        .nav-btn:hover { background: rgba(255,255,255,0.2); }
-        .hidden-btn { visibility: hidden; pointer-events: none; } /* Chhupaane ke liye */
-
-        /* Header Text */
-        .header-center { text-align: center; flex: 1; }
-        .header-center h1 { margin: 0; font-size: 18px; font-weight: 700; }
-        .header-center p { margin: 2px 0 0; font-size: 12px; opacity: 0.9; }
-
-        /* --- CONTAINER --- */
-        .container { max-width: 800px; margin: 0 auto; padding: 15px; }
-
-        /* --- GRIDS & CARDS --- */
-        .grid-sub { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-        .grid-test { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; }
-
-        /* Subject Card */
-        .card { background: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
-        .card:hover { border-color: var(--primary); transform: translateY(-3px); }
-        .icon { font-size: 32px; display: block; margin-bottom: 10px; }
-        .sub-title { font-weight: 700; font-size: 15px; display: block; line-height: 1.2; }
-        .sub-count { font-size: 11px; color: #64748b; margin-top: 5px; display: block; }
-
-        /* Topic Item */
-        .topic-item { 
-            background: white; padding: 15px; margin-bottom: 10px; border-radius: 10px; 
-            display: flex; align-items: center; cursor: pointer; border-left: 5px solid var(--primary);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: 0.2s;
+        .question-text {
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            color: #333;
         }
-        .topic-item:hover { transform: translateX(5px); }
-        .topic-num { 
-            background: #eff6ff; color: var(--primary); width: 30px; height: 30px; 
-            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            font-weight: bold; margin-right: 15px; font-size: 14px; flex-shrink: 0;
+        .options {
+            list-style-type: none;
+            padding: 0;
         }
-        .topic-name { font-weight: 600; font-size: 15px; }
-
-        /* Test Buttons */
-        .t-btn { 
-            background: white; border: 1px solid #cbd5e1; padding: 10px; border-radius: 8px; 
-            text-align: center; text-decoration: none; color: #333; display: block; 
+        .option-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 8px;
+            background-color: #f8f9fa;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95em;
         }
-        .t-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
-        .t-lbl { font-size: 10px; text-transform: uppercase; color: #64748b; display: block; }
-        .t-val { font-size: 16px; font-weight: 800; }
-        .t-btn:hover .t-lbl { color: #e0f2fe; }
-
-        /* SCREENS */
-        .screen { display: none; animation: fadeIn 0.3s; }
-        .active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .option-btn:hover {
+            background-color: #e2e6ea;
+        }
+        /* Correct/Wrong Styles */
+        .correct {
+            background-color: #d4edda !important;
+            border-color: #c3e6cb !important;
+            color: #155724;
+            position: relative;
+        }
+        .correct::after {
+            content: " ✅ Correct";
+            float: right;
+            font-weight: bold;
+        }
+        .wrong {
+            background-color: #f8d7da !important;
+            border-color: #f5c6cb !important;
+            color: #721c24;
+            position: relative;
+        }
+        .wrong::after {
+            content: " ❌ Wrong";
+            float: right;
+            font-weight: bold;
+        }
+        .disabled {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+        .score-board {
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 20px;
+            padding: 15px;
+            background: #007bff;
+            color: white;
+            border-radius: 5px;
+        }
+        .explanation {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #555;
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.8em;
+            color: #777;
+        }
     </style>
 </head>
 <body>
 
+<div class="quiz-container">
     <div class="header">
-        <button id="btn-back" class="nav-btn hidden-btn" onclick="goBack()">&#8592;</button>
-        
-        <div class="header-center">
-            <h1 id="page-title">Civil Engineering Hub</h1>
-            <p id="page-subtitle">Select Subject</p>
-        </div>
-
-        <button id="btn-home" class="nav-btn hidden-btn" onclick="goHome()">&#8962;</button>
+        <h1>Irrigation Engineering</h1>
+        <p>Practice Quiz (Q.58 - Q.89)</p>
     </div>
 
-    <div class="container">
-        <div id="screen-sub" class="screen active">
-            <div class="grid-sub" id="sub-list"></div>
+    <div id="quiz-area">
         </div>
 
-        <div id="screen-top" class="screen">
-            <div id="top-list"></div>
-        </div>
-
-        <div id="screen-test" class="screen">
-            <div class="grid-test" id="test-list"></div>
-        </div>
+    <div class="score-board" id="score-board" style="display:none;">
+        Quiz Completed! <br>
+        Your Score: <span id="final-score"></span> / <span id="total-questions"></span>
     </div>
 
-    <script>
-        // ==================================================
-        // 1. DATABASE (All Subjects & Topics)
-        // ==================================================
-        const db = [
-            { 
-                code: "irr", name: "Irrigation Engg.", icon: "💧",
-                topics: [
-                    "Irrigation & Methods", "Soil Moisture Relation", "Water Logging", "Canal Design",
-                    "Seepage Theory", "River Training", "Canal Regulation", "Dams & Reservoirs",
-                    "Spillway & Gates", "Cross Drainage Works"
-                ]
-            },
-            { 
-                code: "som", name: "Strength of Materials", icon: "🔨",
-                topics: [
-                    "Simple Stress & Strain", "SFD & BMD", "Bending Stresses", "Shear Stresses",
-                    "Torsion of Shafts", "Slope & Deflection", "Columns & Struts", "Thin Cylinders",
-                    "Springs", "Theories of Failure"
-                ]
-            },
-            { 
-                code: "rcc", name: "RCC Design", icon: "🏗️",
-                topics: [
-                    "Introduction (LSM)", "Shear & Bond", "Analysis of Beams", "Slabs Design",
-                    "Columns Design", "Footings", "Prestressed Concrete", "Retaining Walls"
-                ]
-            },
-            { 
-                code: "env", name: "Environmental Engg.", icon: "🌳",
-                topics: [
-                    "Water Demand", "Quality Parameters", "Water Treatment", "Distribution System",
-                    "Sewage System", "Waste Water Treatment", "Solid Waste Mgmt", "Air & Noise Pollution"
-                ]
-            },
-            { 
-                code: "soil", name: "Soil Mechanics", icon: "🏜️",
-                topics: [
-                    "Origin & Properties", "Classification of Soil", "Permeability & Seepage", "Compaction",
-                    "Consolidation", "Shear Strength", "Earth Pressure", "Stability of Slopes",
-                    "Foundation Engineering", "Soil Exploration"
-                ]
-            },
-            { 
-                code: "fm", name: "Fluid Mechanics", icon: "🌊",
-                topics: [
-                    "Properties of Fluid", "Pressure Measurement", "Hydrostatic Forces", "Buoyancy & Floatation",
-                    "Fluid Kinematics", "Fluid Dynamics", "Flow Through Pipes", "Open Channel Flow",
-                    "Hydraulic Machines"
-                ]
-            },
-            { 
-                code: "sur", name: "Surveying", icon: "📷",
-                topics: [
-                    "Linear Measurement", "Compass Surveying", "Theodolite & Traverse", "Leveling",
-                    "Contouring", "Tacheometry", "Curves", "Photogrammetry"
-                ]
-            },
-            { 
-                code: "high", name: "Highway Engg.", icon: "🛣️",
-                topics: [
-                    "Geometric Design", "Traffic Engineering", "Highway Materials", "Pavement Design",
-                    "Highway Construction", "Maintenance"
-                ]
-            },
-            { 
-                code: "rail", name: "Railway Engg.", icon: "🚂",
-                topics: [
-                    "Rails & Sleepers", "Geometric Design", "Points & Crossings", "Track Stresses",
-                    "Signalling"
-                ]
-            },
-            { 
-                code: "bmc", name: "Building Material", icon: "🧱",
-                topics: [
-                    "Cement & Lime", "Concrete Tech", "Bricks & Stones", "Timber",
-                    "Paints & Varnishes", "Mortar & Plaster"
-                ]
-            },
-            { 
-                code: "steel", name: "Steel Structure", icon: "🔩",
-                topics: [
-                    "Connections (Rivets/Welds)", "Tension Members", "Compression Members", "Beams & Girders",
-                    "Roof Trusses", "Plastic Analysis"
-                ]
-            },
-            { 
-                code: "cpm", name: "Construction Mgmt", icon: "📋",
-                topics: [
-                    "PERT & CPM", "Cost Analysis", "Crashing", "Construction Equipment",
-                    "Tenders & Contracts"
-                ]
-            }
-        ];
+    <div class="footer">
+        Based on uploaded textbook images.
+    </div>
+</div>
 
-        // ==================================================
-        // 2. APP LOGIC (Navigation System)
-        // ==================================================
-        
-        let currSub = null;
-        let currTopIndex = 0;
-
-        // Init Subjects
-        const subList = document.getElementById('sub-list');
-        db.forEach(sub => {
-            subList.innerHTML += `
-            <div class="card" onclick="openTopics('${sub.code}')">
-                <span class="icon">${sub.icon}</span>
-                <span class="sub-title">${sub.name}</span>
-                <span class="sub-count">${sub.topics.length} Topics</span>
-            </div>`;
-        });
-
-        // --- Screen Switching Logic ---
-        function switchScreen(id, title, subtitle) {
-            // Hide all screens
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            
-            // Show requested screen
-            document.getElementById(id).classList.add('active');
-            
-            // Update Header Text
-            document.getElementById('page-title').innerText = title;
-            document.getElementById('page-subtitle').innerText = subtitle;
-
-            // Update Buttons Visibility
-            const btnBack = document.getElementById('btn-back');
-            const btnHome = document.getElementById('btn-home');
-
-            if (id === 'screen-sub') {
-                // Main Home Page: No buttons needed
-                btnBack.classList.add('hidden-btn');
-                btnHome.classList.add('hidden-btn');
-            } else {
-                // Any other page: Show Back and Home buttons
-                btnBack.classList.remove('hidden-btn');
-                btnHome.classList.remove('hidden-btn');
-            }
+<script>
+    // Data from the user's images
+    const questions = [
+        {
+            id: 58,
+            text: "58. In irrigation engineering, development of desert area factor comes under which case?",
+            options: ["(a) Necessity of irrigation", "(b) Ill-effects of irrigation", "(c) Benefits of irrigation", "(d) Types of irrigation"],
+            answer: 0 // Index 0 = a
+        },
+        {
+            id: 59,
+            text: "59. For spray application, the quantity to be applied in a field will depend upon",
+            options: ["(a) Pressure", "(b) Forward speed", "(c) No. of nozzles", "(d) All of these"],
+            answer: 3
+        },
+        {
+            id: 60,
+            text: "60. Irrigation water eyed to the land by means gravity flow indicates which of the following type of irrigation?",
+            options: ["(a) Drip irrigation", "(b) Flow irrigation", "(c) Lift irrigation", "(d) Sprinkler irrigation"],
+            answer: 1
+        },
+        {
+            id: 61,
+            text: "61. With an increase in the supply of irrigation water, yields of the crops ...........",
+            options: ["(a) decrease continuously", "(b) increase continuously", "(c) increase up to a certain limit and then becomes constant", "(d) increase up to a certain limit and then decrease"],
+            answer: 3
+        },
+        {
+            id: 62,
+            text: "62. Type of surface irrigation method generally practiced in hilly area is :",
+            options: ["(a) Flooding", "(b) Furrow method", "(c) Contour farming", "(d) Sprinkler irrigation"],
+            answer: 2
+        },
+        {
+            id: 63,
+            text: "63. Out of total liquid water on earth, the brackish water is:",
+            options: ["(a) above 95 percent", "(b) around 75 percent", "(c) around 50 percent", "(d) estimates are not available"],
+            answer: 0
+        },
+        {
+            id: 64,
+            text: "64. Which of the following is also called inundation irrigation?",
+            options: ["(a) Flow irrigation", "(b) Combined scheme", "(c) Storage irrigation", "(d) Diversion irrigation"],
+            answer: 0
+        },
+        {
+            id: 65,
+            text: "65. Which of the following statement is correct for sprinkler irrigation method?",
+            options: ["(a) It is used for rice and jute.", "(b) Is is used for the soil has very low infiltration rate.", "(c) It is best suitable for very light soil.", "(d) It requires borders and field channel."],
+            answer: 2
+        },
+        {
+            id: 66,
+            text: "66. A method of irrigation by which each tree is surrounded by a border to form a pool when water is applied, is called :",
+            options: ["(a) Basin irrigation", "(b) Broad irrigation", "(c) Distributed irrigation", "(d) Spot irrigation"],
+            answer: 0
+        },
+        {
+            id: 67,
+            text: "67. Lands of climate, that are neither arid nor strictly humid in which inferior crops can be grown without irrigation is called?",
+            options: ["(a) Hybrid arid zone", "(b) Medium arid zone", "(c) Partly arid zone", "(d) Semi arid zone"],
+            answer: 3
+        },
+        {
+            id: 68,
+            text: "68. A system of irrigation very suitable in tracts where there are number of small rivers and streams, is ________.",
+            options: ["(a) Bandhara system", "(b) Closed system", "(c) Well system", "(d) Lifting system"],
+            answer: 0
+        },
+        {
+            id: 69,
+            text: "69. In which method of irrigation, the entire field is divided into number of leveled plots surrounded by levees?",
+            options: ["(a) basin method", "(b) Check method", "(c) Furrow method", "(d) Border strip method"],
+            answer: 1
+        },
+        {
+            id: 70,
+            text: "70. For standing crops in undulating sandy fields, the best method of irrigation is",
+            options: ["(a) Sprinkler Irrigation", "(b) Check method", "(c) Furrow method", "(d) All of these"],
+            answer: 0
+        },
+        {
+            id: 71,
+            text: "71. The irrigation method where only one-fifth to one-half of the land surface is wetted by water resulting in less evaporation and less pudding of soil is called____.",
+            options: ["(a) Border irrigation method", "(b) Basin flooding method", "(c) Sprinkler irrigation method", "(d) Furrow irrigation method"],
+            answer: 3
+        },
+        {
+            id: 72,
+            text: "72. The term \"corrugations\" is associated with which of the following irrigation method?",
+            options: ["(a) Furrow irrigation method", "(b) Basin irrigation method", "(c) Sprinkler irrigation method", "(d) Drip irrigation method"],
+            answer: 0
+        },
+        {
+            id: 73,
+            text: "73. Method of irrigation for cereal crops is",
+            options: ["(a) Sub surface irrigation", "(b) Basin flooding", "(c) Check flooding", "(d) Furrow irrigation"],
+            answer: 2
+        },
+        {
+            id: 74,
+            text: "74. 'Flood irrigation' works best on",
+            options: ["(a) Level or gentle terrain", "(b) Steep terrain", "(c) Drought hit areas", "(d) Coasted areas"],
+            answer: 0
+        },
+        {
+            id: 75,
+            text: "75. What classification held for water present in soil is normally found?",
+            options: ["(a) Hydroscopic water", "(b) Surface water", "(c) Capillary water", "(d) Centrifugal water"],
+            answer: 2
+        },
+        {
+            id: 76,
+            text: "76. It is that part in excess of hygroscopic water which exists in the pore space of the soil by molecular attraction",
+            options: ["(a) Sea water", "(b) River water", "(c) Capillary water", "(d) None of these"],
+            answer: 2
+        },
+        {
+            id: 77,
+            text: "77. Permanent wilting point moisture content for a crop represents the:",
+            options: ["(a) Hygroscopic water", "(b) Capillary water", "(c) Field capacity water", "(d) None of the above"],
+            answer: 0
+        },
+        {
+            id: 78,
+            text: "78. Most fertile soil is",
+            options: ["(a) Alluvial", "(b) Black soil", "(c) Laterite soil", "(d) Red soil"],
+            answer: 0
+        },
+        {
+            id: 79,
+            text: "79. The requirement of water is the highest for",
+            options: ["(a) livestock", "(b) irrigation", "(c) domestic needs", "(d) toughness modulus"],
+            answer: 1
+        },
+        {
+            id: 80,
+            text: "80. Kharif season generally extends from",
+            options: ["(a) January - July", "(b) March - August", "(c) September - April", "(d) June - October"],
+            answer: 3
+        },
+        {
+            id: 81,
+            text: "81. A climatic region lacking enough water for agriculture without artificial irrigation is called",
+            options: ["(a) arid zone", "(b) dry zone", "(c) desert zone", "(d) none of the above"],
+            answer: 0
+        },
+        {
+            id: 82,
+            text: "82. Arrange the above irrigation methods (I. Furrow, II. Sprinkler, III. Drip) in decreasing order of their wetting area of the soil surface.",
+            options: ["(a) I, II, III", "(b) II, III, I", "(c) III, I, II", "(d) II, I, III"],
+            answer: 3
+        },
+        {
+            id: 83,
+            text: "83. The method of growing crop on running on the sides of water ditches used in certain agricultural field is called as?",
+            options: ["(a) Drip irrigation", "(b) Flood irrigation", "(c) Furrow irrigation", "(d) Check irrigation"],
+            answer: 2
+        },
+        {
+            id: 84,
+            text: "84. The water table of underground water generally corresponds to water level of",
+            options: ["(a) streams", "(b) rivers", "(c) sea", "(d) all of these"],
+            answer: 3
+        },
+        {
+            id: 85,
+            text: "85. Assertion (A): In border strip method... size depends on soil/slope. <br>Reason (R): Border strip method is a controlled type of subsurface irrigation.",
+            options: ["(a) both A and R true...", "(b) both A and R true but...", "(c) A is true but R is false", "(d) A is false but R is true"],
+            answer: 2
+        },
+        {
+            id: 86,
+            text: "86. Assertion(A): Sprinkler method has higher efficiency. <br>Reason(R): Sprinkler system causes less interference in cultivation...",
+            options: ["(a) both A and R are true...", "(b) both A and R are true but...", "(c) A is true but R is false", "(d) A is false but R is true"],
+            answer: 2
+        },
+        {
+            id: 87,
+            text: "87. Which one of the following is not a major deterrent in water harvesting through water tanks ?",
+            options: ["(a) Deforestation...", "(b) Siltation", "(c) Lack of maintenance...", "(d) Shallow depth of water tanks"],
+            answer: 3
+        },
+        {
+            id: 88,
+            text: "88. Lift irrigation doesn't includes",
+            options: ["(a) Doon", "(b) Deep tube wells", "(c) Mote", "(d) Inundation irrigation"],
+            answer: 3
+        },
+        {
+            id: 89,
+            text: "89. Method of applying water directly to the root zone of the plant is called ..........",
+            options: ["(a) check flooding", "(b) drip method", "(c) furrow method", "(d) sprinkle irrigation"],
+            answer: 1
         }
+    ];
 
-        // --- Open Topic List ---
-        function openTopics(code) {
-            currSub = db.find(s => s.code === code);
-            const list = document.getElementById('top-list');
-            list.innerHTML = '';
+    let score = 0;
+    const quizArea = document.getElementById('quiz-area');
+
+    function loadQuiz() {
+        questions.forEach((q, index) => {
+            const questionBox = document.createElement('div');
+            questionBox.className = 'question-box';
             
-            currSub.topics.forEach((topicName, index) => {
-                list.innerHTML += `
-                <div class="topic-item" onclick="openTests(${index})">
-                    <div class="topic-num">${index + 1}</div>
-                    <div class="topic-name">${topicName}</div>
-                </div>`;
+            const questionTitle = document.createElement('div');
+            questionTitle.className = 'question-text';
+            questionTitle.innerHTML = q.text;
+            questionBox.appendChild(questionTitle);
+
+            const optionsList = document.createElement('div');
+            optionsList.className = 'options';
+
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(btn, i, q.answer, questionBox);
+                optionsList.appendChild(btn);
             });
 
-            switchScreen('screen-top', currSub.name, "Select Topic");
-        }
+            questionBox.appendChild(optionsList);
+            quizArea.appendChild(questionBox);
+        });
+    }
 
-        // --- Open Test List ---
-        function openTests(index) {
-            currTopIndex = index;
-            const topicName = currSub.topics[index];
-            const list = document.getElementById('test-list');
-            list.innerHTML = '';
-
-            for(let i=1; i<=50; i++) {
-                const a = document.createElement('a');
-                a.className = 't-btn';
-                a.innerHTML = `<span class="t-lbl">TEST</span><span class="t-val">${i}</span>`;
-                
-                // Link Formula: subjectCode.TopicNumber.TestNumber.html
-                // (Index + 1 because topics are 0-indexed but files are 1-based)
-                a.href = `${currSub.code}.${index + 1}.${i}.html`;
-                
-                list.appendChild(a);
+    function checkAnswer(selectedBtn, selectedIndex, correctIndex, parentBox) {
+        // Disable all buttons in this question to prevent re-clicking
+        const buttons = parentBox.querySelectorAll('.option-btn');
+        buttons.forEach((btn, idx) => {
+            btn.classList.add('disabled');
+            if (idx === correctIndex) {
+                btn.classList.add('correct'); // Always show correct answer
             }
+        });
 
-            switchScreen('screen-test', topicName, "Select Test");
+        if (selectedIndex === correctIndex) {
+            score++;
+        } else {
+            selectedBtn.classList.add('wrong');
         }
 
-        // --- Go Back Logic (Back Icon) ---
-        function goBack() {
-            if(document.getElementById('screen-test').classList.contains('active')) {
-                // Test List -> Topic List
-                openTopics(currSub.code); 
-            } else if(document.getElementById('screen-top').classList.contains('active')) {
-                // Topic List -> Subject List (Home)
-                goHome();
-            }
-        }
+        // Update score display (Optional: Show real-time or just at end)
+        // For now, let's show a button to calculate final score at the bottom
+        document.getElementById('score-board').style.display = 'block';
+        document.getElementById('final-score').innerText = score;
+        document.getElementById('total-questions').innerText = questions.length;
+    }
 
-        // --- Go Home Logic (Home Icon) ---
-        function goHome() {
-            currSub = null;
-            switchScreen('screen-sub', "Civil Engineering Hub", "Select Subject");
-        }
+    // Initialize
+    loadQuiz();
+</script>
 
-    </script>
 </body>
 </html>
