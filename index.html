@@ -68,11 +68,6 @@
         }
         .discussion-area h3 { margin-bottom: 20px; color: #333; border-bottom: 2px solid #f0f4f8; padding-bottom: 10px; }
 
-        /* --- Styling for the new Comment Box --- */
-        #HCB_comment_box textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 10px; }
-        #HCB_comment_box .submit { background-color: #007bff; color: white; border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer; }
-        #HCB_comment_box .hcb-link { font-size: 0.8rem; color: #999; }
-
         /* --- Responsive --- */
         @media (max-width: 900px) { .subject-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 600px) { 
@@ -130,6 +125,9 @@
         <div class="discussion-area" id="comments">
             <h3>💬 Discussion & Doubts</h3>
             
+            <div id="HCB_comment_box"><a href="http://www.htmlcommentbox.com">Civil Hub Comments</a> is loading comments...</div>
+            <link rel="stylesheet" type="text/css" href="https://www.htmlcommentbox.com/static/skins/bootstrap/twitter-bootstrap.css?v=0" />
+            <script type="text/javascript" id="hcb"> /**/ </script>
             </div>
 
         <div style="text-align: center; margin-top: 30px; color: #888; font-size: 0.85rem;">
