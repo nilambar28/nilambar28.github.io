@@ -6,282 +6,298 @@
     <title>Civil Engineering Hub</title>
     <style>
         :root { --primary: #007bff; --bg: #f8f9fa; --text: #333; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); height: 100vh; display: flex; flex-direction: column; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); }
 
-        /* HEADER */
-        .header { background: var(--primary); color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .back-btn { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 24px; cursor: pointer; display: none; background: none; border: none; color: white; }
-        .header h1 { margin: 0; font-size: 20px; }
-        .header p { margin: 2px 0 0; font-size: 12px; opacity: 0.9; }
+        /* --- HEADER DESIGN --- */
+        .header {
+            background: var(--primary); color: white; padding: 15px; 
+            position: sticky; top: 0; z-index: 100; 
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
 
-        /* CONTENT */
-        .content { flex: 1; overflow-y: auto; padding: 15px; }
-        .screen { display: none; animation: fadeEffect 0.3s; }
-        .active { display: block; }
-        @keyframes fadeEffect { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Navigation Buttons */
+        .nav-btn {
+            background: none; border: none; color: white; font-size: 26px; 
+            cursor: pointer; width: 40px; height: 40px; display: flex; 
+            align-items: center; justify-content: center; border-radius: 50%;
+            transition: 0.2s;
+        }
+        .nav-btn:hover { background: rgba(255,255,255,0.2); }
+        .hidden-btn { visibility: hidden; pointer-events: none; } /* Chhupaane ke liye */
 
-        /* GRIDS */
-        .grid-sub { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
-        .grid-test { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 10px; }
+        /* Header Text */
+        .header-center { text-align: center; flex: 1; }
+        .header-center h1 { margin: 0; font-size: 18px; font-weight: 700; }
+        .header-center p { margin: 2px 0 0; font-size: 12px; opacity: 0.9; }
 
-        /* CARDS (Subject/Topic) */
-        .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; align-items: center; cursor: pointer; border-left: 5px solid #ccc; transition: 0.2s; }
-        .card:hover { transform: translateY(-3px); border-left-color: var(--primary); }
-        .icon { font-size: 24px; margin-right: 15px; background: #e3f2fd; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
-        
-        /* TEST BUTTONS */
-        .t-btn { background: white; border: 1px solid #ddd; padding: 12px 5px; border-radius: 8px; text-align: center; cursor: pointer; }
+        /* --- CONTAINER --- */
+        .container { max-width: 800px; margin: 0 auto; padding: 15px; }
+
+        /* --- GRIDS & CARDS --- */
+        .grid-sub { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
+        .grid-test { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; }
+
+        /* Subject Card */
+        .card { background: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
+        .card:hover { border-color: var(--primary); transform: translateY(-3px); }
+        .icon { font-size: 32px; display: block; margin-bottom: 10px; }
+        .sub-title { font-weight: 700; font-size: 15px; display: block; line-height: 1.2; }
+        .sub-count { font-size: 11px; color: #64748b; margin-top: 5px; display: block; }
+
+        /* Topic Item */
+        .topic-item { 
+            background: white; padding: 15px; margin-bottom: 10px; border-radius: 10px; 
+            display: flex; align-items: center; cursor: pointer; border-left: 5px solid var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: 0.2s;
+        }
+        .topic-item:hover { transform: translateX(5px); }
+        .topic-num { 
+            background: #eff6ff; color: var(--primary); width: 30px; height: 30px; 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            font-weight: bold; margin-right: 15px; font-size: 14px; flex-shrink: 0;
+        }
+        .topic-name { font-weight: 600; font-size: 15px; }
+
+        /* Test Buttons */
+        .t-btn { 
+            background: white; border: 1px solid #cbd5e1; padding: 10px; border-radius: 8px; 
+            text-align: center; text-decoration: none; color: #333; display: block; 
+        }
         .t-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
-        .t-num { display: block; font-weight: bold; font-size: 16px; }
-        .t-lbl { font-size: 10px; text-transform: uppercase; color: #777; }
-        .t-btn:hover .t-lbl { color: #e0e0e0; }
+        .t-lbl { font-size: 10px; text-transform: uppercase; color: #64748b; display: block; }
+        .t-val { font-size: 16px; font-weight: 800; }
+        .t-btn:hover .t-lbl { color: #e0f2fe; }
 
-        /* EXAM INTERFACE */
-        .q-box { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 70px; }
-        .option { padding: 12px; border: 1px solid #ddd; margin: 10px 0; border-radius: 5px; cursor: pointer; display: flex; align-items: center; }
-        .option.selected { background: #e3f2fd; border-color: var(--primary); }
-        .circle { width: 18px; height: 18px; border: 2px solid #999; border-radius: 50%; margin-right: 10px; }
-        .selected .circle { background: var(--primary); border-color: var(--primary); }
-        
-        .footer { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 12px 20px; display: flex; justify-content: space-between; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
-        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .btn-next { background: var(--primary); color: white; }
-        .btn-prev { background: #e0e0e0; color: #333; }
-        .btn-submit { background: #28a745; color: white; }
-
-        /* SUBJECT COLORS */
-        .b-blue { border-left-color: #2196f3; } .b-green { border-left-color: #4caf50; }
-        .b-orange { border-left-color: #ff9800; } .b-red { border-left-color: #f44336; }
-        .b-purple { border-left-color: #9c27b0; } .b-teal { border-left-color: #009688; }
+        /* SCREENS */
+        .screen { display: none; animation: fadeIn 0.3s; }
+        .active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <button id="back-btn" class="back-btn" onclick="goBack()">&#8592;</button>
-        <h1 id="title">Civil Engineering Hub</h1>
-        <p id="subtitle">SSC JE | State AE/JE Practice</p>
+        <button id="btn-back" class="nav-btn hidden-btn" onclick="goBack()">&#8592;</button>
+        
+        <div class="header-center">
+            <h1 id="page-title">Civil Engineering Hub</h1>
+            <p id="page-subtitle">Select Subject</p>
+        </div>
+
+        <button id="btn-home" class="nav-btn hidden-btn" onclick="goHome()">&#8962;</button>
     </div>
 
-    <div class="content">
+    <div class="container">
         <div id="screen-sub" class="screen active">
             <div class="grid-sub" id="sub-list"></div>
         </div>
 
         <div id="screen-top" class="screen">
-            <div class="grid-sub" id="top-list"></div>
+            <div id="top-list"></div>
         </div>
 
         <div id="screen-test" class="screen">
             <div class="grid-test" id="test-list"></div>
         </div>
-
-        <div id="screen-exam" class="screen">
-            <div class="q-box">
-                <div style="display:flex; justify-content:space-between; color:#666; font-size:13px; margin-bottom:15px;">
-                    <span id="q-idx">Q 1/10</span>
-                    <span id="q-timer">Time: 00:00</span>
-                </div>
-                <div id="q-txt" style="font-size:16px; font-weight:bold; margin-bottom:20px;">Loading...</div>
-                <div id="opt-box"></div>
-            </div>
-        </div>
     </div>
 
-    <div id="exam-nav" class="footer" style="display:none;">
-        <button class="btn btn-prev" onclick="prevQ()">Prev</button>
-        <button class="btn btn-next" id="next-btn" onclick="nextQ()">Next</button>
-        <button class="btn btn-submit" id="sub-btn" style="display:none;" onclick="submitExam()">Submit</button>
-    </div>
+    <script>
+        // ==================================================
+        // 1. DATABASE (All Subjects & Topics)
+        // ==================================================
+        const db = [
+            { 
+                code: "irr", name: "Irrigation Engg.", icon: "💧",
+                topics: [
+                    "Irrigation & Methods", "Soil Moisture Relation", "Water Logging", "Canal Design",
+                    "Seepage Theory", "River Training", "Canal Regulation", "Dams & Reservoirs",
+                    "Spillway & Gates", "Cross Drainage Works"
+                ]
+            },
+            { 
+                code: "som", name: "Strength of Materials", icon: "🔨",
+                topics: [
+                    "Simple Stress & Strain", "SFD & BMD", "Bending Stresses", "Shear Stresses",
+                    "Torsion of Shafts", "Slope & Deflection", "Columns & Struts", "Thin Cylinders",
+                    "Springs", "Theories of Failure"
+                ]
+            },
+            { 
+                code: "rcc", name: "RCC Design", icon: "🏗️",
+                topics: [
+                    "Introduction (LSM)", "Shear & Bond", "Analysis of Beams", "Slabs Design",
+                    "Columns Design", "Footings", "Prestressed Concrete", "Retaining Walls"
+                ]
+            },
+            { 
+                code: "env", name: "Environmental Engg.", icon: "🌳",
+                topics: [
+                    "Water Demand", "Quality Parameters", "Water Treatment", "Distribution System",
+                    "Sewage System", "Waste Water Treatment", "Solid Waste Mgmt", "Air & Noise Pollution"
+                ]
+            },
+            { 
+                code: "soil", name: "Soil Mechanics", icon: "🏜️",
+                topics: [
+                    "Origin & Properties", "Classification of Soil", "Permeability & Seepage", "Compaction",
+                    "Consolidation", "Shear Strength", "Earth Pressure", "Stability of Slopes",
+                    "Foundation Engineering", "Soil Exploration"
+                ]
+            },
+            { 
+                code: "fm", name: "Fluid Mechanics", icon: "🌊",
+                topics: [
+                    "Properties of Fluid", "Pressure Measurement", "Hydrostatic Forces", "Buoyancy & Floatation",
+                    "Fluid Kinematics", "Fluid Dynamics", "Flow Through Pipes", "Open Channel Flow",
+                    "Hydraulic Machines"
+                ]
+            },
+            { 
+                code: "sur", name: "Surveying", icon: "📷",
+                topics: [
+                    "Linear Measurement", "Compass Surveying", "Theodolite & Traverse", "Leveling",
+                    "Contouring", "Tacheometry", "Curves", "Photogrammetry"
+                ]
+            },
+            { 
+                code: "high", name: "Highway Engg.", icon: "🛣️",
+                topics: [
+                    "Geometric Design", "Traffic Engineering", "Highway Materials", "Pavement Design",
+                    "Highway Construction", "Maintenance"
+                ]
+            },
+            { 
+                code: "rail", name: "Railway Engg.", icon: "🚂",
+                topics: [
+                    "Rails & Sleepers", "Geometric Design", "Points & Crossings", "Track Stresses",
+                    "Signalling"
+                ]
+            },
+            { 
+                code: "bmc", name: "Building Material", icon: "🧱",
+                topics: [
+                    "Cement & Lime", "Concrete Tech", "Bricks & Stones", "Timber",
+                    "Paints & Varnishes", "Mortar & Plaster"
+                ]
+            },
+            { 
+                code: "steel", name: "Steel Structure", icon: "🔩",
+                topics: [
+                    "Connections (Rivets/Welds)", "Tension Members", "Compression Members", "Beams & Girders",
+                    "Roof Trusses", "Plastic Analysis"
+                ]
+            },
+            { 
+                code: "cpm", name: "Construction Mgmt", icon: "📋",
+                topics: [
+                    "PERT & CPM", "Cost Analysis", "Crashing", "Construction Equipment",
+                    "Tenders & Contracts"
+                ]
+            }
+        ];
 
-<script>
-    // ==========================================
-    // 1. DATA STRUCTURE (12 Subjects & Topics)
-    // ==========================================
-    const db = {
-        "irr": {
-            name: "Irrigation Engg.", icon: "💧", color: "b-blue",
-            topics: [
-                "Irrigation & its Methods", "Soil Moisture & Relationship", "Water Logging & Reclamation",
-                "Canal Design & Lining", "Seepage Theory", "River Training Work",
-                "Canal Regulation & Cross Drainage", "Dams & Reservoirs", "Spillway & Energy Dissipators", "Miscellaneous"
-            ]
-        },
-        "env": {
-            name: "Environmental Engg.", icon: "🌳", color: "b-green",
-            topics: ["Water Demand", "Quality Control", "Water Treatment", "Distribution System", "Sewage System", "Waste Water Treatment", "Solid Waste Mgmt", "Air & Noise Pollution"]
-        },
-        "hydro": {
-            name: "Hydrology Engg.", icon: "🌧️", color: "b-teal",
-            topics: ["Precipitation", "Abstractions", "Stream Flow", "Runoff", "Hydrographs", "Floods", "Flood Routing", "Ground Water"]
-        },
-        "fm": {
-            name: "Fluid Mechanics", icon: "🌊", color: "b-blue",
-            topics: ["Properties of Fluid", "Pressure Measurement", "Hydrostatic Forces", "Buoyancy", "Fluid Kinematics", "Fluid Dynamics", "Flow Through Pipes", "Open Channel Flow", "Hydraulic Machines"]
-        },
-        "cpm": {
-            name: "Construction Mgmt.", icon: "🏗️", color: "b-orange",
-            topics: ["Project Management", "PERT & CPM", "Crashing", "Resource Allocation", "Construction Equipments", "Earthwork"]
-        },
-        "som": {
-            name: "Strength of Material", icon: "🔨", color: "b-red",
-            topics: ["Properties of Metals", "Stress & Strain", "SFD & BMD", "Bending Stresses", "Shear Stresses", "Torsion", "Slopes & Deflection", "Columns", "Thin Cylinders"]
-        },
-        "bmc": {
-            name: "Building Material", icon: "🧱", color: "b-orange",
-            topics: ["Cement", "Concrete", "Bricks", "Timber", "Stone", "Lime", "Mortar", "Paints & Varnishes", "Metals", "Miscellaneous"]
-        },
-        "conc": {
-            name: "Concrete Tech", icon: "🥛", color: "b-purple",
-            topics: ["Ingredients of Concrete", "Workability", "Strength of Concrete", "Admixtures", "Special Concrete", "Concrete Mix Design"]
-        },
-        "soil": {
-            name: "Soil & Foundation", icon: "🏜️", color: "b-orange",
-            topics: ["Origin of Soil", "Soil Water Relation", "Index Properties", "Classification", "Permeability", "Seepage Analysis", "Compaction", "Consolidation", "Shear Strength", "Earth Pressure", "Foundation"]
-        },
-        "highway": {
-            name: "Highway Engg.", icon: "🛣️", color: "b-green",
-            topics: ["Introduction", "Geometric Design", "Traffic Engineering", "Pavement Materials", "Pavement Design", "Highway Construction", "Maintenance"]
-        },
-        "rail": {
-            name: "Railway Engg.", icon: "🚂", color: "b-red",
-            topics: ["Introduction", "Rails", "Sleepers", "Ballast", "Geometric Design", "Points & Crossings", "Track Stresses"]
-        },
-        "tunnel": {
-            name: "Tunnel Engg.", icon: "🚇", color: "b-purple",
-            topics: ["Tunnel Surveying", "Tunneling Methods (Soil)", "Tunneling Methods (Rock)", "Ventilation & Lighting", "Drainage"]
-        }
-    };
+        // ==================================================
+        // 2. APP LOGIC (Navigation System)
+        // ==================================================
+        
+        let currSub = null;
+        let currTopIndex = 0;
 
-    // ==========================================
-    // 2. QUESTION REPOSITORY
-    // ==========================================
-    // ID Format: subjectKey_topicIndex_testIndex (e.g., irr_0_1)
-    
-    const questions = {
-        // Sample: Irrigation -> Topic 1 -> Test 1
-        "irr_0_1": [
-            { q: "Water supplied throughout the crop period is called:", o: ["Inundation", "Perennial", "Lift", "Drip"], a: 1 },
-            { q: "Best method for irregular topography:", o: ["Sprinkler", "Furrow", "Basin", "Flooding"], a: 0 }
-        ],
-        // You can add more like: "irr_0_2": [...], "som_1_5": [...]
-    };
-
-    // ==========================================
-    // 3. LOGIC & NAVIGATION
-    // ==========================================
-    let state = { view: 'sub', sub: null, top: null, test: null };
-    let currData = [], userAns = [], currIdx = 0;
-
-    // --- Init Subjects ---
-    const subList = document.getElementById('sub-list');
-    for(let k in db) {
-        subList.innerHTML += `
-        <div class="card ${db[k].color}" onclick="openTopics('${k}')">
-            <div class="icon">${db[k].icon}</div>
-            <div>
-                <div style="font-weight:bold; font-size:16px;">${db[k].name}</div>
-                <div style="font-size:12px; color:#777;">${db[k].topics.length} Chapters</div>
-            </div>
-        </div>`;
-    }
-
-    function switchScreen(id, title, subtitle, showBack) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        document.getElementById('title').innerText = title;
-        document.getElementById('subtitle').innerText = subtitle;
-        document.getElementById('back-btn').style.display = showBack ? 'block' : 'none';
-        document.getElementById('exam-nav').style.display = (id === 'screen-exam') ? 'flex' : 'none';
-        state.view = id.split('-')[1]; // sub, top, test, exam
-    }
-
-    function openTopics(key) {
-        state.sub = key;
-        const topList = document.getElementById('top-list');
-        topList.innerHTML = '';
-        db[key].topics.forEach((t, i) => {
-            topList.innerHTML += `
-            <div class="card ${db[key].color}" onclick="openTests(${i})">
-                <div class="icon" style="background:${getComputedStyle(document.documentElement).getPropertyValue('--primary')}20; color:#333; font-weight:bold;">${i+1}</div>
-                <div style="font-weight:600;">${t}</div>
+        // Init Subjects
+        const subList = document.getElementById('sub-list');
+        db.forEach(sub => {
+            subList.innerHTML += `
+            <div class="card" onclick="openTopics('${sub.code}')">
+                <span class="icon">${sub.icon}</span>
+                <span class="sub-title">${sub.name}</span>
+                <span class="sub-count">${sub.topics.length} Topics</span>
             </div>`;
         });
-        switchScreen('screen-top', db[key].name, "Select a Chapter", true);
-    }
 
-    function openTests(idx) {
-        state.top = idx;
-        const testList = document.getElementById('test-list');
-        testList.innerHTML = '';
-        // LOOP 1 to 100 TESTS
-        for(let i=1; i<=100; i++) {
-            testList.innerHTML += `
-            <div class="t-btn" onclick="startExam(${i})">
-                <span class="t-lbl">TEST</span>
-                <span class="t-num">${i}</span>
-            </div>`;
+        // --- Screen Switching Logic ---
+        function switchScreen(id, title, subtitle) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            
+            // Show requested screen
+            document.getElementById(id).classList.add('active');
+            
+            // Update Header Text
+            document.getElementById('page-title').innerText = title;
+            document.getElementById('page-subtitle').innerText = subtitle;
+
+            // Update Buttons Visibility
+            const btnBack = document.getElementById('btn-back');
+            const btnHome = document.getElementById('btn-home');
+
+            if (id === 'screen-sub') {
+                // Main Home Page: No buttons needed
+                btnBack.classList.add('hidden-btn');
+                btnHome.classList.add('hidden-btn');
+            } else {
+                // Any other page: Show Back and Home buttons
+                btnBack.classList.remove('hidden-btn');
+                btnHome.classList.remove('hidden-btn');
+            }
         }
-        switchScreen('screen-test', "Select Test", db[state.sub].topics[idx], true);
-    }
 
-    function startExam(num) {
-        state.test = num;
-        let id = `${state.sub}_${state.top}_${num}`;
-        
-        if(questions[id]) {
-            currData = questions[id];
-            userAns = new Array(currData.length).fill(null);
-            currIdx = 0;
-            loadQ(0);
-            switchScreen('screen-exam', `Test ${num}`, "Practice Mode", true);
-        } else {
-            alert("Questions for Test " + num + " Coming Soon!");
+        // --- Open Topic List ---
+        function openTopics(code) {
+            currSub = db.find(s => s.code === code);
+            const list = document.getElementById('top-list');
+            list.innerHTML = '';
+            
+            currSub.topics.forEach((topicName, index) => {
+                list.innerHTML += `
+                <div class="topic-item" onclick="openTests(${index})">
+                    <div class="topic-num">${index + 1}</div>
+                    <div class="topic-name">${topicName}</div>
+                </div>`;
+            });
+
+            switchScreen('screen-top', currSub.name, "Select Topic");
         }
-    }
 
-    function loadQ(i) {
-        currIdx = i;
-        let q = currData[i];
-        document.getElementById('q-idx').innerText = `Q ${i+1}/${currData.length}`;
-        document.getElementById('q-txt').innerText = q.q;
-        let box = document.getElementById('opt-box');
-        box.innerHTML = '';
-        q.o.forEach((opt, idx) => {
-            let cls = userAns[i] === idx ? 'selected' : '';
-            box.innerHTML += `
-            <div class="option ${cls}" onclick="markAns(${idx})">
-                <div class="circle"></div> ${opt}
-            </div>`;
-        });
-        
-        document.getElementById('next-btn').style.display = (i === currData.length-1) ? 'none' : 'block';
-        document.getElementById('sub-btn').style.display = (i === currData.length-1) ? 'block' : 'none';
-    }
+        // --- Open Test List ---
+        function openTests(index) {
+            currTopIndex = index;
+            const topicName = currSub.topics[index];
+            const list = document.getElementById('test-list');
+            list.innerHTML = '';
 
-    function markAns(idx) {
-        userAns[currIdx] = idx;
-        loadQ(currIdx);
-    }
+            for(let i=1; i<=50; i++) {
+                const a = document.createElement('a');
+                a.className = 't-btn';
+                a.innerHTML = `<span class="t-lbl">TEST</span><span class="t-val">${i}</span>`;
+                
+                // Link Formula: subjectCode.TopicNumber.TestNumber.html
+                // (Index + 1 because topics are 0-indexed but files are 1-based)
+                a.href = `${currSub.code}.${index + 1}.${i}.html`;
+                
+                list.appendChild(a);
+            }
 
-    function nextQ() { if(currIdx < currData.length-1) loadQ(currIdx+1); }
-    function prevQ() { if(currIdx > 0) loadQ(currIdx-1); }
-
-    function submitExam() {
-        let score = 0;
-        currData.forEach((q, i) => { if(userAns[i] === q.a) score++; });
-        alert(`You scored: ${score} / ${currData.length}`);
-        goBack(); // Go back to test list
-    }
-
-    function goBack() {
-        if(state.view === 'top') switchScreen('screen-sub', "Civil Engineering Hub", "Select Subject", false);
-        else if(state.view === 'test') switchScreen('screen-top', db[state.sub].name, "Select Chapter", true);
-        else if(state.view === 'exam') {
-            if(confirm("Quit Test?")) switchScreen('screen-test', "Select Test", db[state.sub].topics[state.top], true);
+            switchScreen('screen-test', topicName, "Select Test");
         }
-    }
 
-</script>
+        // --- Go Back Logic (Back Icon) ---
+        function goBack() {
+            if(document.getElementById('screen-test').classList.contains('active')) {
+                // Test List -> Topic List
+                openTopics(currSub.code); 
+            } else if(document.getElementById('screen-top').classList.contains('active')) {
+                // Topic List -> Subject List (Home)
+                goHome();
+            }
+        }
+
+        // --- Go Home Logic (Home Icon) ---
+        function goHome() {
+            currSub = null;
+            switchScreen('screen-sub', "Civil Engineering Hub", "Select Subject");
+        }
+
+    </script>
 </body>
 </html>
