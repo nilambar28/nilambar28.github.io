@@ -60,7 +60,7 @@
         .card-content h3 { font-size: 1.1rem; margin-bottom: 3px; font-weight: 600; color: #2c3e50; }
         .card-content span { font-size: 0.8rem; color: #888; }
 
-        /* --- DIRECT EMAIL FORM STYLING --- */
+        /* --- CONTACT FORM STYLING --- */
         .contact-form {
             background: white;
             padding: 30px;
@@ -78,27 +78,51 @@
             font-size: 1rem;
             background-color: #f9f9f9;
         }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
         
-        .contact-form button {
+        /* Email Button */
+        .btn-email {
+            flex: 1;
             background-color: #007bff;
             color: white;
             border: none;
-            padding: 12px 30px;
+            padding: 12px 20px;
             border-radius: 8px;
             font-size: 1rem;
             cursor: pointer;
             font-weight: 600;
-            transition: background 0.3s;
-            width: 100%;
         }
-        
-        .contact-form button:hover { background-color: #0056b3; }
+        .btn-email:hover { background-color: #0056b3; }
+
+        /* WhatsApp Button */
+        .btn-whatsapp {
+            flex: 1;
+            background-color: #25D366;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-whatsapp:hover { background-color: #1ebc59; }
 
         /* --- Responsive --- */
         @media (max-width: 900px) { .subject-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 600px) { 
             .subject-grid { grid-template-columns: 1fr; }
             .top-nav { flex-wrap: wrap; }
+            .button-group { flex-direction: column; }
         }
 
         /* Colors */
@@ -122,7 +146,7 @@
             <a href="index.html" class="nav-link"><span>🏠</span> Home</a>
             <a href="#" class="nav-link"><span>📝</span> Notes</a>
             <a href="#" class="nav-link"><span>🎥</span> Lectures</a>
-            <a href="#doubts" class="nav-link"><span>💬</span> Doubts</a>
+            <a href="#contact" class="nav-link"><span>💬</span> Doubts</a>
         </nav>
     </header>
 
@@ -148,30 +172,61 @@
             <a href="#" class="card c-red"><div class="card-icon">🚇</div><div class="card-content"><h3>Tunnel Engg.</h3><span>Full test Coming Soon</span></div></a>
         </div>
 
-        <div class="contact-form" id="doubts">
-            <h3 style="color:#333; margin-bottom: 20px;">📩 Ask Your Doubt (Directly to Sir)</h3>
-            <p style="margin-bottom: 20px; color: #666;">Write your thought given below.</p>
+        <div class="contact-form" id="contact">
+            <h3 style="color:#333; margin-bottom: 20px;">📩 Ask Your Doubt</h3>
+            <p style="margin-bottom: 20px; color: #666;">Aapka doubt seedha Sir ke Email ya WhatsApp par jayega.</p>
             
             <form action="https://formsubmit.co/nilambar2802@gmail.com" method="POST">
                 
-                <input type="text" name="name" placeholder="Apna Naam (Your Name)" required>
-                <input type="email" name="email" placeholder="Email ID" required>
+                <input type="text" id="userName" name="name" placeholder="Apna Naam (Your Name)" required>
+                <input type="email" name="email" placeholder="Apna Email ID (Optional for WhatsApp)">
                 
-                <textarea name="message" rows="5" placeholder="Write your doubt or message ..." required></textarea>
+                <textarea id="userMessage" name="message" rows="5" placeholder="Yahan apna doubt ya message likhein..." required></textarea>
                 
                 <input type="hidden" name="_next" value="https://nilambar28.github.io">
                 <input type="hidden" name="_captcha" value="false">
-                <input type="hidden" name="_subject" value="New Doubt from Civil Hub Student!">
-                
-                <button type="submit">Send Message 🚀</button>
+                <input type="hidden" name="_subject" value="New Doubt from Student!">
+
+                <div class="button-group">
+                    <button type="submit" class="btn-email">📧 Send to Email</button>
+                    
+                    <button type="button" class="btn-whatsapp" onclick="sendToWhatsApp()">
+                        <span>📱</span> Send on WhatsApp
+                    </button>
+                </div>
+
             </form>
-            </div>
+        </div>
 
         <div style="text-align: center; margin-top: 30px; color: #888; font-size: 0.85rem;">
-            &copy; 2026 𝘿𝙚𝙫𝙚𝙡𝙤𝙥𝙚𝙙 𝙗𝙮:- 𝙀𝙧. 𝙉𝙞𝙡𝙖𝙢𝙗𝙖𝙧 𝙔𝙖𝙙𝙖𝙫
- <div style="text-align: center; margin-top: 30px; color: #888; font-size: 0.85rem;">Er.Sachin yadav
-                                    
-                         </div>
+            &copy; 2026 Developed by:- Er. Nilambar Yadav
+        </div>
+    </div>
+
+    <script>
+        function sendToWhatsApp() {
+            // 1. Get values from the input boxes
+            var name = document.getElementById("userName").value;
+            var message = document.getElementById("userMessage").value;
+
+            // 2. Validation (Check if empty)
+            if (message.trim() === "") {
+                alert("Please write a message first!");
+                return;
+            }
+
+            // 3. Create the WhatsApp Message Link
+            // Format: Name: [Name] | Message: [Message]
+            var formattedText = "Student Name: " + (name ? name : "Anonymous") + "%0A" + 
+                                "Doubt: " + message;
+
+            var phoneNumber = "918987331285"; // Your Number
+            
+            // 4. Open WhatsApp
+            var url = "https://wa.me/" + phoneNumber + "?text=" + formattedText;
+            window.open(url, '_blank');
+        }
+    </script>
 
 </body>
 </html>
