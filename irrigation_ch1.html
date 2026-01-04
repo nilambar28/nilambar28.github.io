@@ -1,491 +1,566 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Irrigation Engineering Complete Quiz (Q1 - Q57)</title>
-<style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; padding: 20px; max-width: 800px; margin: auto; }
-    .header { text-align: center; margin-bottom: 20px; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .score-board { font-size: 20px; font-weight: bold; color: #007bff; margin-top: 10px; }
-    .card { background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); padding: 20px; margin-bottom: 15px; border-left: 5px solid #007bff; }
-    h3 { margin-top: 0; color: #333; font-size: 16px; line-height: 1.5; }
-    .options { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 15px; }
-    .btn { padding: 10px 15px; border: 1px solid #ddd; border-radius: 5px; background: #fff; text-align: left; cursor: pointer; transition: 0.2s; font-size: 14px; }
-    .btn:hover { background-color: #f8f9fa; border-color: #aaa; }
-    .correct { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724; font-weight: bold; }
-    .wrong { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; opacity: 0.8; }
-    .explanation { display: none; margin-top: 10px; padding: 10px; background: #e9ecef; border-radius: 5px; font-size: 13px; color: #495057; border-left: 3px solid #6c757d; }
-    .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #777; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Irrigation Engineering - 2 Hr Mock</title>
+    <style>
+        :root {
+            --primary: #007bff;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-light: #777777;
+            --correct: #28a745;
+            --wrong: #dc3545;
+            --border: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- HEADER --- */
+        .app-header {
+            background: var(--card-bg);
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .app-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .timer-badge {
+            background: #e3f2fd;
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+            border: 1px solid #bbdefb;
+            min-width: 85px;
+            text-align: center;
+        }
+
+        /* --- MAIN CONTENT --- */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+
+        /* --- SCREENS --- */
+        .screen { display: none; animation: fadeIn 0.3s ease; }
+        .screen.active { display: block; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- START SCREEN --- */
+        .start-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-top: 20px;
+        }
+        
+        .history-list {
+            margin-top: 20px;
+            text-align: left;
+            border-top: 1px solid var(--border);
+            padding-top: 15px;
+        }
+        
+        .history-item {
+            background: #fff;
+            border: 1px solid var(--border);
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+
+        /* --- QUIZ QUESTION --- */
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 80px; /* Space for footer */
+        }
+
+        .q-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-light);
+            font-size: 12px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        
+        .exam-tag {
+            background: #f0f0f0;
+            color: #555;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .q-text {
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 1.5;
+            color: var(--text-main);
+            margin-bottom: 25px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #fff;
+        }
+
+        .option-item:hover { background-color: #f9f9f9; }
+        
+        .option-item.selected {
+            border-color: var(--primary);
+            background-color: #e6f0ff;
+        }
+
+        .circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            margin-right: 15px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .selected .circle { border-color: var(--primary); }
+        .selected .circle::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px; height: 10px;
+            background: var(--primary);
+            border-radius: 50%;
+        }
+
+        /* --- NAV FOOTER --- */
+        .nav-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 12px 20px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            box-sizing: border-box;
+            z-index: 90;
+        }
+
+        .btn {
+            padding: 10px 25px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .btn-prev { background: #e0e0e0; color: #333; }
+        .btn-next { background: var(--primary); color: white; }
+        .btn-submit { background: var(--correct); color: white; }
+        .btn-block { width: 100%; font-size: 16px; padding: 14px; }
+
+        /* --- REPORT CARD --- */
+        .score-header {
+            background: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 30px;
+            border-radius: 0 0 20px 20px;
+            margin: -15px -15px 20px -15px;
+        }
+
+        .score-circle {
+            width: 100px; height: 100px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 32px;
+            font-weight: 700;
+            border: 4px solid rgba(255,255,255,0.4);
+        }
+
+        .solution-card {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 15px;
+        }
+
+        .badge { font-size: 11px; padding: 2px 6px; border-radius: 4px; color: white; font-weight: bold; text-transform: uppercase; }
+        .badge-correct { background: var(--correct); }
+        .badge-wrong { background: var(--wrong); }
+        .badge-skip { background: #999; }
+
+        .sol-desc {
+            background: #f1f8e9;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 13px;
+            border-left: 3px solid var(--correct);
+            color: #2e7d32;
+        }
+
+    </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>Irrigation Engineering</h1>
-    <p>Complete Practice Quiz (Q1 - Q57)</p>
-    <div class="score-board">Score: <span id="score">0</span> / 56</div>
-</div>
-
-<div id="quiz-container">
+    <div class="app-header">
+        <h1 class="app-title">Irrigation Eng.</h1>
+        <div id="timer" class="timer-badge" style="display:none;">02:00:00</div>
     </div>
 
-<div class="footer">
-    Created based on your uploaded study notes.
-</div>
+    <div class="content-area">
+        
+        <div id="screen-start" class="screen active">
+            <div class="start-card">
+                <img src="https://cdn-icons-png.flaticon.com/512/2232/2232688.png" width="60" style="margin-bottom:15px;">
+                <h2>Irrigation Engineering<br>Mock Test</h2>
+                <p style="color:#666;">Questions: 57 | Time: 2 Hours</p>
+                <button class="btn btn-next btn-block" onclick="startQuiz()">Start Test</button>
+                
+                <div class="history-list">
+                    <h4>Previous Attempts</h4>
+                    <div id="history-container">
+                        <p style="color:#999; font-size:13px;">No history found.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-quiz" class="screen">
+            <div class="question-card">
+                <div class="q-meta">
+                    <span id="q-progress">Q 1/57</span>
+                    <span id="q-exam" class="exam-tag">SSC JE</span>
+                </div>
+                <div id="q-text" class="q-text">Loading Question...</div>
+                
+                <div id="options-container">
+                    </div>
+            </div>
+        </div>
+
+        <div id="screen-result" class="screen">
+            <div class="score-header">
+                <div class="score-circle" id="final-score">0%</div>
+                <h3 style="margin:0;">Test Report</h3>
+                <p id="final-stats" style="margin:5px 0 0 0; opacity:0.9;">0/57 Correct</p>
+            </div>
+            
+            <h4 style="margin-left:5px;">Detailed Solutions</h4>
+            <div id="solutions-container">
+                </div>
+            
+            <button class="btn btn-next btn-block" onclick="location.reload()" style="margin-top:20px;">Go Home</button>
+        </div>
+
+    </div>
+
+    <div id="nav-footer" class="nav-footer" style="display:none;">
+        <button id="btn-prev" class="btn btn-prev" onclick="prevQuestion()" disabled>Prev</button>
+        <button id="btn-next" class="btn btn-next" onclick="nextQuestion()">Next</button>
+        <button id="btn-submit" class="btn btn-submit" onclick="submitQuiz()" style="display:none;">Submit</button>
+    </div>
 
 <script>
-// Data from your uploaded images
-const questions = [
-    {
-        id: 1,
-        q: "Water for irrigation supplied as per crop requirement throughout the crop period/year is called:",
-        options: ["(a) Inundation irrigation", "(b) Perennial irrigation", "(c) Lift irrigation", "(d) Drip irrigation"],
-        ans: 1, // Index 1 = b
-        exp: "Perennial irrigation implies supplying water throughout the crop period or year."
-    },
-    {
-        id: 2,
-        q: "From the following, which is an advantage of irrigation?",
-        options: ["(a) Reduced span for cultivation", "(b) Less variety of crop for cultivation", "(c) Increased salinity of farm land", "(d) Increased crop success and yield"],
-        ans: 3,
-        exp: "Irrigation increases crop success, yield, and prosperity of farmers."
-    },
-    {
-        id: 3,
-        q: "Major Irrigation schemes are those which have culturable command area:",
-        options: ["(a) More than 10,000 ha", "(b) Between 5000 to 7000 ha", "(c) Between 2000 to 5000 ha", "(d) Between 1000 to 2000 ha"],
-        ans: 0,
-        exp: "Major > 10,000 ha; Medium 2,000-10,000 ha; Minor < 2,000 ha."
-    },
-    {
-        id: 4,
-        q: "Irrigation canals are generally aligned along:",
-        options: ["(a) Contour line", "(b) Watershed / Ridge line", "(c) Straight line", "(d) Valley line"],
-        ans: 1,
-        exp: "Watershed canals (Ridge canals) can irrigate on both sides of the canal."
-    },
-    {
-        id: 5,
-        q: "Sprinkler irrigation is best suited for where:",
-        options: ["(a) Slopes are excessive and soil is erosive", "(b) The land cannot be prepared for surface method", "(c) Topography is irregular", "(d) All of the above"],
-        ans: 3,
-        exp: "Sprinkler irrigation is ideal for irregular topography, steep slopes, and erosive soils."
-    },
-    {
-        id: 6,
-        q: "Well irrigation is a type of:",
-        options: ["(a) Inundation irrigation", "(b) Infiltration irrigation", "(c) Lift irrigation", "(d) Gravity irrigation"],
-        ans: 2,
-        exp: "In well irrigation, water is lifted from underground, so it is a type of Lift Irrigation."
-    },
-    {
-        id: 7,
-        q: "Which technique of water distribution in farms is also called trickle irrigation?",
-        options: ["(a) Border flooding", "(b) Sprinkler irrigation", "(c) Drip irrigation", "(d) Free flooding"],
-        ans: 2,
-        exp: "Drip irrigation is also known as Trickle irrigation."
-    },
-    {
-        id: 8,
-        q: "______ are sown in autumn & harvested in spring.",
-        options: ["(a) Rabi crops", "(b) Perennial crops", "(c) Eight months crop", "(d) Kharif crops"],
-        ans: 0,
-        exp: "Rabi crops (Wheat, Gram, etc.) are sown in Oct/Nov (Autumn) and harvested in Mar/April (Spring)."
-    },
-    {
-        id: 9,
-        q: "Pick up the incorrect statement: Culturable commanded area is the gross area of an irrigation canal system less...",
-        options: ["(a) Populated area", "(b) Alkaline area", "(c) Forest area", "(d) Fallow area"],
-        ans: 3,
-        exp: "CCA = GCA - Uncultivable area (Ponds, Forests, Residential). Fallow area IS cultivable, so it is included in CCA. Subtracting it is incorrect."
-    },
-    {
-        id: 10,
-        q: "Which irrigation method is adopted when the land gradient is steeper and soil is easily erodible?",
-        options: ["(a) Furrow irrigation", "(b) Basin irrigation", "(c) Sprinkler irrigation", "(d) Drip irrigation"],
-        ans: 2,
-        exp: "Sprinkler irrigation prevents erosion on steep land."
-    },
-    {
-        id: 11,
-        q: "Application of fertilizer along with irrigation water is called:",
-        options: ["(a) Fertigation", "(b) Notching", "(c) Pruning", "(d) None of these"],
-        ans: 0,
-        exp: "Fertilizer + Irrigation = Fertigation."
-    },
-    {
-        id: 12,
-        q: "In border strip flooding method, the farm is divided into a series of strips:",
-        options: ["(a) 8m to 15m wide", "(b) 10m to 20m wide & 100m to 300m long", "(c) 20m to 30m wide", "(d) 5m to 10m wide"],
-        ans: 1,
-        exp: "Standard size for border strips is 10-20m width and 100-400m length."
-    },
-    {
-        id: 13,
-        q: "An irrigation scheme is known as minor, if command area is equal to or less than:",
-        options: ["(a) 2000 hectares", "(b) 1000 hectares", "(c) 500 hectares", "(d) 100 hectares"],
-        ans: 0,
-        exp: "Minor Irrigation schemes cover < 2000 hectares."
-    },
-    {
-        id: 14,
-        q: "In which type of irrigation system water is directly diverted to the canal without attempting to store water?",
-        options: ["(a) River canal / Direct irrigation", "(b) Combined storage", "(c) Storage irrigation", "(d) Tank irrigation"],
-        ans: 0,
-        exp: "In Direct Irrigation (Diversion schemes), water is diverted directly from the river using a weir/barrage."
-    },
-    {
-        id: 15,
-        q: "South-western monsoon season (Rice, Groundnut, Cotton) is also known as:",
-        options: ["(a) Rabi season", "(b) Kharif season", "(c) Winter season", "(d) April to June season"],
-        ans: 1,
-        exp: "SW Monsoon corresponds to the Kharif season (June to Sept/Oct)."
-    },
-    {
-        id: 16,
-        q: "In irrigation engineering, evapotranspiration is also referred as which of the following?",
-        options: ["(a) Combined use", "(b) Paleo water", "(c) Consumptive use", "(d) None of these"],
-        ans: 2,
-        exp: "Consumptive Use (Cu) = Evapotranspiration (Evaporation + Transpiration)."
-    },
-    {
-        id: 17,
-        q: "What is the impact of irrigation on economic development?",
-        options: ["(a) Only positive", "(b) Only negative", "(c) Both positive as well as negative", "(d) Neither positive nor negative"],
-        ans: 2,
-        exp: "Positive: Yield increase. Negative: Water logging, salinity, breeding of mosquitoes."
-    },
-    {
-        id: 18,
-        q: "Identify the type of flooding where ditches are excavated and water flows without control:",
-        options: ["(a) Check flooding", "(b) Border flooding", "(c) Free flooding / Ordinary flooding", "(d) Basin flooding"],
-        ans: 2,
-        exp: "Free flooding (Wild flooding) involves no control after water leaves the ditch."
-    },
-    // Q19 is missing in source images
-    {
-        id: 20,
-        q: "Art of irrigation is practiced in India Since:",
-        options: ["(a) Ancient times", "(b) Mughal period", "(c) British period", "(d) Independence"],
-        ans: 0,
-        exp: "Irrigation has been practiced since ancient times (e.g., Grand Anicut by Chola rulers)."
-    },
-    {
-        id: 21,
-        q: "The irrigation is necessary in an area:",
-        options: ["(a) Where there is scanty rainfall", "(b) Where there is controlled water supply", "(c) Where rainfall is non-uniform", "(d) All the above"],
-        ans: 3,
-        exp: "Irrigation is needed for scanty, non-uniform, or uncertain rainfall."
-    },
-    {
-        id: 22,
-        q: "Sprinkler irrigation efficiency is approx:",
-        options: ["(a) 80%", "(b) 50%", "(c) 30%", "(d) 95%"],
-        ans: 0,
-        exp: "Sprinkler efficiency is generally around 80%."
-    },
-    {
-        id: 23,
-        q: "Which irrigation is more suitable for permeable soil due to large stream discharge?",
-        options: ["(a) Free flooding", "(b) Check flooding", "(c) Check basin", "(d) Furrow"],
-        ans: 1,
-        exp: "Check flooding helps cover permeable soil quickly with large discharge."
-    },
-    {
-        id: 24,
-        q: "Which type of irrigation is practiced when the water supply is at too low a level to run by gravitation?",
-        options: ["(a) Inundation", "(b) River canal", "(c) Lift irrigation", "(d) Flow irrigation"],
-        ans: 2,
-        exp: "Lift irrigation uses pumps to lift water against gravity."
-    },
-    {
-        id: 25,
-        q: "Which of the following crop rotations are correct?",
-        options: ["(a) Gram-rice", "(b) Wheat-Gram-Jowar", "(c) Jowar-Gram-Cotton", "(d) Cotton-Wheat-Gram or sugarcane"],
-        ans: 3,
-        exp: "Cotton-Wheat-Gram is a viable rotation."
-    },
-    {
-        id: 26,
-        q: "Under the Warabandhi system, distributaries are operated for:",
-        options: ["(a) Seven-day periods", "(b) Six-day periods", "(c) Nine-day periods", "(d) Eight-day periods"],
-        ans: 3,
-        exp: "Based on the provided book answer key (d). Typically Warabandi is a weekly rotation."
-    },
-    {
-        id: 27,
-        q: "GCA = 6000 ha, 80% is culturable. Intensity for Rabi 50% (Duty 2000), Kharif 25% (Duty 1000). Find discharge.",
-        options: ["(a) 2.0 cumecs", "(b) 1.33 cumecs", "(c) 1.0 cumecs", "(d) 1.2 cumecs"],
-        ans: 3,
-        exp: "CCA = 4800. Rabi Area = 2400, Q = 2400/2000 = 1.2. Kharif Area = 1200, Q = 1200/1000 = 1.2. Max Discharge = 1.2 cumecs."
-    },
-    {
-        id: 28,
-        q: "On rolling land, the method of applying water is:",
-        options: ["(a) Border flooding", "(b) Check flooding", "(c) Furrow flooding", "(d) Free flooding"],
-        ans: 3,
-        exp: "Free flooding (Wild flooding) is best for rolling/irregular land where other methods fail."
-    },
-    {
-        id: 29,
-        q: "It is termed as ____ because water does not wet the soil surface:",
-        options: ["(a) Surface irrigation", "(b) Flood irrigation", "(c) Subsurface irrigation", "(d) None"],
-        ans: 2,
-        exp: "In Subsurface irrigation, water is applied directly to the root zone underground."
-    },
-    {
-        id: 30,
-        q: "Sprinkler irrigation is not suitable for:",
-        options: ["(a) Rice", "(b) Coffee plant", "(c) Plantation crops", "(d) None of them"],
-        ans: 0,
-        exp: "Rice requires standing water (inundation), which sprinklers cannot provide effectively."
-    },
-    {
-        id: 31,
-        q: "In surface method of irrigation water is applied directly from a:",
-        options: ["(a) Pipe", "(b) Channel", "(c) Drip head", "(d) Sprinkler"],
-        ans: 1,
-        exp: "Surface irrigation uses open channels/ditches."
-    },
-    {
-        id: 32,
-        q: "Among the major river basins in India, the largest catchment area is for:",
-        options: ["(a) Ganga", "(b) Brahmaputra", "(c) Godavari", "(d) Indus"],
-        ans: 0,
-        exp: "Ganga has the largest catchment area in India."
-    },
-    {
-        id: 33,
-        q: "For irrigation purposes, the pH value of water should be:",
-        options: ["(a) 3 to 6", "(b) 6 to 8.5", "(c) 8 to 11", "(d) More than 11"],
-        ans: 1,
-        exp: "Normal pH range for irrigation is 6.5 to 8.4."
-    },
-    {
-        id: 34,
-        q: "The canal which can irrigate only on one side is:",
-        options: ["(a) Contour canal", "(b) Side slope canal", "(c) Ridge canal", "(d) Watershed canal"],
-        ans: 0,
-        exp: "Contour canals run parallel to contours and irrigate only on the lower side."
-    },
-    {
-        id: 35,
-        q: "Why do we need to do the lining of the canal?",
-        options: ["(a) Minimize seepage", "(b) Prevent erosion", "(c) Increase discharge", "(d) All A, B and C"],
-        ans: 3,
-        exp: "Lining reduces seepage losses, prevents bank erosion, and allows higher velocity."
-    },
-    {
-        id: 36,
-        q: "The loss of water caused by the leaves of the growing vegetation is:",
-        options: ["(a) Transpiration", "(b) Evaporation", "(c) Percolation", "(d) Runoff"],
-        ans: 0,
-        exp: "Transpiration is the process of water loss through plant leaves."
-    },
-    {
-        id: 37,
-        q: "When a water table is within the root zone depth... the land is said to be:",
-        options: ["(a) Basin flooding", "(b) Water logged", "(c) Over nourished", "(d) Super saturated"],
-        ans: 1,
-        exp: "Water logging occurs when the water table rises into the root zone."
-    },
-    {
-        id: 38,
-        q: "Well irrigation is most useful where:",
-        options: ["(a) Aquifer is unconfined", "(b) Aquifer is confined", "(c) Rainfall is distributed", "(d) Rainfall is restricted"],
-        ans: 0,
-        exp: "Unconfined aquifers are easier to access for well irrigation."
-    },
-    {
-        id: 39,
-        q: "The main disadvantage of well irrigation is:",
-        options: ["(a) Creation of water logging", "(b) Lowering of ground water table", "(c) Consumption of electric power", "(d) Impurities"],
-        ans: 1,
-        exp: "Excessive well irrigation leads to a drop in the water table."
-    },
-    {
-        id: 40,
-        q: "The method of irrigation used for orchards is:",
-        options: ["(a) Basin flooding", "(b) Free flooding", "(c) Border flooding", "(d) Check flooding"],
-        ans: 0,
-        exp: "Basin flooding (making a ring around the tree) is best for orchards."
-    },
-    {
-        id: 41,
-        q: "A special type of irrigation scheme... between inundation and permanent type is:",
-        options: ["(a) Bandhara irrigation", "(b) Well irrigation", "(c) Flow irrigation", "(d) Terrace irrigation"],
-        ans: 0,
-        exp: "Bandhara irrigation is a minor scheme using small streams."
-    },
-    {
-        id: 42,
-        q: "If in the harvest season when the river flow is low... which method should be adopted?",
-        options: ["(a) Direct Irrigation", "(b) Storage Irrigation", "(c) Lift Irrigation", "(d) Well irrigation"],
-        ans: 1,
-        exp: "Storage irrigation (Dams) stores water for use when river flow is low."
-    },
-    {
-        id: 43,
-        q: "The ratio of the actually irrigated area... to the culturable irrigable area is:",
-        options: ["(a) Capacity coefficient", "(b) Annual intensity", "(c) Crop intensity", "(d) Intensity of irrigation"],
-        ans: 3,
-        exp: "This ratio is defined as Intensity of Irrigation."
-    },
-    {
-        id: 44,
-        q: "Which irrigation technique is preferred where area has irregular topography?",
-        options: ["(a) Sprinkler Irrigation", "(b) Sub-surface Irrigation", "(c) Furrow Irrigation", "(d) Border Irrigation"],
-        ans: 0,
-        exp: "Sprinkler irrigation works best on uneven/irregular land."
-    },
-    {
-        id: 45,
-        q: "Name the type of irrigation, when a storage weir is constructed across the river or water is stored in a tank:",
-        options: ["(a) Canal Irrigation", "(b) Surface Irrigation", "(c) Tank Irrigation", "(d) None"],
-        ans: 2,
-        exp: "Storing water in a reservoir/tank is Tank Irrigation."
-    },
-    {
-        id: 46,
-        q: "Water lifted by pumps to an area whose level is too high for flow is known as:",
-        options: ["(a) Flow irrigation", "(b) High level irrigation", "(c) Artificial irrigation", "(d) Lift irrigation"],
-        ans: 3,
-        exp: "Lifting water = Lift Irrigation."
-    },
-    {
-        id: 47,
-        q: "The best irrigation method that suits area where scarcity of irrigation water is:",
-        options: ["(a) Check flooding", "(b) Furrow", "(c) Drip irrigation", "(d) Sprinkler"],
-        ans: 2,
-        exp: "Drip irrigation is most efficient and saves water in scarcity areas."
-    },
-    {
-        id: 48,
-        q: "In which one of the following methods, loss of water due to evaporation is negligible?",
-        options: ["(a) Furrow", "(b) Sprinkle", "(c) Drip irrigation", "(d) Border"],
-        ans: 2,
-        exp: "Drip irrigation applies water directly to roots, minimizing evaporation."
-    },
-    {
-        id: 49,
-        q: "Which of the following has the highest irrigation efficiency?",
-        options: ["(a) Power loom", "(b) Drip irrigation", "(c) Surface", "(d) Sprinkler"],
-        ans: 1,
-        exp: "Drip irrigation has the highest efficiency (90%+)."
-    },
-    {
-        id: 50,
-        q: "Irrigation may be defined as the process:",
-        options: ["(a) Supplying water artificially", "(b) Controlling natural sources", "(c) Controlling river/drainage", "(d) All of the above"],
-        ans: 3,
-        exp: "Irrigation covers artificial supply, source control, and drainage."
-    },
-    {
-        id: 51,
-        q: "Pick up the correct statement:",
-        options: ["(a) Gravity water is harmful", "(b) Hygroscopic water is harmful", "(c) Capillary moisture is utilized by plants", "(d) All the above"],
-        ans: 2,
-        exp: "Capillary water is the primary source of water for plants."
-    },
-    {
-        id: 52,
-        q: "The flow irrigation is by:",
-        options: ["(a) Lift", "(b) Gravity flow", "(c) Electrical", "(d) Sub-soil"],
-        ans: 1,
-        exp: "Flow irrigation relies on gravity."
-    },
-    {
-        id: 53,
-        q: "In which method the field is divided into a number of long parallel strips?",
-        options: ["(a) Border flooding", "(b) Furrow", "(c) Free flooding", "(d) Check flooding"],
-        ans: 0,
-        exp: "Border flooding uses long strips separated by levees."
-    },
-    {
-        id: 54,
-        q: "Flow irrigation is done from:",
-        options: ["(a) Wells", "(b) Rivers", "(c) Sea", "(d) Canals"],
-        ans: 3,
-        exp: "Canals are the main source for flow irrigation."
-    },
-    {
-        id: 55,
-        q: "Which is NOT a limitation of sprinkler irrigation?",
-        options: ["(a) Only B", "(b) A, B and C", "(c) Only A", "(d) Only C (Minimizes erosion)"],
-        ans: 3,
-        exp: "Minimizing soil erosion is an Advantage, not a limitation."
-    },
-    {
-        id: 56,
-        q: "The method of irrigation in which water is lifted by mechanical means is:",
-        options: ["(a) flow", "(b) border", "(c) sub-surface", "(d) lift"],
-        ans: 3,
-        exp: "Mechanical lifting = Lift irrigation."
-    },
-    {
-        id: 57,
-        q: "In which method, Irrigation water is useful for row crops?",
-        options: ["(a) Furrow method", "(b) Contour method", "(c) Basin method", "(d) Flooding method"],
-        ans: 0,
-        exp: "Furrow method is designed for row crops like maize, potatoes, etc."
+    // --- QUESTION DATABASE (Transcribed from uploaded images 1-57) ---
+    const quizData = [
+        // Image 03 / Page 490
+        { id: 1, text: "Water for irrigation supplied as per crop requirement throughout the crop period/year is called:", options: ["Inundation irrigation", "Perennial irrigation", "Lift irrigation", "Drip irrigation"], ans: 1, exam: "RSMSSB JEN 2021", sol: "Ans (b): Perennial Canals assume supply of water throughout the year/crop period." },
+        { id: 2, text: "From the following, which is an advantage of irrigation?", options: ["Reduced span for cultivation", "Less variety of crop", "Increased salinity", "Increased crop success and yield"], ans: 3, exam: "NWDA JE 2021", sol: "Ans (d): Advantages: Stabilized yield, protection from famine, cash crops." },
+        { id: 3, text: "Major Irrigation schemes are those which have culturable command area:", options: ["More than 10,000 ha", "5000-7000 ha", "2000-5000 ha", "1000-2000 ha"], ans: 0, exam: "NWDA JE 2021", sol: "Ans (a): Major > 10,000 ha; Medium 2,000-10,000 ha; Minor < 2,000 ha." },
+        { id: 4, text: "Irrigation canals are generally aligned along:", options: ["Contour line", "Water shed", "Straight line", "Valley line"], ans: 1, exam: "SSC JE 2012", sol: "Ans (b): Watershed (Ridge) canal irrigates both sides." },
+        { id: 5, text: "Sprinkler irrigation is best suited for where:", options: ["Slopes are excessive", "The land cannot be prepared for surface", "Topography is irregular", "All of the above"], ans: 3, exam: "DSSSB JE 2021", sol: "Ans (d): Best for irregular topography, steep slopes, and erosive soil." },
+
+        // Image 01 / Page 491
+        { id: 6, text: "Well irrigation is a type of:", options: ["Inundation", "Infiltration", "Lift irrigation", "Gravity irrigation"], ans: 2, exam: "RPSC Lect. 2021", sol: "Ans (c): Well irrigation requires lifting water, hence it is Lift Irrigation." },
+        { id: 7, text: "Which technique of water distribution in farms is also called trickle irrigation?", options: ["Border flooding", "Sprinkler", "Drip irrigation", "Free flooding"], ans: 2, exam: "SSC JE 2019", sol: "Ans (c): Drip irrigation is also called Trickle irrigation." },
+        { id: 8, text: "______ are sown in autumn & harvested in spring.", options: ["Rabi crops", "Perennial crops", "Eight months crop", "Kharif crops"], ans: 0, exam: "RSMSSB JEN 2021", sol: "Ans (a): Rabi crops (Wheat, etc.) are sown in Oct/Nov and harvested in March/April." },
+        { id: 9, text: "Pick up the incorrect statement: Culturable commanded area is the gross area less...", options: ["Populated area", "Alkaline area", "Forest area", "Fallow area"], ans: 3, exam: "HPSSC JE 2021", sol: "Ans (d): CCA includes fallow land. It excludes uncultivable areas like forests/ponds." },
+        { id: 10, text: "Which method is adopted when land gradient is steeper and soil is easily erodible?", options: ["Furrow", "Basin", "Sprinkler", "Drip"], ans: 2, exam: "WBPSC SAE 2000", sol: "Ans (c): Sprinkler reduces erosion on steep slopes." },
+        { id: 11, text: "Application of fertilizer along with irrigation water is called:", options: ["Fertigation", "Notching", "Pruning", "None"], ans: 0, exam: "HPPCL JE 2021", sol: "Ans (a): Application of fertilizer through irrigation water is Fertigation." },
+        { id: 12, text: "In border strip flooding method, the farm is divided into strips of size:", options: ["8-15m wide", "10-20m wide & 100-300m long", "20-30m wide", "5-10m wide"], ans: 1, exam: "RSMSSB JEN 2021", sol: "Ans (b): Strips 10-20m wide and 100-300m long." },
+        { id: 13, text: "An irrigation scheme is known as minor, if command area is equal to or less than:", options: ["2000 ha", "1000 ha", "500 ha", "100 ha"], ans: 0, exam: "DSSSB JE 2021", sol: "Ans (a): Minor schemes are <= 2000 hectares." },
+
+        // Image 04 / Page 492
+        { id: 14, text: "In which type of irrigation system water is directly diverted to canal without storage?", options: ["River canal irrigation", "Combined storage", "Storage irrigation", "Tank irrigation"], ans: 0, exam: "HRRL 2021", sol: "Ans (a): Direct irrigation (River canal) uses a weir/barrage to divert water directly." },
+        { id: 15, text: "South-western monsoon season (Rice, Maize, Jowar) is also known as:", options: ["Rabi season", "Kharif season", "Dec to Feb", "April to June"], ans: 1, exam: "NWDA JE 2021", sol: "Ans (b): SW Monsoon (June-Sept) is Kharif season." },
+        { id: 16, text: "Evapotranspiration is also referred as which of the following?", options: ["Combined use", "Paleo water", "Consumptive use", "None"], ans: 2, exam: "NWDA JE 2021", sol: "Ans (c): Evapotranspiration = Consumptive Use." },
+        { id: 17, text: "What is impact of irrigation on economic development?", options: ["Only positive", "Only negative", "Both positive & negative", "Neither"], ans: 2, exam: "NWDA JE 2021", sol: "Ans (c): Yield increase is positive; Water logging/salinity is negative." },
+        { id: 20, text: "Art of irrigation is practiced in India Since:", options: ["Ancient times", "Mughal period", "British period", "Independence"], ans: 0, exam: "Nagaland PSC 2016", sol: "Ans (a): Practiced since ancient times (e.g., Grand Anicut)." },
+        { id: 21, text: "The irrigation is necessary in an area:", options: ["scanty rainfall", "controlled water supply", "non-uniform rainfall", "All the above"], ans: 3, exam: "WBPSC SAE", sol: "Ans (d): All are reasons for irrigation." },
+
+        // Image 06 / Page 493
+        { id: 23, text: "Because of large stream discharge, ______ irrigation is more suitable for permeable soil.", options: ["Free flooding", "Check flooding", "Check basin", "Furrow"], ans: 1, exam: "UPPCL JE 2016", sol: "Ans (b): Check flooding controls water better on permeable soil with large discharge." },
+        { id: 24, text: "Which type of irrigation is practiced when water supply is at too low a level to run by gravitation?", options: ["Inundation", "River canal", "Lift irrigation", "Flow"], ans: 2, exam: "SSC JE 2020", sol: "Ans (c): Lift irrigation uses mechanical means to lift water." },
+        { id: 25, text: "Which of the following crop rotations are correct?", options: ["Gram-rice", "Wheat-Gram-Jowar", "Jowar-Gram-Cotton", "Cotton-wheat-Gram"], ans: 3, exam: "HPSSC JE 2018", sol: "Ans (d): Cotton -> Wheat -> Gram is a valid rotation." },
+        { id: 26, text: "Under Warabandhi system, distributaries operate at full capacities usually on:", options: ["7-day periods", "6-day periods", "9-day periods", "8-day periods"], ans: 3, exam: "DSSSB JE 2019", sol: "Ans (d): Warabandhi turns are usually fixed on 8-day cycles." },
+        { id: 27, text: "Calculate Discharge: GCA=6000ha, 80% Culturable, Intensity 50%, Duty 2000 ha/cumec.", options: ["2.0 cumecs", "1.33 cumecs", "1.0 cumecs", "1.2 cumecs"], ans: 3, exam: "MP VYAPAM 2017", sol: "Ans (d): CCA=4800. Irrigated=2400. Discharge = 2400/2000 = 1.2 cumecs." },
+        { id: 28, text: "On rolling land, the method of applying water is:", options: ["Border flooding", "Check flooding", "Furrow flooding", "Free flooding"], ans: 3, exam: "KPSC Overseer", sol: "Ans (d): Free flooding (Wild flooding) is best for rolling topography." },
+
+        // Image 03 / Page 494
+        { id: 29, text: "In this type of irrigation, water does not wet the soil surface:", options: ["Surface", "Flood", "Subsurface", "None"], ans: 2, exam: "KPSC Overseer", sol: "Ans (c): Subsurface irrigation supplies water to roots without wetting surface." },
+        { id: 30, text: "Sprinkler irrigation is not suitable for:", options: ["rice", "coffee", "plantation", "none"], ans: 0, exam: "KPSC Overseer", sol: "Ans (a): Rice needs standing water (high delta), so sprinkler is not suitable." },
+        { id: 31, text: "In surface method, water is applied directly from a:", options: ["Pipe", "Channel", "Drip head", "Sprinkler"], ans: 1, exam: "KPSC Overseer", sol: "Ans (b): Surface irrigation uses channels." },
+        { id: 32, text: "Largest river basin catchment area in India:", options: ["Ganga", "Brahmaputra", "Godavari", "Indus"], ans: 0, exam: "KPSC Overseer", sol: "Ans (a): Ganga basin is the largest." },
+        { id: 33, text: "For irrigation, pH value of water should be:", options: ["3-6", "6-8", "8-11", ">11"], ans: 1, exam: "Odisha JE 2015", sol: "Ans (b): Normal pH is 6.5 to 8.4." },
+        { id: 34, text: "The canal which can irrigate only on one side is:", options: ["contour canal", "side slope canal", "ridge canal", "watershed canal"], ans: 0, exam: "WBPSC SAE", sol: "Ans (a): Contour canal irrigates only on the lower side." },
+        { id: 35, text: "Why do we need lining of canal?", options: ["Minimize seepage", "Prevent erosion", "Increase discharge", "All A, B, C"], ans: 3, exam: "SSC JE 2017", sol: "Ans (d): Lining serves all these purposes." },
+        { id: 36, text: "Loss of water by leaves of vegetation is:", options: ["transpiration", "evaporation", "percolation", "runoff"], ans: 0, exam: "Haryana SSC JE", sol: "Ans (a): Transpiration." },
+
+        // Image 02 / Page 495
+        { id: 37, text: "When water table is within root zone and detrimental to plants, land is:", options: ["basin flooding", "water logged", "over nourished", "saturated"], ans: 1, exam: "KERLA PSC", sol: "Ans (b): This condition is called Water Logging." },
+        { id: 38, text: "Well irrigation is most useful where:", options: ["aquifer is unconfined", "aquifer is confined", "rainfall distributed", "restricted"], ans: 0, exam: "WBPSC SAE", sol: "Ans (a): Useful where aquifer is unconfined." },
+        { id: 39, text: "Main disadvantage of well irrigation:", options: ["water logging", "lowering ground water", "electricity", "impurities"], ans: 1, exam: "WBPSC SAE", sol: "Ans (b): It lowers the water table." },
+        { id: 40, text: "Method of irrigation used for orchards:", options: ["Basin flooding", "Free flooding", "Border", "Check"], ans: 0, exam: "UKSSSC JE", sol: "Ans (a): Basin flooding (Ring basin) is used for trees/orchards." },
+        { id: 41, text: "Special type of irrigation between inundation and permanent type:", options: ["Bandhara", "Well", "Flow", "Terrance"], ans: 0, exam: "UKSSSC JE", sol: "Ans (a): Bandhara irrigation is a minor scheme in Maharashtra." },
+        { id: 42, text: "Water is sprayed in air simulating rainfall in:", options: ["Drip", "Sprinkler", "Lift", "Flow"], ans: 1, exam: "Assam PSC", sol: "Ans (b): Sprinkler irrigation." },
+        { id: 43, text: "Ratio of actually irrigated area to culturable area:", options: ["Capacity coefficient", "Annual intensity", "Crop intensity", "Intensity of irrigation"], ans: 3, exam: "KPSC Overseer", sol: "Ans (d): This is Intensity of Irrigation." },
+
+        // Image 08 / Page 496
+        { id: 44, text: "Irrigation technique for irregular topography with excessive slope:", options: ["Sprinkler", "Sub-surface", "Furrow", "Border"], ans: 0, exam: "UPPCL JE", sol: "Ans (a): Sprinkler is best for slopes." },
+        { id: 45, text: "Type of irrigation where storage weir is constructed:", options: ["Canal", "Surface", "Tank", "None"], ans: 2, exam: "KPSC JE", sol: "Ans (c): Tank irrigation stores water in reservoirs." },
+        { id: 46, text: "Water lifted by pumps to high level area:", options: ["Flow", "High level", "Artificial", "Lift irrigation"], ans: 3, exam: "WBPSC JE", sol: "Ans (d): Lift Irrigation." },
+        { id: 47, text: "Best method for water scarcity area:", options: ["check flooding", "furrow", "drip", "sprinkler"], ans: 2, exam: "Kerala JID", sol: "Ans (c): Drip irrigation saves the most water." },
+        { id: 48, text: "Method where evaporation loss is negligible:", options: ["Furrow", "Sprinkle", "Drip", "Border"], ans: 2, exam: "Punjab JE", sol: "Ans (c): Drip irrigation has negligible evaporation." },
+        { id: 49, text: "Highest irrigation efficiency:", options: ["Power loom", "Drip", "Surface", "Sprinkler"], ans: 1, exam: "UPPCL JE", sol: "Ans (b): Drip irrigation (~90% efficiency)." },
+
+        // Image 07 / Page 497
+        { id: 50, text: "Irrigation is defined as:", options: ["Supplying water artificially", "Controlling sources", "Drainage", "All above"], ans: 3, exam: "WBPSC SAE", sol: "Ans (d): All definitions apply." },
+        { id: 51, text: "Pick correct statement:", options: ["Gravity water harmful", "Hygroscopic harmful", "Capillary utilized by plants", "All above"], ans: 2, exam: "WBPSC SAE", sol: "Ans (c): Plants utilize capillary water." },
+        { id: 52, text: "Flow irrigation is by:", options: ["Lift", "Gravity flow", "Electrical", "Sub-soil"], ans: 1, exam: "WBPSC SAE", sol: "Ans (b): Water flows by gravity." },
+        { id: 53, text: "Field divided into long parallel strips:", options: ["Border flooding", "Furrow", "Free", "Check"], ans: 0, exam: "MPPEB", sol: "Ans (a): Border flooding uses strips." },
+        { id: 54, text: "Flow irrigation is done from:", options: ["Wells", "Rivers", "Sea", "Canals"], ans: 3, exam: "UPJN JE", sol: "Ans (d): Canal irrigation is flow irrigation." },
+        { id: 55, text: "Limitation of sprinkler irrigation:", options: ["Strong wind disturbs", "Heavy initial investment", "Minimizes erosion", "A and B"], ans: 3, exam: "DFCCIL", sol: "Ans (b): Both A (Wind) and B (Cost) are limitations. C is an advantage." },
+        { id: 56, text: "Water lifted by mechanical means:", options: ["flow", "border", "sub-surface", "lift"], ans: 3, exam: "MP Sub Eng", sol: "Ans (d): Lift irrigation." },
+        { id: 57, text: "Method useful for row crops:", options: ["Furrow", "Contour", "Basin", "Flooding"], ans: 0, exam: "DSSSB JE", sol: "Ans (a): Furrow method is used for row crops (Maize, Cotton)." }
+    ];
+
+    // --- APP LOGIC ---
+    let currentQ = 0;
+    let answers = new Array(quizData.length).fill(null);
+    let timerRef = null;
+    let timeRemaining = 7200; // 2 Hours in seconds
+
+    // Initialize
+    window.onload = function() {
+        loadHistory();
+    };
+
+    function startQuiz() {
+        document.getElementById('screen-start').classList.remove('active');
+        document.getElementById('screen-quiz').classList.add('active');
+        document.getElementById('nav-footer').style.display = 'flex';
+        document.getElementById('timer').style.display = 'block';
+        
+        loadQuestion(0);
+        startTimer();
     }
-];
 
-let score = 0;
-const container = document.getElementById('quiz-container');
-const scoreDisplay = document.getElementById('score');
-
-questions.forEach((q, index) => {
-    // Create Card
-    const card = document.createElement('div');
-    card.className = 'card';
-    
-    // Question Text
-    const title = document.createElement('h3');
-    title.innerText = `${q.id}. ${q.q}`;
-    card.appendChild(title);
-    
-    // Options Container
-    const optionsDiv = document.createElement('div');
-    optionsDiv.className = 'options';
-    
-    q.options.forEach((opt, optIndex) => {
-        const btn = document.createElement('button');
-        btn.className = 'btn';
-        btn.innerText = opt;
-        
-        btn.onclick = function() {
-            // Disable all buttons in this card
-            const allBtns = optionsDiv.querySelectorAll('.btn');
-            allBtns.forEach(b => b.disabled = true);
+    function startTimer() {
+        timerRef = setInterval(() => {
+            timeRemaining--;
             
-            // Check Answer
-            if (optIndex === q.ans) {
-                btn.classList.add('correct');
-                score++;
-                scoreDisplay.innerText = score;
-            } else {
-                btn.classList.add('wrong');
-                // Highlight correct answer
-                allBtns[q.ans].classList.add('correct');
-            }
+            let h = Math.floor(timeRemaining / 3600);
+            let m = Math.floor((timeRemaining % 3600) / 60);
+            let s = timeRemaining % 60;
             
-            // Show Explanation
-            const expDiv = document.createElement('div');
-            expDiv.className = 'explanation';
-            expDiv.style.display = 'block';
-            expDiv.innerHTML = `<strong>Explanation:</strong> ${q.exp}`;
-            card.appendChild(expDiv);
-        };
-        
-        optionsDiv.appendChild(btn);
-    });
-    
-    card.appendChild(optionsDiv);
-    container.appendChild(card);
-});
+            document.getElementById('timer').innerText = 
+                `${h < 10 ? '0'+h : h}:${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
 
+            if (timeRemaining <= 0) submitQuiz();
+        }, 1000);
+    }
+
+    function loadQuestion(index) {
+        currentQ = index;
+        const q = quizData[index];
+
+        document.getElementById('q-progress').innerText = `Q ${index + 1} / ${quizData.length}`;
+        document.getElementById('q-exam').innerText = q.exam;
+        document.getElementById('q-text').innerText = q.text;
+
+        const optContainer = document.getElementById('options-container');
+        optContainer.innerHTML = '';
+
+        q.options.forEach((opt, i) => {
+            const div = document.createElement('div');
+            div.className = 'option-item';
+            if (answers[index] === i) div.classList.add('selected');
+            
+            div.innerHTML = `<div class="circle"></div> <span>${opt}</span>`;
+            div.onclick = () => selectOption(i, div);
+            optContainer.appendChild(div);
+        });
+
+        // Button states
+        document.getElementById('btn-prev').disabled = (index === 0);
+        
+        if (index === quizData.length - 1) {
+            document.getElementById('btn-next').style.display = 'none';
+            document.getElementById('btn-submit').style.display = 'block';
+        } else {
+            document.getElementById('btn-next').style.display = 'block';
+            document.getElementById('btn-submit').style.display = 'none';
+        }
+    }
+
+    function selectOption(optIndex, el) {
+        // Deselect others
+        Array.from(document.getElementsByClassName('option-item')).forEach(item => {
+            item.classList.remove('selected');
+        });
+        // Select clicked
+        el.classList.add('selected');
+        answers[currentQ] = optIndex;
+    }
+
+    function prevQuestion() {
+        if (currentQ > 0) loadQuestion(currentQ - 1);
+    }
+
+    function nextQuestion() {
+        if (currentQ < quizData.length - 1) loadQuestion(currentQ + 1);
+    }
+
+    function submitQuiz() {
+        clearInterval(timerRef);
+        
+        let score = 0;
+        let correctCount = 0;
+        
+        // Calculate Score & Generate Solutions
+        const solContainer = document.getElementById('solutions-container');
+        solContainer.innerHTML = '';
+
+        quizData.forEach((q, i) => {
+            const userAns = answers[i];
+            const isCorrect = (userAns === q.ans);
+            if (isCorrect) correctCount++;
+            
+            // Generate Solution Card
+            const card = document.createElement('div');
+            card.className = 'solution-card';
+            
+            let badgeClass = userAns === null ? 'badge-skip' : (isCorrect ? 'badge-correct' : 'badge-wrong');
+            let badgeText = userAns === null ? 'Skipped' : (isCorrect ? 'Correct' : 'Wrong');
+            
+            card.innerHTML = `
+                <div style="margin-bottom:8px;">
+                    <span class="badge ${badgeClass}">${badgeText}</span>
+                    <span style="font-size:12px; color:#999; float:right;">${q.exam}</span>
+                </div>
+                <div style="font-weight:600; font-size:15px; margin-bottom:10px;">Q${i+1}. ${q.text}</div>
+                <div style="font-size:14px; margin-bottom:5px;">Your Answer: ${userAns !== null ? q.options[userAns] : '-'}</div>
+                <div style="font-size:14px; color:#28a745; font-weight:600;">Correct Answer: ${q.options[q.ans]}</div>
+                <div class="sol-desc">${q.sol}</div>
+            `;
+            solContainer.appendChild(card);
+        });
+
+        const percent = Math.round((correctCount / quizData.length) * 100);
+        
+        // Update UI
+        document.getElementById('nav-footer').style.display = 'none';
+        document.getElementById('timer').style.display = 'none';
+        document.getElementById('screen-quiz').classList.remove('active');
+        document.getElementById('screen-result').classList.add('active');
+
+        document.getElementById('final-score').innerText = `${percent}%`;
+        document.getElementById('final-stats').innerText = `${correctCount}/${quizData.length} Correct`;
+
+        // Save History
+        saveHistory(percent, correctCount);
+    }
+
+    // --- LOCAL STORAGE ---
+    function saveHistory(pct, count) {
+        let history = JSON.parse(localStorage.getItem('irrigation_mock_history_2hr')) || [];
+        history.unshift({
+            date: new Date().toLocaleDateString(),
+            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+            score: pct,
+            correct: count
+        });
+        localStorage.setItem('irrigation_mock_history_2hr', JSON.stringify(history));
+    }
+
+    function loadHistory() {
+        const history = JSON.parse(localStorage.getItem('irrigation_mock_history_2hr')) || [];
+        const container = document.getElementById('history-container');
+        
+        if (history.length > 0) {
+            container.innerHTML = '';
+            history.forEach((h, i) => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `
+                    <div>
+                        <div style="font-weight:600;">Attempt ${history.length - i}</div>
+                        <div style="color:#888; font-size:11px;">${h.date} at ${h.time}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-weight:bold; color:${h.score >= 50 ? 'green' : 'red'}">${h.score}%</div>
+                        <div style="font-size:11px; color:#666;">${h.correct}/57</div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+    }
 </script>
 
 </body>
