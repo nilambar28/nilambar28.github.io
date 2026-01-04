@@ -6,182 +6,103 @@
     <title>Civil Engineering Hub</title>
     <style>
         /* --- Reset & Base Styles --- */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #f0f4f8; padding-bottom: 40px; }
 
-        body {
-            background-color: #f0f4f8;
-            padding-bottom: 40px;
-        }
-
-        /* --- Header Section (with Nav) --- */
+        /* --- Header --- */
         header {
             background: linear-gradient(135deg, #007bff, #0056b3);
             color: white;
             padding-top: 30px;
-            /* Bottom curve remove kar diya taaki nav clean lage, ya curve retain bhi kar sakte hain */
             border-bottom-left-radius: 30px;
             border-bottom-right-radius: 30px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.15);
             margin-bottom: 30px;
-            position: relative;
         }
 
-        .header-content {
-            text-align: center;
-            padding: 0 20px 20px;
-        }
+        .header-content { text-align: center; padding: 0 20px 20px; }
+        header h1 { font-size: 2.2rem; margin-bottom: 5px; font-weight: 700; }
+        header p { font-size: 1rem; opacity: 0.9; margin-bottom: 25px; }
 
-        header h1 {
-            font-size: 2.2rem;
-            margin-bottom: 5px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        header p {
-            font-size: 1rem;
-            opacity: 0.9;
-            margin-bottom: 25px;
-        }
-
-        /* --- TOP NAVIGATION BAR --- */
+        /* --- TOP NAVIGATION --- */
         .top-nav {
-            background: rgba(255, 255, 255, 0.15); /* Glassy effect */
+            background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(5px);
             display: flex;
             justify-content: center;
             gap: 15px;
             padding: 15px 10px;
             border-top: 1px solid rgba(255,255,255,0.1);
-            /* Corner radius inherit from header for smooth look */
-            border-bottom-left-radius: 30px;
-            border-bottom-right-radius: 30px;
         }
-
         .nav-link {
-            text-decoration: none;
-            color: white;
-            font-weight: 500;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 8px; /* Icon aur Text ke beech gap */
-            padding: 8px 16px;
-            border-radius: 20px;
-            transition: all 0.3s ease;
+            text-decoration: none; color: white; font-weight: 500; font-size: 0.95rem;
+            display: flex; align-items: center; gap: 8px; padding: 8px 16px;
+            border-radius: 20px; transition: all 0.3s ease;
         }
-
-        .nav-link:hover {
-            background-color: white;
-            color: #0056b3; /* Text blue ho jayega hover pe */
-            transform: translateY(-2px);
-        }
-
-        .nav-link.active {
-            background-color: white;
-            color: #0056b3;
-            font-weight: 700;
-        }
+        .nav-link:hover { background-color: white; color: #0056b3; transform: translateY(-2px); }
 
         /* --- Container --- */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 15px;
-        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 15px; }
 
         /* --- GRID SYSTEM --- */
-        .subject-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 15px;
-        }
+        .subject-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
 
         /* --- Card Styling --- */
         .card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            color: #333;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(0,0,0,0.02);
+            background: white; border-radius: 15px; padding: 20px; display: flex;
+            align-items: center; text-decoration: none; color: #333;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s;
+            position: relative; overflow: hidden; border: 1px solid rgba(0,0,0,0.02);
         }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
-        }
-
-        .card::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 5px;
-        }
-
-        .card-icon {
-            font-size: 2rem;
-            margin-right: 15px;
-            width: 40px;
-            text-align: center;
-            flex-shrink: 0;
-        }
-
-        .card-content h3 {
-            font-size: 1.1rem;
-            margin-bottom: 3px;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-
-        .card-content span {
-            font-size: 0.8rem;
-            color: #888;
-        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+        .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; }
+        .card-icon { font-size: 2rem; margin-right: 15px; width: 40px; text-align: center; flex-shrink: 0; }
+        .card-content h3 { font-size: 1.1rem; margin-bottom: 3px; font-weight: 600; color: #2c3e50; }
+        .card-content span { font-size: 0.8rem; color: #888; }
 
         /* --- DISCUSSION AREA --- */
         .discussion-area {
-            background: white;
-            margin-top: 30px;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            background: white; margin-top: 30px; padding: 25px;
+            border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
-        
         .discussion-area h3 { margin-bottom: 15px; color: #333; }
+        
         .comment-box {
             width: 100%; padding: 15px; border: 2px solid #e0e0e0;
-            border-radius: 10px; margin-bottom: 10px; resize: vertical;
+            border-radius: 10px; margin-bottom: 10px; resize: vertical; font-size: 1rem;
         }
+        
         .comment-btn {
             background-color: #007bff; color: white; border: none;
             padding: 10px 25px; border-radius: 8px; cursor: pointer;
+            font-weight: 600;
+        }
+        .comment-btn:hover { background-color: #0056b3; }
+
+        /* New Comment List Styling */
+        #commentList { margin-top: 20px; }
+        .posted-comment {
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            animation: fadeIn 0.5s;
+        }
+        .posted-comment strong { color: #333; display: block; margin-bottom: 5px; }
+        .posted-comment p { color: #555; margin: 0; }
+        .time-stamp { font-size: 0.75rem; color: #999; float: right; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- Mobile Responsive --- */
-        @media (max-width: 900px) {
-            .subject-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-        
-        @media (max-width: 600px) {
+        /* --- Responsive --- */
+        @media (max-width: 900px) { .subject-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { 
             .subject-grid { grid-template-columns: 1fr; }
-            
-            /* Mobile Nav: Thoda adjust kiya taaki icons fit ho */
-            .top-nav { flex-wrap: wrap; justify-content: space-evenly; gap: 5px; }
-            .nav-link { font-size: 0.85rem; padding: 6px 10px; }
+            .top-nav { flex-wrap: wrap; }
         }
 
         /* Colors */
@@ -192,7 +113,6 @@
         .c-purple::before { background-color: #9b59b6; }
         .c-grey::before { background-color: #7f8c8d; }
         .c-teal::before { background-color: #1abc9c; }
-
     </style>
 </head>
 <body>
@@ -202,98 +122,86 @@
             <h1>Civil Engineering Hub</h1>
             <p>SSC JE | State AE/JE Practice Portal</p>
         </div>
-
         <nav class="top-nav">
-            <a href="index.html" class="nav-link active">
-                <span>🏠</span> Home
-            </a>
-            <a href="#" class="nav-link">
-                <span>📝</span> Notes
-            </a>
-            <a href="#" class="nav-link">
-                <span>🎥</span> Lectures
-            </a>
-            <a href="#comments" class="nav-link">
-                <span>💬</span> Doubts
-            </a>
+            <a href="index.html" class="nav-link"><span>🏠</span> Home</a>
+            <a href="#" class="nav-link"><span>📝</span> Notes</a>
+            <a href="#" class="nav-link"><span>🎥</span> Lectures</a>
+            <a href="#comments" class="nav-link"><span>💬</span> Doubts</a>
         </nav>
     </header>
 
     <div class="container">
-        
         <div class="subject-grid">
-            
             <a href="irrigation engineering.html" class="card c-blue">
                 <div class="card-icon">💧</div>
                 <div class="card-content"><h3>Irrigation Engg.</h3><span>Full test Available</span></div>
             </a>
-            
             <a href="environmental engineering.html" class="card c-green">
                 <div class="card-icon">🌳</div>
                 <div class="card-content"><h3>Environmental Engg.</h3><span>Full test Coming Soon</span></div>
             </a>
-
-            <a href="#" class="card c-teal">
-                <div class="card-icon">🍃</div>
-                <div class="card-content"><h3>Hydrology Engg.</h3><span>Full test Coming Soon</span></div>
-            </a>
-
-            <a href="#" class="card c-blue">
-                <div class="card-icon">🌊</div>
-                <div class="card-content"><h3>Fluid Mechanics</h3><span>Full test Coming Soon</span></div>
-            </a>
-
-            <a href="#" class="card c-orange">
-                <div class="card-icon">🏗️</div>
-                <div class="card-content"><h3>Construction Mgmt.</h3><span>Full test Coming Soon</span></div>
-            </a>
-
-            <a href="#" class="card c-grey">
-                <div class="card-icon">🔨</div>
-                <div class="card-content"><h3>Strength of Material</h3><span>Full test Coming Soon</span></div>
-            </a>
-
-            <a href="#" class="card c-red">
-                <div class="card-icon">🧱</div>
-                <div class="card-content"><h3>Building Material</h3><span>Full test Coming Soon</span></div>
-            </a>
-
-            <a href="#" class="card c-grey">
-                <div class="card-icon">🌫️</div>
-                <div class="card-content"><h3>Concrete Tech</h3><span>Full test Coming Soon</span></div>
-            </a>
-
-            <a href="#" class="card c-purple">
-                <div class="card-icon">⛰️</div>
-                <div class="card-content"><h3>Soil & Foundation</h3><span>Full test Coming Soon</span></div>
-            </a>
-            
-            <a href="#" class="card c-green">
-                <div class="card-icon">🛣️</div>
-                <div class="card-content"><h3>Highway Engg.</h3><span>Full test Coming Soon</span></div>
-            </a>
-
-             <a href="#" class="card c-orange">
-                <div class="card-icon">🚂</div>
-                <div class="card-content"><h3>Railway Engg.</h3><span>Full test Coming Soon</span></div>
-            </a>
-
-             <a href="#" class="card c-red">
-                <div class="card-icon">🚇</div>
-                <div class="card-content"><h3>Tunnel Engg.</h3><span>Full test Coming Soon</span></div>
-            </a>
+            <a href="#" class="card c-teal"><div class="card-icon">🍃</div><div class="card-content"><h3>Hydrology Engg.</h3><span>Full test Coming Soon</span></div></a>
+            <a href="#" class="card c-blue"><div class="card-icon">🌊</div><div class="card-content"><h3>Fluid Mechanics</h3><span>Full test Coming Soon</span></div></a>
+            <a href="#" class="card c-orange"><div class="card-icon">🏗️</div><div class="card-content"><h3>Construction Mgmt.</h3><span>Full test Coming Soon</span></div></a>
+            <a href="#" class="card c-grey"><div class="card-icon">🔨</div><div class="card-content"><h3>Strength of Material</h3><span>Full test Coming Soon</span></div></a>
+            <a href="#" class="card c-red"><div class="card-icon">🧱</div><div class="card-content"><h3>Building Material</h3><span>Full test Coming Soon</span></div></a>
+            <a href="#" class="card c-grey"><div class="card-icon">🌫️</div><div class="card-content"><h3>Concrete Tech</h3><span>Full test Coming Soon</span></div></a>
+            <a href="#" class="card c-purple"><div class="card-icon">⛰️</div><div class="card-content"><h3>Soil & Foundation</h3><span>Full test Coming Soon</span></div></a>
+            <a href="#" class="card c-green"><div class="card-icon">🛣️</div><div class="card-content"><h3>Highway Engg.</h3><span>Full test Coming Soon</span></div></a>
+            <a href="#" class="card c-orange"><div class="card-icon">🚂</div><div class="card-content"><h3>Railway Engg.</h3><span>Full test Coming Soon</span></div></a>
+            <a href="#" class="card c-red"><div class="card-icon">🚇</div><div class="card-content"><h3>Tunnel Engg.</h3><span>Full test Coming Soon</span></div></a>
         </div>
 
         <div class="discussion-area" id="comments">
             <h3>💬 Discussion & Doubts</h3>
-            <textarea class="comment-box" rows="4" placeholder="Write your doubt or comment here..."></textarea>
-            <button class="comment-btn">Post Comment</button>
+            
+            <textarea id="userInput" class="comment-box" rows="3" placeholder="Apna doubt yahan likhein..."></textarea>
+            
+            <button class="comment-btn" onclick="addComment()">Post Comment</button>
+
+            <div id="commentList"></div>
         </div>
 
         <div style="text-align: center; margin-top: 30px; color: #888; font-size: 0.85rem;">
             &copy; 2026 Developed by:- Er. Nilambar Yadav
         </div>
     </div>
+
+    <script>
+        function addComment() {
+            // 1. User ne kya likha wo nikalna
+            var input = document.getElementById("userInput");
+            var message = input.value;
+
+            // Agar box khali hai to alert do
+            if (message.trim() === "") {
+                alert("Please write something first!");
+                return;
+            }
+
+            // 2. Naya comment box banana (HTML creation)
+            var commentList = document.getElementById("commentList");
+            
+            var newDiv = document.createElement("div");
+            newDiv.className = "posted-comment";
+            
+            // Time nikalna
+            var time = new Date().toLocaleTimeString();
+
+            // Comment ke andar kya dikhega
+            newDiv.innerHTML = `
+                <span class="time-stamp">Time: ${time}</span>
+                <strong>Student (You)</strong>
+                <p>${message}</p>
+            `;
+
+            // 3. List me sabse upar add karna
+            commentList.prepend(newDiv);
+
+            // 4. Input box khali karna
+            input.value = "";
+        }
+    </script>
 
 </body>
 </html>
