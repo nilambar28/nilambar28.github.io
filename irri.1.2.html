@@ -3,390 +3,333 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Irrigation Engineering Quiz (Q58-Q89)</title>
+    <title>Exam Interface - Fixed</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
+        :root {
+            --primary: #007bff;
+            --success: #27ae60;     /* Green */
+            --danger: #c0392b;      /* Red */
+            --review: #8e44ad;      /* Purple */
+            --warning: #f39c12;     /* Orange/Yellow */
+            --gray: #ecf0f1;
+            --dark: #2c3e50;
         }
-        .quiz-container {
-            background-color: white;
-            width: 100%;
-            max-width: 700px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            padding: 20px;
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+        body { background: #f4f6f9; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* HEADER */
+        header {
+            background: #fff; height: 60px; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd;
         }
-        .header {
-            text-align: center;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+        .timer-box { font-size: 1.2rem; font-weight: bold; color: var(--dark); font-family: monospace; }
+        .btn-exit { border: 1px solid var(--danger); color: var(--danger); background: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+
+        /* LAYOUT */
+        #quiz-interface { display: flex; flex: 1; overflow: hidden; }
+
+        /* LEFT: QUESTION */
+        .question-section { flex: 1; padding: 20px; overflow-y: auto; padding-bottom: 80px; }
+        .q-card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); max-width: 900px; margin: 0 auto; }
+        
+        .q-text { font-size: 1.1rem; font-weight: 500; margin-bottom: 20px; line-height: 1.5; }
+        .q-tag { float: right; background: #e3f2fd; color: var(--primary); font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; }
+
+        .option-item {
+            display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid #eee; 
+            border-radius: 6px; margin-bottom: 8px; cursor: pointer; transition: 0.2s;
         }
-        .question-box {
-            margin-bottom: 25px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px;
-            background: #fff;
+        .option-item:hover { background: #f9f9f9; }
+        .option-item.selected { background: #e7f1ff; border-color: var(--primary); }
+        .circle { 
+            width: 24px; height: 24px; border-radius: 50%; border: 2px solid #bbb; 
+            display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; color: #666; 
         }
-        .question-text {
-            font-weight: 600;
-            font-size: 1.1em;
-            margin-bottom: 15px;
-            color: #333;
+        .option-item.selected .circle { background: var(--primary); border-color: var(--primary); color: white; }
+
+        /* RIGHT: PALETTE */
+        .sidebar { width: 300px; background: #fff; border-left: 1px solid #ddd; display: flex; flex-direction: column; z-index: 100; }
+        .palette-legend { padding: 10px; border-bottom: 1px solid #eee; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 0.75rem; }
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+        .box-icon { width: 12px; height: 12px; border-radius: 2px; }
+
+        .palette-grid { padding: 15px; overflow-y: auto; flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; align-content: start; }
+        
+        .pal-btn {
+            height: 35px; border: 1px solid #ddd; background: #f8f9fa; border-radius: 4px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: 600; font-size: 0.9rem; position: relative;
         }
-        .options {
-            list-style-type: none;
-            padding: 0;
+        
+        /* PALETTE COLORS */
+        .pal-btn.current { border: 2px solid #000; }
+        .pal-btn.answered { background: var(--success); color: white; border-color: var(--success); clip-path: polygon(0 0, 100% 0, 100% 80%, 80% 100%, 0 100%); }
+        .pal-btn.not-answered { background: var(--danger); color: white; border-color: var(--danger); clip-path: polygon(0 0, 100% 0, 100% 80%, 80% 100%, 0 100%); }
+        .pal-btn.review { background: var(--review); color: white; border-color: var(--review); border-radius: 50%; }
+        
+        /* Answered AND Marked for Review (Purple with Green Dot) */
+        .pal-btn.review-answered {
+            background: var(--review); color: white; border-radius: 50%; position: relative;
         }
-        .option-btn {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 8px;
-            background-color: #f8f9fa;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            text-align: left;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 0.95em;
+        .pal-btn.review-answered::after {
+            content: "✓"; font-size: 10px; position: absolute; bottom: 0; right: 0; 
+            background: var(--success); width: 14px; height: 14px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center;
         }
-        .option-btn:hover {
-            background-color: #e2e6ea;
+
+        /* FOOTER */
+        footer {
+            height: 60px; background: #fff; border-top: 1px solid #ddd; position: fixed; bottom: 0; left: 0; width: 100%;
+            display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 200;
         }
-        /* Correct/Wrong Styles */
-        .correct {
-            background-color: #d4edda !important;
-            border-color: #c3e6cb !important;
-            color: #155724;
-            position: relative;
+        @media (min-width: 768px) { footer { width: calc(100% - 300px); } }
+        
+        .btn { padding: 10px 15px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; color: white; }
+        .btn-prev { background: #7f8c8d; }
+        .btn-next { background: var(--success); }
+        .btn-review { background: var(--review); }
+        .btn-review.active { background: var(--warning); color: #fff; } /* Yellow when active */
+        .btn-submit { width: 100%; background: #2ecc71; margin-top: 10px; }
+
+        /* MOBILE */
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; top: 60px; right: -100%; height: calc(100% - 60px); transition: 0.3s; }
+            .sidebar.open { right: 0; }
+            footer { width: 100%; }
         }
-        .correct::after {
-            content: " ✅ Correct";
-            float: right;
-            font-weight: bold;
-        }
-        .wrong {
-            background-color: #f8d7da !important;
-            border-color: #f5c6cb !important;
-            color: #721c24;
-            position: relative;
-        }
-        .wrong::after {
-            content: " ❌ Wrong";
-            float: right;
-            font-weight: bold;
-        }
-        .disabled {
-            pointer-events: none;
-            opacity: 0.8;
-        }
-        .score-board {
-            text-align: center;
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-top: 20px;
-            padding: 15px;
-            background: #007bff;
-            color: white;
-            border-radius: 5px;
-        }
-        .explanation {
-            margin-top: 10px;
-            font-size: 0.9em;
-            color: #555;
-            background: #fff3cd;
-            padding: 10px;
-            border-radius: 5px;
-            display: none;
-        }
-        .footer {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 0.8em;
-            color: #777;
-        }
+
+        .hidden { display: none !important; }
+        #result-screen { padding: 40px; text-align: center; max-width: 800px; margin: 0 auto; overflow-y: auto; height: 100vh;}
     </style>
 </head>
 <body>
 
-<div class="quiz-container">
-    <div class="header">
-        <h1>Irrigation Engineering</h1>
-        <p>Practice Quiz (Q.58 - Q.89)</p>
+    <div id="start-screen" style="padding: 40px; text-align: center;">
+        <h1 style="color:var(--primary)">Civil Engg Mock</h1>
+        <p>32 Questions | 120 Minutes</p>
+        <button class="btn btn-next" onclick="startTest()" style="margin-top: 20px; padding: 12px 30px;">Start Test</button>
     </div>
 
-    <div id="quiz-area">
+    <div id="exam-interface" class="hidden" style="height: 100%; display: flex; flex-direction: column;">
+        <header>
+            <strong>Irrigation Test</strong>
+            <div class="timer-box" id="timer">02:00:00</div>
+            <div style="display:flex; gap:10px">
+                <button onclick="toggleSidebar()" style="background:none; border:1px solid #ccc; padding:5px;">☰</button>
+                <button class="btn-exit" onclick="exitTest()">Exit</button>
+            </div>
+        </header>
+
+        <div id="quiz-interface">
+            <div class="question-section" id="q-area"></div>
+
+            <div class="sidebar" id="sidebar">
+                <div class="palette-legend">
+                    <div class="legend-item"><div class="box-icon" style="background:var(--success)"></div> Ans</div>
+                    <div class="legend-item"><div class="box-icon" style="background:var(--danger)"></div> Not Ans</div>
+                    <div class="legend-item"><div class="box-icon" style="background:var(--review); border-radius:50%"></div> Review</div>
+                    <div class="legend-item"><div class="box-icon" style="background:var(--review); border-radius:50%"></div><span style="font-size:8px">✓</span> Ans+Rev</div>
+                </div>
+                <div class="palette-grid" id="palette-grid"></div>
+                <div style="padding:15px; border-top:1px solid #ddd">
+                    <button class="btn btn-submit" onclick="submitTest()">Submit Test</button>
+                </div>
+            </div>
         </div>
 
-    <div class="score-board" id="score-board" style="display:none;">
-        Quiz Completed! <br>
-        Your Score: <span id="final-score"></span> / <span id="total-questions"></span>
+        <footer>
+            <button class="btn btn-prev" id="btn-prev" onclick="nav(-1)">Previous</button>
+            <button class="btn btn-review" id="btn-review" onclick="toggleReview()">Mark for Review</button>
+            <button class="btn btn-next" id="btn-next" onclick="nav(1)">Save & Next</button>
+        </footer>
     </div>
 
-    <div class="footer">
-        Based on uploaded textbook images.
+    <div id="result-screen" class="hidden">
+        <h1>Result</h1>
+        <h2 id="score-disp" style="font-size:3rem; color:var(--primary)">0%</h2>
+        <div id="sol-container" style="text-align: left; margin-top:30px"></div>
+        <button class="btn btn-next" onclick="location.reload()" style="margin:20px 0;">Home</button>
     </div>
-</div>
 
 <script>
-    // Data from the user's images
+    // --- DATA ---
     const questions = [
-        {
-            id: 58,
-            text: "58. In irrigation engineering, development of desert area factor comes under which case?",
-            options: ["(a) Necessity of irrigation", "(b) Ill-effects of irrigation", "(c) Benefits of irrigation", "(d) Types of irrigation"],
-            answer: 0 // Index 0 = a
-        },
-        {
-            id: 59,
-            text: "59. For spray application, the quantity to be applied in a field will depend upon",
-            options: ["(a) Pressure", "(b) Forward speed", "(c) No. of nozzles", "(d) All of these"],
-            answer: 3
-        },
-        {
-            id: 60,
-            text: "60. Irrigation water eyed to the land by means gravity flow indicates which of the following type of irrigation?",
-            options: ["(a) Drip irrigation", "(b) Flow irrigation", "(c) Lift irrigation", "(d) Sprinkler irrigation"],
-            answer: 1
-        },
-        {
-            id: 61,
-            text: "61. With an increase in the supply of irrigation water, yields of the crops ...........",
-            options: ["(a) decrease continuously", "(b) increase continuously", "(c) increase up to a certain limit and then becomes constant", "(d) increase up to a certain limit and then decrease"],
-            answer: 3
-        },
-        {
-            id: 62,
-            text: "62. Type of surface irrigation method generally practiced in hilly area is :",
-            options: ["(a) Flooding", "(b) Furrow method", "(c) Contour farming", "(d) Sprinkler irrigation"],
-            answer: 2
-        },
-        {
-            id: 63,
-            text: "63. Out of total liquid water on earth, the brackish water is:",
-            options: ["(a) above 95 percent", "(b) around 75 percent", "(c) around 50 percent", "(d) estimates are not available"],
-            answer: 0
-        },
-        {
-            id: 64,
-            text: "64. Which of the following is also called inundation irrigation?",
-            options: ["(a) Flow irrigation", "(b) Combined scheme", "(c) Storage irrigation", "(d) Diversion irrigation"],
-            answer: 0
-        },
-        {
-            id: 65,
-            text: "65. Which of the following statement is correct for sprinkler irrigation method?",
-            options: ["(a) It is used for rice and jute.", "(b) Is is used for the soil has very low infiltration rate.", "(c) It is best suitable for very light soil.", "(d) It requires borders and field channel."],
-            answer: 2
-        },
-        {
-            id: 66,
-            text: "66. A method of irrigation by which each tree is surrounded by a border to form a pool when water is applied, is called :",
-            options: ["(a) Basin irrigation", "(b) Broad irrigation", "(c) Distributed irrigation", "(d) Spot irrigation"],
-            answer: 0
-        },
-        {
-            id: 67,
-            text: "67. Lands of climate, that are neither arid nor strictly humid in which inferior crops can be grown without irrigation is called?",
-            options: ["(a) Hybrid arid zone", "(b) Medium arid zone", "(c) Partly arid zone", "(d) Semi arid zone"],
-            answer: 3
-        },
-        {
-            id: 68,
-            text: "68. A system of irrigation very suitable in tracts where there are number of small rivers and streams, is ________.",
-            options: ["(a) Bandhara system", "(b) Closed system", "(c) Well system", "(d) Lifting system"],
-            answer: 0
-        },
-        {
-            id: 69,
-            text: "69. In which method of irrigation, the entire field is divided into number of leveled plots surrounded by levees?",
-            options: ["(a) basin method", "(b) Check method", "(c) Furrow method", "(d) Border strip method"],
-            answer: 1
-        },
-        {
-            id: 70,
-            text: "70. For standing crops in undulating sandy fields, the best method of irrigation is",
-            options: ["(a) Sprinkler Irrigation", "(b) Check method", "(c) Furrow method", "(d) All of these"],
-            answer: 0
-        },
-        {
-            id: 71,
-            text: "71. The irrigation method where only one-fifth to one-half of the land surface is wetted by water resulting in less evaporation and less pudding of soil is called____.",
-            options: ["(a) Border irrigation method", "(b) Basin flooding method", "(c) Sprinkler irrigation method", "(d) Furrow irrigation method"],
-            answer: 3
-        },
-        {
-            id: 72,
-            text: "72. The term \"corrugations\" is associated with which of the following irrigation method?",
-            options: ["(a) Furrow irrigation method", "(b) Basin irrigation method", "(c) Sprinkler irrigation method", "(d) Drip irrigation method"],
-            answer: 0
-        },
-        {
-            id: 73,
-            text: "73. Method of irrigation for cereal crops is",
-            options: ["(a) Sub surface irrigation", "(b) Basin flooding", "(c) Check flooding", "(d) Furrow irrigation"],
-            answer: 2
-        },
-        {
-            id: 74,
-            text: "74. 'Flood irrigation' works best on",
-            options: ["(a) Level or gentle terrain", "(b) Steep terrain", "(c) Drought hit areas", "(d) Coasted areas"],
-            answer: 0
-        },
-        {
-            id: 75,
-            text: "75. What classification held for water present in soil is normally found?",
-            options: ["(a) Hydroscopic water", "(b) Surface water", "(c) Capillary water", "(d) Centrifugal water"],
-            answer: 2
-        },
-        {
-            id: 76,
-            text: "76. It is that part in excess of hygroscopic water which exists in the pore space of the soil by molecular attraction",
-            options: ["(a) Sea water", "(b) River water", "(c) Capillary water", "(d) None of these"],
-            answer: 2
-        },
-        {
-            id: 77,
-            text: "77. Permanent wilting point moisture content for a crop represents the:",
-            options: ["(a) Hygroscopic water", "(b) Capillary water", "(c) Field capacity water", "(d) None of the above"],
-            answer: 0
-        },
-        {
-            id: 78,
-            text: "78. Most fertile soil is",
-            options: ["(a) Alluvial", "(b) Black soil", "(c) Laterite soil", "(d) Red soil"],
-            answer: 0
-        },
-        {
-            id: 79,
-            text: "79. The requirement of water is the highest for",
-            options: ["(a) livestock", "(b) irrigation", "(c) domestic needs", "(d) toughness modulus"],
-            answer: 1
-        },
-        {
-            id: 80,
-            text: "80. Kharif season generally extends from",
-            options: ["(a) January - July", "(b) March - August", "(c) September - April", "(d) June - October"],
-            answer: 3
-        },
-        {
-            id: 81,
-            text: "81. A climatic region lacking enough water for agriculture without artificial irrigation is called",
-            options: ["(a) arid zone", "(b) dry zone", "(c) desert zone", "(d) none of the above"],
-            answer: 0
-        },
-        {
-            id: 82,
-            text: "82. Arrange the above irrigation methods (I. Furrow, II. Sprinkler, III. Drip) in decreasing order of their wetting area of the soil surface.",
-            options: ["(a) I, II, III", "(b) II, III, I", "(c) III, I, II", "(d) II, I, III"],
-            answer: 3
-        },
-        {
-            id: 83,
-            text: "83. The method of growing crop on running on the sides of water ditches used in certain agricultural field is called as?",
-            options: ["(a) Drip irrigation", "(b) Flood irrigation", "(c) Furrow irrigation", "(d) Check irrigation"],
-            answer: 2
-        },
-        {
-            id: 84,
-            text: "84. The water table of underground water generally corresponds to water level of",
-            options: ["(a) streams", "(b) rivers", "(c) sea", "(d) all of these"],
-            answer: 3
-        },
-        {
-            id: 85,
-            text: "85. Assertion (A): In border strip method... size depends on soil/slope. <br>Reason (R): Border strip method is a controlled type of subsurface irrigation.",
-            options: ["(a) both A and R true...", "(b) both A and R true but...", "(c) A is true but R is false", "(d) A is false but R is true"],
-            answer: 2
-        },
-        {
-            id: 86,
-            text: "86. Assertion(A): Sprinkler method has higher efficiency. <br>Reason(R): Sprinkler system causes less interference in cultivation...",
-            options: ["(a) both A and R are true...", "(b) both A and R are true but...", "(c) A is true but R is false", "(d) A is false but R is true"],
-            answer: 2
-        },
-        {
-            id: 87,
-            text: "87. Which one of the following is not a major deterrent in water harvesting through water tanks ?",
-            options: ["(a) Deforestation...", "(b) Siltation", "(c) Lack of maintenance...", "(d) Shallow depth of water tanks"],
-            answer: 3
-        },
-        {
-            id: 88,
-            text: "88. Lift irrigation doesn't includes",
-            options: ["(a) Doon", "(b) Deep tube wells", "(c) Mote", "(d) Inundation irrigation"],
-            answer: 3
-        },
-        {
-            id: 89,
-            text: "89. Method of applying water directly to the root zone of the plant is called ..........",
-            options: ["(a) check flooding", "(b) drip method", "(c) furrow method", "(d) sprinkle irrigation"],
-            answer: 1
-        }
+        { id: 58, text: "In irrigation engineering, development of desert area factor comes under which case?", options: ["Necessity of irrigation", "Ill-effects of irrigation", "Benefits of irrigation", "Types of irrigation"], correct: 0, tag: "DSSSB JE 2019", sol: "Desert area factor falls under Necessity of Irrigation." },
+        { id: 59, text: "For spray application, the quantity to be applied in a field will depend upon:", options: ["Pressure", "Forward speed", "No. of nozzles", "All of these"], correct: 3, tag: "HPSSC JE 2018", sol: "Depends on pressure, speed, and nozzles." },
+        { id: 60, text: "Irrigation water eyed to the land by means gravity flow indicates which type?", options: ["Drip irrigation", "Flow irrigation", "Lift irrigation", "Sprinkler irrigation"], correct: 1, tag: "NWDA JE 2018", sol: "Gravity flow = Flow Irrigation." },
+        { id: 61, text: "With increase in supply of irrigation water, crop yields...", options: ["decrease continuously", "increase continuously", "increase up to limit then constant", "increase up to limit then decrease"], correct: 3, tag: "SSC JE 2018", sol: "Increases up to a limit, then decreases (waterlogging)." },
+        { id: 62, text: "Surface irrigation method generally practiced in hilly area is:", options: ["Flooding", "Furrow method", "Contour farming", "Sprinkler irrigation"], correct: 2, tag: "GSSSB ITI 2016", sol: "Contour farming fits hilly terrain." },
+        { id: 63, text: "Out of total liquid water on earth, brackish water is:", options: ["above 95 percent", "around 75 percent", "around 50 percent", "not available"], correct: 0, tag: "Manipur AE 2016", sol: "95% is salty/brackish." },
+        { id: 64, text: "Also called inundation irrigation?", options: ["Flow irrigation", "Combined scheme", "Storage irrigation", "Diversion irrigation"], correct: 0, tag: "SSC JE 2019", sol: "Inundation is a type of Flow Irrigation." },
+        { id: 65, text: "Correct statement for sprinkler irrigation?", options: ["Used for rice/jute", "Used for low infiltration soil", "Best for very light soil", "Requires borders"], correct: 2, tag: "SSC JE 2018", sol: "Best for light (sandy) soil." },
+        { id: 66, text: "Method where each tree is surrounded by a border to form a pool:", options: ["Basin irrigation", "Broad irrigation", "Distributed irrigation", "Spot irrigation"], correct: 0, tag: "Rajasthan JEN 2020", sol: "Basin irrigation." },
+        { id: 67, text: "Lands neither arid nor strictly humid where inferior crops grow without irrigation?", options: ["Hybrid arid", "Medium arid", "Partly arid", "Semi arid zone"], correct: 3, tag: "Rajasthan JEN 2020", sol: "Semi arid zone." },
+        { id: 68, text: "System suitable where there are number of small rivers and streams:", options: ["Bandhara system", "Closed system", "Well system", "Lifting system"], correct: 0, tag: "UKSSSC JE 2020", sol: "Bandhara system." },
+        { id: 69, text: "Entire field divided into leveled plots surrounded by levees?", options: ["basin method", "Check method", "Furrow method", "Border strip"], correct: 1, tag: "UPPCL JE 2020", sol: "Check flooding." },
+        { id: 70, text: "For standing crops in undulating sandy fields, best method is:", options: ["Sprinkler Irrigation", "Check method", "Furrow method", "All of these"], correct: 0, tag: "Mizoram PSC 2015", sol: "Sprinkler handles undulating sandy land best." },
+        { id: 71, text: "Method where only 1/5 to 1/2 of land is wetted:", options: ["Border", "Basin", "Sprinkler", "Furrow irrigation"], correct: 3, tag: "MP VYAPAM 2017", sol: "Furrow irrigation reduces evaporation." },
+        { id: 72, text: "'Corrugations' is associated with:", options: ["Furrow irrigation", "Basin irrigation", "Sprinkler irrigation", "Drip irrigation"], correct: 0, tag: "MH PWD 2019", sol: "Small furrows = Corrugations." },
+        { id: 73, text: "Irrigation for cereal crops is:", options: ["Sub surface", "Basin flooding", "Check flooding", "Furrow irrigation"], correct: 2, tag: "Nagaland PSC 2015", sol: "Check flooding." },
+        { id: 74, text: "'Flood irrigation' works best on:", options: ["Level/gentle terrain", "Steep terrain", "Drought areas", "Coasted areas"], correct: 0, tag: "Nagaland PSC 2015", sol: "Level or gentle terrain." },
+        { id: 75, text: "Water held in soil by surface tension against gravity:", options: ["Hydroscopic", "Surface", "Capillary", "Centrifugal"], correct: 2, tag: "Karnataka PSC", sol: "Capillary water." },
+        { id: 76, text: "Water in excess of hygroscopic water existing by molecular attraction:", options: ["Sea", "River", "Capillary", "None"], correct: 2, tag: "Kerala PSC 2019", sol: "Capillary water." },
+        { id: 77, text: "Permanent wilting point moisture represents:", options: ["Hygroscopic water", "Capillary", "Field capacity", "None"], correct: 0, tag: "UJVNL AE 2021", sol: "Hygroscopic (Unavailable) water." },
+        { id: 78, text: "Most fertile soil is:", options: ["Alluvial", "Black", "Laterite", "Red"], correct: 0, tag: "Nagaland PSC 2016", sol: "Alluvial soil." },
+        { id: 79, text: "Water requirement is highest for:", options: ["livestock", "irrigation", "domestic", "toughness"], correct: 1, tag: "APPSC AE 2004", sol: "Irrigation consumes ~70%." },
+        { id: 80, text: "Kharif season extends from:", options: ["Jan-July", "Mar-Aug", "Sept-Apr", "June-October"], correct: 3, tag: "APPSC AE 2004", sol: "June to October." },
+        { id: 81, text: "Region lacking water without artificial irrigation:", options: ["arid zone", "dry zone", "desert", "none"], correct: 0, tag: "APPSC AEE 2011", sol: "Arid Zone." },
+        { id: 82, text: "Decrease order of wetting area (Furrow, Sprinkler, Drip):", options: ["I, II, III", "II, III, I", "III, I, II", "II, I, III"], correct: 3, tag: "Punjab JE 2016", sol: "Sprinkler > Furrow > Drip." },
+        { id: 83, text: "Crops on sides of water ditches:", options: ["Drip", "Flood", "Furrow", "Check"], correct: 2, tag: "NPCC 2017", sol: "Furrow irrigation." },
+        { id: 84, text: "Underground water table corresponds to level of:", options: ["streams", "rivers", "sea", "all of these"], correct: 3, tag: "Mizoram PSC 2016", sol: "All of these." },
+        { id: 85, text: "Assertion: Border strip depends on soil. Reason: It is subsurface.", options: ["Both true", "Both true not expl", "A true R false", "A false R true"], correct: 2, tag: "ESE 2010", sol: "Border strip is Surface irrigation. R is False." },
+        { id: 86, text: "Assertion: Sprinkler higher efficiency. Reason: Less interference.", options: ["Both true", "Both true not expl", "A true R false", "A false R true"], correct: 2, tag: "Unknown", sol: "Sprinkler causes MORE interference (pipes). R is False." },
+        { id: 87, text: "Not a major deterrent in water harvesting tanks?", options: ["Deforestation", "Siltation", "Lack of maintenance", "Shallow depth"], correct: 3, tag: "ESE 2020", sol: "Shallow depth is not a major issue compared to others." },
+        { id: 88, text: "Lift irrigation doesn't include:", options: ["Doon", "Deep tube wells", "Mote", "Indundation"], correct: 3, tag: "Nagaland PSC 2017", sol: "Inundation is flow type, not lift." },
+        { id: 89, text: "Applying water directly to root zone:", options: ["check", "drip", "furrow", "sprinkle"], correct: 1, tag: "SSC JE 2018", sol: "Drip irrigation." }
     ];
 
-    let score = 0;
-    const quizArea = document.getElementById('quiz-area');
+    // --- STATE ---
+    let currentQ = 0;
+    let answers = new Array(questions.length).fill(null);
+    let reviews = new Array(questions.length).fill(false); // Stores Review State
+    let visited = new Array(questions.length).fill(false);
+    let timerRef;
 
-    function loadQuiz() {
-        questions.forEach((q, index) => {
-            const questionBox = document.createElement('div');
-            questionBox.className = 'question-box';
-            
-            const questionTitle = document.createElement('div');
-            questionTitle.className = 'question-text';
-            questionTitle.innerHTML = q.text;
-            questionBox.appendChild(questionTitle);
-
-            const optionsList = document.createElement('div');
-            optionsList.className = 'options';
-
-            q.options.forEach((opt, i) => {
-                const btn = document.createElement('button');
-                btn.className = 'option-btn';
-                btn.innerText = opt;
-                btn.onclick = () => checkAnswer(btn, i, q.answer, questionBox);
-                optionsList.appendChild(btn);
-            });
-
-            questionBox.appendChild(optionsList);
-            quizArea.appendChild(questionBox);
-        });
+    // --- LOGIC ---
+    function startTest() {
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('exam-interface').classList.remove('hidden');
+        document.getElementById('exam-interface').style.display = 'flex';
+        
+        visited[0] = true;
+        initPalette();
+        renderQ(0);
+        
+        let time = 7200;
+        timerRef = setInterval(() => {
+            time--;
+            if(time <= 0) submitTest();
+            let h = Math.floor(time/3600).toString().padStart(2,'0');
+            let m = Math.floor((time%3600)/60).toString().padStart(2,'0');
+            let s = (time%60).toString().padStart(2,'0');
+            document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+        }, 1000);
     }
 
-    function checkAnswer(selectedBtn, selectedIndex, correctIndex, parentBox) {
-        // Disable all buttons in this question to prevent re-clicking
-        const buttons = parentBox.querySelectorAll('.option-btn');
-        buttons.forEach((btn, idx) => {
-            btn.classList.add('disabled');
-            if (idx === correctIndex) {
-                btn.classList.add('correct'); // Always show correct answer
-            }
+    function initPalette() {
+        const grid = document.getElementById('palette-grid');
+        grid.innerHTML = '';
+        questions.forEach((_, i) => {
+            const btn = document.createElement('div');
+            btn.className = 'pal-btn';
+            btn.innerText = i + 1;
+            btn.id = `pal-${i}`;
+            btn.onclick = () => renderQ(i);
+            grid.appendChild(btn);
         });
+        updatePalette();
+    }
 
-        if (selectedIndex === correctIndex) {
-            score++;
+    function renderQ(index) {
+        currentQ = index;
+        visited[index] = true;
+        const q = questions[index];
+        
+        // Render Text
+        document.getElementById('q-area').innerHTML = `
+            <div class="q-card">
+                <div style="overflow:hidden; margin-bottom:10px;">
+                    <span style="color:var(--primary); font-weight:bold;">Question ${index+1}</span>
+                    <span class="q-tag">${q.tag}</span>
+                </div>
+                <div class="q-text">Q.${q.id}: ${q.text}</div>
+                <div>${q.options.map((o, i) => `
+                    <div class="option-item ${answers[index] === i ? 'selected' : ''}" onclick="setAns(${i})">
+                        <div class="circle">${['A','B','C','D'][i]}</div> ${o}
+                    </div>`).join('')}
+                </div>
+            </div>
+        `;
+
+        // Update Buttons
+        document.getElementById('btn-prev').disabled = index === 0;
+        document.getElementById('btn-next').innerText = index === questions.length-1 ? "Submit" : "Save & Next";
+        
+        // Update Review Button Appearance (FEEDBACK FIXED)
+        const revBtn = document.getElementById('btn-review');
+        if(reviews[index]) {
+            revBtn.innerText = "Unmark Review";
+            revBtn.classList.add('active');
         } else {
-            selectedBtn.classList.add('wrong');
+            revBtn.innerText = "Mark for Review";
+            revBtn.classList.remove('active');
         }
 
-        // Update score display (Optional: Show real-time or just at end)
-        // For now, let's show a button to calculate final score at the bottom
-        document.getElementById('score-board').style.display = 'block';
-        document.getElementById('final-score').innerText = score;
-        document.getElementById('total-questions').innerText = questions.length;
+        updatePalette();
+        if(window.innerWidth < 768) document.getElementById('sidebar').classList.remove('open');
     }
 
-    // Initialize
-    loadQuiz();
-</script>
+    function setAns(optIndex) {
+        answers[currentQ] = optIndex;
+        renderQ(currentQ);
+    }
 
+    function toggleReview() {
+        reviews[currentQ] = !reviews[currentQ]; // Toggle state
+        renderQ(currentQ); // Re-render to show button change
+    }
+
+    function nav(dir) {
+        let next = currentQ + dir;
+        if(next >= 0 && next < questions.length) renderQ(next);
+        else if (dir === 1) submitTest();
+    }
+
+    function updatePalette() {
+        questions.forEach((_, i) => {
+            const btn = document.getElementById(`pal-${i}`);
+            btn.className = 'pal-btn'; // Reset
+            
+            if(i === currentQ) btn.classList.add('current');
+
+            // PRIORITY LOGIC (Review Overrides All)
+            if(reviews[i]) {
+                if(answers[i] !== null) btn.classList.add('review-answered'); // Purple + Green Dot
+                else btn.classList.add('review'); // Just Purple
+            } 
+            else if(answers[i] !== null) btn.classList.add('answered'); // Green
+            else if(visited[i]) btn.classList.add('not-answered'); // Red
+        });
+    }
+
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    function submitTest() {
+        if(!confirm("Submit Test?")) return;
+        clearInterval(timerRef);
+        document.getElementById('exam-interface').style.display = 'none';
+        document.getElementById('result-screen').classList.remove('hidden');
+
+        let correct = 0;
+        questions.forEach((q, i) => {
+            if(answers[i] === q.correct) correct++;
+        });
+
+        document.getElementById('score-disp').innerText = Math.round((correct/questions.length)*100) + "%";
+        document.getElementById('sol-container').innerHTML = questions.map((q, i) => `
+            <div style="background:#fff; padding:15px; margin-bottom:10px; border-radius:8px; border:1px solid #eee;">
+                <strong>Q${q.id}</strong>: ${q.text}<br>
+                <div style="font-size:0.9rem; color:#666; margin-top:5px;">
+                    Correct: <span style="color:green; font-weight:bold">${q.options[q.correct]}</span>
+                </div>
+                <div style="background:#e8f5e9; padding:5px; font-size:0.85rem; margin-top:5px;">Sol: ${q.sol}</div>
+            </div>
+        `).join('');
+    }
+
+    function exitTest() { if(confirm("Exit?")) location.reload(); }
+
+</script>
 </body>
 </html>
