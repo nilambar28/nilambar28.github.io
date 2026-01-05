@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Irrigation Engineering (Q251-Q309)</title>
+    <style>
+        :root {
+            --primary: #007bff; /* App Blue */
+            --header-bg: #fff;
+            --text: #333;
+            --light-gray: #f8f9fa;
+            --border: #dee2e6;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --review: #6f42c1;
+        }
+
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { margin: 0; padding: 0; background: #f5f7fb; color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* HEADER */
+        header {
+            background: var(--header-bg);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            z-index: 10;
+            height: 60px;
+        }
+        
+        .timer-badge {
+            background: #e3f2fd; color: var(--primary);
+            padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 0.95rem;
+            display: flex; align-items: center; gap: 5px;
+        }
+
+        .exit-btn {
+            background: #ffebee; color: #c62828;
+            border: none; padding: 6px 14px; border-radius: 6px;
+            font-weight: 600; font-size: 0.85rem; cursor: pointer;
+        }
+
+        /* MAIN AREA */
+        #quiz-container { flex: 1; display: flex; position: relative; overflow: hidden; }
+        
+        #question-panel {
+            flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 80px;
+            scroll-behavior: smooth;
+        }
+
+        /* QUESTIONS */
+        .q-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .q-number { font-size: 0.9rem; color: #666; font-weight: 500; }
+        .q-badge { font-size: 0.8rem; background: #28a7451a; color: var(--success); padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+        .neg-badge { color: var(--danger); background: #dc35451a; }
+
+        .exam-tag {
+            display: inline-block; background: #fff3cd; color: #856404;
+            font-size: 0.75rem; padding: 4px 8px; border-radius: 4px;
+            margin-bottom: 12px; font-weight: 600; border: 1px solid #ffeeba;
+        }
+
+        .question-text { font-size: 1.05rem; line-height: 1.5; font-weight: 500; margin-bottom: 20px; color: #212529; }
+
+        .options-container { display: flex; flex-direction: column; gap: 12px; }
+        
+        .option-card {
+            background: white; border: 1px solid var(--border);
+            padding: 14px; border-radius: 8px; cursor: pointer;
+            display: flex; align-items: flex-start; gap: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .option-card:active { background-color: #f0f0f0; }
+        
+        .opt-marker {
+            width: 24px; height: 24px; border-radius: 50%; border: 2px solid #adb5bd;
+            flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; color: #adb5bd; font-weight: 600;
+        }
+
+        /* Selection States */
+        .option-card.selected { border-color: var(--primary); background: #f4f9ff; }
+        .option-card.selected .opt-marker { border-color: var(--primary); background: var(--primary); color: white; }
+
+        /* Review Mode Colors */
+        .res-correct { border-color: var(--success); background: #d4edda; }
+        .res-wrong { border-color: var(--danger); background: #f8d7da; }
+        
+        /* FOOTER */
+        footer {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: white; border-top: 1px solid var(--border);
+            padding: 10px 15px; display: flex; gap: 10px;
+            z-index: 20; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+
+        .btn {
+            flex: 1; padding: 12px; border: none; border-radius: 8px;
+            font-weight: 600; font-size: 0.95rem; cursor: pointer;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .btn-sec { background: #f1f3f5; color: var(--text); border: 1px solid var(--border); }
+        .btn-rev { background: #fff; border: 1px solid var(--warning); color: #856404; }
+        .btn-rev.active { background: var(--warning); color: #000; }
+        .btn-main { background: var(--success); color: white; }
+
+        /* SPECIFIC STYLE FOR START BUTTON */
+        .btn-start {
+            background: var(--primary);
+            color: white;
+            padding: 10px 30px; /* Chhota padding */
+            border-radius: 50px; /* Rounded pill shape */
+            font-size: 1rem;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,123,255,0.3);
+            border: none;
+            cursor: pointer;
+            transition: transform 0.1s;
+            width: auto; /* Full width hataya */
+            min-width: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-start:active { transform: scale(0.98); }
+
+        /* PALETTE DRAWER */
+        #palette-drawer {
+            position: fixed; top: 0; right: -100%; width: 85%; max-width: 320px; height: 100%;
+            background: white; z-index: 50; transition: right 0.3s ease;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column;
+        }
+        #palette-drawer.open { right: 0; }
+        
+        .drawer-header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; }
+        
+        .grid-area { padding: 15px; overflow-y: auto; flex: 1; }
+        .p-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+        
+        .p-item {
+            aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+            border-radius: 8px; font-weight: 600; font-size: 0.9rem;
+            background: #f1f3f5; color: #666; cursor: pointer; border: 1px solid transparent;
+        }
+
+        .p-item.answered { background: var(--success); color: white; }
+        .p-item.review { background: var(--review); color: white; }
+        .p-item.current { border: 2px solid var(--primary); }
+
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); z-index: 40; display: none;
+        }
+        .overlay.visible { display: block; }
+
+        /* SOLUTIONS */
+        .solution-box {
+            margin-top: 20px; padding: 15px; background: #e8f5e9;
+            border: 1px solid #c8e6c9; border-radius: 8px; font-size: 0.95rem;
+            display: none;
+        }
+        .sol-label { font-weight: bold; color: #2e7d32; margin-bottom: 5px; display: block; }
+
+        /* SCREENS */
+        #start-screen, #result-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 100; padding: 20px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+        }
+        .stat-box {
+            background: #f8f9fa; padding: 15px; border-radius: 10px; width: 100%;
+            margin: 10px 0; border: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen">
+        <div style="margin-bottom: 20px; width: 60px; height: 60px; background: #e3f2fd; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 30px;">
+            📝
+        </div>
+        <h2 style="color:var(--text); margin:0 0 5px 0;">Irrigation Engineering</h2>
+        <p style="color:#666; margin:0 0 30px 0; font-size: 0.9rem;">Questions 251 - 309 (Mock Test)</p>
+        
+        <div style="display: flex; gap: 20px; margin-bottom: 30px; font-size: 0.9rem; color: #555;">
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <span style="font-weight: bold; font-size: 1.1rem; color: var(--text);">59</span>
+                <span>Questions</span>
+            </div>
+            <div style="width: 1px; background: #ddd;"></div>
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <span style="font-weight: bold; font-size: 1.1rem; color: var(--text);">120</span>
+                <span>Mins</span>
+            </div>
+            <div style="width: 1px; background: #ddd;"></div>
+             <div style="display: flex; flex-direction: column; align-items: center;">
+                <span style="font-weight: bold; font-size: 1.1rem; color: var(--text);">59</span>
+                <span>Marks</span>
+            </div>
+        </div>
+
+        <button class="btn-start" onclick="app.start()">
+            Start Test
+        </button>
+        
+        <div style="margin-top:30px; font-size:0.75rem; color:#aaa;">
+            Includes JPSC, SSC JE, DSSSB Papers
+        </div>
+    </div>
+
+    <div id="result-screen" style="display:none;">
+        <h2>Test Submitted!</h2>
+        <div class="stat-box">
+            <h1 id="score-text" style="font-size:3rem; color:var(--primary); margin:0;">0%</h1>
+            <p>Score</p>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%;">
+            <div class="stat-box" style="margin:0;"><b id="correct-count">0</b><br><small>Correct</small></div>
+            <div class="stat-box" style="margin:0;"><b id="wrong-count">0</b><br><small>Wrong</small></div>
+        </div>
+        <br>
+        <button class="btn btn-sec" style="width:100%; margin-bottom:10px;" onclick="app.reviewMode()">View Solutions</button>
+        <button class="btn btn-main" style="width:100%;" onclick="location.reload()">Back to Home</button>
+    </div>
+
+    <header id="app-header" style="display:none;">
+        <div class="timer-badge">
+            <span>⏱</span> <span id="timer">02:00:00</span>
+        </div>
+        <div style="display:flex; gap:10px;">
+             <button style="background:none; border:none; font-size:1.2rem;" onclick="app.togglePalette()">☰</button>
+        </div>
+    </header>
+    
+    <div style="position:absolute; top:15px; right:60px; z-index:100; display:none;" id="exit-control">
+        <button class="exit-btn" onclick="app.exit()">Exit</button>
+    </div>
+
+    <div id="quiz-container" style="display:none;">
+        <div id="question-panel">
+            </div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="app.togglePalette()"></div>
+    
+    <div id="palette-drawer">
+        <div class="drawer-header">
+            <h3>Question Palette</h3>
+            <button onclick="app.togglePalette()" style="border:none; background:none; font-size:1.5rem;">&times;</button>
+        </div>
+        <div class="grid-area">
+            <div class="p-grid" id="p-grid"></div>
+        </div>
+        <div style="padding:15px; border-top:1px solid #eee;">
+            <button class="btn btn-main" onclick="app.submit()">Submit Test</button>
+        </div>
+    </div>
+
+    <footer id="app-footer" style="display:none;">
+        <button class="btn btn-sec" onclick="app.prev()">Prev</button>
+        <button class="btn btn-rev" id="btn-review" onclick="app.markReview()">Review</button>
+        <button class="btn btn-main" onclick="app.next()">Save & Next</button>
+    </footer>
+
+    <script>
+        // --- DATASET (Q251-Q309) ---
+        const rawData = [
+            {n:251, t:"The amount of irrigation water required in order to meet the evapotranspiration needs of the crop during its full growth is called ______.", o:["consumptive use","net irrigation requirement","consumptive irrigation requirement","effective rainfall"], a:2, tag:"JPSC AE 2021", s:"CIR = Cu - Re. It is the water required to meet evapotranspiration needs."},
+            {n:252, t:"Which of the following is a Kharif crop?", o:["Jowar","Wheat","Barley","Gram"], a:0, tag:"DSSSB JE 2019", s:"Kharif crops: Jowar, soyabean, rice, bajra, cotton. Rabi: Wheat, gram, barley."},
+            {n:253, t:"One cumec of water is pumped into a farm distribution system. 0.8 cumec is delivered to a turn-out 0.9 km away. Compute conveyance efficiency.", o:["60 percent","70 percent","80 percent","50 percent"], a:2, tag:"DSSSB JE 2019", s:"Efficiency = (Output/Input)*100 = (0.8/1.0)*100 = 80%."},
+            {n:254, t:"If rice requires about 10 cm depth of water at an average interval of about 10 days, and the crop period is 120 days, find the delta.", o:["37.5 cm","120 cm","100 cm","87.5 cm"], a:1, tag:"KPSC 2015", s:"No. of waterings = 120/10 = 12. Total Depth (Delta) = 12 * 10cm = 120 cm."},
+            {n:255, t:"Delta is the:", o:["Discharge at head","Constant factor for crop","Constant factor for discharge","Total depth of water applied over base period"], a:3, tag:"MH WRD 2016", s:"Delta (Δ) is the total depth of water required by a crop during the entire period."},
+            {n:256, t:"Most mechanized crop in India presently is:", o:["Paddy","Wheat","Maize","Sugarcane"], a:1, tag:"HPSSC JE 2018", s:"Most mechanized crop in India is Wheat (Punjab, Haryana)."},
+            {n:257, t:"Concentration of Na, Ca, Mg are 22, 5, 3 milli-equivalent per litre respectively; then Sodium Absorption Ratio (SAR) is:", o:["10","11","12","9"], a:1, tag:"HPSSC JE 2018", s:"SAR = Na / sqrt((Ca+Mg)/2) = 22 / sqrt((5+3)/2) = 22 / sqrt(4) = 22/2 = 11."},
+            {n:258, t:"Factors on which duty of the irrigation water depend:", o:["1, 2, 3","2, 3, 4, 5","1, 2, 3, 4, 5","1, 2, 3, 4"], a:3, tag:"HPSSC JE 2018", s:"Duty depends on Soil, Crop, Rainfall, Cultivation method, Climate, etc. (All factors)."},
+            {n:259, t:"One cumec pumped, 0.5 cumec delivered. Conveyance efficiency is:", o:["80%","50%","60%","100%"], a:1, tag:"HPSSC JE 2018", s:"(0.5 / 1.0) * 100 = 50%."},
+            {n:260, t:"Time (t) required to irrigate a strip of land... is given by equation:", o:["t = 2.3 (y/f) log10(Q/(Q-fA))","t = 2.3 (f/y) log10(Q/(Q-fA))","t = 2.3 (y/f) loge(Q/(Q-fA))","t = 2.3 (y/f) log10(Q/(Q+fA))"], a:0, tag:"HPSSC JE 2018", s:"Formula: t = 2.303(y/f) * log10(Q / (Q - fA))."},
+            {n:261, t:"The crop sequence which cannot serve any useful purpose in crop rotation is:", o:["Cotton-wheat-gram","Rice-gram-rice","Wheat-jowar-gram","Rice-wheat-cotton"], a:1, tag:"HPSSC JE 2018", s:"Standard rotations maximize fertility. Rice-Gram-Rice is generally not preferred compared to others."},
+            {n:262, t:"About 80% irrigation efficiency is possible with sprinkler irrigation particularly in:", o:["hilly regions","fully arid regions","arid regions","humid and semi-arid regions"], a:3, tag:"DMRC JE 2018", s:"Sprinkler is used for humid and semi-arid reasons. High efficiency (80%)."},
+            {n:263, t:"The water application efficiency does NOT depend upon:", o:["method of application","type of soil","climatic condition","geometry of the conveyance system"], a:3, tag:"DMRC JE 2018", s:"It depends on soil, climate, and method. Conveyance geometry affects conveyance efficiency, not application."},
+            {n:264, t:"Canal designed for 1200 ha (rice, base 140d, delta 134cm). If used for wheat (base 120d, delta 52cm), area irrigated is:", o:["2650","3608","543","1730"], a:0, tag:"PGCIL DET 2016", s:"Discharge Q = A*Delta/(8.64*B). Rice Q = 1200*1.34/(8.64*140). Equate Q for Wheat: A_wheat = Q*8.64*120/0.52 = 2650 ha."},
+            {n:265, t:"Gravitational water is also called:", o:["Capillary water","Superfluous water","Hygroscopic water","All of above"], a:1, tag:"GSSSB Surveyor 2016", s:"Gravitational water drains out freely under gravity, hence 'Superfluous'."},
+            {n:266, t:"Consumptive use of water by a crop means water consumed by:", o:["evaporation only","conveyance loss","transpiration and conveyance","evaporation and transpiration"], a:3, tag:"JPSC AE 2021", s:"Cu = Evaporation + Transpiration (Evapotranspiration)."},
+            {n:267, t:"Crop requires total depth 950 mm for base period 110 days. The duty is:", o:["1000 ha/cumec","1100 ha/cumec","1200 ha/cumec","975 ha/cumec"], a:0, tag:"KPSC JE 2016", s:"D = 8.64B / Delta = 8.64 * 110 / 0.95 = 1000.4 ha/cumec."},
+            {n:268, t:"Capacity of an irrigation tank depends on:", o:["topography","population","contour","type of crop and duty"], a:3, tag:"HPSSC JE 2015", s:"Depends on water consumed, type of crop, and its duty."},
+            {n:269, t:"For a furrow slope of 0.3%, depth for use of water in clay should not be less than:", o:["500 mm","390 mm","300 mm","200 mm"], a:1, tag:"NWDA JE 2018", s:"Code provision: For Clay, 0.3% slope -> Min furrow length/depth ~390m."},
+            {n:270, t:"Kharif crops are also called:", o:["Summer crops","Winter crops","Spring crops","Monsoon crops"], a:3, tag:"NWDA JE 2018", s:"Kharif (Rice, etc.) coincides with Monsoon."},
+            {n:271, t:"Water released at 12 cumec. Duty at field 1250 ha/cumec. Loss is 25%. Find area irrigated.", o:["10250 ha","12250 ha","11250 ha","9250 ha"], a:2, tag:"NWDA JE 2018", s:"Water at field = 12 * 0.75 = 9 cumec. Area = Q * D = 9 * 1250 = 11250 ha."},
+            {n:272, t:"Time between the first watering at sowing and its last watering before harvesting:", o:["Crop period","Base period","Duty","Delta"], a:1, tag:"MH PWD 2019", s:"First watering to last watering = Base Period. Sowing to harvesting = Crop Period."},
+            {n:273, t:"The water which cannot be extracted by the plants from the soil is called:", o:["Capillary water","Hygroscopic water","Available moisture","Field capacity"], a:1, tag:"KPSC 2015", s:"Hygroscopic water is held tightly by soil particles and is unavailable."},
+            {n:274, t:"Salt concentration in irrigation water is generally measured by:", o:["SAR value","Electrical conductivity value","pH value","BOD value"], a:1, tag:"KPSC 2015", s:"Salinity is measured by Electrical Conductivity (EC)."},
+            {n:275, t:"An example for Kharif crop is:", o:["wheat","rice","barley","gram"], a:1, tag:"KPSC JE 2016", s:"Rice is the main Kharif crop."},
+            {n:276, t:"Delta is measured in:", o:["Hectares/Cumecs","Cumecs","Days","Meter"], a:3, tag:"KPSC JE 2016", s:"Delta is depth, measured in cm or Meters."},
+            {n:277, t:"The extend of land that gets irrigated from a water source is:", o:["duty","delta","ayacut","furrouts"], a:2, tag:"Kerala PSC 2016", s:"Ayacut is the area served by an irrigation project."},
+            {n:278, t:"As one moves from head of the canal to the field, the duty of the water:", o:["decreases","either increases or decreases","increases","remains constant"], a:2, tag:"SSC JE 2018", s:"Duty increases because losses reduce the flow downstream, but the area a unit of water can irrigate at that point (relative to losses already occurred) effectively increases in definition terms relative to source."},
+            {n:279, t:"Field capacity 25%, PW 15%, dry unit weight 1.5. Root zone 80cm. Storage capacity is:", o:["8 cm","10 cm","12 cm","14 cm"], a:2, tag:"SSC JE 2017", s:"Available Water = (FC - PWP) * d * (Gamma_d/Gamma_w). = (0.25-0.15)*80*1.5 = 0.1*120 = 12 cm."},
+            {n:280, t:"Which process includes spreading external material on soils to increase infiltration?", o:["Mulching","Paleo irrigation","Ploughing","Tillage"], a:0, tag:"SSC JE 2018", s:"Mulching increases infiltration and reduces evaporation."},
+            {n:281, t:"Calculate water distribution efficiency. Depths: 1.5m, 1.8m, 2.1m.", o:["0.6667","0.8333","0.8889","0.9767"], a:2, tag:"SSC JE 2018", s:"Mean D = 1.8. Deviation y = (0.3+0+0.3)/3 = 0.2. Eff = (1 - y/D) = 1 - (0.2/1.8) = 0.8889."},
+            {n:282, t:"Discharge capacity for 2600 ha, kor depth 17cm, kor period 30 days.", o:["2.3 m3/s","1.71 m3/s","14.7 m3/s","0.18 m3/s"], a:1, tag:"SSC JE 2011", s:"D = 8.64*30/0.17 = 1524. Q = 2600/1524 = 1.71."},
+            {n:283, t:"The consumptive use of water for a crop:", o:["measured as volume","measured as depth","supplied partly by precipitation","All of the above"], a:3, tag:"Karnataka PSC 2017", s:"It is depth/volume, and met by irrigation + rain."},
+            {n:284, t:"Total area which can be irrigated by a canal system is called:", o:["gross command area","cultural command area","cultural cultivated area","uncultivated area"], a:1, tag:"Kerala PSC 2019", s:"The area fit for cultivation is CCA."},
+            {n:285, t:"Total area sown under various crops during the whole year is:", o:["Gross Cropped Area","Net Crop Area","Gross Command Area","Cultivated Command Area"], a:0, tag:"BSPHCL JE 2019", s:"Sum of areas of all crops = Gross Cropped Area."},
+            {n:286, t:"Tube well 4m3/hour, 20 hours/day. Irrigation interval 20 days, depth 7cm. Area?", o:["1.71 x 10^4 m2","1.14 x 10^4 m2","22.9 x 10^4 m2","2.29 x 10^4 m2"], a:3, tag:"HESCOM AE 2017", s:"Total Vol = 4 * 20 * 20 = 1600 m3. Area = Vol/Depth = 1600/0.07 = 22857 m2 = 2.29x10^4."},
+            {n:287, t:"Outlet discharge for 20 ha, requirement 20 mm in 20 days.", o:["2.52","2.31","2.01","1.52"], a:1, tag:"HESCOM AE 2017", s:"Duty D = 8.64*20/0.02 = 8640. Q = 20/8640 = 0.00231 cumec = 2.31 L/s."},
+            {n:288, t:"Delta means:", o:["Total depth of water required","Area of land","Production of pulses","All of above"], a:0, tag:"MESCOM AE 2017", s:"Delta is total depth."},
+            {n:289, t:"The depth of root zone for rice crop is:", o:["50 cm","90 cm","1 m or more","30 cm"], a:0, tag:"MANIPUR AE 2016", s:"Rice typically has shallow roots ~50cm."},
+            {n:290, t:"12 m3/s for 4 hours. Field 0.32 km2. 0.4m stored. App Efficiency?", o:["74%","58.5%","66.6%","85%"], a:0, tag:"SSC JE 2019", s:"Input = 12*4*3600 = 172800. Stored = 0.32*10^6 * 0.4 = 128000. Eff = 128/172.8 = 74%."},
+            {n:291, t:"1 cumec day = ?", o:["8.64 ha-m","864 ha-m","864 ha-m","0.86 ha-m"], a:0, tag:"SSC JE 2019", s:"1 * 24 * 3600 = 86400 m3 = 8.64 hectare-meters."},
+            {n:292, t:"B = 100 days, D = 1400 ha/cumec, then Delta is:", o:["61.71 cm","65.71 cm","51.71 cm","55.71 cm"], a:0, tag:"SSC JE 2019", s:"Delta = 864*100/1400 = 61.71 cm."},
+            {n:293, t:"Advantage of tile drainage:", o:["Removes free gravity water","Decreases soil volume","Decreases air circulation","Decreases bacteria"], a:0, tag:"SSC JE 2019", s:"Tile drainage removes excess gravitational water."},
+            {n:294, t:"Net irrigation req = 15 cm, App eff = 80%, Conveyance eff = 60%. Gross req?", o:["11.25","18.75","25","31.25"], a:3, tag:"SSC JE 2018", s:"GIR = NIR / (eff_a * eff_c) = 15 / (0.8*0.6) = 15/0.48 = 31.25 cm."},
+            {n:295, t:"Ratio of water stored in root zone to water delivered to field is:", o:["Water-conveyance efficiency","Water-application efficiency","Water-storage efficiency","Water-use efficiency"], a:1, tag:"SSC JE 2019", s:"Stored/Delivered = Application Efficiency."},
+            {n:296, t:"Calculate permanent wilting point depth. 0.4m depth, dry density 16 kN/m3.", o:["0.025","0.345","0.4","0.245"], a:3, tag:"SSC JE 2018", s:"This question usually implies calculation from Gamma_d and moisture. Standard Answer key: 0.245."},
+            {n:297, t:"If Delta for crop A is 60cm and crop B is 75cm, ratio of duty A to B (Assume same Base):", o:["0.75","1.5","0.8","1.25"], a:3, tag:"MH WRD 2016", s:"Duty is inversely proportional to Delta. Da/Db = Delta_b/Delta_a = 75/60 = 1.25."},
+            {n:298, t:"Wilting point of plant growth is related with:", o:["Depth of roots","Temperature","Water required","Moisture content in root zone"], a:3, tag:"NWRD 2016", s:"It is the moisture content below which plants wilt."},
+            {n:299, t:"Project irrigates 5000 Ha. Field duty 1250. Efficiency 80%. Design discharge?", o:["6.25 Cumecs","5 Cumecs","6 Cumecs","4 Cumecs"], a:1, tag:"NWRD 2016", s:"Field Q = 5000/1250 = 4. Design Q = 4 / 0.8 = 5 cumecs."},
+            {n:300, t:"Water held by soil particles freely from atmosphere by physical forces:", o:["contact moisture","hygroscopic water","adsorbed water","hygroscopic water"], a:1, tag:"MH Asst. Town Planning 2018", s:"Hygroscopic water is absorbed from atmosphere."},
+            {n:301, t:"Trace moisture absorbed by dry soil from atmosphere is called:", o:["moisture content","water content","hygroscopic moisture","none"], a:2, tag:"MH ATP 2018", s:"Hygroscopic moisture."},
+            {n:302, t:"Which relationship between Crop period and Base period is TRUE?", o:["Crop period > Base period","Crop period < Base period","Crop = Base","Crop << Base"], a:0, tag:"MH PWD 2018", s:"Crop period (sowing to harvest) is slightly more than Base period (first to last watering)."},
+            {n:303, t:"Soil moisture driven off by heat is called:", o:["Free water","Hygroscopic water","Gravity water","None"], a:1, tag:"IOF JE 2016", s:"Hygroscopic water requires heat to be removed."},
+            {n:304, t:"Depth of water required to bring soil moisture to field capacity is:", o:["Consumptive use","Equivalent moisture","Soil moisture deficiency","Hygroscopic water"], a:2, tag:"BSPHCL 2019", s:"Field Capacity - Existing Moisture = Soil Moisture Deficiency."},
+            {n:305, t:"Most effective farming method for returning minerals to soil:", o:["Contour ploughing","Teracing","Crop rotation","Furrowing"], a:2, tag:"RRB JE 2014", s:"Crop rotation helps restore nutrients/minerals."},
+            {n:306, t:"Plants get water through roots because of:", o:["Viscosity","Elasticity","Gravity","Capillarity"], a:3, tag:"RRB SSE 2014", s:"Capillary action allows roots to absorb water."},
+            {n:307, t:"Part of water which will more out of soil if proper drainage provided:", o:["capillary water","gravitational water","hygroscopic water","all of above"], a:1, tag:"ASSAM PSC 2020", s:"Gravitational water drains out easily."},
+            {n:308, t:"Which of the following is not a cash crop?", o:["Sugarcane","Jute","Tobacco","Rice"], a:3, tag:"Rajasthan JEn 2020", s:"Rice is a food crop. Sugarcane, Jute, Tobacco are cash crops."},
+            {n:309, t:"Crop requires 90 cm depth for 110 days base period. Duty is:", o:["918 ha/cumec","1123 ha/cumec","1026 ha/cumec","1056 ha/cumec"], a:3, tag:"Rajasthan JEn 2020", s:"D = 8.64*110/0.9 = 1056 ha/cumec."}
+        ];
+
+        // --- APP LOGIC ---
+        const app = {
+            state: {
+                current: 0,
+                answers: {}, // {index: optionIndex}
+                review: new Set(),
+                submitted: false,
+                timeLeft: 7200 // 2 hours
+            },
+
+            start: function() {
+                document.getElementById('start-screen').style.display = 'none';
+                document.getElementById('app-header').style.display = 'flex';
+                document.getElementById('exit-control').style.display = 'block';
+                document.getElementById('quiz-container').style.display = 'flex';
+                document.getElementById('app-footer').style.display = 'flex';
+                
+                this.renderQuestion();
+                this.startTimer();
+                this.updatePaletteGrid();
+            },
+
+            renderQuestion: function() {
+                const q = rawData[this.state.current];
+                const panel = document.getElementById('question-panel');
+                
+                const selected = this.state.answers[this.state.current];
+                const isReview = this.state.review.has(this.state.current);
+                
+                // Review Button State
+                const revBtn = document.getElementById('btn-review');
+                if(isReview) {
+                    revBtn.classList.add('active');
+                    revBtn.innerText = "Unmark Review";
+                } else {
+                    revBtn.classList.remove('active');
+                    revBtn.innerText = "Mark Review";
+                }
+
+                // Options HTML
+                let optionsHtml = '';
+                q.o.forEach((opt, idx) => {
+                    let className = 'option-card';
+                    let markerText = ['A','B','C','D'][idx];
+                    
+                    if(this.state.submitted) {
+                        if(idx === q.a) className += ' res-correct';
+                        else if(selected === idx) className += ' res-wrong';
+                    } else {
+                        if(selected === idx) className += ' selected';
+                    }
+                    
+                    optionsHtml += `
+                        <div class="${className}" onclick="app.selectOption(${idx})">
+                            <div class="opt-marker">${markerText}</div>
+                            <div>${opt}</div>
+                        </div>
+                    `;
+                });
+
+                // Solution HTML
+                let solHtml = '';
+                if(this.state.submitted) {
+                    solHtml = `
+                        <div class="solution-box" style="display:block">
+                            <span class="sol-label">Correct Answer: ${['A','B','C','D'][q.a]}</span>
+                            ${q.s}
+                        </div>
+                    `;
+                }
+
+                panel.innerHTML = `
+                    <div class="q-meta">
+                        <span class="q-number">Question ${this.state.current + 1} of ${rawData.length}</span>
+                        <div>
+                            <span class="q-badge">+1.0</span>
+                            <span class="q-badge neg-badge">-0.25</span>
+                        </div>
+                    </div>
+                    <span class="exam-tag">${q.tag}</span>
+                    <div class="question-text">${q.t}</div>
+                    <div class="options-container">${optionsHtml}</div>
+                    ${solHtml}
+                `;
+            },
+
+            selectOption: function(idx) {
+                if(this.state.submitted) return;
+                this.state.answers[this.state.current] = idx;
+                this.renderQuestion();
+                this.updatePaletteGrid();
+            },
+
+            markReview: function() {
+                if(this.state.submitted) return;
+                const c = this.state.current;
+                if(this.state.review.has(c)) this.state.review.delete(c);
+                else this.state.review.add(c);
+                this.renderQuestion();
+                this.updatePaletteGrid();
+            },
+
+            next: function() {
+                if(this.state.current < rawData.length - 1) {
+                    this.state.current++;
+                    this.renderQuestion();
+                }
+            },
+
+            prev: function() {
+                if(this.state.current > 0) {
+                    this.state.current--;
+                    this.renderQuestion();
+                }
+            },
+
+            togglePalette: function() {
+                const p = document.getElementById('palette-drawer');
+                const o = document.getElementById('overlay');
+                if(p.classList.contains('open')) {
+                    p.classList.remove('open');
+                    o.classList.remove('visible');
+                } else {
+                    p.classList.add('open');
+                    o.classList.add('visible');
+                    this.updatePaletteGrid();
+                }
+            },
+
+            updatePaletteGrid: function() {
+                const grid = document.getElementById('p-grid');
+                grid.innerHTML = '';
+                rawData.forEach((_, i) => {
+                    let classes = 'p-item';
+                    if(i === this.state.current) classes += ' current';
+                    if(this.state.review.has(i)) classes += ' review';
+                    else if(this.state.answers[i] !== undefined) classes += ' answered';
+                    
+                    grid.innerHTML += `<div class="${classes}" onclick="app.jumpTo(${i})">${i+1}</div>`;
+                });
+            },
+
+            jumpTo: function(i) {
+                this.state.current = i;
+                this.renderQuestion();
+                this.togglePalette();
+            },
+
+            startTimer: function() {
+                setInterval(() => {
+                    if(this.state.submitted || this.state.timeLeft <= 0) return;
+                    this.state.timeLeft--;
+                    const h = Math.floor(this.state.timeLeft/3600).toString().padStart(2,'0');
+                    const m = Math.floor((this.state.timeLeft%3600)/60).toString().padStart(2,'0');
+                    const s = (this.state.timeLeft%60).toString().padStart(2,'0');
+                    document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+                    if(this.state.timeLeft === 0) this.submit();
+                }, 1000);
+            },
+
+            submit: function() {
+                if(!this.state.submitted) {
+                    if(!confirm("Are you sure you want to submit?")) return;
+                }
+                
+                this.state.submitted = true;
+                
+                let correct = 0;
+                let wrong = 0;
+                
+                rawData.forEach((q, i) => {
+                    const ans = this.state.answers[i];
+                    if(ans !== undefined) {
+                        if(ans === q.a) correct++;
+                        else wrong++;
+                    }
+                });
+                
+                const score = Math.round((correct / rawData.length) * 100);
+                
+                document.getElementById('app-header').style.display = 'none';
+                document.getElementById('exit-control').style.display = 'none';
+                document.getElementById('quiz-container').style.display = 'none';
+                document.getElementById('app-footer').style.display = 'none';
+                document.getElementById('palette-drawer').classList.remove('open');
+                document.getElementById('overlay').classList.remove('visible');
+                
+                document.getElementById('result-screen').style.display = 'flex';
+                document.getElementById('score-text').innerText = score + '%';
+                document.getElementById('correct-count').innerText = correct;
+                document.getElementById('wrong-count').innerText = wrong;
+            },
+
+            reviewMode: function() {
+                document.getElementById('result-screen').style.display = 'none';
+                document.getElementById('app-header').style.display = 'flex';
+                document.getElementById('quiz-container').style.display = 'flex';
+                // Note: Footer hidden in review mode to prevent changing answers, 
+                // but we add a "Home" button in header or similar if needed.
+                // Re-using footer for navigation only:
+                document.getElementById('app-footer').style.display = 'flex';
+                this.state.current = 0;
+                this.renderQuestion();
+                alert("Review Mode: You can now see correct answers and solutions.");
+            },
+            
+            exit: function() {
+                if(confirm("Exit test? All progress will be lost.")) {
+                    location.reload();
+                }
+            }
+        };
+    </script>
+</body>
+</html>
