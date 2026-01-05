@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SSC JE Mock Test (Q180-Q250)</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --primary-dark: #1558b0;
+            --success: #00c853; /* Green - Answered */
+            --danger: #d32f2f;
+            --warning: #ffca28;
+            --review: #7b1fa2; /* Purple - Review */
+            --skipped: #9e9e9e; /* Gray - Skipped */
+            --current: #e3f2fd; /* Light Blue - Current Q */
+            --current-border: #2196f3;
+            --text: #333;
+            --bg: #f5f7fb;
+            --white: #ffffff;
+            --border: #e0e0e0;
+        }
+
+        * { box-sizing: border-box; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; padding: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* --- VIEWS --- */
+        .view { display: none; height: 100%; width: 100%; flex-direction: column; }
+        .view.active { display: flex; }
+
+        /* --- START SCREEN --- */
+        #start-screen { align-items: center; justify-content: center; padding: 20px; }
+        .card { background: var(--white); width: 100%; max-width: 400px; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; }
+        .info-row { display: flex; justify-content: space-between; margin: 15px 0; padding: 10px; background: #f8f9fa; border-radius: 8px; font-size: 0.9em; }
+        .btn-start { background: var(--primary); color: white; border: none; padding: 14px; width: 100%; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .history-section { margin-top: 25px; width: 100%; max-width: 400px; }
+        .history-item { background: white; padding: 10px; margin-bottom: 8px; border-radius: 6px; border-left: 4px solid var(--primary); font-size: 0.9em; display: flex; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+
+        /* --- HEADER --- */
+        header { background: var(--white); height: 60px; padding: 0 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); z-index: 10; }
+        .timer-box { background: #ffebee; color: var(--danger); padding: 5px 10px; border-radius: 4px; font-weight: bold; font-family: monospace; font-size: 1.1em; display: flex; align-items: center; gap: 5px; }
+        .header-actions { display: flex; gap: 15px; align-items: center; }
+        .btn-icon { background: none; border: none; font-size: 1.2em; color: #555; cursor: pointer; }
+        .btn-exit { background: var(--danger); color: white; border: none; padding: 5px 12px; border-radius: 4px; font-weight: bold; font-size: 0.8em; }
+
+        /* --- QUESTION AREA --- */
+        #test-body { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 80px; }
+        .q-meta { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.85em; color: #666; }
+        .exam-tag { background: #eee; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; font-size: 0.75em; }
+        .q-text { font-size: 1.1em; font-weight: 500; line-height: 1.5; margin-bottom: 20px; }
+        
+        .options-list { display: flex; flex-direction: column; gap: 10px; }
+        .option-label { display: flex; align-items: flex-start; padding: 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; background: var(--white); transition: 0.2s; }
+        .option-label:hover { background: #f5f9ff; }
+        .option-label.selected { border-color: var(--primary); background: #e3f2fd; }
+        .opt-radio { margin-right: 12px; margin-top: 4px; accent-color: var(--primary); transform: scale(1.2); }
+
+        /* --- FOOTER --- */
+        footer { height: 60px; background: var(--white); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 10px; position: fixed; bottom: 0; width: 100%; z-index: 20; }
+        .foot-left { display: flex; gap: 8px; }
+        .btn-act { padding: 8px 12px; border-radius: 4px; font-weight: 600; font-size: 0.85em; border: 1px solid var(--border); background: white; cursor: pointer; }
+        .btn-review { color: var(--review); border-color: var(--review); }
+        .btn-next { background: var(--success); color: white; border: none; padding: 8px 24px; font-size: 0.9em; }
+
+        /* --- DRAWER (PALETTE) --- */
+        .drawer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99; display: none; }
+        .drawer { position: fixed; top: 0; right: -80%; width: 80%; max-width: 300px; height: 100%; background: white; z-index: 100; transition: 0.3s; display: flex; flex-direction: column; }
+        .drawer.open { right: 0; }
+        .drawer-header { padding: 15px; background: #f5f5f5; border-bottom: 1px solid var(--border); font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .legend { padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.75em; border-bottom: 1px solid var(--border); }
+        .leg-item { display: flex; align-items: center; gap: 5px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+        
+        .grid-container { padding: 15px; overflow-y: auto; flex: 1; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; align-content: start; }
+        .grid-item { aspect-ratio: 1; display: flex; justify-content: center; align-items: center; border-radius: 50%; font-size: 0.85em; font-weight: bold; cursor: pointer; border: 1px solid transparent; position: relative; }
+        
+        /* State Colors */
+        .st-skip { background: var(--skipped); color: #fff; }
+        .st-ans { background: var(--success); color: white; }
+        .st-curr { background: var(--white); border: 2px solid var(--primary); color: var(--primary); }
+        .st-rev { background: var(--review); color: white; border-radius: 50%; }
+        .st-ans-rev { background: var(--review); color: white; }
+        .st-ans-rev::after { content:''; position: absolute; bottom: -2px; right: -2px; width: 8px; height: 8px; background: var(--success); border-radius: 50%; border: 1px solid white; }
+
+        .drawer-footer { padding: 15px; border-top: 1px solid var(--border); }
+        .btn-submit { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; }
+
+        /* --- RESULTS --- */
+        #result-view { overflow-y: auto; background: white; }
+        .res-header { background: var(--primary); color: white; padding: 30px 20px; text-align: center; }
+        .score-circle { width: 100px; height: 100px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.4); margin: 0 auto 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .sc-val { font-size: 2em; font-weight: bold; }
+        
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 20px; background: #f9f9f9; border-bottom: 1px solid #eee; }
+        .stat-box { background: white; padding: 10px; text-align: center; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .stat-num { font-weight: bold; font-size: 1.1em; display: block; }
+        
+        .sol-list { padding: 15px; }
+        .sol-card { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 15px; padding: 15px; background: white; }
+        .sol-badge { font-size: 0.7em; padding: 3px 8px; border-radius: 4px; font-weight: bold; display: inline-block; margin-bottom: 8px; }
+        .sb-correct { background: #e8f5e9; color: var(--success); }
+        .sb-wrong { background: #ffebee; color: var(--danger); }
+        .sb-skip { background: #f5f5f5; color: #777; }
+        .sol-exp { background: #f0f8ff; padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 0.9em; border-left: 3px solid var(--primary); color: #444; }
+
+    </style>
+</head>
+<body>
+
+    <div id="start-screen" class="view active">
+        <div class="card">
+            <h2 style="color: var(--primary); margin:0;">Irrigation Engineering</h2>
+            <p style="color:#666; margin:5px 0 20px;">Questions 180 - 250</p>
+            
+            <div class="info-row">
+                <span><i class="fas fa-list"></i> 71 Questions</span>
+                <span><i class="fas fa-clock"></i> 120 Mins</span>
+            </div>
+            
+            <div class="info-row">
+                <span><i class="fas fa-check-circle"></i> +1 Mark</span>
+                <span><i class="fas fa-times-circle"></i> 0 Neg</span>
+            </div>
+
+            <button class="btn-start" onclick="startTest()">START TEST</button>
+        </div>
+        
+        <div class="history-section">
+            <h4 style="color:#555; border-bottom:1px solid #ddd; padding-bottom:5px;">History</h4>
+            <div id="history-list"></div>
+        </div>
+    </div>
+
+    <div id="test-view" class="view">
+        <header>
+            <div class="timer-box">
+                <i class="far fa-clock"></i> <span id="timer">02:00:00</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn-exit" onclick="exitTest()">EXIT</button>
+                <button class="btn-icon" onclick="toggleDrawer()"><i class="fas fa-th-large"></i></button>
+            </div>
+        </header>
+
+        <div id="test-body">
+            </div>
+
+        <footer>
+            <div class="foot-left">
+                <button class="btn-act btn-review" onclick="markReview()">Review</button>
+                <button class="btn-act" onclick="clearAns()">Clear</button>
+            </div>
+            <button class="btn-next" onclick="saveNext()">Save & Next</button>
+        </footer>
+
+        <div class="drawer-overlay" onclick="toggleDrawer()"></div>
+        <div class="drawer" id="drawer">
+            <div class="drawer-header">
+                <span>Question Palette</span>
+                <span onclick="toggleDrawer()" style="cursor:pointer">&times;</span>
+            </div>
+            <div class="legend">
+                <div class="leg-item"><span class="dot" style="background:var(--success)"></span> Ans</div>
+                <div class="leg-item"><span class="dot" style="background:var(--danger)"></span> Not Ans</div>
+                <div class="leg-item"><span class="dot" style="background:var(--review)"></span> Review</div>
+                <div class="leg-item"><span class="dot" style="background:var(--skipped)"></span> Skip</div>
+            </div>
+            <div class="grid-container" id="grid"></div>
+            <div class="drawer-footer">
+                <button class="btn-submit" onclick="submitTest()">SUBMIT TEST</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-view" class="view">
+        <div class="res-header">
+            <div class="score-circle">
+                <span class="sc-val" id="score-val">0</span>
+                <span style="font-size:0.8em; opacity:0.8">/ 71</span>
+            </div>
+            <div id="acc-val">Accuracy: 0%</div>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-box">
+                <span class="stat-num" style="color:var(--success)" id="res-cor">0</span>
+                <small>Correct</small>
+            </div>
+            <div class="stat-box">
+                <span class="stat-num" style="color:var(--danger)" id="res-wro">0</span>
+                <small>Wrong</small>
+            </div>
+            <div class="stat-box">
+                <span class="stat-num" style="color:#777" id="res-skip">0</span>
+                <small>Skipped</small>
+            </div>
+        </div>
+
+        <div style="padding:15px; display:flex; gap:10px;">
+            <button class="btn-start" onclick="location.reload()" style="background:white; color:var(--primary); border:1px solid var(--primary); margin:0;">Re-Attempt</button>
+            <button class="btn-start" onclick="location.reload()" style="margin:0;">Home</button>
+        </div>
+
+        <div class="sol-list" id="solutions"></div>
+    </div>
+
+    <script>
+        // QUESTION DATA (180-250)
+        const db = [
+            {
+                id: 180, exam: "Kerala PSC 2021",
+                q: "The ratio of the number of days the canal has actually run to the number of days of irrigation period:",
+                o: ["Time factor", "Capacity factor", "Outlet factor", "Open discharge"],
+                a: 0,
+                sol: "Time factor is the ratio of the actual operating period of a distributary to the crop-period. It is used to check dangers of over irrigation."
+            },
+            {
+                id: 181, exam: "Karnataka PSC AE 2021",
+                q: "Crop period is the time period elapsed from:",
+                o: ["sowing to last watering", "first harvesting to last harvesting", "instant of sowing to instant of harvesting", "first watering to last watering"],
+                a: 2,
+                sol: "Crop period is the time elapsed from the instant of sowing to the instant of harvesting. Base period is from first watering to last watering."
+            },
+            {
+                id: 182, exam: "ESE 2021",
+                q: "If wheat requires 7.5 cm of water after every 28 days and the base period for wheat is 140 days, what is the value of delta for wheat?",
+                o: ["7.5 cm", "27.5 cm", "37.5 cm", "17.5 cm"],
+                a: 2,
+                sol: "Number of waterings = 140/28 = 5. Total Delta = 5 * 7.5 cm = 37.5 cm."
+            },
+            {
+                id: 183, exam: "JKSSB JE 2013",
+                q: "In water requirement of crops, the measurement of duty at the head of a branch canal is known as:",
+                o: ["outlet factor", "net quantity", "gross quantity", "lateral quantity"],
+                a: 3,
+                sol: "Duty at head of Main Canal = Gross Quantity. At Branch Canal = Lateral Quantity. At Outlet = Outlet Factor. At Field = Net Quantity."
+            },
+            {
+                id: 184, exam: "NWDA JE 2021",
+                q: "__________ is the total area which can be economically irrigated from an irrigation system without considering the limitation on the quantity of available water.",
+                o: ["Net area", "Gross command area", "Non-irrigable area", "Culturable command area"],
+                a: 1,
+                sol: "Gross Command Area (GCA) is the total area bounded within the irrigation boundary which can be irrigated without water limitations."
+            },
+            {
+                id: 185, exam: "HPSSC JE 2021",
+                q: "10.0 m³/s of water is diverted to a 30.0 hectare field for 4.0 hours. Soil probing after irrigation showed that 0.2 m of water had been stored in the root zone. Water application efficiency in this case will be:",
+                o: ["41.66%", "50.0%", "60.5%", "75.0%"],
+                a: 0,
+                sol: "Vol Supplied = 10 * 4 * 3600 = 144,000 m³. Depth Supplied = 144000 / (30*10000) = 0.48 m. Efficiency = (0.2 / 0.48) * 100 = 41.66%."
+            },
+            {
+                id: 186, exam: "HPSSC JE 2021",
+                q: "If the optimum depth of kor watering for a crop is 15.12 cm, the outlet factor for the crop for four week period in hectares per cumec, is:",
+                o: ["1000", "1200", "1400", "1600"],
+                a: 3,
+                sol: "Base period B = 4 weeks = 28 days. Delta = 15.12 cm = 0.1512 m. Duty D = (8.64 * 28) / 0.1512 = 1600 ha/cumec."
+            },
+            {
+                id: 187, exam: "HPSSC JE 2021",
+                q: "The field capacity of a soil is 25%, its permanent wilting point is 15% and specific dry unit weight is 1.5. If the depth of root zone of a crop is 80 cm, the storage capacity of the soil is:",
+                o: ["8 cm", "10 cm", "12 cm", "14 cm"],
+                a: 2,
+                sol: "Storage Capacity = (Dry Density/Water Density) * d * (FC - PWP). = 1.5 * 80 * (0.25 - 0.15) = 1.5 * 80 * 0.10 = 12 cm."
+            },
+            {
+                id: 188, exam: "SSC JE 2018",
+                q: "Which of the following statement is CORRECT for duty of the water?",
+                o: ["It increases with an increase in temperature", "It increases with an increase in wind speed", "It increases with an increase in humidity", "It is not affected by climatic conditions"],
+                a: 2,
+                sol: "Duty represents the area irrigated. High humidity reduces water requirement (losses), so same water can irrigate more area. Thus, Duty increases with humidity."
+            },
+            {
+                id: 189, exam: "MPPEB SE 2016",
+                q: "The ratio of cultivated land for a particular crop to the total culturable command area is called as:",
+                o: ["Intensity of irrigation", "Crop ratio", "Overlap allowance", "Root zone depth"],
+                a: 0,
+                sol: "Intensity of Irrigation is the percentage of CCA proposed to be irrigated annually."
+            },
+            {
+                id: 190, exam: "ESIC 2019",
+                q: "_____ is the ratio of the consumptive use of water to the amount of water depleted from the root zone.",
+                o: ["water use efficiency", "consumptive use efficiency", "water conveyance efficiency", "water application efficiency"],
+                a: 1,
+                sol: "Consumptive use efficiency = (Consumptive Use / Water Depleted from Root Zone) * 100."
+            },
+            {
+                id: 191, exam: "WBPSC SAE 2001",
+                q: "For a standing crop the consumptive use of water is equal to the depth of water:",
+                o: ["transpired by the crop", "evaporated by the crop", "transpired and evaporated by the crop", "used by the crop in transpiration, evaporation and also the quantity of water evaporated from adjacent soil"],
+                a: 3,
+                sol: "Consumptive use (Evapotranspiration) includes transpiration by plants + evaporation from adjacent soil + water for metabolic needs (negligible)."
+            },
+            {
+                id: 192, exam: "WBPSC SAE 2002",
+                q: "Base period for a crop refers to:",
+                o: ["Crop period only", "Whole period of cultivation", "Part period of cultivation", "Part crop period only"],
+                a: 3,
+                sol: "Base Period (First watering to Last watering) is slightly shorter than Crop Period (Sowing to Harvesting). Hence it is a part of the crop period."
+            },
+            {
+                id: 193, exam: "KPSC JE 2014",
+                q: "The area in which a crop is grown at a particular time or crop season is known as:",
+                o: ["Gross commanded area", "Culturable cultivated area", "Culturable uncultivated area", "Catchment area"],
+                a: 1,
+                sol: "Culturable Cultivated Area is the portion of CCA where crops are actually grown during a specific season."
+            },
+            {
+                id: 194, exam: "UPPCL JE 2016",
+                q: "The consumptive use coefficient for crops like wheat, barley, flax and other small grains is approximately:",
+                o: ["0.6", "0.66", "0.9", "1.1"],
+                a: 2,
+                sol: "Consumptive use coefficient (K) for Group D crops (wheat, barley, etc.) is approx 0.90."
+            },
+            {
+                id: 195, exam: "SSC JE 2018",
+                q: "A field of 500 hectares is to be irrigated for a particular crop having 100 days base period. The total depth of water required by the crop is 100 cm. Calculate the duty of the water (in hectares per cubic metre).",
+                o: ["8.64", "57.87", "86.4", "864"],
+                a: 3,
+                sol: "Duty D = 8.64B / Delta. D = (8.64 * 100) / 1.0 = 864 ha/cumec."
+            },
+            {
+                id: 196, exam: "WBPSC SAE 2001",
+                q: "Delta for crop with duty 1728 hectares per cumecs and base period 120 days is:",
+                o: ["120 cm", "100 cm", "90 cm", "60 cm"],
+                a: 3,
+                sol: "Delta = 8.64B / D = (8.64 * 120) / 1728 = 0.60 m = 60 cm."
+            },
+            {
+                id: 197, exam: "Rajasthan JE 2016",
+                q: "The optimum depth of kor watering for wheat crop is:",
+                o: ["13.5 cm", "17.5 cm", "19.5 cm", "23.5 cm"],
+                a: 0,
+                sol: "Kor depth for Wheat = 13.5 cm. For Rice = 19 cm. For Sugarcane = 16.5 cm."
+            },
+            {
+                id: 198, exam: "Assam PSC AE 2020",
+                q: "Specific surface area (SSA) is defined as:",
+                o: ["total surface area/mass", "total surface area/volume", "total surface area/thickness", "total surface area/length"],
+                a: 0,
+                sol: "Specific Surface Area is the total surface area contained in a unit mass of soil."
+            },
+            {
+                id: 199, exam: "GPSC 2020",
+                q: "Water existing in capillary zone is a part of:",
+                o: ["phreatic water", "ground water", "gravity water", "vadose water"],
+                a: 3,
+                sol: "Capillary zone is part of the Vadose Zone (Unsaturated zone) located just above the water table."
+            },
+            {
+                id: 200, exam: "MH PWD 2019",
+                q: "Which of the following is the ratio of area estimated to be irrigated during base period to the design full supply discharge at the head of the canal?",
+                o: ["Capacity factor", "Time factor", "Nominal duty", "Duty on capacity"],
+                a: 3,
+                sol: "This is the definition of Duty on Capacity (or Full Supply Coefficient)."
+            },
+            {
+                id: 201, exam: "MH PWD 2019",
+                q: "When the water consumed by a crop of a given base period is more, its duty will be:",
+                o: ["More", "Less", "Constant", "More or less"],
+                a: 1,
+                sol: "Duty is inversely proportional to Delta (water consumed). D = 8.64B/Delta. If Delta is more, Duty is Less."
+            },
+            {
+                id: 202, exam: "MH PWD 2019",
+                q: "'Overlap allowance' is the term which is applicable to which one of the following crop?",
+                o: ["Maize", "Cotton", "Potatoes", "Sugarcane"],
+                a: 3,
+                sol: "Sugarcane is a perennial crop. Sometimes crops of two seasons overlap, requiring extra discharge known as overlap allowance."
+            },
+            {
+                id: 203, exam: "MH Mahabeej 2019",
+                q: "The Base of the crop is generally expressed by:",
+                o: ["Area", "Volume", "Day", "Length"],
+                a: 2,
+                sol: "Base period is expressed in Days."
+            },
+            {
+                id: 204, exam: "MH WCD 2019",
+                q: "For a crop season of 180 days, with time factor 0.6, each distributary would receive its full supply for a period of:",
+                o: ["108 days", "72 days", "300 days", "450 days"],
+                a: 0,
+                sol: "Supply Period = Crop Season * Time Factor = 180 * 0.6 = 108 days."
+            },
+            {
+                id: 205, exam: "MH WCD 2019",
+                q: "For a crop season of 100 days, with time factor 0.5, each distributary would receive its full supply for a period of:",
+                o: ["50 days", "100 days", "200 days", "400 days"],
+                a: 0,
+                sol: "Supply Period = 100 * 0.5 = 50 days."
+            },
+            {
+                id: 206, exam: "MH Mahabeej 2019",
+                q: "For a crop season of 200 days, with time factor 0.6, each distributary would receive its full supply for a period of:",
+                o: ["120 days", "200 days", "333 days", "400 days"],
+                a: 0,
+                sol: "Supply Period = 200 * 0.6 = 120 days."
+            },
+            {
+                id: 207, exam: "JKSSB JE 2013",
+                q: "What is the relation between Consumptive Irrigation Requirement (CIR), Net Irrigation Requirement (NIR), Field Irrigation Requirement (FIR) and Gross Irrigation Requirement (GIR)?",
+                o: ["CIR>FIR>GIR>NIR", "CIR>GIR>FIR>NIR", "GIR>FIR>CIR>NIR", "GIR>FIR>NIR>CIR"],
+                a: 3,
+                sol: "GIR includes conveyance losses. FIR includes application losses. NIR includes leaching etc. CIR is basic needs. Thus GIR > FIR > NIR > CIR."
+            },
+            {
+                id: 208, exam: "JKSSB JE 2013",
+                q: "The delta for a crop having base period of 100 days is 75 cm. What is the duty?",
+                o: ["2304 hectare/cumec", "1152 hectare/cumec", "115.2 hectare/cumec", "11.52 hectare/cumec"],
+                a: 1,
+                sol: "Duty D = 864B / Delta(cm) = (864 * 100) / 75 = 1152 ha/cumec."
+            },
+            {
+                id: 209, exam: "JKSSB JE 2013",
+                q: "What is the intensity of irrigation, if the total area of the field is 1000 acres and the cultivable commanded area is 65 acres?",
+                o: ["6.50%", "0.65%", "65%", "0.065%"],
+                a: 0,
+                sol: "Intensity = (Cultivated Area / Total Area) * 100 = (65 / 1000) * 100 = 6.5%."
+            },
+            {
+                id: 210, exam: "BSPHCL 2019",
+                q: "The quantity of water consumed in evaporation, transpiration and metabolic processes during crops growth, including water consumed by accompanying weed growth is known as:",
+                o: ["Conveyance Water Use", "Water Application Use", "Plant Growth Use", "Consumptive Water Use"],
+                a: 3,
+                sol: "This is the definition of Consumptive Water Use (Cu)."
+            },
+            {
+                id: 211, exam: "Mizoram PSC 2010",
+                q: "Ground water occurs in different zones below ground level (GL). The zone just below the GL is:",
+                o: ["zone of aeration", "capillary fringe", "unconfined aquifer", "pressure or confined aquifer"],
+                a: 0,
+                sol: "The zone just below ground level is the Zone of Aeration (Vadose Zone), where pores contain both air and water."
+            },
+            {
+                id: 212, exam: "Mizoram PSC 2010",
+                q: "The field capacity of a soil depends upon:",
+                o: ["capillary tension in soil", "porosity of soil", "both (a) and (b)", "neither (a) nor (b)"],
+                a: 2,
+                sol: "Field capacity depends on soil texture, structure, porosity, and capillary tension."
+            },
+            {
+                id: 213, exam: "Kerala PSC 2016",
+                q: "Sugarcane is:",
+                o: ["Perennial crop", "Kharif crop", "Rabi crop", "None of the above"],
+                a: 0,
+                sol: "Sugarcane is a Perennial crop as it occupies the land for almost the entire year (10-12 months or more)."
+            },
+            {
+                id: 214, exam: "Haryana PSC AE 2020",
+                q: "Rabi crops are sown & harvested in the months of ____________ respectively.",
+                o: ["October & March", "April & September", "January & June", "February & July"],
+                a: 0,
+                sol: "Rabi crops (Winter crops) are sown in Oct/Nov and harvested in March/April."
+            },
+            {
+                id: 215, exam: "Karnataka PSC JE 2018",
+                q: "A reservoir with live storage of 400 million cubic meters of water is available to irrigate an area of 40,000 hectares with 2 fillings in a year. If the crop season is 125 days. The duty is ______ hectares/cubic meter.",
+                o: ["440", "540", "940", "1040"],
+                a: 1,
+                sol: "Total Vol = 2 * 400 Mm³ = 800 Mm³. Delta = Vol/Area = 800*10^6 / 40*10^7 = 2m. Duty = 8.64*125 / 2 = 540 ha/cumec."
+            },
+            {
+                id: 216, exam: "Karnataka PSC JE 2018",
+                q: "What shall be the duty of irrigation water if 3 cumecs of water supply is required for a crop sown in area of 5100 hectares?",
+                o: ["15300", "5100", "1700", "310"],
+                a: 2,
+                sol: "Duty = Area / Discharge = 5100 / 3 = 1700 ha/cumec."
+            },
+            {
+                id: 217, exam: "TSPSC 2020",
+                q: "Water is released at the rate of 12 cumec at the head of a canal. If duty at the field is 1250 hectares/cumec and loss of water in transit is 25%. Find the area of the land that can be irrigated in hectares.",
+                o: ["1.125 x 10^8", "1.125 x 10^6", "1.125 x 10^4", "1.125 x 10^2"],
+                a: 2,
+                sol: "Discharge at field = 12 * (1-0.25) = 9 cumec. Area = Q * D = 9 * 1250 = 11250 ha = 1.125 x 10^4."
+            },
+            {
+                id: 218, exam: "BSPHCL 2019",
+                q: "The total area sown under various crops during the whole agricultural year counting the area as many times as the number of crops grown on the same land is generally known as:",
+                o: ["Gross Cropped Area", "Net Crop Area", "Gross Command Area", "Cultivated Command Area"],
+                a: 0,
+                sol: "This is the definition of Gross Cropped Area."
+            },
+            {
+                id: 219, exam: "HPSSC JE 2018",
+                q: "The optimum depth of Kor watering is 19 cm for:",
+                o: ["Wheat", "Sugarcane", "Rice", "Cotton"],
+                a: 2,
+                sol: "Kor depth for Rice is 19 cm."
+            },
+            {
+                id: 220, exam: "KPSC JE 2014",
+                q: "A area of one hectare is equal to:",
+                o: ["10000 m²", "10 m²", "100 m²", "1000 m²"],
+                a: 0,
+                sol: "1 Hectare = 10,000 square meters."
+            },
+            {
+                id: 221, exam: "Rajasthan JE 2016",
+                q: "Kharif crop sown in :",
+                o: ["In June", "In September", "In October - November", "None of the above"],
+                a: 0,
+                sol: "Kharif crops (Monsoon crops) are sown in June/July."
+            },
+            {
+                id: 222, exam: "KPSC Overseer 2020",
+                q: "The crops which cannot normally be grown without irrigation water are called:",
+                o: ["Wet crops", "Dry crops", "Perennial crops", "Seasonal crops"],
+                a: 0,
+                sol: "Crops requiring irrigation are called Wet crops. Rain-fed are Dry crops."
+            },
+            {
+                id: 223, exam: "WBPSC JE 2016",
+                q: "If base period of the crop is 140 days and a Channel supplies 0.6 m³/sec of water for irrigating a crop land of 240 hectare, the delta of water will be:",
+                o: ["3.365 m", "1.183 m", "3.024 m", "2.365 m"],
+                a: 2,
+                sol: "Duty D = 240/0.6 = 400. Delta = 8.64B/D = (8.64*140)/400 = 3.024 m."
+            },
+            {
+                id: 224, exam: "KPCL JE 2018",
+                q: "When surface of transpiration is submerged under water, then potential evapotranspiration is:",
+                o: ["Much more than evapotranspiration", "Much less than evapotranspiration", "Equal to evapotranspiration", "Equal to or less than"],
+                a: 0,
+                sol: "When submerged, evaporation occurs freely from the water surface, making PET much higher."
+            },
+            {
+                id: 225, exam: "WBPSC JE 2007",
+                q: "For supplying water to rabi crop, kharif crop and sugarcane, the channel is designed for a capacity equal to the greater of the water requirement of:",
+                o: ["Rabi or kharif", "(Rabi and kharif) or sugarcane", "(Rabi and sugarcane) or (kharif and sugarcane)", "Rabi or kharif or sugarcane"],
+                a: 2,
+                sol: "Sugarcane is perennial (year-round). So design capacity = max(Rabi + Sugarcane, Kharif + Sugarcane)."
+            },
+            {
+                id: 226, exam: "Kerala JID 2019",
+                q: "Which of the following is not a Rabi-crop?",
+                o: ["Potato", "Ground nut", "Wheat", "Gram"],
+                a: 1,
+                sol: "Ground nut is a Kharif crop. Potato, Wheat, Gram are Rabi."
+            },
+            {
+                id: 227, exam: "DSSSB JE 2019",
+                q: "Find the delta for a crop if the duty for a base period of 110 days is 1400 hectares/cumec.",
+                o: ["34 cm", "68 cm", "100 cm", "12 cm"],
+                a: 1,
+                sol: "Delta = 864B/D = (864*110)/1400 = 67.88 cm approx 68 cm."
+            },
+            {
+                id: 228, exam: "DSSSB JE 2019",
+                q: "Rabi Season is also known as:",
+                o: ["Summer Season", "Monsoon Season", "Winter Season", "Both Summer & Winter Season"],
+                a: 2,
+                sol: "Rabi season is the Winter season."
+            },
+            {
+                id: 229, exam: "DSSSB JE 2019",
+                q: "Which water is subject to polar, electrostatic and ionic binding forces?",
+                o: ["Capillary water", "Solvent water", "Pore water", "Structural water"],
+                a: 1,
+                sol: "According to the source, Solvent water is subject to these forces due to the polar nature of water molecules dissolving substances."
+            },
+            {
+                id: 230, exam: "DSSSB JE 2019",
+                q: "The ratio of water stored in the root zone during irrigation to the water needed in the root zone prior to irrigation is known as:",
+                o: ["Efficiency of water-conveyance", "Efficiency of water storage", "Efficiency of water-application", "Efficiency of water-use"],
+                a: 1,
+                sol: "Water Storage Efficiency = (Water Stored / Water Needed) * 100."
+            },
+            {
+                id: 231, exam: "WBPSC SAE 2001",
+                q: "Duty is said to be low when:",
+                o: ["small amount of water is applied a small area of land", "small amount of water is applied a large area of land", "large amount of water is applied a small area of land", "large amount of water is applied a large area of land"],
+                a: 1,
+                sol: "Note: The source text states 'Duty is said to be low when small amount of water is applied a large area'. (Normally Low Duty means less area per cumec, but adhering to source)."
+            },
+            {
+                id: 232, exam: "MP Sub Engineer 2020",
+                q: "For Kharif season, the capacity factor usually varies from:",
+                o: ["0.6-0.7", "0.6-0.8", "0.9-0.95", "0.3-0.4"],
+                a: 2,
+                sol: "Capacity factor for Kharif is 0.9 - 0.95. For Rabi it is 0.6 - 0.7."
+            },
+            {
+                id: 233, exam: "MH WCD 2019",
+                q: "For a crop season of 150 days, with time factor 0.6, each distributary would receive its full supply for a period of:",
+                o: ["90 days", "150 days", "200 days", "250 days"],
+                a: 0,
+                sol: "Supply Period = 150 * 0.6 = 90 days."
+            },
+            {
+                id: 234, exam: "MP Sub Engineer 2020",
+                q: "Time factor for rabi season is fixed at 0.75 for a canal. What are the number of days for which a distributary will receive its full supply if the crop season is 120 days?",
+                o: ["30 days", "50 days", "90 days", "110 days"],
+                a: 2,
+                sol: "Days = 120 * 0.75 = 90 days."
+            },
+            {
+                id: 235, exam: "NWRD 2016",
+                q: "In Irrigation Engineering 'Duty' is the:",
+                o: ["Total depth of water applied for a crop", "Area of the crop irrigated by 1 Cumec of discharge throughout the base period of the crop", "Discharge required to irrigate one hector of a crop", "Constant Factor required to calculate total depth"],
+                a: 1,
+                sol: "Duty is the Area irrigated by 1 cumec of discharge flowing continuously for the base period."
+            },
+            {
+                id: 236, exam: "HPSSC JE 2018",
+                q: "Duty of canal water is calculated:",
+                o: ["Only at outlet", "Only at head works", "At any important point on the canal system", "None of these"],
+                a: 2,
+                sol: "Duty can be calculated at various points: Head (Gross), Branch (Lateral), Outlet (Outlet factor), Field (Net)."
+            },
+            {
+                id: 237, exam: "GSSSB 2017",
+                q: "Available moisture may be defined as the:",
+                o: ["Moisture content at permanent wilting point", "difference in water content of the soil between field capacity and permanent wilting.", "Maximum moisture holding capacity", "All of the above"],
+                a: 1,
+                sol: "Available Moisture = Field Capacity - Permanent Wilting Point."
+            },
+            {
+                id: 238, exam: "DSSSB JE 2019",
+                q: "Crop ratio is defined as the ratio of irrigated area......",
+                o: ["Kharif season with Rabi season", "Rabi season with Kharif season", "Non-perennial crops from under perennial crops", "Total area under perennial crop"],
+                a: 0,
+                sol: "Crop Ratio (or Kharif-Rabi Ratio) is the ratio of area irrigated in Kharif to Rabi season."
+            },
+            {
+                id: 239, exam: "DSSSB JE 2019",
+                q: "The time period that elapses from the:",
+                o: ["instant of its first watering to instant of its last watering", "instant of its sowing to instant of its last watering", "instant of its first watering to instant of its harvesting", "instant of its sowing to instant of its harvesting"],
+                a: 3,
+                sol: "This question defines Crop Period: Sowing to Harvesting."
+            },
+            {
+                id: 240, exam: "DSSSB JE 2019",
+                q: "Under Benefits of Irrigation, Statement 1: Yield of crops can be increased by irrigation even in the period of low rainfall. Statement 2: Optimum use of water is possible by irrigation to obtain maximum output.",
+                o: ["Both are false", "Statement 1 is true and statement 2 is false", "Both are true", "Statement 1 is false and statement 2 is true"],
+                a: 2,
+                sol: "Both statements correctly describe benefits of irrigation."
+            },
+            {
+                id: 241, exam: "DSSSB JE 2019",
+                q: "Sodium absorption ratio of high sodium water lies between:",
+                o: ["36 and 40", "26 and 35", "10 and 15", "18 and 26"],
+                a: 3,
+                sol: "Low (0-10), Medium (10-18), High (18-26), Very High (>26)."
+            },
+            {
+                id: 242, exam: "DSSSB JE 2019",
+                q: "What is the delta for a crop when its duty is 864 hectares/cumec on the field and the base period of the same crop is 140 days?",
+                o: ["140 cm", "130 cm", "145 cm", "135 cm"],
+                a: 0,
+                sol: "Delta = 864B/D = (864*140)/864 = 140 cm."
+            },
+            {
+                id: 243, exam: "DSSSB JE 2019",
+                q: "A pump is installed on a well to lift water and to irrigate rice crop sown over 6 hectares of land. If duty for rice is 1728 hectares/cumec on the field, then determine the weight of water lifted per second by the pump.",
+                o: ["0.00134 kN/s", "0.0341 kN/s", "0.0134 kN/s", "0.341 kN/s"],
+                a: 1,
+                sol: "Q = Area/Duty = 6/1728 = 0.00347 m³/s. Weight = 0.00347 * 9.81 kN/m³ = 0.0341 kN/s."
+            },
+            {
+                id: 244, exam: "DSSSB JE 2019",
+                q: "If barley requires about 7.5 cm of water after every 30 days, and the base period for barley is 120 days, then find the value of delta for barley.",
+                o: ["20", "40", "10", "30"],
+                a: 3,
+                sol: "Number of waterings = 120/30 = 4. Delta = 4 * 7.5 = 30 cm."
+            },
+            {
+                id: 245, exam: "DSSSB JE 2019",
+                q: "If wheat requires about 10 cm depth of water at an average interval of about 10 days, and the crop period for wheat is 130 days, then the delta for wheat is:",
+                o: ["150 cm", "130 cm", "120 cm", "140 cm"],
+                a: 1,
+                sol: "Number of waterings = 130/10 = 13. Delta = 13 * 10 = 130 cm."
+            },
+            {
+                id: 246, exam: "DSSSB JE 2019",
+                q: "The gross commanded area for a distributary is 6000 hectares, 80 percent of which is culturable irrigable. If the intensity of irrigation for Rabi season is 50 percent, then the area to be irrigation in Rabi season is:",
+                o: ["1600 hectares", "2400 hectares", "1400 hectares", "2200 hectares"],
+                a: 1,
+                sol: "CCA = 6000 * 0.8 = 4800. Irrigated Area = 4800 * 0.5 = 2400 ha."
+            },
+            {
+                id: 247, exam: "DSSSB JE 2019",
+                q: "Hygroscopic water is also called:",
+                o: ["adsorbed water", "free water", "structural water", "held water"],
+                a: 0,
+                sol: "Hygroscopic water is adsorbed by soil particles from the atmosphere."
+            },
+            {
+                id: 248, exam: "DSSSB JE 2019",
+                q: "In an irrigated command area, 'residential area' is a part of which of the following?",
+                o: ["Culturable command area", "Gross command area", "Net irrigated area", "Gross irrigated area"],
+                a: 1,
+                sol: "GCA includes both culturable and unculturable (residential, roads, etc.) areas."
+            },
+            {
+                id: 249, exam: "DSSSB JE 2019",
+                q: "The gross commanded area for a distributary is 8000 hectares, 60 percent of which is culturable irrigable. The intensity of irrigation for Rabi season is 60 percent and the corresponding average duty at the head of the distributary is 2000 hectares/cumec, find the discharge required at the head of the distributary.",
+                o: ["3.45 cumec", "1.44 cumec", "2.45 cumec", "1.11 cumec"],
+                a: 1,
+                sol: "CCA = 8000 * 0.6 = 4800. Irrigated = 4800 * 0.6 = 2880. Q = 2880/2000 = 1.44 cumec."
+            },
+            {
+                id: 250, exam: "DSSSB JE 2019",
+                q: "The time period that elapses from the instant of its sowing to the instant of its harvesting is called:",
+                o: ["base period", "crop period", "growth period", "rotation period"],
+                a: 1,
+                sol: "Sowing to Harvesting is Crop Period. First watering to Last watering is Base Period."
+            }
+        ];
+
+        // VARIABLES
+        let currentIdx = 0;
+        let answers = new Array(db.length).fill(null);
+        let status = new Array(db.length).fill(0); // 0:Skip, 1:Ans, 2:Review
+        let timer;
+        let timeLeft = 7200; // 2 hrs
+
+        // DOM ELEMENTS
+        const startScreen = document.getElementById('start-screen');
+        const testScreen = document.getElementById('test-view');
+        const resultScreen = document.getElementById('result-view');
+        const qContainer = document.getElementById('test-body');
+        const drawer = document.getElementById('drawer');
+        const grid = document.getElementById('grid');
+        const timeDisplay = document.getElementById('timer');
+
+        // INITIALIZE
+        window.onload = () => {
+            renderHistory();
+        }
+
+        function startTest() {
+            startScreen.classList.remove('active');
+            testScreen.classList.add('active');
+            status[0] = 3; // Current
+            buildGrid();
+            loadQ(0);
+            timer = setInterval(updateTime, 1000);
+        }
+
+        function updateTime() {
+            if(timeLeft <= 0) { clearInterval(timer); submitTest(); return; }
+            timeLeft--;
+            let h = Math.floor(timeLeft / 3600).toString().padStart(2,'0');
+            let m = Math.floor((timeLeft % 3600) / 60).toString().padStart(2,'0');
+            let s = (timeLeft % 60).toString().padStart(2,'0');
+            timeDisplay.innerText = `${h}:${m}:${s}`;
+        }
+
+        function loadQ(idx) {
+            currentIdx = idx;
+            const q = db[idx];
+            
+            // Build Options
+            let opts = "";
+            q.o.forEach((opt, i) => {
+                let checked = answers[idx] === i ? "checked" : "";
+                let cls = answers[idx] === i ? "selected" : "";
+                opts += `<label class="option-label ${cls}" onclick="selectOpt(${i})">
+                            <input type="radio" name="opt" class="opt-radio" ${checked}>
+                            <span>${opt}</span>
+                         </label>`;
+            });
+
+            qContainer.innerHTML = `
+                <div class="q-meta">
+                    <span class="exam-tag">${q.exam}</span>
+                    <span>Q.${idx + 180}</span>
+                </div>
+                <div class="q-text">${q.q}</div>
+                <div class="options-list">${opts}</div>
+            `;
+            
+            updateGrid();
+            // Render Math
+            if(window.MathJax) MathJax.typesetPromise();
+        }
+
+        function selectOpt(i) {
+            answers[currentIdx] = i;
+            // Update UI
+            const labels = document.querySelectorAll('.option-label');
+            labels.forEach(l => l.classList.remove('selected'));
+            labels[i].classList.add('selected');
+            document.querySelectorAll('.opt-radio')[i].checked = true;
+        }
+
+        function saveNext() {
+            // Update Status
+            if(status[currentIdx] !== 2) { // Don't override review
+                status[currentIdx] = answers[currentIdx] !== null ? 1 : 0;
+            }
+            
+            if(currentIdx < db.length - 1) {
+                if(status[currentIdx+1] === 0) status[currentIdx+1] = 3; // Mark next as current
+                loadQ(currentIdx + 1);
+            } else {
+                toggleDrawer();
+            }
+        }
+
+        function markReview() {
+            status[currentIdx] = 2; // Review
+            if(currentIdx < db.length - 1) loadQ(currentIdx + 1);
+            else updateGrid();
+        }
+
+        function clearAns() {
+            answers[currentIdx] = null;
+            if(status[currentIdx] !== 2) status[currentIdx] = 3; // Reset to current
+            loadQ(currentIdx);
+        }
+
+        // DRAWER LOGIC
+        function buildGrid() {
+            grid.innerHTML = db.map((_, i) => `<div class="grid-item st-skip" id="g-${i}" onclick="jumpTo(${i})">${i + 180}</div>`).join('');
+        }
+
+        function updateGrid() {
+            db.forEach((_, i) => {
+                const el = document.getElementById(`g-${i}`);
+                el.className = 'grid-item';
+                
+                if(i === currentIdx) el.classList.add('st-curr');
+                else if(status[i] === 2) {
+                    if(answers[i] !== null) el.classList.add('st-ans-rev');
+                    else el.classList.add('st-rev');
+                }
+                else if(status[i] === 1) el.classList.add('st-ans');
+                else el.classList.add('st-skip');
+            });
+        }
+
+        function jumpTo(i) {
+            loadQ(i);
+            toggleDrawer();
+        }
+
+        function toggleDrawer() {
+            drawer.classList.toggle('open');
+            document.querySelector('.drawer-overlay').style.display = drawer.classList.contains('open') ? 'block' : 'none';
+            if(drawer.classList.contains('open')) updateGrid();
+        }
+
+        function exitTest() {
+            if(confirm("Exit test? Data will be lost.")) location.reload();
+        }
+
+        // SUBMIT
+        function submitTest() {
+            clearInterval(timer);
+            testScreen.classList.remove('active');
+            resultScreen.classList.add('active');
+            document.querySelector('.drawer-overlay').style.display = 'none';
+            drawer.classList.remove('open');
+
+            let score = 0, correct = 0, wrong = 0, skipped = 0;
+            let solHTML = "";
+
+            db.forEach((q, i) => {
+                let userAns = answers[i];
+                let statusCls = "sb-skip", statusTxt = "Skipped";
+                
+                if(userAns === null) {
+                    skipped++;
+                } else if(userAns === q.a) {
+                    score++; correct++;
+                    statusCls = "sb-correct"; statusTxt = "Correct";
+                } else {
+                    wrong++;
+                    statusCls = "sb-wrong"; statusTxt = "Wrong";
+                }
+
+                solHTML += `
+                    <div class="sol-card">
+                        <span class="sol-badge ${statusCls}">${statusTxt}</span>
+                        <div style="font-weight:bold; color:#555; font-size:0.9em; margin-bottom:5px;">Q.${180+i} (${q.exam})</div>
+                        <div style="margin-bottom:10px;">${q.q}</div>
+                        <div style="font-size:0.9em; color:#666;">
+                            Your Answer: <b>${userAns !== null ? q.o[userAns] : 'None'}</b><br>
+                            Correct Answer: <b style="color:var(--success)">${q.o[q.a]}</b>
+                        </div>
+                        <div class="sol-exp">
+                            <b>Explanation:</b> ${q.sol}
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('score-val').innerText = score;
+            document.getElementById('res-cor').innerText = correct;
+            document.getElementById('res-wro').innerText = wrong;
+            document.getElementById('res-skip').innerText = skipped;
+            let acc = (correct + wrong) > 0 ? Math.round((correct / (correct + wrong)) * 100) : 0;
+            document.getElementById('acc-val').innerText = `Accuracy: ${acc}%`;
+            document.getElementById('solutions').innerHTML = solHTML;
+
+            // Save History
+            let hist = JSON.parse(localStorage.getItem('irrigation_hist')) || [];
+            hist.unshift({ date: new Date().toLocaleDateString(), score: score, total: db.length });
+            localStorage.setItem('irrigation_hist', JSON.stringify(hist));
+            
+            if(window.MathJax) MathJax.typesetPromise();
+        }
+
+        function renderHistory() {
+            let hist = JSON.parse(localStorage.getItem('irrigation_hist')) || [];
+            const list = document.getElementById('history-list');
+            if(hist.length === 0) list.innerHTML = "<div style='text-align:center; color:#999;'>No history available</div>";
+            else {
+                list.innerHTML = hist.slice(0,5).map(h => `
+                    <div class="history-item">
+                        <span>${h.date}</span>
+                        <span style="font-weight:bold; color:var(--primary)">${h.score}/${h.total}</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+    </script>
+</body>
+</html>
