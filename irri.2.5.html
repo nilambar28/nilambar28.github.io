@@ -10,7 +10,7 @@
         :root {
             --primary: #127cc0; /* Testbook Blue */
             --green: #2dbd5c;   /* Answered */
-            --red: #e74c3c;     /* Skipped */
+            --red: #e74c3c;     /* Skipped/Exit */
             --purple: #8e44ad;  /* Review */
             --gray: #ecf0f1;    /* Not Visited */
             --text: #333;
@@ -20,52 +20,47 @@
         * { box-sizing: border-box; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: var(--light-bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* --- SCREENS --- */
+        /* SCREENS */
         .screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; display: none; overflow-y: auto; }
         .screen.active { display: flex; flex-direction: column; }
 
-        /* 1. START SCREEN */
+        /* START SCREEN */
         #start-screen { align-items: center; justify-content: center; padding: 20px; text-align: center; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); }
         .start-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 400px; width: 100%; }
         .start-btn { background: var(--primary); color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 1.2rem; font-weight: bold; cursor: pointer; margin-top: 20px; box-shadow: 0 4px 10px rgba(18, 124, 192, 0.3); transition: transform 0.2s; }
         .start-btn:active { transform: scale(0.95); }
 
-        /* 2. QUIZ SCREEN */
-        /* Header */
+        /* QUIZ SCREEN */
         header { background: #fff; padding: 0 15px; height: 60px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 10; flex-shrink: 0; }
         .timer { font-weight: 700; color: #333; font-size: 1.1rem; background: #eef2f5; padding: 5px 12px; border-radius: 4px; border: 1px solid #ddd; }
         .submit-header-btn { background: var(--red); color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; font-size: 0.9rem; cursor: pointer; }
 
-        /* Layout */
         .container { display: flex; flex: 1; overflow: hidden; position: relative; }
         .main-content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 80px; }
         
-        /* Sidebar */
         .sidebar { width: 300px; background: #fff; border-left: 1px solid #ddd; display: flex; flex-direction: column; position: absolute; right: 0; top: 0; bottom: 0; transform: translateX(100%); transition: 0.3s; z-index: 100; box-shadow: -5px 0 15px rgba(0,0,0,0.1); }
         .sidebar.open { transform: translateX(0); }
         
-        /* Question Card */
         .q-card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 15px; }
         .meta { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 0.85rem; color: #666; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         .tag { background: #e1f0fa; color: var(--primary); padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; }
         .q-text { font-size: 1.1rem; line-height: 1.6; color: #2c3e50; font-weight: 500; margin-bottom: 25px; }
 
-        /* Options */
         .opt { display: flex; align-items: flex-start; padding: 14px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; background: #fff; }
         .opt:hover { background: #f8fbff; border-color: #b3d7ff; }
         .opt.selected { border-color: var(--primary); background: #f0f7fc; box-shadow: 0 0 0 1px var(--primary) inset; }
         .circle { width: 24px; height: 24px; border: 2px solid #ccc; border-radius: 50%; margin-right: 15px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; font-size: 12px; font-weight: bold; color: #777; }
         .opt.selected .circle { border-color: var(--primary); background: var(--primary); color: white; }
 
-        /* Footer */
         footer { position: fixed; bottom: 0; width: 100%; height: 60px; background: #fff; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; z-index: 50; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
         .btn { padding: 10px 18px; border-radius: 6px; border: 1px solid #ddd; background: #fff; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: background 0.2s; }
-        .btn:active { transform: scale(0.98); }
         .btn-main { background: var(--green); color: white; border: none; }
         .btn-rev { color: var(--purple); border-color: var(--purple); }
-        .btn-rev:hover { background: #fbf5ff; }
+        
+        /* Submit Button Style for Last Question */
+        .btn-submit-final { background: var(--red) !important; color: white !important; border: none !important; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); } 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); } }
 
-        /* Palette Grid */
         .p-header { padding: 15px; background: #f8f9fa; border-bottom: 1px solid #eee; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
         .grid { padding: 10px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; overflow-y: auto; flex: 1; align-content: start; }
         .p-item { height: 40px; width: 40px; display: flex; justify-content: center; align-items: center; border-radius: 6px; font-size: 0.9rem; font-weight: bold; cursor: pointer; border: 1px solid #e0e0e0; background: #fff; color: #555; }
@@ -74,18 +69,16 @@
         .p-item.rev { background: var(--purple); color: white; border: none; border-radius: 50%; }
         .p-item.skip { background: var(--red); color: white; border: none; border-radius: 50%; }
         
-        /* 3. RESULT SCREEN */
+        /* RESULT SCREEN */
         #result-screen { padding: 20px; background: #f0f2f5; }
         .score-card { background: white; padding: 30px; border-radius: 10px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; max-width: 600px; margin-left: auto; margin-right: auto; }
         .big-score { font-size: 3rem; font-weight: bold; color: var(--primary); margin: 10px 0; }
-        .sol-container { max-width: 800px; margin: 0 auto; }
         .sol-card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 15px; border: 1px solid #e1e4e8; }
         .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; display: inline-block; }
         .b-correct { background: #e6fffa; color: #00bfa5; }
         .b-wrong { background: #fff5f5; color: #e53e3e; }
         .b-skip { background: #edf2f7; color: #718096; }
         .expl { background: #f7fafc; padding: 15px; margin-top: 15px; border-radius: 6px; border-left: 4px solid var(--primary); font-size: 0.95rem; color: #4a5568; }
-
     </style>
 </head>
 <body>
@@ -94,14 +87,7 @@
         <div class="start-card">
             <h1 style="color:var(--primary); margin-bottom:10px;">Irrigation Engineering</h1>
             <h3 style="color:#555; margin-bottom:20px;">Mock Test (Q310 - Q361)</h3>
-            <div style="text-align:left; margin-bottom:20px; color:#666; font-size:0.95rem;">
-                <p>✅ <b>Total Questions:</b> 52</p>
-                <p>⏱ <b>Time:</b> 120 Minutes</p>
-                <p>🎯 <b>Correct:</b> +1.0 | <b>Wrong:</b> -0.25</p>
-            </div>
             <button class="start-btn" onclick="startTest()">Start Test Now</button>
-            <br><br>
-            <button onclick="showHistory()" style="background:none; border:none; color:#666; text-decoration:underline; cursor:pointer;">View History</button>
         </div>
     </div>
 
@@ -109,12 +95,11 @@
         <header>
             <div style="font-weight:bold; font-size:1.1rem; color:#333;">Irrigation Test</div>
             <div class="timer" id="timer">02:00:00</div>
-            <button class="submit-header-btn" onclick="submitTest()">Submit Test</button>
+            <button class="submit-header-btn" onclick="submitTest()">Submit</button>
         </header>
 
         <div class="container">
-            <div class="main-content" id="q-area">
-                </div>
+            <div class="main-content" id="q-area"></div>
 
             <div class="sidebar" id="sidebar">
                 <div class="p-header">
@@ -127,8 +112,7 @@
                     <span style="color:var(--purple)">● Rev</span> &nbsp;
                     <span style="color:#999">● Not Vis</span>
                 </div>
-                <div class="grid" id="grid">
-                    </div>
+                <div class="grid" id="grid"></div>
                 <div style="padding:15px; border-top:1px solid #ddd; text-align:center;">
                     <button class="submit-header-btn" style="width:100%; background:var(--primary);" onclick="submitTest()">Submit Test</button>
                 </div>
@@ -139,25 +123,22 @@
             <button class="btn" onclick="prevQ()">Previous</button>
             <button class="btn btn-rev" onclick="markReview()">Mark Review</button>
             <button class="btn" onclick="toggleSidebar()">Palette</button>
-            <button class="btn btn-main" onclick="nextQ()">Save & Next</button>
+            <button class="btn btn-main" id="next-btn" onclick="nextQ()">Save & Next</button>
         </footer>
     </div>
 
     <div id="result-screen" class="screen">
         <div class="score-card">
-            <h2>Test Submitted Successfully!</h2>
+            <h2>Test Submitted!</h2>
             <div class="big-score" id="score-txt">0/52</div>
-            <p style="color:#666;">Accuracy: <span id="acc-txt">0%</span></p>
-            <div style="margin-top:20px;">
-                <button class="btn" onclick="location.reload()">Back to Home</button>
-            </div>
+            <p>Accuracy: <span id="acc-txt">0%</span></p>
+            <button class="btn" onclick="location.reload()" style="margin-top:20px;">Back to Home</button>
         </div>
-        <h3 style="text-align:center; color:#444;">Detailed Solutions</h3>
-        <div class="sol-container" id="sol-container"></div>
+        <h3 style="text-align:center; color:#444;">Solutions</h3>
+        <div class="sol-container" style="max-width:800px; margin:0 auto;" id="sol-container"></div>
     </div>
 
 <script>
-    // --- FULL DATA (Q310-Q361) ---
     const db = [
 {i:310,t:"DMRC 26.02.2020",q:"What is the depth of water to be applied for a particular stage of the growth of a crop when the amount of water available in the soil is 35%, if 0% of the maximum depth of available water in the root zone which is 80 mm and assuming irrigation efficiency is 60%?",o:["84 mm","90 mm","87 mm","81 mm"],a:2,s:"Water req = (Max Depth * (1-0.35)) / Eff = (80 * 0.65) / 0.60 = 86.66 ≈ 87mm."},
 {i:311,t:"WBPSC JE 2009",q:"The duty of a crop is 432 hectares/cumec, when the base period of the crop is 100 days. Delta for the crop will be:",o:["132","200","464","846"],a:1,s:"Delta = 8.64B/D = 8.64*100/432 = 200cm."},
@@ -218,13 +199,11 @@
     let answers = {};
     let timerRef;
 
-    // --- LOGIC ---
     function startTest() {
         document.getElementById('start-screen').classList.remove('active');
         document.getElementById('quiz-screen').classList.add('active');
         renderGrid();
         loadQ(0);
-        
         timerRef = setInterval(() => {
             time--;
             if(time <= 0) submitTest();
@@ -238,15 +217,24 @@
     function loadQ(idx) {
         curr = idx;
         const d = db[idx];
-        const status = answers[idx] ? answers[idx].status : 'not';
         const sel = answers[idx] ? answers[idx].opt : null;
+
+        // Logic to switch "Save & Next" to "Submit Test" on Last Question
+        const nextBtn = document.getElementById('next-btn');
+        if(idx === db.length - 1) {
+            nextBtn.innerText = "Submit Test";
+            nextBtn.className = "btn btn-submit-final"; // Red Color Pulse
+        } else {
+            nextBtn.innerText = "Save & Next";
+            nextBtn.className = "btn btn-main"; // Normal Green
+        }
 
         const html = `
             <div class="q-card">
                 <div class="meta">
                     <span class="tag">${d.t}</span>
-                    <span>Q${d.i}</span>
-                    <span style="font-weight:bold; color:#666;">+1.0 / -0.25</span>
+                    <span style="font-weight:bold; color:#555;">Q${d.i}</span>
+                    <span style="font-weight:bold; color:#666; font-size:0.8rem;">+1.0 / -0.25</span>
                 </div>
                 <div class="q-text">${d.q}</div>
                 <div class="opts">
@@ -267,7 +255,7 @@
         if(!answers[qIdx]) answers[qIdx] = {};
         answers[qIdx].opt = oIdx;
         answers[qIdx].status = 'ans';
-        loadQ(qIdx); // Refresh
+        loadQ(qIdx);
     }
 
     function markReview() {
@@ -278,14 +266,22 @@
     }
 
     function nextQ() {
+        // If undefined, mark as skipped
         if(!answers[curr]) answers[curr] = {status: 'skip'};
-        if(curr < db.length - 1) loadQ(curr + 1);
+        
+        // If Last Question -> SUBMIT Logic
+        if(curr === db.length - 1) {
+            submitTest();
+        } else {
+            // Normal Next Logic
+            loadQ(curr + 1);
+        }
     }
+    
     function prevQ() { if(curr > 0) loadQ(curr - 1); }
 
     function renderGrid() {
-        const grid = document.getElementById('grid');
-        grid.innerHTML = db.map((_, i) => `
+        document.getElementById('grid').innerHTML = db.map((_, i) => `
             <div id="p-${i}" class="p-item" onclick="loadQ(${i})">${i+310}</div>
         `).join('');
     }
@@ -300,12 +296,10 @@
         });
     }
 
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('open');
-    }
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 
     function submitTest() {
-        if(!confirm("Are you sure you want to Submit the Test?")) return;
+        if(!confirm("Are you sure you want to Submit?")) return;
         
         clearInterval(timerRef);
         document.getElementById('quiz-screen').classList.remove('active');
@@ -319,45 +313,28 @@
             let badge = '<span class="badge b-skip">Skipped</span>';
             if(a && a.opt !== undefined) {
                 att++;
-                if(a.opt === d.a) {
-                    score += 1; correct++; badge = '<span class="badge b-correct">Correct</span>';
-                } else {
-                    score -= 0.25; badge = '<span class="badge b-wrong">Wrong</span>';
-                }
+                if(a.opt === d.a) { score++; correct++; badge = '<span class="badge b-correct">Correct</span>'; }
+                else { score -= 0.25; badge = '<span class="badge b-wrong">Wrong</span>'; }
             }
-
             html += `
                 <div class="sol-card">
                     <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                        <span style="font-weight:bold;">Q${d.i} (${d.t})</span>
+                        <span style="font-weight:bold;">Q${d.i}</span>
                         ${badge}
                     </div>
-                    <p style="margin-bottom:10px;">${d.q}</p>
-                    <div style="font-size:0.9rem;">
-                        Your Answer: <b>${a && a.opt !== undefined ? String.fromCharCode(65+a.opt) : '-'}</b> | 
-                        Correct Answer: <b style="color:var(--green)">${String.fromCharCode(65+d.a)}</b>
+                    <p>${d.q}</p>
+                    <div style="font-size:0.9rem; margin-top:5px;">
+                        Your: <b>${a && a.opt !== undefined ? String.fromCharCode(65+a.opt) : '-'}</b> | 
+                        Correct: <b style="color:var(--green)">${String.fromCharCode(65+d.a)}</b>
                     </div>
-                    <div class="expl"><b>Solution:</b> ${d.s}</div>
-                </div>
-            `;
+                    <div class="expl"><b>Sol:</b> ${d.s}</div>
+                </div>`;
         });
 
-        // Save History
-        let hist = JSON.parse(localStorage.getItem('myTestHistory') || '[]');
-        hist.push({ date: new Date().toLocaleString(), score: score });
-        localStorage.setItem('myTestHistory', JSON.stringify(hist));
-
-        document.getElementById('score-txt').innerText = `${score} / ${db.length}`;
+        document.getElementById('score-txt').innerText = `${score}/${db.length}`;
         document.getElementById('acc-txt').innerText = att ? ((correct/att)*100).toFixed(1)+'%' : '0%';
         document.getElementById('sol-container').innerHTML = html;
     }
-
-    function showHistory() {
-        let hist = JSON.parse(localStorage.getItem('myTestHistory') || '[]');
-        if(hist.length === 0) alert("No history found.");
-        else alert(hist.map(h => `${h.date}: ${h.score}`).join('\n'));
-    }
-
 </script>
 </body>
 </html>
