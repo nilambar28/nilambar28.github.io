@@ -2,150 +2,754 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Irrigation Engineering Index</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SSC JE Mock Test - Irrigation Eng.</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #e0f7fa; margin: 0; padding: 0; }
-        
-        /* Header Design */
-        header { background: linear-gradient(135deg, #0097a7, #006064); color: white; padding: 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
-        h1 { margin: 0; font-size: 22px; }
-        p { margin: 5px 0 0; font-size: 14px; opacity: 0.9; }
-        
-        .back-btn { position: absolute; left: 15px; top: 20px; color: white; text-decoration: none; font-size: 24px; font-weight: bold; }
-
-        /* Chapter List Layout */
-        .chapter-list { max-width: 800px; margin: 20px auto; padding: 0 15px; }
-
-        /* Card Design */
-        .chapter-card { 
-            background: white; 
-            margin-bottom: 15px; 
-            padding: 15px; 
-            border-radius: 10px; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
-            display: flex; 
-            align-items: center; 
-            text-decoration: none; 
-            color: #333; 
-            border-left: 6px solid #00bcd4; /* Blue border */
-            transition: transform 0.2s;
+        :root {
+            --primary: #1a73e8;
+            --success: #00c853; /* Green for Answered */
+            --danger: #d32f2f;
+            --warning: #ffca28;
+            --current: #29b6f6; /* Blue for Current */
+            --skipped: #e0e0e0; /* Gray for Skipped */
+            --review: #ab47bc;  /* Purple for Review */
+            --text: #333;
+            --bg: #f5f7fb;
+            --white: #ffffff;
+            --border: #e0e0e0;
         }
 
-        .chapter-card:hover { transform: translateX(5px); background-color: #f0fdff; }
+        * { box-sizing: border-box; font-family: 'Roboto', 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; padding: 0; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* Number Circle */
-        .num { 
-            background: #e0f7fa; 
-            color: #00838f; 
-            min-width: 40px; 
-            height: 40px; 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-weight: bold; 
-            margin-right: 15px; 
-            font-size: 18px;
-        }
+        /* --- VIEWS --- */
+        .view { display: none; height: 100%; width: 100%; flex-direction: column; }
+        .view.active { display: flex; }
 
-        .details h3 { margin: 0; font-size: 16px; color: #006064; }
-        .details span { font-size: 12px; color: #777; }
+        /* --- START SCREEN --- */
+        #start-screen { justify-content: center; align-items: center; padding: 20px; text-align: center; }
+        .card { background: var(--white); padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 400px; width: 100%; }
+        .btn-primary { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 16px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .history-list { margin-top: 20px; text-align: left; max-height: 200px; overflow-y: auto; font-size: 0.9em; }
+        .history-item { border-bottom: 1px solid var(--border); padding: 8px 0; display: flex; justify-content: space-between; }
+
+        /* --- TEST SCREEN HEADER --- */
+        header { background: var(--white); padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); height: 60px; z-index: 10; }
+        .timer-badge { background: #e3f2fd; color: var(--primary); padding: 6px 12px; border-radius: 20px; font-weight: bold; font-family: monospace; font-size: 1.1em; display: flex; align-items: center; gap: 8px; }
+        .exit-btn { background: none; border: 1px solid var(--danger); color: var(--danger); padding: 5px 12px; border-radius: 4px; font-size: 0.9em; cursor: pointer; }
+        
+        /* --- QUESTION AREA --- */
+        #test-body { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 80px; position: relative; }
+        .exam-tag { display: inline-block; background: #eee; color: #666; font-size: 0.75em; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; }
+        .question-text { font-size: 1.1em; font-weight: 500; line-height: 1.5; margin-bottom: 20px; }
+        
+        /* Options */
+        .option-container { display: flex; flex-direction: column; gap: 10px; }
+        .option { display: flex; align-items: flex-start; padding: 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.2s; background: var(--white); }
+        .option:hover { background: #f9f9f9; }
+        .option.selected { border-color: var(--primary); background: #e3f2fd; }
+        .option-radio { margin-right: 12px; margin-top: 3px; accent-color: var(--primary); transform: scale(1.2); }
+        
+        /* --- FOOTER --- */
+        footer { background: var(--white); padding: 10px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; height: 70px; position: fixed; bottom: 0; width: 100%; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 20; }
+        .footer-left { display: flex; gap: 10px; }
+        .btn-footer { padding: 10px 15px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; font-size: 0.9em; }
+        .btn-mark { background: white; border: 1px solid var(--review); color: var(--review); }
+        .btn-clear { background: white; border: 1px solid var(--text); color: var(--text); }
+        .btn-save { background: var(--success); color: white; padding: 10px 25px; }
+
+        /* --- QUESTION PALETTE (DRAWER) --- */
+        #palette-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99; display: none; }
+        #palette-drawer { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: var(--white); z-index: 100; transition: right 0.3s ease; display: flex; flex-direction: column; box-shadow: -2px 0 10px rgba(0,0,0,0.1); }
+        #palette-drawer.open { right: 0; }
+        .palette-header { padding: 15px; background: #f5f5f5; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+        .palette-grid { padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; overflow-y: auto; flex: 1; align-content: start; }
+        .palette-item { aspect-ratio: 1; display: flex; justify-content: center; align-items: center; border-radius: 50%; background: var(--skipped); color: #555; font-size: 0.9em; font-weight: bold; cursor: pointer; border: 1px solid transparent; }
+        
+        /* Palette Colors */
+        .p-answered { background: var(--success); color: white; }
+        .p-current { background: var(--white); border: 2px solid var(--current); color: var(--current); }
+        .p-review { background: var(--review); color: white; }
+        .p-skipped { background: var(--skipped); }
+
+        .palette-footer { padding: 15px; border-top: 1px solid var(--border); }
+        .btn-submit { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; }
+
+        /* --- REPORT CARD --- */
+        #result-screen { overflow-y: auto; padding-bottom: 40px; }
+        .score-header { background: var(--primary); color: white; padding: 30px 20px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
+        .score-big { font-size: 3em; font-weight: bold; margin: 10px 0; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px; }
+        .stat-card { background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid var(--border); }
+        .stat-val { font-size: 1.2em; font-weight: bold; color: var(--text); }
+        .stat-label { font-size: 0.8em; color: #777; }
+
+        /* Solutions */
+        .solution-card { background: white; margin: 15px 20px; padding: 20px; border-radius: 8px; border: 1px solid var(--border); }
+        .sol-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75em; font-weight: bold; }
+        .badge-correct { background: #e8f5e9; color: var(--success); }
+        .badge-wrong { background: #ffebee; color: var(--danger); }
+        .badge-skip { background: #f5f5f5; color: #777; }
+        .sol-text { background: #f0f4f8; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.95em; border-left: 4px solid var(--primary); }
+        
+        .toggle-btn { margin-left: auto; display: block; border: none; background: transparent; color: var(--primary); font-weight: bold; cursor: pointer; }
 
     </style>
 </head>
 <body>
 
-<header>
-    <a href="index.html" class="back-btn">⬅</a>
-    <h1>Irrigation Engineering</h1>
-    <p>Select a Chapter to Start Quiz</p>
-</header>
-
-<div class="chapter-list">
-
-    <a href="irrigation_ch1.html" class="chapter-card">
-        <div class="num">1</div>
-        <div class="details">
-            <h3>Irrigation & its Methods</h3>
-            <span>Techniques & Introduction</span>
+    <div id="start-screen" class="view active">
+        <div class="card">
+            <h2><i class="fas fa-book-open"></i> Irrigation Engineering</h2>
+            <p>Mock Test (Q141 - Q179)</p>
+            <div style="margin: 20px 0; text-align: left;">
+                <p><i class="fas fa-check-circle" style="color:var(--success)"></i> <strong>39 Questions</strong></p>
+                <p><i class="fas fa-clock" style="color:var(--primary)"></i> <strong>120 Minutes</strong></p>
+                <p><i class="fas fa-trophy" style="color:var(--warning)"></i> <strong>+1 for Correct, 0 for Wrong</strong></p>
+            </div>
+            <button class="btn-primary" onclick="startTest()">Start Test Now</button>
+            
+            <div style="margin-top: 30px;">
+                <h4><i class="fas fa-history"></i> Previous Attempts</h4>
+                <div id="history-container" class="history-list">
+                    <div style="color: #999; text-align: center;">No history yet.</div>
+                </div>
+            </div>
         </div>
-    </a>
+    </div>
 
-    <a href="irrigation_ch2.html" class="chapter-card">
-        <div class="num">2</div>
-        <div class="details">
-            <h3>Soil Moisture & Relationship</h3>
-            <span>Water Holding Capacity</span>
+    <div id="test-view" class="view">
+        <header>
+            <div class="timer-badge">
+                <i class="far fa-clock"></i> <span id="timer">02:00:00</span>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="exit-btn" onclick="exitTest()">Exit</button>
+                <button class="btn-clear" onclick="togglePalette()" style="border:none; font-size: 1.2em;"><i class="fas fa-th"></i></button>
+            </div>
+        </header>
+
+        <div id="test-body">
+            </div>
+
+        <footer>
+            <div class="footer-left">
+                <button class="btn-footer btn-mark" onclick="markForReview()">Review</button>
+                <button class="btn-footer btn-clear" onclick="clearResponse()">Clear</button>
+            </div>
+            <button class="btn-footer btn-save" onclick="saveAndNext()">Save & Next</button>
+        </footer>
+
+        <div id="palette-overlay" onclick="togglePalette()"></div>
+        <div id="palette-drawer">
+            <div class="palette-header">
+                <span>Question Palette</span>
+                <span onclick="togglePalette()" style="cursor:pointer">&times;</span>
+            </div>
+            <div style="padding: 10px; font-size: 0.8em; display:flex; flex-wrap:wrap; gap:10px; background:#fff;">
+                <span style="display:flex; align-items:center; gap:4px"><div style="width:10px; height:10px; background:var(--success); border-radius:50%"></div> Ans</span>
+                <span style="display:flex; align-items:center; gap:4px"><div style="width:10px; height:10px; background:var(--white); border:2px solid var(--current); border-radius:50%"></div> Curr</span>
+                <span style="display:flex; align-items:center; gap:4px"><div style="width:10px; height:10px; background:var(--skipped); border-radius:50%"></div> Skip</span>
+                <span style="display:flex; align-items:center; gap:4px"><div style="width:10px; height:10px; background:var(--review); border-radius:50%"></div> Rev</span>
+            </div>
+            <div class="palette-grid" id="palette-grid">
+                </div>
+            <div class="palette-footer">
+                <button class="btn-submit" onclick="submitTest()">Submit Test</button>
+            </div>
         </div>
-    </a>
+    </div>
 
-    <a href="irrigation_ch3.html" class="chapter-card">
-        <div class="num">3</div>
-        <div class="details">
-            <h3>Water Logging & Reclamation</h3>
-            <span>Salinity & Drainage</span>
+    <div id="result-screen" class="view">
+        <div class="score-header">
+            <p>Your Score</p>
+            <div class="score-big"><span id="score-val">0</span> <span style="font-size:0.4em; opacity:0.8">/ 39</span></div>
+            <p id="accuracy-val">Accuracy: 0%</p>
         </div>
-    </a>
 
-    <a href="irrigation_ch4.html" class="chapter-card">
-        <div class="num">4</div>
-        <div class="details">
-            <h3>Canal Design & Lining</h3>
-            <span>Lacey's & Kennedy's Theory</span>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-val" style="color:var(--success)" id="res-correct">0</div>
+                <div class="stat-label">Correct</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" style="color:var(--danger)" id="res-wrong">0</div>
+                <div class="stat-label">Wrong</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" style="color:var(--review)" id="res-skipped">0</div>
+                <div class="stat-label">Skipped</div>
+            </div>
+             <div class="stat-card">
+                <div class="stat-val" id="res-time">00:00</div>
+                <div class="stat-label">Time Taken</div>
+            </div>
         </div>
-    </a>
 
-    <a href="irrigation_ch5.html" class="chapter-card">
-        <div class="num">5</div>
-        <div class="details">
-            <h3>Seepage Theory</h3>
-            <span>Bligh's & Khosla's Theory</span>
+        <div style="padding: 0 20px; display:flex; gap:10px;">
+             <button class="btn-primary" onclick="location.reload()" style="background: white; color: var(--primary); border: 1px solid var(--primary);">Next Test</button>
+             <button class="btn-primary" onclick="showStartScreen()">Home</button>
         </div>
-    </a>
 
-    <a href="irrigation_ch6.html" class="chapter-card">
-        <div class="num">6</div>
-        <div class="details">
-            <h3>River Training Work</h3>
-            <span>Guide Banks & Groynes</span>
-        </div>
-    </a>
+        <h3 style="margin-left: 20px; margin-top: 30px;">Detailed Solutions</h3>
+        <div id="solutions-container">
+            </div>
+    </div>
 
-    <a href="irrigation_ch7.html" class="chapter-card">
-        <div class="num">7</div>
-        <div class="details">
-            <h3>Canal Regulation & Cross Drainage</h3>
-            <span>Falls & Regulators</span>
-        </div>
-    </a>
+    <script>
+        // --- DATA: Q141 to Q179 ---
+        const questionsDB = [
+            {
+                id: 141, exam: "JKPSC AE 25.08.2021",
+                q: "An identified source of irrigation water has ion concentration of \\(Na^{+}\\), \\(Ca^{++}\\) and \\(Mg^{++}\\) as 20, 10 and 8 milli-equivalent per litre, respectively. The SAR of this water is approximately:",
+                options: ["2.06", "6.67", "2.67", "0"],
+                ans: 1, 
+                sol: "SAR (Sodium Absorption Ratio) is calculated as: \\[ S.A.R. = \\frac{Na^{+}}{\\sqrt{\\frac{Ca^{2+} + Mg^{2+}}{2}}} \\] Given: \\(Na^{+} = 20\\), \\(Ca^{2+} = 10\\), \\(Mg^{2+} = 8\\). \\[ S.A.R. = \\frac{20}{\\sqrt{\\frac{10+8}{2}}} = \\frac{20}{\\sqrt{9}} = \\frac{20}{3} = 6.67 \\]"
+            },
+            {
+                id: 142, exam: "Nagaland PSC 2015",
+                q: "Effective rainfall for crops is:",
+                options: ["Part of rainfall utilized by crops", "Total rainfall", "Total rainfall - total runoff", "Total runoff stored and utilized by crops"],
+                ans: 2,
+                sol: "The effective rainfall for crop is the water stored in root zone of crop, i.e., Eff. Rainfall = Total rainfall - Total run-off."
+            },
+            {
+                id: 143, exam: "WBPSC JE 2005",
+                q: "Net irrigation requirement of a crop is equal to:",
+                options: ["Consumptive use", "Consumptive use minus effective rainfall", "Consumptive use minus effective rainfall plus leaching and other requirements", "Percolation loss plus effective rainfall"],
+                ans: 2,
+                sol: "Net irrigation requirement (NIR) is the portion of consumptive use satisfied by irrigation plus leaching req. \\[ NIR = C_{u} - R_{e} + \\text{leaching requirement} \\]"
+            },
+            {
+                id: 144, exam: "Chandrapur MNC 2017",
+                q: "The crop having maximum duty is:",
+                options: ["Cotton", "Sugarcane", "Wheat", "Rice"],
+                ans: 2,
+                sol: "Wheat has the maximum duty (approx 1800 ha/cumec) because it requires less water depth compared to Rice or Sugarcane. Rice has a duty of approx 775 ha/cumec."
+            },
+            {
+                id: 145, exam: "SSC JE 2020",
+                q: "The delta for a crop having base period 120 days is 70 cm. What is the duty?",
+                options: ["2490 hectare/cumec", "1481 hectare/cumec", "148 hectare/cumec", "1.481 hectare/cumec"],
+                ans: 1,
+                sol: "Given \\(\\Delta = 0.70 m\\), \\(B = 120\\) days. \\[ D = \\frac{8.64B}{\\Delta} = \\frac{8.64 \\times 120}{0.70} = 1481.14 \\approx 1481 \\text{ ha/cumec} \\]"
+            },
+            {
+                id: 146, exam: "JKPSC AE 2021",
+                q: "The intensity of irrigation for the Kharif season is 50% for an irrigation project with culturable command area of 50,000 hectares. The duty for the Kharif season is 1000 hectare/cumec. Assuming transmission loss of 10% the required discharge at the head of the canal is:",
+                options: ["35", "28", "20", "16"],
+                ans: 1,
+                sol: "Area = \\(50000 \\times 0.5 = 25000\\) ha. Field Q = \\(25000/1000 = 2.5\\) cumec. Head Q = \\(2.5 / (1 - 0.10) = 2.5/0.9 = 27.78 \\approx 28\\) cumec."
+            },
+            {
+                id: 147, exam: "HPCL Engineer 2021",
+                q: "The delta of a crop is 0.864 m and the base period is 130 days. What is the duty of the crop (in hectares/cumec)?",
+                options: ["1300", "13000", "130", "864"],
+                ans: 0,
+                sol: "\\[ D = \\frac{8.64 \\times 130}{0.864} = 1300 \\text{ ha/cumec} \\]"
+            },
+            {
+                id: 148, exam: "KPSC Overseer 2017",
+                q: "The ratio of the actually irrigated area during a year or during a crop to the culturable irrigable area:",
+                options: ["Capacity coefficient", "Annual intensity", "Crop intensity", "Intensity of irrigation"],
+                ans: 3,
+                sol: "This percentage of CCA is called intensity of irrigation."
+            },
+            {
+                id: 149, exam: "HPPCL JE Civil 2021",
+                q: "The intensity of irrigation for the Kharif season is 40% for an irrigation project with culturable command area of 25000 hectares. The duty for the Kharif season is 1000 hectare/cumec. Assuming transmission loss of 20%, the required discharge at the head of the canal is:",
+                options: ["12.5", "10", "15", "20"],
+                ans: 0,
+                sol: "Area = \\(25000 \\times 0.4 = 10000\\) ha. Field Q = \\(10000/1000 = 10\\). Head Q = \\(10/0.8 = 12.5\\) cumec."
+            },
+            {
+                id: 150, exam: "SSC JE 2020",
+                q: "Which of the following is correct about annual irrigation intensity?",
+                options: ["Minimum value of annual irrigation is desirable.", "It can be greater than 100%", "It is the area in percentage of the cultural command area irrigated in a season.", "It is the area in percentage of the gross command area irrigated in a season."],
+                ans: 1,
+                sol: "Annual irrigation intensity is the sum of intensities of all seasons (e.g., Rabi + Kharif), so it can exceed 100%."
+            },
+            {
+                id: 151, exam: "SSC JE 2020",
+                q: "Find the delta of a crop when its duty is 900 ha/cumec on the field. The base period of the crop is 100 days.",
+                options: ["96 cm", "64 cm", "87 cm", "45 cm"],
+                ans: 0,
+                sol: "\\[ \\Delta = \\frac{8.64 \\times 100}{900} = 0.96 \\text{ m} = 96 \\text{ cm} \\]"
+            },
+            {
+                id: 152, exam: "SSC JE 2020",
+                q: "A certain crop needs 3 cumec of water for irrigating 5100 hectares land up to 10 cm depth. Total 12 watering at an interval of 10 days are needed. Duty and delta (in hectare/cumec and cm respectively) will be:",
+                options: ["51000, 1200", "15300, 0.12", "510, 1.2", "1700, 120"],
+                ans: 3,
+                sol: "Duty = \\(5100/3 = 1700\\). Delta = \\(12 \\text{ waterings} \\times 10 \\text{ cm} = 120 \\text{ cm}\\)."
+            },
+            {
+                id: 153, exam: "SSC JE 2020",
+                q: "Which of the following is a plantation type of crop?",
+                options: ["Ground nut", "Fodder", "Sugarcane", "Tea"],
+                ans: 3,
+                sol: "Plantation crops are cultivated on an extensive scale like tea, coffee, and rubber. Sugarcane is also sometimes considered, but Tea is the primary plantation crop here."
+            },
+            {
+                id: 154, exam: "SSC JE 2020",
+                q: "The number of hectares of land irrigated for full growth of a given crop by supply of 1 m³/s of water continuously during the entire base period of crop is called:",
+                options: ["Duty", "Kor-watering", "Delta", "Crop water"],
+                ans: 0,
+                sol: "This is the standard definition of Duty."
+            },
+            {
+                id: 155, exam: "SSC JE 2020",
+                q: "Which of the following statements is correct?",
+                options: ["Ratio of water diverted to water delivered is water use efficiency.", "Ratio of quantity of water stored into the root zone of the crop to the quantity of water delivered to the field is called water application efficiency.", "Ratio of water used to water delivered is water storage efficiency.", "Ratio of water stored to water needed is conveyance efficiency."],
+                ans: 1,
+                sol: "Water application efficiency \\((\\eta_a)\\) = (Water stored in root zone / Water delivered to field) * 100."
+            },
+            {
+                id: 156, exam: "SSC JE 2020",
+                q: "Duty on capacity is also known as:",
+                options: ["time factor", "nominal duty", "capacity factor", "full supply coefficient"],
+                ans: 3,
+                sol: "The number of hectares irrigable per cumec of the canal capacity at its head is known as full supply coefficient or duty on capacity."
+            },
+            {
+                id: 157, exam: "SSC JE 2020",
+                q: "Two cumec of water is pumped into a farm distribution system. Out of this, 0.8 cumec is delivered to a turn-out. What is the conveyance efficiency?",
+                options: ["60%", "50%", "70%", "40%"],
+                ans: 3,
+                sol: "Eff = (Delivered / Supplied) * 100 = (0.8 / 2) * 100 = 40%."
+            },
+            {
+                id: 158, exam: "SSC JE 2020",
+                q: "The graph showing Moisture Content vs Time (depleting from Field Capacity) represents:",
+                options: ["classes of soil water", "furrow method of irrigation", "base flow of water", "frequency of irrigation"],
+                ans: 3,
+                sol: "It represents the Frequency of Irrigation, showing depletion of available moisture down to PWP or Optimum level and then refilling."
+            },
+            {
+                id: 159, exam: "SSC JE 2020",
+                q: "A crop requires a total depth of 96 cm of water for a base period of 2280 hours. Find the duty of water.",
+                options: ["882 ha/cumec", "855 ha/cumec", "1058 ha/cumec", "765 ha/cumec"],
+                ans: 1,
+                sol: "B = 2280/24 = 95 days. \\[ D = \\frac{8.64 \\times 95}{0.96} = 855 \\text{ ha/cumec} \\]"
+            },
+            {
+                id: 160, exam: "SSC JE 2020",
+                q: "CCA = 1200 ha. Crop A (Intensity 40%, Kor 20 days, Delta 10cm). Crop B (Intensity 35%, Kor 15 days, Delta 16cm). Calculate discharge.",
+                options: ["0.8 m³/s", "0.15 m³/s", "0.28 m³/s", "0.52 m³/s"],
+                ans: 0,
+                sol: "Area A = 480, Duty A = (8.64*20)/0.1 = 1728. Q_A = 480/1728 = 0.277. Area B = 420, Duty B = (8.64*15)/0.16 = 810. Q_B = 420/810 = 0.518. Total Q = 0.8."
+            },
+            {
+                id: 161, exam: "SSC JE 2020",
+                q: "Field capacity = 29%, optimum moisture = 17%, root zone = 80 cm, rel density = 1.302. Frequency = 10 days. Find daily consumptive use.",
+                options: ["0.125 cm", "1.25 cm", "12.5 cm", "125 cm"],
+                ans: 1,
+                sol: "Available moisture depth = \\((0.29 - 0.17) \\times 80 \\times 1.302 = 12.5\\) cm. Daily use = 12.5 / 10 = 1.25 cm/day."
+            },
+            {
+                id: 162, exam: "SSC JE 2020",
+                q: "Kharif Area=3554.4 ha, Duty=1900. Rabi Area=2369.9 ha, Duty=2150. Find avg discharge required.",
+                options: ["1.10 cumecs", "1.25 cumecs", "1.49 cumecs", "1.29 cumecs"],
+                ans: 2,
+                sol: "Q_Kharif = 3554.4/1900 = 1.87. Q_Rabi = 2369.9/2150 = 1.10. Avg = (1.87 + 1.10)/2 = 1.485 approx 1.49."
+            },
+            {
+                id: 163, exam: "SSC JE 2020",
+                q: "In which assessment method is a 'demand statement' prepared after patrolling sowing and maturity?",
+                options: ["Permanent assessment", "Betterment levy basis", "Assessment on composite rate basis", "Assessment on area basis"],
+                ans: 3,
+                sol: "In assessment on area basis, patrol records sowing and maturity to prepare demand statement."
+            },
+            {
+                id: 164, exam: "SSC JE 2020",
+                q: "Find Field Capacity: Root zone=2m, Existing water=5%, Dry density=20, Water applied=500m³, Area=1000m², Loss=10%.",
+                options: ["12%", "20%", "16%", "24%"],
+                ans: 2,
+                sol: "Water Depth applied = (500/1000)*0.9 = 0.45m. Formula: D = F * d * (gamma_d/gamma_w). 0.45 = F * 2 * (20/9.81). F_added = 0.1104 (11%). Total FC = 5% + 11% = 16%."
+            },
+            {
+                id: 165, exam: "RPSC ACF 2021",
+                q: "Base period is 120 days. Duty is 1500 ha/cumec. The delta is:",
+                options: ["69 cm", "54 cm", "35 cm", "54 cm"],
+                ans: 0,
+                sol: "\\[ \\Delta = \\frac{864 \\times 120}{1500} = 69.12 \\approx 69 \\text{ cm} \\]"
+            },
+            {
+                id: 166, exam: "RPSC ACF 2021",
+                q: "What is field capacity?",
+                options: ["Total water content when pores filled", "Water retained against gravity after drainage", "Water content at wilting point", "None of these"],
+                ans: 1,
+                sol: "Field capacity is the amount of soil moisture or water content held in the soil after excess water has drained away (against gravity)."
+            },
+            {
+                id: 167, exam: "SSC JE 2021",
+                q: "Duty is 400 ha/cumec, Base period is 100 days. Delta will be:",
+                options: ["4000 mm", "2160 mm", "6000 mm", "2000 mm"],
+                ans: 1,
+                sol: "\\[ \\Delta = \\frac{8.64 \\times 100}{400} = 2.16 \\text{ m} = 2160 \\text{ mm} \\]"
+            },
+            {
+                id: 168, exam: "SSC JE 2021",
+                q: "Which of the following is Kharif season in India?",
+                options: ["March to June", "Dec to April", "May/June to Oct/Nov", "Oct/Nov to April"],
+                ans: 2,
+                sol: "Kharif is the monsoon season, typically starting May/June and ending Oct/Nov."
+            },
+            {
+                id: 169, exam: "SSC JE 2021",
+                q: "Saturation capacity=47%, yield capacity=27%, PWP=14%. Available moisture is:",
+                options: ["13%", "27%", "20%", "33%"],
+                ans: 0,
+                sol: "Available Moisture = Yield Capacity (Field Capacity) - PWP = 27% - 14% = 13%."
+            },
+            {
+                id: 170, exam: "DSSSB JE 2021",
+                q: "The temperature at which air mass becomes saturated if cooled at constant pressure is called:",
+                options: ["Degree day", "Dew point", "Normal daily temp", "Mean daily temp"],
+                ans: 1,
+                sol: "This is the definition of Dew Point."
+            },
+            {
+                id: 171, exam: "DSSSB JE 2021",
+                q: "A small channel from an outlet of distributary to the field is called:",
+                options: ["Major distributary", "Watercourse", "Branch canal", "Minor distributary"],
+                ans: 1,
+                sol: "Watercourses are small channels maintained by cultivators to take water from government outlets to fields."
+            },
+            {
+                id: 172, exam: "DSSSB JE 2021",
+                q: "Delta of a crop, if Duty is 1500 ha/cumec and Base period is 130 days:",
+                options: ["15 m", "99.69 m", "0.750 m", "1.75 m"],
+                ans: 2,
+                sol: "\\[ \\Delta = \\frac{8.64 \\times 130}{1500} = 0.7488 \\approx 0.75 \\text{ m} \\]"
+            },
+            {
+                id: 173, exam: "DSSSB JE 2021",
+                q: "Measured duty at the head of main canal is known as:",
+                options: ["Gross quantity", "Lateral quantity", "Outlet factor", "Net quantity"],
+                ans: 0,
+                sol: "Head of Main Canal = Gross quantity. Head of Branch = Lateral quantity. Outlet = Outlet factor."
+            },
+            {
+                id: 174, exam: "DSSSB JE 2021",
+                q: "The depth of water table required which affects the growth of Rice is:",
+                options: ["1.5 m", "0.6 m", "2.0 m", "0.8 m"],
+                ans: 1,
+                sol: "Rice generally requires a high water table, approx 60cm (0.6m)."
+            },
+            {
+                id: 175, exam: "HPSSSC JE 2021",
+                q: "15 m³/s water diverted to 30 ha field for 3 hours. 0.4 m stored in root zone. Water application efficiency is:",
+                options: ["74.07%", "66.6%", "65.6%", "70.0%"],
+                ans: 0,
+                sol: "Supplied = \\(15 \\times 3 \\times 3600 = 162000\\). Depth Supplied = \\(162000 / (30 \\times 10^4) = 0.54\\) m. Eff = \\((0.4/0.54) \\times 100 = 74.07\\%\\)."
+            },
+            {
+                id: 176, exam: "Odisha JE 2015",
+                q: "Flow irrigation involves construction of:",
+                options: ["Weir and barrage", "Canal system", "Dam", "All of these"],
+                ans: 3,
+                sol: "Flow irrigation uses gravity, requiring dams/weirs to raise level and canals to transport."
+            },
+            {
+                id: 177, exam: "Odisha JE 2019",
+                q: "The crops that need a lot of water are:",
+                options: ["Rice and maize", "Wheat and maize", "Rice and wheat", "Maize and other grains"],
+                ans: 0,
+                sol: "Rice and Maize are Kharif crops needing significant water (Rice ~120cm)."
+            },
+            {
+                id: 178, exam: "GPSC 2021",
+                q: "FC=22%, PWP=10%, Rel Density=1.3, Root depth=50cm. Irrigation applied at 12% moisture. NIR is:",
+                options: ["3.25 cm", "6.50 cm", "9.75 cm", "13.0 cm"],
+                ans: 1,
+                sol: "Deficit = 22% - 12% = 10% (0.1). NIR = \\(1.3 \\times 50 \\times 0.1 = 6.5\\) cm."
+            },
+            {
+                id: 179, exam: "GPSC 2021",
+                q: "Cotton field 4 sq km, Intensity 60%, Base 200 days, Duty 1200 ha/cumec. Volume required is:",
+                options: ["345.6 ha-m", "3456000 ha-m", "345.6 m³", "345600 m³"],
+                ans: 0,
+                sol: "Area = 400 ha * 0.6 = 240 ha. Delta = (8.64*200)/1200 = 1.44m. Vol = 240 * 1.44 = 345.6 ha-m."
+            }
+        ];
 
-    <a href="irrigation_ch8.html" class="chapter-card">
-        <div class="num">8</div>
-        <div class="details">
-            <h3>Dams & Reservoirs</h3>
-            <span>Gravity & Earthen Dams</span>
-        </div>
-    </a>
+        // --- APP STATE ---
+        let currentQIndex = 0;
+        let answers = new Array(questionsDB.length).fill(null); 
+        let status = new Array(questionsDB.length).fill('skipped');
+        let timerInterval;
+        let timeRemaining = 7200; // 2 hours in seconds
 
-    <a href="irrigation_ch9.html" class="chapter-card">
-        <div class="num">9</div>
-        <div class="details">
-            <h3>Spillway & Energy Dissipators</h3>
-            <span>Hydraulic Jump & Energy Loss</span>
-        </div>
-    </a>
+        // --- INITIALIZATION ---
+        window.onload = function() {
+            try {
+                renderHistory();
+            } catch(e) { console.error("History load error", e); }
+            MathJax.typeset();
+        };
 
-    <a href="irrigation_ch10.html" class="chapter-card">
-        <div class="num">10</div>
-        <div class="details">
-            <h3>Miscellaneous</h3>
-            <span>Other Important Topics</span>
-        </div>
-    </a>
+        function renderHistory() {
+            const hist = JSON.parse(localStorage.getItem('mockHistory')) || [];
+            const container = document.getElementById('history-container');
+            if(hist.length === 0) return;
+            container.innerHTML = hist.map(h => `
+                <div class="history-item">
+                    <span>${h.date}</span>
+                    <span style="font-weight:bold; color:var(--primary)">${h.score}/${h.total} (${h.acc}%)</span>
+                </div>
+            `).join('');
+        }
 
-</div>
+        // --- CORE FUNCTIONS (FIXED) ---
+        function startTest() {
+            try {
+                document.getElementById('start-screen').classList.remove('active');
+                document.getElementById('test-view').classList.add('active');
+                
+                // Initialize State
+                currentQIndex = 0;
+                status.fill('skipped');
+                status[0] = 'current'; 
 
+                // FIX: Build Palette FIRST, so elements exist before we try to access them
+                buildPalette();
+
+                // Then Load Question (which might update palette classes)
+                loadQuestion(0);
+                
+                startTimer();
+            } catch (e) {
+                alert("Error starting test: " + e.message);
+                console.error(e);
+            }
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                let h = Math.floor(timeRemaining / 3600).toString().padStart(2,'0');
+                let m = Math.floor((timeRemaining % 3600) / 60).toString().padStart(2,'0');
+                let s = (timeRemaining % 60).toString().padStart(2,'0');
+                document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+                if(timeRemaining <= 0) submitTest();
+            }, 1000);
+        }
+
+        function loadQuestion(index) {
+            currentQIndex = index;
+            const q = questionsDB[index];
+            const container = document.getElementById('test-body');
+            
+            // Generate Options HTML
+            let optsHtml = q.options.map((opt, i) => `
+                <label class="option ${answers[index] === i ? 'selected' : ''}" onclick="selectOption(${i})">
+                    <input type="radio" name="opt" class="option-radio" ${answers[index] === i ? 'checked' : ''}>
+                    <span>${opt}</span>
+                </label>
+            `).join('');
+
+            container.innerHTML = `
+                <div>
+                    <span class="exam-tag">${q.exam}</span>
+                    <span style="float:right; font-weight:bold; color:#777">Q.${index + 141}</span>
+                </div>
+                <div class="question-text">${q.q}</div>
+                <div class="option-container">${optsHtml}</div>
+            `;
+            
+            // Re-render MathJax
+            MathJax.typesetPromise();
+            updatePaletteUI();
+        }
+
+        function selectOption(optIndex) {
+            answers[currentQIndex] = optIndex;
+            // Update UI immediately
+            const opts = document.querySelectorAll('.option');
+            opts.forEach(o => o.classList.remove('selected'));
+            opts[optIndex].classList.add('selected');
+            document.querySelectorAll('.option-radio')[optIndex].checked = true;
+        }
+
+        function saveAndNext() {
+            // Update status based on answer
+            if(answers[currentQIndex] !== null) {
+                if(status[currentQIndex] !== 'review') status[currentQIndex] = 'answered';
+            } else {
+                 if(status[currentQIndex] !== 'review') status[currentQIndex] = 'skipped';
+            }
+            
+            // Move to next or finish
+            if(currentQIndex < questionsDB.length - 1) {
+                if(status[currentQIndex+1] === 'skipped') status[currentQIndex+1] = 'current';
+                loadQuestion(currentQIndex + 1);
+            } else {
+               togglePalette();
+            }
+        }
+
+        function markForReview() {
+            status[currentQIndex] = 'review';
+            updatePaletteUI();
+            if(currentQIndex < questionsDB.length - 1) loadQuestion(currentQIndex + 1);
+        }
+
+        function clearResponse() {
+            answers[currentQIndex] = null;
+            status[currentQIndex] = 'current';
+            loadQuestion(currentQIndex); 
+        }
+
+        function jumpTo(index) {
+            currentQIndex = index;
+            loadQuestion(index);
+            togglePalette();
+        }
+
+        function exitTest() {
+            if(confirm("Are you sure you want to exit? Progress will be lost.")) {
+                location.reload();
+            }
+        }
+
+        function buildPalette() {
+            const grid = document.getElementById('palette-grid');
+            if(!grid) return; // safety
+            grid.innerHTML = questionsDB.map((_, i) => `
+                <div class="palette-item p-skipped" id="p-item-${i}" onclick="jumpTo(${i})">
+                    ${i + 141}
+                </div>
+            `).join('');
+        }
+
+        function updatePaletteUI() {
+            questionsDB.forEach((_, i) => {
+                const item = document.getElementById(`p-item-${i}`);
+                if (!item) return; // Prevents the "Cannot set property of null" error
+                
+                item.className = 'palette-item'; // reset classes
+                
+                if (i === currentQIndex) {
+                    item.classList.add('p-current');
+                } else if (status[i] === 'answered') {
+                    item.classList.add('p-answered');
+                } else if (status[i] === 'review') {
+                    item.classList.add('p-review');
+                } else {
+                    item.classList.add('p-skipped');
+                }
+            });
+        }
+
+        function togglePalette() {
+            const drawer = document.getElementById('palette-drawer');
+            const overlay = document.getElementById('palette-overlay');
+            if(drawer.classList.contains('open')) {
+                drawer.classList.remove('open');
+                overlay.style.display = 'none';
+            } else {
+                drawer.classList.add('open');
+                overlay.style.display = 'block';
+                updatePaletteUI();
+            }
+        }
+
+        function submitTest() {
+            clearInterval(timerInterval);
+            document.getElementById('test-view').classList.remove('active');
+            document.getElementById('palette-drawer').classList.remove('open');
+            document.getElementById('palette-overlay').style.display = 'none';
+            document.getElementById('result-screen').classList.add('active');
+
+            let score = 0, correct = 0, wrong = 0, skipped = 0;
+
+            answers.forEach((ans, i) => {
+                if(ans === null) {
+                    skipped++;
+                } else if(ans === questionsDB[i].ans) {
+                    score++;
+                    correct++;
+                } else {
+                    wrong++;
+                }
+            });
+
+            document.getElementById('score-val').innerText = score;
+            const accuracy = (correct + wrong) > 0 ? Math.round((correct / (correct + wrong)) * 100) : 0;
+            document.getElementById('accuracy-val').innerText = `Accuracy: ${accuracy}%`;
+            
+            document.getElementById('res-correct').innerText = correct;
+            document.getElementById('res-wrong').innerText = wrong;
+            document.getElementById('res-skipped').innerText = skipped;
+            
+            let timeUsed = 7200 - timeRemaining;
+            let m = Math.floor(timeUsed / 60);
+            let s = timeUsed % 60;
+            document.getElementById('res-time').innerText = `${m}m ${s}s`;
+
+            try {
+                const hist = JSON.parse(localStorage.getItem('mockHistory')) || [];
+                hist.unshift({
+                    date: new Date().toLocaleDateString(),
+                    score: score,
+                    total: questionsDB.length,
+                    acc: accuracy
+                });
+                localStorage.setItem('mockHistory', JSON.stringify(hist.slice(0, 10)));
+            } catch(e) { console.error("History save failed", e); }
+
+            renderSolutions();
+        }
+        
+        function renderSolutions() {
+            const container = document.getElementById('solutions-container');
+            container.innerHTML = questionsDB.map((q, i) => {
+                let badge = '', userAnsText = '';
+                
+                if(answers[i] === null) {
+                    badge = '<span class="badge badge-skip">Skipped</span>';
+                    userAnsText = 'Not Answered';
+                } else if(answers[i] === q.ans) {
+                    badge = '<span class="badge badge-correct">Correct</span>';
+                    userAnsText = q.options[answers[i]];
+                } else {
+                    badge = '<span class="badge badge-wrong">Wrong</span>';
+                    userAnsText = `<span style="text-decoration:line-through">${q.options[answers[i]]}</span>`;
+                }
+
+                return `
+                <div class="solution-card">
+                    <div class="sol-header">
+                        <span style="font-weight:bold; color:#555">Q.${141+i}</span>
+                        ${badge}
+                    </div>
+                    <div style="font-weight:500; margin-bottom:10px">${q.q}</div>
+                    <div style="font-size:0.9em; color:#666; margin-bottom:10px">
+                        Your Answer: <strong>${userAnsText}</strong><br>
+                        Correct Answer: <strong style="color:var(--success)">${q.options[q.ans]}</strong>
+                    </div>
+                    <button class="toggle-btn" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display==='none'?'block':'none'">
+                        View Solution <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="sol-text" style="display:none">
+                        <strong>Explanation:</strong><br>
+                        ${q.sol}
+                    </div>
+                </div>`;
+            }).join('');
+            
+            MathJax.typesetPromise();
+        }
+
+        function showStartScreen() {
+            location.reload();
+        }
+    </script>
 </body>
-</html>       
-           
+</html>
