@@ -5,14 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Irrigation Engg Mock (Q310-361)</title>
     <style>
-        /* CRITERIA 1: Mobile App Interface (Clean, Testbook-like) */
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
         
         :root {
-            --primary: #127cc0; /* Testbook-ish Blue */
+            --primary: #127cc0; /* Testbook Blue */
             --green: #2dbd5c;   /* Answered */
-            --red: #e74c3c;     /* Skipped/Exit */
-            --purple: #8e44ad;  /* Mark for Review */
+            --red: #e74c3c;     /* Skipped */
+            --purple: #8e44ad;  /* Review */
             --gray: #ecf0f1;    /* Not Visited */
             --text: #333;
             --light-bg: #f5f7f9;
@@ -21,125 +20,144 @@
         * { box-sizing: border-box; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: var(--light-bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* HEADER & CRITERIA 2 (Timer) & 9 (Exit) */
-        header {
-            background: #fff; padding: 0 15px; height: 55px; display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 10;
-        }
-        .timer { font-weight: 700; color: #333; font-size: 1.1rem; background: #eef2f5; padding: 5px 10px; border-radius: 4px; }
-        .exit-btn { background: var(--red); color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; cursor: pointer; }
+        /* --- SCREENS --- */
+        .screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; display: none; overflow-y: auto; }
+        .screen.active { display: flex; flex-direction: column; }
 
-        /* LAYOUT & CRITERIA 3 (Palette) */
+        /* 1. START SCREEN */
+        #start-screen { align-items: center; justify-content: center; padding: 20px; text-align: center; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); }
+        .start-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 400px; width: 100%; }
+        .start-btn { background: var(--primary); color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 1.2rem; font-weight: bold; cursor: pointer; margin-top: 20px; box-shadow: 0 4px 10px rgba(18, 124, 192, 0.3); transition: transform 0.2s; }
+        .start-btn:active { transform: scale(0.95); }
+
+        /* 2. QUIZ SCREEN */
+        /* Header */
+        header { background: #fff; padding: 0 15px; height: 60px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 10; flex-shrink: 0; }
+        .timer { font-weight: 700; color: #333; font-size: 1.1rem; background: #eef2f5; padding: 5px 12px; border-radius: 4px; border: 1px solid #ddd; }
+        .submit-header-btn { background: var(--red); color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; font-size: 0.9rem; cursor: pointer; }
+
+        /* Layout */
         .container { display: flex; flex: 1; overflow: hidden; position: relative; }
+        .main-content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 80px; }
         
-        .main-content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 70px; }
+        /* Sidebar */
+        .sidebar { width: 300px; background: #fff; border-left: 1px solid #ddd; display: flex; flex-direction: column; position: absolute; right: 0; top: 0; bottom: 0; transform: translateX(100%); transition: 0.3s; z-index: 100; box-shadow: -5px 0 15px rgba(0,0,0,0.1); }
+        .sidebar.open { transform: translateX(0); }
         
-        .sidebar {
-            width: 280px; background: #fff; border-left: 1px solid #ddd; display: flex; flex-direction: column;
-            position: absolute; right: 0; top: 0; bottom: 0; transform: translateX(100%); transition: 0.3s; z-index: 100;
-        }
-        .sidebar.active { transform: translateX(0); box-shadow: -5px 0 15px rgba(0,0,0,0.1); }
+        /* Question Card */
+        .q-card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        .meta { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 0.85rem; color: #666; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .tag { background: #e1f0fa; color: var(--primary); padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; }
+        .q-text { font-size: 1.1rem; line-height: 1.6; color: #2c3e50; font-weight: 500; margin-bottom: 25px; }
 
-        /* QUESTION STYLING & CRITERIA 7 (Exam Tags) */
-        .q-card { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 15px; }
-        .meta { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.85rem; color: #666; }
-        .tag { background: #e1f0fa; color: var(--primary); padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; }
-        .q-text { font-size: 1.05rem; line-height: 1.5; color: #2c3e50; font-weight: 500; margin-bottom: 20px; }
+        /* Options */
+        .opt { display: flex; align-items: flex-start; padding: 14px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; background: #fff; }
+        .opt:hover { background: #f8fbff; border-color: #b3d7ff; }
+        .opt.selected { border-color: var(--primary); background: #f0f7fc; box-shadow: 0 0 0 1px var(--primary) inset; }
+        .circle { width: 24px; height: 24px; border: 2px solid #ccc; border-radius: 50%; margin-right: 15px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; font-size: 12px; font-weight: bold; color: #777; }
+        .opt.selected .circle { border-color: var(--primary); background: var(--primary); color: white; }
 
-        /* CRITERIA 5: One Click Option */
-        .opt { display: flex; align-items: flex-start; padding: 12px; border: 1px solid #e0e0e0; border-radius: 6px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; background: #fff; }
-        .opt:hover { background: #f9f9f9; }
-        .opt.selected { border-color: var(--primary); background: #f0f7fc; }
-        .circle { width: 20px; height: 20px; border: 2px solid #ccc; border-radius: 50%; margin-right: 12px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; font-size: 10px; color: white; }
-        .opt.selected .circle { border-color: var(--primary); background: var(--primary); }
-
-        /* FOOTER & CRITERIA 10 (Mark Review) */
-        footer {
-            position: fixed; bottom: 0; width: 100%; height: 60px; background: #fff; border-top: 1px solid #eee;
-            display: flex; justify-content: space-between; align-items: center; padding: 0 10px; z-index: 50;
-        }
-        .btn { padding: 10px 15px; border-radius: 4px; border: 1px solid #ddd; background: #fff; font-weight: 600; cursor: pointer; font-size: 0.9rem; }
+        /* Footer */
+        footer { position: fixed; bottom: 0; width: 100%; height: 60px; background: #fff; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; z-index: 50; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .btn { padding: 10px 18px; border-radius: 6px; border: 1px solid #ddd; background: #fff; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: background 0.2s; }
+        .btn:active { transform: scale(0.98); }
         .btn-main { background: var(--green); color: white; border: none; }
         .btn-rev { color: var(--purple); border-color: var(--purple); }
+        .btn-rev:hover { background: #fbf5ff; }
 
-        /* PALETTE GRID & CRITERIA 4 (Color Coding) */
-        .p-header { padding: 15px; background: #f8f9fa; border-bottom: 1px solid #eee; font-weight: bold; display: flex; justify-content: space-between; }
-        .grid { padding: 10px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; overflow-y: auto; flex: 1; }
-        .p-item {
-            height: 35px; width: 35px; display: flex; justify-content: center; align-items: center;
-            border-radius: 4px; font-size: 0.8rem; font-weight: bold; cursor: pointer; border: 1px solid #e0e0e0; background: #fff;
-        }
+        /* Palette Grid */
+        .p-header { padding: 15px; background: #f8f9fa; border-bottom: 1px solid #eee; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .grid { padding: 10px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; overflow-y: auto; flex: 1; align-content: start; }
+        .p-item { height: 40px; width: 40px; display: flex; justify-content: center; align-items: center; border-radius: 6px; font-size: 0.9rem; font-weight: bold; cursor: pointer; border: 1px solid #e0e0e0; background: #fff; color: #555; }
         .p-item.current { border: 2px solid var(--primary); }
-        .p-item.ans { background: var(--green); color: white; border: none; border-radius: 50%; border-bottom-right-radius: 4px; }
+        .p-item.ans { background: var(--green); color: white; border: none; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 20%); border-radius: 4px; }
         .p-item.rev { background: var(--purple); color: white; border: none; border-radius: 50%; }
         .p-item.skip { background: var(--red); color: white; border: none; border-radius: 50%; }
-        .p-item.not { background: var(--gray); color: #777; }
-
-        /* CRITERIA 6: Solutions & Report Card */
-        #result-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:2000; display:none; overflow-y: auto; padding: 20px; }
-        .score-box { text-align: center; padding: 20px; background: linear-gradient(135deg, #127cc0, #0b4e7a); color: white; border-radius: 10px; margin-bottom: 20px; }
-        .sol-item { border: 1px solid #eee; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: #fff; }
-        .badge { padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-left: 10px; }
-        .b-correct { background: #d4edda; color: #155724; }
-        .b-wrong { background: #f8d7da; color: #721c24; }
-        .b-skip { background: #e2e3e5; color: #383d41; }
-        .expl { background: #f8f9fa; padding: 10px; margin-top: 10px; border-left: 3px solid var(--primary); font-size: 0.9rem; }
-
-        /* CRITERIA 8: History */
-        #history-btn { font-size: 0.8rem; color: var(--primary); text-decoration: underline; background: none; border: none; cursor: pointer; }
+        
+        /* 3. RESULT SCREEN */
+        #result-screen { padding: 20px; background: #f0f2f5; }
+        .score-card { background: white; padding: 30px; border-radius: 10px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .big-score { font-size: 3rem; font-weight: bold; color: var(--primary); margin: 10px 0; }
+        .sol-container { max-width: 800px; margin: 0 auto; }
+        .sol-card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 15px; border: 1px solid #e1e4e8; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; display: inline-block; }
+        .b-correct { background: #e6fffa; color: #00bfa5; }
+        .b-wrong { background: #fff5f5; color: #e53e3e; }
+        .b-skip { background: #edf2f7; color: #718096; }
+        .expl { background: #f7fafc; padding: 15px; margin-top: 15px; border-radius: 6px; border-left: 4px solid var(--primary); font-size: 0.95rem; color: #4a5568; }
 
     </style>
 </head>
 <body>
 
-<header>
-    <div>
-        <span style="font-weight:bold; font-size:1.1rem;">Irrigation Test</span>
-        <button id="history-btn" onclick="showHistory()">History</button>
+    <div id="start-screen" class="screen active">
+        <div class="start-card">
+            <h1 style="color:var(--primary); margin-bottom:10px;">Irrigation Engineering</h1>
+            <h3 style="color:#555; margin-bottom:20px;">Mock Test (Q310 - Q361)</h3>
+            <div style="text-align:left; margin-bottom:20px; color:#666; font-size:0.95rem;">
+                <p>✅ <b>Total Questions:</b> 52</p>
+                <p>⏱ <b>Time:</b> 120 Minutes</p>
+                <p>🎯 <b>Correct:</b> +1.0 | <b>Wrong:</b> -0.25</p>
+            </div>
+            <button class="start-btn" onclick="startTest()">Start Test Now</button>
+            <br><br>
+            <button onclick="showHistory()" style="background:none; border:none; color:#666; text-decoration:underline; cursor:pointer;">View History</button>
+        </div>
     </div>
-    <div class="timer" id="timer">02:00:00</div>
-    <button class="exit-btn" onclick="submitTest()">EXIT</button>
-</header>
 
-<div class="container">
-    <div class="main-content" id="q-area">
+    <div id="quiz-screen" class="screen">
+        <header>
+            <div style="font-weight:bold; font-size:1.1rem; color:#333;">Irrigation Test</div>
+            <div class="timer" id="timer">02:00:00</div>
+            <button class="submit-header-btn" onclick="submitTest()">Submit Test</button>
+        </header>
+
+        <div class="container">
+            <div class="main-content" id="q-area">
+                </div>
+
+            <div class="sidebar" id="sidebar">
+                <div class="p-header">
+                    <span>Question Palette</span>
+                    <span onclick="toggleSidebar()" style="cursor:pointer; font-size:1.2rem;">&times;</span>
+                </div>
+                <div style="padding:10px; font-size:0.8rem; background:#fff; border-bottom:1px solid #eee;">
+                    <span style="color:var(--green)">● Ans</span> &nbsp;
+                    <span style="color:var(--red)">● Skip</span> &nbsp;
+                    <span style="color:var(--purple)">● Rev</span> &nbsp;
+                    <span style="color:#999">● Not Vis</span>
+                </div>
+                <div class="grid" id="grid">
+                    </div>
+                <div style="padding:15px; border-top:1px solid #ddd; text-align:center;">
+                    <button class="submit-header-btn" style="width:100%; background:var(--primary);" onclick="submitTest()">Submit Test</button>
+                </div>
+            </div>
         </div>
 
-    <div class="sidebar" id="sidebar">
-        <div class="p-header">
-            <span>Questions</span>
-            <span onclick="toggleSidebar()" style="cursor:pointer">✕</span>
-        </div>
-        <div style="padding:10px; font-size:0.75rem; display:flex; gap:10px; flex-wrap:wrap;">
-            <span style="color:var(--green)">● Ans</span>
-            <span style="color:var(--red)">● Skip</span>
-            <span style="color:var(--purple)">● Review</span>
-            <span style="color:#999">● Not Visit</span>
-        </div>
-        <div class="grid" id="grid"></div>
+        <footer>
+            <button class="btn" onclick="prevQ()">Previous</button>
+            <button class="btn btn-rev" onclick="markReview()">Mark Review</button>
+            <button class="btn" onclick="toggleSidebar()">Palette</button>
+            <button class="btn btn-main" onclick="nextQ()">Save & Next</button>
+        </footer>
     </div>
-</div>
 
-<footer>
-    <button class="btn" onclick="prevQ()">Previous</button>
-    <button class="btn btn-rev" onclick="markReview()">Review</button>
-    <button class="btn" onclick="toggleSidebar()">Grid</button>
-    <button class="btn btn-main" onclick="nextQ()">Save & Next</button>
-</footer>
-
-<div id="result-modal">
-    <div class="score-box">
-        <h1 id="score-txt">0 / 52</h1>
-        <p>Accuracy: <span id="acc-txt">0%</span></p>
-        <button class="btn" style="color:#333; background:white; margin-top:10px;" onclick="location.reload()">Close & Retry</button>
+    <div id="result-screen" class="screen">
+        <div class="score-card">
+            <h2>Test Submitted Successfully!</h2>
+            <div class="big-score" id="score-txt">0/52</div>
+            <p style="color:#666;">Accuracy: <span id="acc-txt">0%</span></p>
+            <div style="margin-top:20px;">
+                <button class="btn" onclick="location.reload()">Back to Home</button>
+            </div>
+        </div>
+        <h3 style="text-align:center; color:#444;">Detailed Solutions</h3>
+        <div class="sol-container" id="sol-container"></div>
     </div>
-    <h3>Detailed Solutions</h3>
-    <div id="sol-container"></div>
-</div>
 
 <script>
-    // CRITERIA 11 & 12: Full Data (Q310-361) & Bug Free
-    // Data compressed to save space but expands in UI: q=text, o=options, a=answer_index, t=tag, s=solution
+    // --- FULL DATA (Q310-Q361) ---
     const db = [
 {i:310,t:"DMRC 26.02.2020",q:"What is the depth of water to be applied for a particular stage of the growth of a crop when the amount of water available in the soil is 35%, if 0% of the maximum depth of available water in the root zone which is 80 mm and assuming irrigation efficiency is 60%?",o:["84 mm","90 mm","87 mm","81 mm"],a:2,s:"Water req = (Max Depth * (1-0.35)) / Eff = (80 * 0.65) / 0.60 = 86.66 ≈ 87mm."},
 {i:311,t:"WBPSC JE 2009",q:"The duty of a crop is 432 hectares/cumec, when the base period of the crop is 100 days. Delta for the crop will be:",o:["132","200","464","846"],a:1,s:"Delta = 8.64B/D = 8.64*100/432 = 200cm."},
@@ -153,7 +171,7 @@
 {i:319,t:"DMRC JE 2018",q:"The method of growing crops in rotation, one after the other, in the same field, is known as:",o:["Crop development","Crop rotation","Mixed farming","Crop optimization"],a:1,s:"It is Crop Rotation."},
 {i:320,t:"Nagaland PSC 2016",q:"Mixed crop of the following is",o:["Rice","Wheat","Sugarcane","Wheat and gram"],a:3,s:"Wheat and Gram is a common mixed crop."},
 {i:321,t:"Nagaland PSC 2016",q:"C.C.A means",o:["Gross commanded area","Culturable commanded area","Irrigated area","Uncultivated area"],a:1,s:"Culturable Commanded Area."},
-{i:322,t:"APPSC AE 2016",q:"If average rate of infiltration is 5 cm/h, what will be the maximum area that can be irrigated by a stream with a discharge of 0.05 m³/s?",o:["0.36 hectares","36 hectares","0.864 hectares","0.25 hectares"],a:0,s:"A = Q/f = 0.05 / 0.05 = 1 m²? No units: f=0.05m/hr. Q=180m³/hr. A=3600m²=0.36ha."},
+{i:322,t:"APPSC AE 2016",q:"If average rate of infiltration is 5 cm/h, what will be the maximum area that can be irrigated by a stream with a discharge of 0.05 m³/s?",o:["0.36 hectares","36 hectares","0.864 hectares","0.25 hectares"],a:0,s:"f=0.05m/hr. Q=180m³/hr. A=Q/f=3600m²=0.36ha."},
 {i:323,t:"KPSC JE 2017",q:"GCA 6000 ha, 80% CCA. Intensity Kharif 25%. Area Kharif?",o:["600","1200","2400","4800"],a:1,s:"CCA=4800. Area=0.25*4800=1200."},
 {i:324,t:"KPSC JE 2017",q:"60% Kharif and 46% Rabi without water. Intensity?",o:["126%","80%","124%","94%"],a:3,s:"(100-60) + (100-46) = 94%."},
 {i:325,t:"Assam Engg 2021",q:"Water stored 60cm, Required 80cm. Storage Efficiency?",o:["50%","66.67%","100%","75%"],a:3,s:"(60/80)*100 = 75%."},
@@ -197,22 +215,23 @@
 
     let curr = 0;
     let time = 2 * 3600;
-    let answers = {}; // { index: { opt: number, status: 'ans'|'rev'|'skip' } }
+    let answers = {};
+    let timerRef;
 
-    const qArea = document.getElementById('q-area');
-    const grid = document.getElementById('grid');
-    const timerEl = document.getElementById('timer');
-
-    function init() {
+    // --- LOGIC ---
+    function startTest() {
+        document.getElementById('start-screen').classList.remove('active');
+        document.getElementById('quiz-screen').classList.add('active');
         renderGrid();
         loadQ(0);
-        setInterval(() => {
+        
+        timerRef = setInterval(() => {
             time--;
             if(time <= 0) submitTest();
             let h = Math.floor(time/3600).toString().padStart(2,'0');
             let m = Math.floor((time%3600)/60).toString().padStart(2,'0');
             let s = (time%60).toString().padStart(2,'0');
-            timerEl.innerText = `${h}:${m}:${s}`;
+            document.getElementById('timer').innerText = `${h}:${m}:${s}`;
         }, 1000);
     }
 
@@ -222,107 +241,123 @@
         const status = answers[idx] ? answers[idx].status : 'not';
         const sel = answers[idx] ? answers[idx].opt : null;
 
-        let html = `
+        const html = `
             <div class="q-card">
                 <div class="meta">
                     <span class="tag">${d.t}</span>
-                    <span style="color:var(--green)">+1.0</span> / <span style="color:var(--red)">-0.25</span>
+                    <span>Q${d.i}</span>
+                    <span style="font-weight:bold; color:#666;">+1.0 / -0.25</span>
                 </div>
-                <div class="q-text">Q${d.i}. ${d.q}</div>
+                <div class="q-text">${d.q}</div>
                 <div class="opts">
                     ${d.o.map((o, i) => `
                         <div class="opt ${sel === i ? 'selected' : ''}" onclick="saveAns(${idx}, ${i})">
                             <div class="circle">${String.fromCharCode(65+i)}</div>
-                            <div>${o}</div>
+                            <div style="flex:1;">${o}</div>
                         </div>
                     `).join('')}
                 </div>
             </div>
         `;
-        qArea.innerHTML = html;
+        document.getElementById('q-area').innerHTML = html;
         updateGrid();
     }
 
     function saveAns(qIdx, oIdx) {
         if(!answers[qIdx]) answers[qIdx] = {};
         answers[qIdx].opt = oIdx;
-        answers[qIdx].status = 'ans'; // Green immediately on click
-        loadQ(qIdx); // Re-render to show selection
+        answers[qIdx].status = 'ans';
+        loadQ(qIdx); // Refresh
     }
 
     function markReview() {
         if(!answers[curr]) answers[curr] = {};
-        answers[curr].status = 'rev'; // Purple
+        answers[curr].status = 'rev';
         updateGrid();
         nextQ();
     }
 
     function nextQ() {
-        if(!answers[curr]) answers[curr] = {status: 'skip'}; // Gray if moving without answer
+        if(!answers[curr]) answers[curr] = {status: 'skip'};
         if(curr < db.length - 1) loadQ(curr + 1);
     }
     function prevQ() { if(curr > 0) loadQ(curr - 1); }
 
     function renderGrid() {
-        grid.innerHTML = db.map((_, i) => `<div class="p-item not" id="p-${i}" onclick="loadQ(${i})">${i+310}</div>`).join('');
+        const grid = document.getElementById('grid');
+        grid.innerHTML = db.map((_, i) => `
+            <div id="p-${i}" class="p-item" onclick="loadQ(${i})">${i+310}</div>
+        `).join('');
     }
 
     function updateGrid() {
         db.forEach((_, i) => {
             const el = document.getElementById(`p-${i}`);
-            el.className = `p-item ${answers[i] ? answers[i].status : 'not'} ${i === curr ? 'current' : ''}`;
+            let cls = 'p-item';
+            if(i === curr) cls += ' current';
+            if(answers[i]) cls += ` ${answers[i].status}`;
+            el.className = cls;
         });
     }
 
     function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('sidebar').classList.toggle('open');
     }
 
     function submitTest() {
-        if(!confirm("Submit Test?")) return;
+        if(!confirm("Are you sure you want to Submit the Test?")) return;
         
-        let score = 0, correct = 0, att = 0;
-        let solHtml = '';
-        
+        clearInterval(timerRef);
+        document.getElementById('quiz-screen').classList.remove('active');
+        document.getElementById('result-screen').classList.add('active');
+
+        let score = 0, att = 0, correct = 0;
+        let html = '';
+
         db.forEach((d, i) => {
             const a = answers[i];
             let badge = '<span class="badge b-skip">Skipped</span>';
             if(a && a.opt !== undefined) {
                 att++;
-                if(a.opt === d.a) { score++; correct++; badge = '<span class="badge b-correct">Correct</span>'; }
-                else { score -= 0.25; badge = '<span class="badge b-wrong">Wrong</span>'; }
+                if(a.opt === d.a) {
+                    score += 1; correct++; badge = '<span class="badge b-correct">Correct</span>';
+                } else {
+                    score -= 0.25; badge = '<span class="badge b-wrong">Wrong</span>';
+                }
             }
-            
-            solHtml += `
-                <div class="sol-item">
-                    <div style="font-weight:bold; margin-bottom:5px;">Q${d.i} (${d.t}) ${badge}</div>
-                    <div>${d.q}</div>
-                    <div style="margin-top:5px; font-size:0.9rem;">
-                        Your: <b>${a && a.opt !== undefined ? String.fromCharCode(65+a.opt) : '-'}</b> | 
-                        Correct: <b style="color:var(--green)">${String.fromCharCode(65+d.a)}</b>
+
+            html += `
+                <div class="sol-card">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <span style="font-weight:bold;">Q${d.i} (${d.t})</span>
+                        ${badge}
                     </div>
-                    <div class="expl"><b>Sol:</b> ${d.s}</div>
+                    <p style="margin-bottom:10px;">${d.q}</p>
+                    <div style="font-size:0.9rem;">
+                        Your Answer: <b>${a && a.opt !== undefined ? String.fromCharCode(65+a.opt) : '-'}</b> | 
+                        Correct Answer: <b style="color:var(--green)">${String.fromCharCode(65+d.a)}</b>
+                    </div>
+                    <div class="expl"><b>Solution:</b> ${d.s}</div>
                 </div>
             `;
         });
 
-        // Save History (Criterion 8)
-        let hist = JSON.parse(localStorage.getItem('testHist') || '[]');
-        hist.push({date: new Date().toLocaleDateString(), score: score});
-        localStorage.setItem('testHist', JSON.stringify(hist));
+        // Save History
+        let hist = JSON.parse(localStorage.getItem('myTestHistory') || '[]');
+        hist.push({ date: new Date().toLocaleString(), score: score });
+        localStorage.setItem('myTestHistory', JSON.stringify(hist));
 
         document.getElementById('score-txt').innerText = `${score} / ${db.length}`;
         document.getElementById('acc-txt').innerText = att ? ((correct/att)*100).toFixed(1)+'%' : '0%';
-        document.getElementById('sol-container').innerHTML = solHtml;
-        document.getElementById('result-modal').style.display = 'block';
+        document.getElementById('sol-container').innerHTML = html;
     }
 
     function showHistory() {
-        let hist = JSON.parse(localStorage.getItem('testHist') || '[]');
-        alert("Previous Scores:\n" + hist.map(h => `${h.date}: ${h.score}`).join('\n'));
+        let hist = JSON.parse(localStorage.getItem('myTestHistory') || '[]');
+        if(hist.length === 0) alert("No history found.");
+        else alert(hist.map(h => `${h.date}: ${h.score}`).join('\n'));
     }
 
-    init();
 </script>
 </body>
 </html>
