@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civil Engineering Practice - Detailed</title>
+    <style>
+        /* --- CSS STYLES --- */
+        :root {
+            --primary: #007bff; /* Testbook Blue */
+            --success: #28a745; /* Green */
+            --danger: #dc3545; /* Red */
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --selected: #cce5ff;
+            --answered-color: #28a745;
+            --skipped-color: #6c757d;
+            --review-color: #6f42c1;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        body { margin: 0; padding: 0; background-color: #f5f5f5; height: 100vh; display: flex; flex-direction: column; }
+
+        /* UTILITIES */
+        .hidden { display: none !important; }
+        .btn { border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { background: white; border: 1px solid var(--primary); color: var(--primary); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-sm { padding: 5px 10px; font-size: 0.85rem; }
+        
+        /* START SCREEN */
+        #start-screen {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: white; padding: 20px; text-align: center;
+        }
+        .stats-card {
+            background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+            border-radius: 8px; padding: 15px; margin-top: 20px; width: 100%; max-width: 400px;
+            text-align: left;
+        }
+
+        /* HEADER */
+        header {
+            background: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); height: 60px; z-index: 100;
+        }
+        .timer-box { font-size: 1.1rem; font-weight: bold; color: var(--dark); background: #f0f0f0; padding: 5px 10px; border-radius: 4px; }
+
+        /* MAIN LAYOUT */
+        #quiz-container { flex: 1; display: flex; overflow: hidden; position: relative; }
+
+        /* LEFT: QUESTION AREA */
+        #question-area {
+            flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 80px;
+        }
+        .exam-tag {
+            font-size: 0.75rem; background: #e3f2fd; color: var(--primary); 
+            padding: 4px 8px; border-radius: 12px; font-weight: bold; display: inline-block; margin-bottom: 5px;
+        }
+        .q-text { font-size: 1.1rem; font-weight: 500; color: #212529; margin-bottom: 20px; line-height: 1.5; }
+        
+        /* OPTIONS */
+        .options-grid { display: flex; flex-direction: column; gap: 10px; }
+        .option-btn {
+            background: white; border: 1px solid #ced4da; padding: 12px 15px; border-radius: 8px;
+            text-align: left; font-size: 1rem; color: #495057; position: relative; cursor: pointer; transition: 0.2s;
+        }
+        .option-btn:hover { background-color: #f8f9fa; }
+        
+        /* STATES */
+        .option-btn.selected { background-color: var(--selected); border-color: var(--primary); color: var(--primary); font-weight: bold; }
+        .option-btn.correct { border-color: var(--success); background-color: #d4edda; color: #155724; }
+        .option-btn.wrong { border-color: var(--danger); background-color: #f8d7da; color: #721c24; }
+        
+        /* SOLUTION BOX */
+        .solution-box {
+            margin-top: 20px; background: #fffcf0; border: 1px solid #f0e68c; 
+            padding: 15px; border-radius: 6px; font-size: 0.95rem; color: #333;
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .solution-title { font-weight: bold; margin-bottom: 8px; display: block; color: #856404; text-decoration: underline; }
+        .sol-text { white-space: pre-wrap; font-family: inherit; line-height: 1.6; }
+        .sol-text strong { color: #000; }
+
+        /* RIGHT: PALETTE SIDEBAR */
+        #palette-sidebar {
+            width: 300px; background: white; border-left: 1px solid #ddd; display: flex; flex-direction: column;
+        }
+        .palette-grid {
+            padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; overflow-y: auto; flex: 1;
+        }
+        .palette-btn {
+            width: 35px; height: 35px; border-radius: 50%; border: 1px solid #ddd; background: white;
+            display: flex; align-items: center; justify-content: center; font-size: 0.85rem; cursor: pointer;
+        }
+        .palette-btn.current { border: 2px solid var(--primary); font-weight: bold; }
+        .palette-btn.answered { background: var(--answered-color); color: white; border: none; }
+        .palette-btn.review { background: var(--review-color); color: white; border: none; }
+        .palette-btn.review-answered { background: var(--review-color); color: white; position: relative; }
+        .palette-btn.review-answered::after { content:''; position: absolute; bottom: 2px; right: 2px; width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
+
+        /* FOOTER */
+        footer {
+            position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: white;
+            border-top: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; padding: 0 15px;
+            z-index: 90;
+        }
+        .footer-left, .footer-right { display: flex; gap: 10px; align-items: center; }
+        .review-check { display: flex; align-items: center; gap: 5px; font-size: 0.9rem; }
+        
+        /* MOBILE */
+        @media (max-width: 768px) {
+            #palette-sidebar {
+                position: absolute; top: 0; right: 0; bottom: 0; z-index: 101;
+                transform: translateX(100%); transition: transform 0.3s; box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+            }
+            #palette-sidebar.open { transform: translateX(0); }
+            footer { padding: 0 10px; }
+            .btn span { display: none; } /* Hide text on small screens if needed */
+        }
+        #overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); 
+            z-index: 100; display: none;
+        }
+        #overlay.show { display: block; }
+        
+        .footer-credit { font-size: 0.75rem; color: #aaa; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen">
+        <h2>Civil Engineering Practice</h2>
+        <p style="color: #666;">Target: SSC JE, State AE/JE</p>
+        <p><strong>Topic:</strong> Cement (Building Materials)</p>
+        <p><strong>Questions:</strong> 675 - 706</p>
+        
+        <button class="btn btn-primary" style="padding: 15px 40px; font-size: 1.2rem; margin: 20px 0;" onclick="startQuiz()">Start Test</button>
+
+        <div class="stats-card">
+            <h4>📜 Previous Attempts</h4>
+            <div id="history-content">No history found.</div>
+        </div>
+        
+        <div class="footer-credit">© 2026 Developed by:- Er. Nilambar Yadav</div>
+    </div>
+
+    <div id="quiz-interface" class="hidden">
+        <header>
+            <div style="font-weight:bold; color:var(--primary);">TESTBOOK MODE</div>
+            <div class="timer-box">⏳ <span id="timer">02:00:00</span></div>
+            <div>
+                <button class="btn btn-danger btn-sm" onclick="submitQuiz()">Submit Test</button>
+            </div>
+        </header>
+
+        <div id="quiz-container">
+            <div id="question-area">
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span class="exam-tag" id="q-exam-tag">Exam Tag</span>
+                    <span style="font-weight:bold; color:var(--primary);">Q.<span id="q-num">1</span></span>
+                </div>
+                
+                <div class="q-text" id="q-text">Loading question...</div>
+                
+                <div class="options-grid" id="options-container">
+                    </div>
+
+                <div class="solution-box hidden" id="solution-box">
+                    <span class="solution-title">💡 Detailed Solution:</span>
+                    <div class="sol-text" id="solution-text"></div>
+                </div>
+            </div>
+
+            <div id="overlay" onclick="togglePalette()"></div>
+            <div id="palette-sidebar">
+                <div style="padding:15px; border-bottom:1px solid #eee; font-weight:bold; display:flex; justify-content:space-between;">
+                    Question Palette
+                    <span style="cursor:pointer;" onclick="togglePalette()">✕</span>
+                </div>
+                <div class="palette-grid" id="palette-grid">
+                    </div>
+                <div style="padding:15px; font-size:0.8rem; border-top:1px solid #eee;">
+                    <div><span style="color:var(--answered-color)">●</span> Answered</div>
+                    <div><span style="color:var(--review-color)">●</span> Marked for Review</div>
+                    <div><span style="color:var(--skipped-color)">●</span> Not Visited</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-left">
+                <button class="btn btn-outline" onclick="changeQuestion(-1)">Previous</button>
+                <button class="btn btn-outline" onclick="togglePalette()">Grid ▦</button>
+            </div>
+            
+            <div class="review-check">
+                <input type="checkbox" id="review-check" onchange="toggleReview()">
+                <label for="review-check">Review</label>
+            </div>
+
+            <div class="footer-right">
+                <button id="check-btn" class="btn btn-success" onclick="checkAnswer()">Check Answer</button>
+                <button class="btn btn-primary" onclick="changeQuestion(1)">Next ➡</button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // --- COMPLETE DATABASE OF QUESTIONS (Detailed Solutions) ---
+        const questions = [
+            {
+                id: 675,
+                text: "The minimum compressive strength of Portland Pozzolana cement at 28 days should be",
+                options: ["33 MPa", "20 MPa", "10 MPa", "50 MPa"],
+                correct: 0,
+                exam: "DSSSB JE 20.03.2021 (Afternoon)",
+                solution: "Ans. (a) : Compressive strength of Portland Pozzolana cement (IS:1489) is similar to OPC 33 Grade:\n\n• 3 days (72 ± 1 hr) : 16 N/mm² (16 MPa)\n• 7 days (168 ± 2 hr) : 22 N/mm² (22 MPa)\n• 28 days (672 ± 4 hr) : 33 N/mm² (33 MPa)"
+            },
+            {
+                id: 676,
+                text: "For chemical reaction of hydration of 200 kg of cement of average composition, the mass of water required, would be",
+                options: ["50 kg", "200 kg", "25 kg", "35 kg"],
+                correct: 0,
+                exam: "DSSSB JE 20.03.2021 (Afternoon)",
+                solution: "Ans. (a) : Approx 23% of water by weight of cement is required for complete chemical reaction (bound water).\nApprox 15% water is required for filling gel pores.\n\nHere, for hydration only:\nWeight of cement = 200 kg\nAmount of water = 200 × 0.23 = 46 kg\n\nThe nearest option is 50 kg (Option a)."
+            },
+            {
+                id: 677,
+                text: "Group I gives a list of test methods... Match Group I with Group II:\nP. Le-Chatelier test\nQ. Vee-Bee set\nR. Blaine air permeability\nS. Vicat Apparatus\n\n1. Soundness of OPC\n2. Consistency/setting time\n3. Consistency/Workability\n4. Fineness of OPC",
+                options: ["P-4, Q-2, R-4, S-1", "P-1, Q-4, R-2, S-3", "P-2, Q-3, R-1, S-4", "P-1, Q-3, R-4, S-2"],
+                correct: 3,
+                exam: "DSSSB JE 20.03.2021 (Evening)",
+                solution: "Ans. (d) : Correct Match:\n\n• Le-Chatelier test → Soundness of OPC (due to Free Lime only).\n• Vee-Bee Consistometer → Consistency or Workability of concrete (for very dry mixes).\n• Blaine's Air permeability → Fineness of OPC (Specific Surface Area).\n• Vicat Apparatus → Standard Consistency & Setting Times (Initial/Final)."
+            },
+            {
+                id: 678,
+                text: "As per IS 4031-1988, the heat of hydration of low heat Portland cement for 7 days is",
+                options: ["Should not be more than 120 calories per gram", "Should not be more than 65 calories per gram", "Should not be more than 100 calories per gram", "Should not be more than 90 calories per gram"],
+                correct: 1,
+                exam: "DSSSB JE 20.03.2021 (Evening)",
+                solution: "Ans. (b) : Low Heat Portland Cement (IS: 12600-1989):\nIt is produced by reducing C3S and C3A content.\n\nHeat of hydration limits:\n• 7 days : Not more than 65 calories/gm\n• 28 days : Not more than 75 calories/gm"
+            },
+            {
+                id: 679,
+                text: "A mortar for which both cement and lime are mixed is called:",
+                options: ["gauged mortar", "cement mortar", "lime mortar", "light weight mortar"],
+                correct: 0,
+                exam: "JPSC AE / ESE-2000",
+                solution: "Ans. (a) : Gauged Mortar (Composite Mortar):\nThis mortar is a mix of Cement + Lime + Sand.\n\n• Cement and Lime act as binding materials.\n• It combines the strength of cement and the workability/plasticity of lime.\n• Common ratio of Cement : Lime is 1:6 to 1:9.\n• It is economical and has good water retention."
+            },
+            {
+                id: 680,
+                text: "The main role of di-calcium silicate (C2S) compound in cement is :",
+                options: ["to provide ultimate strength at the latter age", "to retard the flash setting of cement", "to provide colour effect in cement", "to flash set"],
+                correct: 0,
+                exam: "DSSSB JE 20.03.2021 (Evening)",
+                solution: "Ans. (a) : Di-calcium Silicate (C2S) [Belite]:\n• Composition: 25-40% of cement.\n• Rate of hydration: Very slow.\n• Heat of hydration: Lowest (260 J/g).\n• It is responsible for the Ultimate Strength (Progressive strength) at later ages (after 1 year).\n• It imparts resistance to chemical attack."
+            },
+            {
+                id: 681,
+                text: "The diameter of a cylinder in the Le-Chatelier apparatus for conducting the soundness test of cement is",
+                options: ["22 mm", "40 mm", "35 mm", "30 mm"],
+                correct: 3,
+                exam: "SSC JE 23.03.2021 (2-4 pm)",
+                solution: "Ans. (d) : Le-Chatelier Apparatus Details:\n• Used for: Soundness due to Free Lime.\n• Diameter of cylinder: 30 mm.\n• Height of cylinder: 30 mm.\n• Length of indicator arms: 165 mm.\n• The split in the cylinder should not be more than 0.5 mm."
+            },
+            {
+                id: 682,
+                text: "Identify the component content which has to be reduced at the time of clinker grinding in the preparation of Quick setting cement.",
+                options: ["Alumina", "Sulphure", "Gypsum", "Magnesia"],
+                correct: 2,
+                exam: "SSC JE 23.03.2021 (2-4 pm)",
+                solution: "Ans. (c) : Quick Setting Cement:\n• It sets very rapidly (Initial setting time: 5 mins, Final: 30 mins).\n• Preparation: The quantity of Gypsum (Retarder) is reduced.\n• Small amount of Aluminium Sulphate is added to accelerate setting."
+            },
+            {
+                id: 683,
+                text: "Which of the following tests is not used for testing fineness of cement?",
+                options: ["Air permeability method", "Wagner turbidimeter method", "Density bottle method", "Sieve method"],
+                correct: 2,
+                exam: "SSC JE 23.03.2021 (2-4 pm)",
+                solution: "Ans. (c) : Density Bottle Method is used for finding Specific Gravity of cement (Standard value 3.15).\n\nMethods for Fineness:\n1. Sieve Method (90 micron sieve)\n2. Blaine's Air Permeability Method (Specific surface area)\n3. Wagner Turbidimeter Method"
+            },
+            {
+                id: 684,
+                text: "Match List-I (Cement Type) with List-II (Characteristics):\na. Air entraining b. Low-heat c. Hydrophobic d. Rapid hardening\n1. Suitable for large structures\n2. Unsuitable for very large masses\n3. Greater resistance to frost\n4. Safe storage",
+                options: ["a-4, b-2, c-1, d-3", "a-3, b-4, c-1, d-2", "a-3, b-1, c-4, d-2", "a-4, b-1, c-2, d-3"],
+                correct: 2,
+                exam: "HPSSSC JE 11.04.2021",
+                solution: "Ans. (c) : Correct Match:\n\n• Air Entraining Cement (a-3): Generates bubbles, provides greater resistance to frost attack.\n• Low Heat Cement (b-1): Low heat evolution, suitable for mass concreting (Dams, large structures).\n• Hydrophobic Cement (c-4): Contains oleic acid, provides safe storage under unfavorable humid conditions.\n• Rapid Hardening Cement (d-2): High heat, unsuitable for very large masses."
+            },
+            {
+                id: 685,
+                text: "The apparatus used to test the fineness of cement is",
+                options: ["Vicat's apparatus", "Le Chatelier's apparatus", "Any of these", "Blain's air permeability apparatus"],
+                correct: 3,
+                exam: "DSSSB JE / DMRC JE",
+                solution: "Ans. (d) : Blaine's Air Permeability Apparatus.\n\n• It measures fineness in terms of Specific Surface Area (cm²/gm).\n• Principle: The flow of air through a bed of cement particles is related to surface area.\n\nSpecific Surface Area values:\n• OPC: 2250 cm²/gm\n• PPC: 3000 cm²/gm\n• Low Heat: 3250 cm²/gm"
+            },
+            {
+                id: 686,
+                text: "Which of the following constituents is present in the blast furnace slag?",
+                options: ["50% alumina and 20% calcium oxide", "45% calcium oxide and 35% silica", "25% calcium oxide and 15% silica", "25% magnesia and 15% silica"],
+                correct: 1,
+                exam: "HPSSSC JE 11.04.2021",
+                solution: "Ans. (b) : Blast Furnace Slag is a byproduct of pig iron manufacture.\nChemical composition is similar to Portland Cement:\n\n• Calcium Oxide (CaO): 35 - 55%\n• Silica (SiO₂): 27 - 40%\n• Alumina (Al₂O₃): 8 - 20%\n• Magnesia (MgO): < 10%"
+            },
+            {
+                id: 687,
+                text: "What will be the depth of penetration of the plunger in Vicat apparatus (IS:5513) from the bottom of the Vicat Mould for consistency?",
+                options: ["5 to 7 mm", "8 to 10 mm", "15 to 17 mm", "11 to 15 mm"],
+                correct: 0,
+                exam: "SSC JE 23.03.2021 (10am)",
+                solution: "Ans. (a) : Standard Consistency Test (IS: 4031 Part 4):\n\n• Plunger: 10 mm diameter, 50 mm length.\n• Consistency is achieved when the plunger penetrates the mould to a depth of 33 to 35 mm from the TOP.\n• This corresponds to 5 to 7 mm from the BOTTOM of the mould."
+            },
+            {
+                id: 688,
+                text: "Hydration of which compound is responsible for increase in strength of cement in later age?",
+                options: ["Tri-calcium Aluminate (C3A)", "Tetra-calcium Aluminoferrite", "Tri-calcium Silicate (C3S)", "Di-calcium Silicate (C2S)"],
+                correct: 3,
+                exam: "JPSC AE 10.04.2021",
+                solution: "Ans. (d) : Strength contribution:\n\n• C3S (Tricalcium Silicate): Responsible for EARLY strength (first 28 days).\n• C2S (Dicalcium Silicate): Responsible for LATER age strength (ultimate strength). It gains strength slowly over a year."
+            },
+            {
+                id: 689,
+                text: "Which constituent in cement is to be kept minimum to avoid a sulphate attack?",
+                options: ["C3A", "C3S", "C2A", "C2AF"],
+                correct: 0,
+                exam: "SSC JE 23.03.2021",
+                solution: "Ans. (a) : C3A (Tricalcium Aluminate).\n\n• C3A reacts with sulphates to form calcium sulphoaluminate (ettringite), which causes expansion and cracking (Sulphate Attack).\n• To improve sulphate resistance, C3A content is minimized (kept below 5% for Sulphate Resisting Cement)."
+            },
+            {
+                id: 690,
+                text: "Gypsum is used as an admixture in cement grouts for:",
+                options: ["accelerating the setting time", "retarding the setting time", "increasing the plasticity", "reducing the grout shrinkage"],
+                correct: 1,
+                exam: "JPSC AE 10.04.2021",
+                solution: "Ans. (b) : Gypsum (CaSO₄·2H₂O) is a RETARDER.\n\n• It is added (3-4%) at the time of clinker grinding.\n• Function: It retards (delays) the initial setting time of cement by neutralizing the flash-setting effect of C3A, allowing time for mixing and placing."
+            },
+            {
+                id: 691,
+                text: "What is the approximate composition of silicon dioxide (SiO2) present in ordinary Portland cement?",
+                options: ["40-50%", "3-8%", "60-67%", "17-25%"],
+                correct: 3,
+                exam: "SSC JE 23.03.2021",
+                solution: "Ans. (d) : Oxide Composition of OPC:\n\n• Lime (CaO): 62 - 67%\n• Silica (SiO₂): 17 - 25%\n• Alumina (Al₂O₃): 3 - 8%\n• Calcium Sulphate: 3 - 4%\n• Iron Oxide: 3 - 4%\n• Magnesia: 1 - 3%"
+            },
+            {
+                id: 692,
+                text: "Which of the following components of cement is responsible for early strength?",
+                options: ["C3S", "C2S", "C3A", "C4AF"],
+                correct: 0,
+                exam: "DSSSB JE 19.03.2021",
+                solution: "Ans. (a) : Tricalcium Silicate (C3S) [Alite]:\n• It undergoes hydration within a week or two.\n• It is responsible for the development of EARLY strength (first 7 to 28 days).\n• It has the best cementitious properties among Bogue's compounds."
+            },
+            {
+                id: 693,
+                text: "Match lists:\na. C2S, b. C3S, c. C4AF, d. C3A\n1. First to react & set\n2. Responsible for 28 days strength\n3. Responsible for increase in strength after 28 days\n4. Inactive compound",
+                options: ["2,3,4,1", "1,2,3,4", "4,3,2,1", "3,2,4,1"],
+                correct: 3,
+                exam: "HPSSSC JE 11.04.2021",
+                solution: "Ans. (d) : Correct Match:\n\na. C2S → 3. Responsible for strength after 28 days.\nb. C3S → 2. Responsible for 28 days strength.\nc. C4AF → 4. Inactive/Poor cementitious property.\nd. C3A → 1. First to react and set (Flash Set)."
+            },
+            {
+                id: 694,
+                text: "Addition of pozzolana to ordinary Portland cement causes",
+                options: ["decrease in early strength", "reduction in chemical action with sulphates", "increase in shrinkage", "All option are correct"],
+                correct: 3,
+                exam: "HPSSSC JE 11.04.2021",
+                solution: "Ans. (d) : Effect of Pozzolana (PPC):\n\n• Decrease in early strength: Because pozzolana reaction is slow.\n• Reduction in chemical action: It consumes lime (Ca(OH)2), improving resistance to sulphates.\n• Increase in shrinkage: Pozzolana is finer, requiring more water, leading to more shrinkage.\n• Low heat of hydration."
+            },
+            {
+                id: 695,
+                text: "The pigment used to produce coloured cement. Which statement given below is wrong?",
+                options: ["Cobalt oxide to get blue colour", "Chloride oxide to get green colour", "Manganese oxide to get brown colour", "Aluminium oxide to get white colour"],
+                correct: 3,
+                exam: "HPSSSC JE 11.04.2021",
+                solution: "Ans. (d) : Wrong Statement is (d).\n\nCorrect Pigments:\n• Cobalt Oxide → Blue\n• Chromium Oxide → Green\n• Manganese Oxide → Black / Brown\n• Iron Oxide → Red / Yellow\n\nNote: Aluminium oxide is a raw material, not a pigment for white colour. White cement is made by removing Iron Oxide."
+            },
+            {
+                id: 696,
+                text: "The basis for classification of ordinary Portland cement (OPC) as grade 33, 43 and 53 as per IS 10262 is",
+                options: ["setting time", "soundness value", "fineness value", "28 day compressive strength"],
+                correct: 3,
+                exam: "SSC JE 23.03.2021",
+                solution: "Ans. (d) : Classification is based on 28-day Compressive Strength:\n\n• Grade 33: ≥ 33 N/mm²\n• Grade 43: ≥ 43 N/mm²\n• Grade 53: ≥ 53 N/mm²"
+            },
+            {
+                id: 697,
+                text: "Which of the following methods is not used for measuring air content in fresh concrete?",
+                options: ["Blaine air permeability method", "Volumetric method", "Pressure method", "Gravimetric method"],
+                correct: 0,
+                exam: "SSC JE 23.03.2021",
+                solution: "Ans. (a) : Blaine Air Permeability Method is used for Fineness of Cement, NOT air content of concrete.\n\nMethods for Air Content in Concrete:\n1. Pressure Method\n2. Volumetric Method\n3. Gravimetric Method"
+            },
+            {
+                id: 698,
+                text: "Soundness test of cement determines",
+                options: ["Quantity of free lime", "Ultimate strength", "Durability", "Initial setting"],
+                correct: 0,
+                exam: "DSSSB JE 20.03.2021",
+                solution: "Ans. (a) : Soundness Test:\n• Purpose: To detect the presence of uncombined (free) lime and magnesia.\n• Apparatus: Le-Chatelier (for Lime) and Autoclave (for Lime & Magnesia).\n• Soundness ensures the cement does not undergo large volume changes after setting."
+            },
+            {
+                id: 699,
+                text: "The seven-day tensile strength of ordinary Portland cement as tested by Briquette test shall not be less than ____ kg/cm²",
+                options: ["25", "30", "15", "20"],
+                correct: 0,
+                exam: "DSSSB JE 19.03.2021",
+                solution: "Ans. (a) : Tensile Strength of Cement (Briquette Test):\n\n• 3 Days: ≥ 2.0 N/mm² (20 kg/cm²)\n• 7 Days: ≥ 2.5 N/mm² (25 kg/cm²)\n\nNote: Tensile strength is roughly 10-15% of compressive strength."
+            },
+            {
+                id: 700,
+                text: "The normal consistency of ordinary Portland cement is about",
+                options: ["10%", "20%", "30%", "40%"],
+                correct: 2,
+                exam: "AEGCL Asst. Manager 31.01.2021",
+                solution: "Ans. (c) : Normal Consistency (P):\n• Generally ranges between 25% to 35% for OPC.\n• Average value taken as 30%.\n• Test: Vicat Apparatus (Plunger penetration 33-35mm)."
+            },
+            {
+                id: 701,
+                text: "Vicat's Apparatus is used to determine",
+                options: ["Initial Setting time", "Final Setting time", "Normal consistency", "All of above"],
+                correct: 3,
+                exam: "ASSAM PSC AE 2021",
+                solution: "Ans. (d) : Vicat's Apparatus is used for:\n1. Standard Consistency (Plunger)\n2. Initial Setting Time (Square needle)\n3. Final Setting Time (Needle with annular collar)"
+            },
+            {
+                id: 702,
+                text: "At the end of the soundness test on cement, increase in the distance between the two indicators of Le Chatelier apparatus should not be more than",
+                options: ["5 mm", "10 mm", "15 mm", "20 mm"],
+                correct: 1,
+                exam: "AEGCL Asst. Manager 31.01.2021",
+                solution: "Ans. (b) : As per IS Code, for OPC:\nThe expansion (increase in distance between indicator arms) should not be more than 10 mm."
+            },
+            {
+                id: 703,
+                text: "What is the amount of water used to conduct the initial setting time test of cement which has a standard consistency of P.",
+                options: ["0.55 p", "0.35 p", "0.75 p", "0.85 p"],
+                correct: 3,
+                exam: "SSC JE Civil 30.10.2020",
+                solution: "Ans. (d) : Water Requirements for Tests:\n\n• Initial & Final Setting Time: 0.85 P\n• Soundness (Le-Chatelier): 0.78 P\n• Compressive Strength: (P/4 + 3)%\n\nWhere P = Standard Consistency."
+            },
+            {
+                id: 704,
+                text: "The size of cubical mould for testing compressive strength of cement shall be :",
+                options: ["50 mm", "70.6 mm", "100 mm", "150 mm"],
+                correct: 1,
+                exam: "Assam PSC AE / Rajasthan JE",
+                solution: "Ans. (b) : Cube Sizes:\n• For Cement Mortar (1:3): 70.6 mm (Face area 5000 mm²)\n• For Concrete: 150 mm."
+            },
+            {
+                id: 705,
+                text: "Which of the following statements is true regarding stacking of cement?\nA. A gap of 0.3 m is to be maintained between cement bag and wall.\nB. A gap 100 cm is to be maintained.",
+                options: ["Only A", "Only B", "Both A and B", "None of these"],
+                correct: 0,
+                exam: "SSC JE 25.01.2018",
+                solution: "Ans. (a) : IS 4082 Storage Recommendations:\n• Clear space between exterior wall and stack: 30 cm (0.3 m).\n• Cement bags should be stacked on wooden planks/dry floor (15-20 cm above ground).\n• Height of stack not more than 10-15 bags."
+            },
+            {
+                id: 706,
+                text: "The compound which is largely responsible for initial setting and early strength gain of ordinary Portland cement is",
+                options: ["C3A", "C3S", "C4AF", "C2S"],
+                correct: 0,
+                exam: "AEGCL Asst. Manager 31.01.2021",
+                solution: "Ans. (a) : Initial Setting & Flash Set:\n• C3A (Tri-calcium Aluminate) reacts fastest with water (within 24 hours) and causes Initial Setting (Flash Set).\n• C3S is responsible for Early Strength (not setting)."
+            }
+        ];
+
+        // --- STATE & LOGIC ---
+        let currentIndex = 0;
+        let answers = {}; 
+        let reviewList = new Set();
+        let timerInterval;
+        let timeRemaining = 7200; // 2 hours
+        let isSubmitted = false;
+        let selectedOption = null; // Temporary selection before checking
+
+        function startQuiz() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('quiz-interface').classList.remove('hidden');
+            loadHistory();
+            renderPalette();
+            loadQuestion(0);
+            startTimer();
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                const h = Math.floor(timeRemaining / 3600).toString().padStart(2,'0');
+                const m = Math.floor((timeRemaining % 3600) / 60).toString().padStart(2,'0');
+                const s = (timeRemaining % 60).toString().padStart(2,'0');
+                document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+                if (timeRemaining <= 0) submitQuiz();
+            }, 1000);
+        }
+
+        function renderPalette() {
+            const grid = document.getElementById('palette-grid');
+            grid.innerHTML = '';
+            questions.forEach((q, index) => {
+                const btn = document.createElement('div');
+                btn.className = 'palette-btn skipped';
+                btn.textContent = index + 1;
+                btn.id = `pal-${index}`;
+                btn.onclick = () => {
+                    loadQuestion(index);
+                    if(window.innerWidth <= 768) togglePalette();
+                };
+                grid.appendChild(btn);
+            });
+            updatePalette();
+        }
+
+        function updatePalette() {
+            questions.forEach((q, index) => {
+                const btn = document.getElementById(`pal-${index}`);
+                btn.className = 'palette-btn';
+                if (index === currentIndex) btn.classList.add('current');
+                
+                if (answers[q.id] !== undefined) {
+                    btn.classList.add(reviewList.has(q.id) ? 'review-answered' : 'answered');
+                } else if (reviewList.has(q.id)) {
+                    btn.classList.add('review');
+                } else {
+                    btn.classList.add('skipped');
+                }
+            });
+        }
+
+        function loadQuestion(index) {
+            currentIndex = index;
+            const q = questions[index];
+            selectedOption = null; // Reset temp selection
+            
+            // UI Updates
+            document.getElementById('q-num').textContent = index + 1;
+            document.getElementById('q-text').textContent = q.text;
+            document.getElementById('q-exam-tag').textContent = q.exam;
+            document.getElementById('review-check').checked = reviewList.has(q.id);
+            
+            // Render Options
+            const cont = document.getElementById('options-container');
+            cont.innerHTML = '';
+            
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.id = `opt-btn-${i}`;
+                btn.innerHTML = `<b>${String.fromCharCode(65+i)}.</b> ${opt}`;
+                
+                if (answers[q.id] !== undefined) {
+                    // Already Answered
+                    btn.disabled = true;
+                    if (i === q.correct) btn.classList.add('correct');
+                    else if (i === answers[q.id]) btn.classList.add('wrong');
+                } else {
+                    // Not Answered
+                    btn.onclick = () => selectOption(i);
+                }
+                cont.appendChild(btn);
+            });
+
+            // Logic for Check Button & Solution
+            const checkBtn = document.getElementById('check-btn');
+            const solBox = document.getElementById('solution-box');
+
+            if (answers[q.id] !== undefined) {
+                // Already answered: Show Solution, Hide Check Button
+                solBox.classList.remove('hidden');
+                document.getElementById('solution-text').innerHTML = q.solution.replace(/\n/g, '<br>');
+                checkBtn.classList.add('hidden');
+            } else {
+                // New question: Hide Solution, Show Check Button
+                solBox.classList.add('hidden');
+                checkBtn.classList.remove('hidden');
+                checkBtn.disabled = true; // Disable until option selected
+            }
+
+            updatePalette();
+        }
+
+        function selectOption(index) {
+            if (isSubmitted) return;
+            selectedOption = index;
+            
+            // Visual Update Only (No Logic yet)
+            const btns = document.querySelectorAll('.option-btn');
+            btns.forEach((btn, i) => {
+                if (i === index) btn.classList.add('selected');
+                else btn.classList.remove('selected');
+            });
+
+            // Enable Check Button
+            document.getElementById('check-btn').disabled = false;
+        }
+
+        function checkAnswer() {
+            if (selectedOption === null) return;
+            
+            const q = questions[currentIndex];
+            answers[q.id] = selectedOption; // COMMIT ANSWER
+            
+            loadQuestion(currentIndex); // Reload to show solution/colors
+        }
+
+        function changeQuestion(dir) {
+            const next = currentIndex + dir;
+            if (next >= 0 && next < questions.length) {
+                loadQuestion(next);
+            }
+        }
+
+        function toggleReview() {
+            const q = questions[currentIndex];
+            if (document.getElementById('review-check').checked) reviewList.add(q.id);
+            else reviewList.delete(q.id);
+            updatePalette();
+        }
+
+        function togglePalette() {
+            document.getElementById('palette-sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('show');
+        }
+
+        function submitQuiz() {
+            if(!confirm("Are you sure you want to finish the test?")) return;
+            
+            isSubmitted = true;
+            clearInterval(timerInterval);
+            
+            let score = 0;
+            questions.forEach(q => {
+                if(answers[q.id] === q.correct) score++;
+            });
+            
+            // Save History
+            const hist = JSON.parse(localStorage.getItem('ce_history') || '[]');
+            hist.unshift({
+                date: new Date().toLocaleDateString(),
+                score: score,
+                total: questions.length
+            });
+            localStorage.setItem('ce_history', JSON.stringify(hist));
+            
+            alert(`Test Finished!\nYour Score: ${score} / ${questions.length}`);
+            location.reload();
+        }
+
+        function loadHistory() {
+            const hist = JSON.parse(localStorage.getItem('ce_history') || '[]');
+            const box = document.getElementById('history-content');
+            if (hist.length) {
+                box.innerHTML = hist.slice(0,3).map(h => 
+                    `<div style="border-bottom:1px solid #eee; padding:5px 0; font-size:0.9rem;">
+                        📅 ${h.date} — <strong>${h.score}/${h.total}</strong>
+                    </div>`
+                ).join('');
+            }
+        }
+    </script>
+</body>
+</html>
