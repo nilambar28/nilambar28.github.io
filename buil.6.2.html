@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Civil Engineering Mock Test</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --text: #333;
+            --bg: #f5f7fa;
+            --border: #e0e0e0;
+            --review: #8e44ad;
+            --bookmark: #ff9800;
+        }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* Screens */
+        .screen { display: none; height: 100%; width: 100%; flex-direction: column; }
+        .active-screen { display: flex; }
+        
+        /* Start Screen */
+        #start-screen { justify-content: center; align-items: center; padding: 20px; text-align: center; overflow-y: auto; }
+        .logo-area { font-size: 2rem; color: var(--primary); margin-bottom: 20px; font-weight: bold; }
+        .instruction-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; max-width: 400px; text-align: left; }
+        
+        .btn { border: none; padding: 12px 25px; border-radius: 30px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 15px; width: 100%; display: block; transition: transform 0.1s; }
+        .btn:active { transform: scale(0.98); }
+        .start-btn { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(26, 115, 232, 0.3); }
+        .saved-btn { background: white; color: var(--bookmark); border: 2px solid var(--bookmark); margin-top: 10px; }
+        
+        /* Quiz Interface */
+        header { background: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); height: 60px; flex-shrink: 0; }
+        .timer-box { font-weight: bold; background: #eee; padding: 4px 12px; border-radius: 4px; font-family: monospace; font-size: 1.1rem; }
+        .submit-btn { background: var(--success); color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; }
+        .sub-header { background: white; padding: 10px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: #666; flex-shrink: 0; }
+        
+        /* Content Area */
+        #quiz-body, #saved-body { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 80px; }
+        .question-card { background: white; padding: 20px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 20px; position: relative; break-inside: avoid; page-break-inside: avoid; }
+        .exam-tag { display: inline-block; background: #e3f2fd; color: var(--primary); font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; margin-bottom: 12px; font-weight: 600; }
+        .q-text { font-size: 1.15rem; font-weight: 500; line-height: 1.5; margin-bottom: 20px; }
+        
+        /* Options */
+        .options-list { list-style: none; padding: 0; }
+        .option-item { display: flex; align-items: flex-start; padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: background 0.2s; }
+        .option-circle { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #ccc; margin-right: 12px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 0.9rem; }
+        
+        /* States */
+        .option-item.selected { background: #f0f7ff; border-color: var(--primary); }
+        .option-item.selected .option-circle { background: var(--primary); border-color: var(--primary); color: white; }
+        .option-item.correct { background: #e8f5e9; border-color: var(--success); }
+        .option-item.correct .option-circle { background: var(--success); border-color: var(--success); color: white; content: '✔'; }
+        .option-item.wrong { background: #fceceb; border-color: var(--error); }
+        .option-item.wrong .option-circle { background: var(--error); border-color: var(--error); color: white; }
+
+        /* Solution */
+        .solution-box { background: #fffbe6; border: 1px solid #ffe58f; padding: 15px; border-radius: 8px; margin-top: 20px; font-size: 0.95rem; line-height: 1.5; }
+
+        /* Bookmark Icon */
+        .bookmark-icon { position: absolute; top: 20px; right: 20px; font-size: 1.5rem; color: #ccc; cursor: pointer; transition: color 0.3s; z-index: 5; }
+        .bookmark-icon.active { color: var(--bookmark); }
+
+        /* Footer */
+        footer { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid var(--border); padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; z-index: 20; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .nav-btn { background: white; border: 1px solid var(--border); padding: 10px 20px; border-radius: 20px; font-weight: 600; color: #555; cursor: pointer; }
+        .nav-btn.primary { background: var(--primary); color: white; border: none; }
+        
+        /* Palette */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 50; display: none; }
+        .overlay.active { display: block; }
+        #palette-modal { position: fixed; top: 0; right: -100%; width: 85%; height: 100%; background: white; z-index: 100; transition: right 0.3s; box-shadow: -2px 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+        #palette-modal.open { right: 0; }
+        .grid-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 15px; overflow-y: auto; }
+        .p-item { height: 40px; width: 40px; display: flex; justify-content: center; align-items: center; border-radius: 50%; border: 1px solid #ddd; font-weight: bold; cursor: pointer; position: relative;}
+        .p-item.current { border: 2px solid var(--primary); }
+        .p-item.answered { background: var(--success); color: white; border-color: var(--success); }
+        .p-item.marked { background: var(--review); color: white; border-color: var(--review); }
+        .p-item.skipped { background: #95a5a6; color: white; border-color: #95a5a6; }
+        .p-dot { width: 8px; height: 8px; background: var(--bookmark); border-radius: 50%; position: absolute; top: -2px; right: -2px; display: none; }
+        .p-item.bookmarked .p-dot { display: block; }
+
+        /* Saved Screen Specifics */
+        .saved-header { background: white; padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .pdf-btn { background: var(--error); color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; font-size: 0.9rem; cursor: pointer; }
+        .empty-state { text-align: center; color: #999; margin-top: 50px; }
+        
+        /* PDF specific styles to force visibility during generation */
+        .pdf-mode .question-card { border: 1px solid #333 !important; box-shadow: none; margin-bottom: 10px; }
+        .pdf-mode .solution-box { display: block !important; border: 1px dashed #666; background: #fff !important; }
+        .pdf-mode .bookmark-icon { display: none; }
+    </style>
+</head>
+<body>
+
+<div id="pdf-container" style="position: absolute; left: -9999px; width: 700px; padding: 20px; background: white;"></div>
+
+<div id="start-screen" class="screen active-screen">
+    <div class="logo-area"><i class="fas fa-hard-hat"></i> Civil Hub</div>
+    <div class="instruction-card">
+        <h3>Cement & Building Materials</h3>
+        <p><strong>Questions:</strong> 25 (Q.706 - Q.730)</p>
+        <p><strong>Time:</strong> 120 Minutes</p>
+        <button class="btn start-btn" onclick="startTest()">Start Test</button>
+        <button class="btn saved-btn" onclick="showSavedScreen()"><i class="fas fa-bookmark"></i> My Saved Questions</button>
+        <div id="history-list" style="margin-top:20px; font-size:0.9rem; border-top:1px solid #eee; padding-top:10px;"></div>
+    </div>
+</div>
+
+<div id="quiz-screen" class="screen">
+    <header>
+        <div onclick="exitTest()" style="font-size:1.5rem; color:var(--error); cursor:pointer"><i class="fas fa-times"></i></div>
+        <div class="timer-box" id="timer">02:00:00</div>
+        <button class="submit-btn" onclick="submitTest()">SUBMIT</button>
+    </header>
+    <div class="sub-header">
+        <span style="font-weight:bold">Q.<span id="curr-q-id"></span></span>
+        <div onclick="togglePalette()" style="color:var(--primary); cursor:pointer; font-weight:600"><i class="fas fa-th"></i> Palette</div>
+    </div>
+    <div id="quiz-body"></div>
+    <footer>
+        <button class="nav-btn" onclick="prevQuestion()"><i class="fas fa-arrow-left"></i></button>
+        <button class="nav-btn" style="color:var(--review); border-color:var(--review)" onclick="toggleMarkReview()">Review</button>
+        <button class="nav-btn primary" onclick="nextQuestion()"><i class="fas fa-arrow-right"></i></button>
+    </footer>
+</div>
+
+<div id="saved-screen" class="screen">
+    <div class="saved-header">
+        <div onclick="goHome()" style="font-size:1.2rem; cursor:pointer"><i class="fas fa-arrow-left"></i> Home</div>
+        <button class="pdf-btn" onclick="downloadPDF()"><i class="fas fa-file-pdf"></i> Download PDF</button>
+    </div>
+    <div id="saved-body"></div>
+</div>
+
+<div class="overlay" id="overlay" onclick="togglePalette()"></div>
+<div id="palette-modal">
+    <div style="padding:15px; border-bottom:1px solid #eee; font-weight:bold; display:flex; justify-content:space-between">
+        Question Palette <span onclick="togglePalette()">✕</span>
+    </div>
+    <div class="grid-container" id="palette-grid"></div>
+    <div style="padding:10px; font-size:0.8rem; text-align:center; color:var(--bookmark);">● Orange Dot = Bookmarked</div>
+</div>
+
+<script>
+// --- DATA ---
+const questionsData = [
+    { id: 706, text: "The compound which is largely responsible for initial setting and early strength gain of ordinary Portland cement is", options: ["C<sub>3</sub>A", "C<sub>3</sub>S", "C<sub>4</sub>AF", "C<sub>2</sub>S"], correct: 1, tag: "AEGCL AM 2021 | Punjab JE 2018", solution: "<b>Ans. (b) C<sub>3</sub>S</b>: Tricalcium Silicate (C<sub>3</sub>S) hydrates rapidly and is responsible for early strength. While C<sub>3</sub>A causes flash set, C<sub>3</sub>S provides the initial strength." },
+    { id: 707, text: "100 percent bags were received and stored at a site in February 2020. Due to lockdown, work resumed in October 2020. The stored cement bags:", options: ["Should not be used for concreting but can be used for masonry.", "Should not be used for construction", "Can be used for concreting", "Can be used for construction by using more quantity than usual."], correct: 1, tag: "GSPHCL AE 2020", solution: "<b>Ans. (b)</b>: Stored cement absorbs moisture forming lumps. Strength decreases with time. Grade 43 OPC rejected if stored > 6 months." },
+    { id: 708, text: "Consider the following statements:<br>1. Rich mixes are less prone to bleeding than lean ones.<br>2. Bleeding can be reduced by increasing the fineness of cement.<br>Which of the above statements is/are correct?", options: ["1 only", "2 only", "Both 1 and 2", "Neither 1 nor 2"], correct: 2, tag: "ESE 2018", solution: "<b>Ans. (c)</b>: Both statements are correct. Rich mixes and finer cement reduce bleeding." },
+    { id: 709, text: "Which one of the following light weight element will be added to enhance the protective properties for X-ray shielding mortars?", options: ["Sodium", "Potassium", "Lithium", "Calcium"], correct: 2, tag: "ESE 2020", solution: "<b>Ans. (c) Lithium</b>: Used in X-ray shielding mortar along with heavy rock to enhance protection." },
+    { id: 710, text: "The chemical name of calcite is:", options: ["Calcium Carbonate", "Calcium Chloride", "Calcium Fluoride", "Calcium Sulphate"], correct: 0, tag: "UPPCL JE 2016", solution: "<b>Ans. (a)</b>: Calcite is Calcium Carbonate (CaCO<sub>3</sub>)." },
+    { id: 711, text: "Which conditions are recommended for sulphate resisting cement?<br>1. Foundation in sulphate infested soil.<br>2. Pipes in marshy region.<br>3. Sewage treatment works.", options: ["2 and 3 only", "1 and 2 only", "1 and 3 only", "1, 2 and 3"], correct: 3, tag: "ESE 2020", solution: "<b>Ans. (d)</b>: All conditions (Marine, Marshy, Sewage, Sulphate soil) require Sulphate Resisting Cement." },
+    { id: 712, text: "Which one of the following cements is a deliquescent?", options: ["Quick setting Portland cement", "White and Coloured cement", "Calcium Chloride cement", "Water Repellent cement"], correct: 2, tag: "ESE 2020", solution: "<b>Ans. (c)</b>: Calcium Chloride is deliquescent (absorbs moisture from air)." },
+    { id: 713, text: "What is the temperature of burning the materials in the kiln at which the material sinters?", options: ["1100°C to 1300°C", "1300°C to 1500°C", "950°C to 1100°C", "750°C to 950°C"], correct: 1, tag: "SSC JE 2020", solution: "<b>Ans. (b)</b>: Clinkering temperature is approx 1300°C to 1500°C." },
+    { id: 714, text: "Select the INCORRECT statement regarding effects of natural pozzolanas.", options: ["The heat of hydration of pozzolana is higher than that of low heat cement.", "At early ages, replacement by pozzolana decreases compressive strength.", "Addition of pozzolana increases workability.", "Shrinkage is similar to Portland cement."], correct: 0, tag: "SSC JE 2020", solution: "<b>Ans. (a)</b>: Incorrect statement. Heat of hydration of pozzolana is LOWER, not higher." },
+    { id: 715, text: "Which among the following is NOT a Bogue's compound present in cement?", options: ["4 CaO.SiO₂.Fe₂O₃", "3 CaO.Al₂O₃", "4 CaO.Al₂O₃.Fe₂O₃", "3 CaO.SiO₂"], correct: 0, tag: "SSC JE 2020", solution: "<b>Ans. (a)</b>: This is not a standard Bogue formula. The correct ones are C3S, C2S, C3A, C4AF." },
+    { id: 716, text: "A very small amount of _____ is useful in making sound cement. If it is in excess, it causes the cement to become unsound.", options: ["iron oxide", "sulphur", "silica", "alkali"], correct: 1, tag: "SSC JE 2020", solution: "<b>Ans. (b) Sulphur</b>: Small amounts are useful, excess causes unsoundness." },
+    { id: 717, text: "According to IS 8041-1990, which type of cement is recommended when high early strength is required?", options: ["Portland slag cement", "Ordinary Portland cement", "Sulphate resisting cement", "Rapid hardening cement"], correct: 3, tag: "SSC JE 2020", solution: "<b>Ans. (d)</b>: Rapid Hardening Cement (RHC) attains high strength early." },
+    { id: 718, text: "The specific gravity of cement is generally about:", options: ["2.6", "2.7", "7.85", "3.15"], correct: 3, tag: "SSC JE 2020", solution: "<b>Ans. (d)</b>: Standard specific gravity of cement is 3.15." },
+    { id: 719, text: "How much water is added in cement mortar to determine compressive strength of cement?", options: ["(P/4 + 3)% of total mass", "04 times the mass of cement", "0.85P percent", "0.28 times the mass"], correct: 0, tag: "SSC JE 2020", solution: "<b>Ans. (a)</b>: For Compressive strength: (P/4 + 3)%. For Tensile: (P/5 + 2.5)%." },
+    { id: 720, text: "Which cement is produced by grinding clinkers formed by calcining bauxite, lime, iron oxide, etc? (Alumina > 32%)", options: ["Acid resistance cement", "Blast furnace cement", "Colored cement", "High alumina cement"], correct: 3, tag: "SSC JE 2020", solution: "<b>Ans. (d) High Alumina Cement</b>: Made from Bauxite and Limestone." },
+    { id: 721, text: "According to IS 8112 : 2013, the initial setting time of OPC grade 43 should be more than:", options: ["30 min", "15 min", "600 min", "60 min"], correct: 0, tag: "SSC JE 2020", solution: "<b>Ans. (a)</b>: Min Initial Setting time = 30 mins. Max Final = 600 mins." },
+    { id: 722, text: "Minimum specific surface area (Blaine's) for Rapid Hardening Portland cement is:", options: ["3250 cm²/g", "3500 cm²/g", "3200 cm²/g", "2250 cm²/g"], correct: 0, tag: "SSC JE 2020", solution: "<b>Ans. (a)</b>: RHC = 3250 cm²/g. OPC = 2250 cm²/g." },
+    { id: 723, text: "Which test checks the soundness of cement?", options: ["Air permeability method", "Autoclave test", "Compressive strength test", "Fineness test"], correct: 1, tag: "SSC JE 2020", solution: "<b>Ans. (b) Autoclave</b>: Checks soundness due to Lime and Magnesia." },
+    { id: 724, text: "Warehouse area 54 sq.m, max pile height 270 cm. How many cement bags can be stored?", options: ["200", "2000", "24000", "2700"], correct: 3, tag: "SSC JE 2018", solution: "<b>Ans. (d) 2700</b>: (54 * 2.7) / (0.3 * 0.18) = 2700 bags." },
+    { id: 725, text: "For hot weather concreting, choose the INCORRECT statement:", options: ["Rapid rate of hydration", "Necessary for gain continuously strength", "Delay in setting and hardening", "Greater plastic shrinkage"], correct: 2, tag: "DMRC 2020", solution: "<b>Ans. (c)</b>: Hot weather accelerates setting, it does NOT delay it." },
+    { id: 726, text: "Air permeability method is used to determine:", options: ["Soundness", "Setting time", "Fineness", "Resistance"], correct: 2, tag: "ESE 2020", solution: "<b>Ans. (c) Fineness</b>: Blaine's Air Permeability test measures fineness." },
+    { id: 727, text: "Statements: (I) Finer grinding results in early strength. (II) Finer cement has higher rate of hydration.", options: ["Both True, II explains I", "Both True, II no explain I", "I True, II False", "I False, II True"], correct: 0, tag: "ESE 2020", solution: "<b>Ans. (a)</b>: Higher surface area (fineness) leads to faster hydration and early strength." },
+    { id: 728, text: "Statements: (I) Pozzolana increases early strength. (II) It reduces heat of hydration.", options: ["Both True", "Both True (No exp)", "I True, II False", "I False, II True"], correct: 3, tag: "ESE 2020", solution: "<b>Ans. (d)</b>: Statement I is False. Pozzolana reduces early strength." },
+    { id: 729, text: "Three main raw materials for Portland cement:", options: ["Limestone, sandstone, clay", "Lime, silica, clay", "Lime, clay, gypsum", "Silica, alumina, gypsum"], correct: 1, tag: "BCCL JE 2017", solution: "<b>Ans. (b)</b>: Lime, Silica and Clay." },
+    { id: 730, text: "Out of C3S, C2S, C3A and C4AF, the first to set and harden is:", options: ["C3S", "C2S", "C3A", "C4AF"], correct: 3, tag: "SSC JE 2012", solution: "<b>Ans. (d) C<sub>4</sub>AF</b>: Sets rapidly (flash set) but has poor strength value." }
+];
+
+// --- STATE ---
+let currIdx = 0;
+let userAnswers = {};
+let bookmarks = new Set();
+let timer;
+
+// --- INITIALIZATION ---
+function init() {
+    loadPersistence();
+    renderHistory();
+}
+
+function loadPersistence() {
+    // Load Bookmarks
+    const saved = localStorage.getItem('civilBookmarks');
+    if (saved) {
+        bookmarks = new Set(JSON.parse(saved));
+    }
+}
+
+function savePersistence() {
+    localStorage.setItem('civilBookmarks', JSON.stringify([...bookmarks]));
+}
+
+function renderHistory() {
+    try {
+        const h = JSON.parse(localStorage.getItem('civilTestHistory')) || [];
+        const div = document.getElementById('history-list');
+        div.innerHTML = h.length ? `<b>Last Attempt:</b> ${h[0].score}/${questionsData.length} (${h[0].date})` : 'No history yet.';
+    } catch(e) { localStorage.removeItem('civilTestHistory'); }
+}
+
+// --- NAVIGATION SCREENS ---
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+    document.getElementById(id).classList.add('active-screen');
+}
+
+function startTest() {
+    showScreen('quiz-screen');
+    userAnswers = {}; // Reset answers for new test
+    loadQ(0);
+    startTimer(7200);
+}
+
+function exitTest() {
+    if(confirm('Exit test? Progress will be lost.')) {
+        clearInterval(timer);
+        goHome();
+    }
+}
+
+function goHome() {
+    clearInterval(timer);
+    showScreen('start-screen');
+    renderHistory();
+}
+
+// --- QUIZ LOGIC ---
+function startTimer(sec) {
+    clearInterval(timer);
+    timer = setInterval(() => {
+        sec--;
+        let h = Math.floor(sec/3600).toString().padStart(2,'0');
+        let m = Math.floor((sec%3600)/60).toString().padStart(2,'0');
+        let s = (sec%60).toString().padStart(2,'0');
+        document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+        if(sec<=0) submitTest();
+    }, 1000);
+}
+
+function loadQ(idx) {
+    currIdx = idx;
+    document.getElementById('curr-q-id').innerText = questionsData[idx].id;
+    const q = questionsData[idx];
+    const attempt = userAnswers[idx];
+    const isBookmarked = bookmarks.has(idx);
+    
+    let html = `
+        <div class="question-card">
+            <i class="fas fa-bookmark bookmark-icon ${isBookmarked ? 'active' : ''}" onclick="toggleBookmark(${idx}, this)"></i>
+            <span class="exam-tag">${q.tag}</span>
+            <div class="q-text">${q.text}</div>
+            <ul class="options-list">
+                ${q.options.map((opt, i) => {
+                    let cls = 'option-item';
+                    if(attempt && attempt.status === 'answered') {
+                        if(i === q.correct) cls += ' correct';
+                        else if(i === attempt.sel) cls += ' wrong';
+                        else if(i === attempt.sel && i !== q.correct) cls += ' wrong'; 
+                    }
+                    else if(attempt && attempt.sel === i) cls += ' selected';
+                    
+                    return `<li class="${cls}" onclick="handleOption(${i})">
+                        <div class="option-circle">${String.fromCharCode(65+i)}</div>
+                        <div>${opt}</div>
+                    </li>`;
+                }).join('')}
+            </ul>
+            ${(attempt && attempt.status === 'answered') ? `<div class="solution-box">${q.solution}</div>` : ''}
+        </div>
+    `;
+    document.getElementById('quiz-body').innerHTML = html;
+    updatePalette();
+}
+
+function handleOption(i) {
+    if(userAnswers[currIdx] && userAnswers[currIdx].status === 'answered') return;
+    userAnswers[currIdx] = { sel: i, status: 'answered' };
+    loadQ(currIdx);
+}
+
+function toggleBookmark(idx, el) {
+    if(bookmarks.has(idx)) {
+        bookmarks.delete(idx);
+        if(el) el.classList.remove('active');
+    } else {
+        bookmarks.add(idx);
+        if(el) el.classList.add('active');
+    }
+    savePersistence();
+    updatePalette();
+}
+
+function toggleMarkReview() {
+    if(!userAnswers[currIdx]) userAnswers[currIdx] = { sel: null, status: 'marked' };
+    else if(userAnswers[currIdx].status === 'marked') delete userAnswers[currIdx];
+    else userAnswers[currIdx].status = 'marked';
+    updatePalette();
+}
+
+function nextQuestion() {
+    if(currIdx < questionsData.length - 1) loadQ(currIdx + 1);
+}
+function prevQuestion() {
+    if(currIdx > 0) loadQ(currIdx - 1);
+}
+
+// --- PALETTE ---
+function updatePalette() {
+    const grid = document.getElementById('palette-grid');
+    grid.innerHTML = questionsData.map((_, i) => {
+        let cls = 'p-item';
+        if(i === currIdx) cls += ' current';
+        if(userAnswers[i]) cls += ' ' + userAnswers[i].status;
+        else if(i < currIdx) cls += ' skipped';
+        if(bookmarks.has(i)) cls += ' bookmarked';
+        return `<div class="${cls}" onclick="jumpTo(${i})">${i+1} <div class="p-dot"></div></div>`;
+    }).join('');
+}
+
+function jumpTo(i) {
+    loadQ(i);
+    togglePalette();
+}
+
+function togglePalette() {
+    document.getElementById('palette-modal').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('active');
+}
+
+function submitTest() {
+    clearInterval(timer);
+    let score = 0;
+    questionsData.forEach((q, i) => {
+        if(userAnswers[i] && userAnswers[i].status === 'answered' && userAnswers[i].sel === q.correct) score++;
+    });
+    
+    const h = JSON.parse(localStorage.getItem('civilTestHistory')) || [];
+    h.unshift({ score: score, date: new Date().toLocaleDateString() });
+    localStorage.setItem('civilTestHistory', JSON.stringify(h));
+    
+    if(confirm(`Test Finished!\nScore: ${score} / ${questionsData.length}\n\nGo to 'My Saved Questions' to see bookmarks?`)) {
+        showSavedScreen();
+    } else {
+        goHome();
+    }
+}
+
+// --- SAVED QUESTIONS SCREEN ---
+function showSavedScreen() {
+    showScreen('saved-screen');
+    const container = document.getElementById('saved-body');
+    
+    if(bookmarks.size === 0) {
+        container.innerHTML = `<div class="empty-state"><i class="far fa-bookmark" style="font-size:3rem; margin-bottom:10px;"></i><br>No questions saved yet.<br>Click the bookmark icon during test to save.</div>`;
+        return;
+    }
+
+    // Render Saved List
+    const list = [...bookmarks].sort((a,b)=>a-b);
+    let html = '';
+    list.forEach(idx => {
+        const q = questionsData[idx];
+        html += `
+            <div class="question-card">
+                <i class="fas fa-trash bookmark-icon" style="color:var(--error)" onclick="removeBookmark(${idx})"></i>
+                <span class="exam-tag">${q.tag}</span>
+                <div class="q-text"><strong>Q.${q.id}</strong> ${q.text}</div>
+                <ul class="options-list">
+                    ${q.options.map((opt, i) => 
+                        `<li class="option-item ${i === q.correct ? 'correct' : ''}" style="cursor:default">
+                            <div class="option-circle">${String.fromCharCode(65+i)}</div>
+                            <div>${opt}</div>
+                        </li>`
+                    ).join('')}
+                </ul>
+                <div class="solution-box" style="display:block">${q.solution}</div>
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
+
+function removeBookmark(idx) {
+    bookmarks.delete(idx);
+    savePersistence();
+    showSavedScreen(); // Refresh
+}
+
+// --- PDF DOWNLOAD ---
+function downloadPDF() {
+    if(bookmarks.size === 0) { alert("No bookmarks to download."); return; }
+    
+    // Create a clean HTML structure for PDF
+    const pdfContainer = document.getElementById('pdf-container');
+    const list = [...bookmarks].sort((a,b)=>a-b);
+    
+    let content = `<h2 style="text-align:center; color:#1a73e8; margin-bottom:20px;">Civil Engineering Bookmarks</h2>`;
+    list.forEach(idx => {
+        const q = questionsData[idx];
+        content += `
+            <div class="question-card" style="border:1px solid #333; padding:15px; margin-bottom:15px; page-break-inside:avoid;">
+                <div style="font-size:0.8rem; color:#666; margin-bottom:5px;">${q.tag}</div>
+                <div style="font-weight:bold; margin-bottom:10px;">Q.${q.id} ${q.text}</div>
+                <ul style="list-style:none; padding:0;">
+                    ${q.options.map((opt, i) => `
+                        <li style="padding:5px; ${i === q.correct ? 'color:green; font-weight:bold;' : ''}">
+                            ${String.fromCharCode(65+i)}. ${opt}
+                        </li>
+                    `).join('')}
+                </ul>
+                <div style="background:#f9f9f9; padding:10px; border:1px dashed #999; margin-top:10px; font-size:0.9rem;">
+                    <strong>Solution:</strong> ${q.solution}
+                </div>
+            </div>
+        `;
+    });
+    pdfContainer.innerHTML = content;
+
+    // Generate PDF
+    const opt = {
+        margin:       10,
+        filename:     `Civil_Bookmarks_${new Date().toISOString().slice(0,10)}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(pdfContainer).save().then(() => {
+        alert("PDF Downloaded Successfully!");
+    });
+}
+
+// Init
+init();
+
+</script>
+</body>
+</html>
