@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Civil Engineering Test</title>
+    <style>
+        :root {
+            --primary: #1263F1;
+            --success: #00C853;
+            --error: #D32F2F;
+            --bg-color: #F2F4F8;
+            --surface: #FFFFFF;
+            --text-main: #212121;
+            --text-sub: #616161;
+            --border: #E0E0E0;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-color); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* HEADER */
+        header { background: var(--surface); height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); z-index: 10; flex-shrink: 0; }
+        .h-title { font-weight: 700; font-size: 16px; color: var(--text-main); display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .timer-badge { background: #E3F2FD; color: var(--primary); font-weight: 700; font-size: 14px; padding: 4px 10px; border-radius: 4px; }
+        .btn-submit { background: var(--success); color: white; border: none; font-weight: 600; font-size: 13px; padding: 6px 16px; border-radius: 4px; text-transform: uppercase; }
+
+        /* MAIN */
+        #main-container { flex: 1; overflow-y: auto; padding: 10px; padding-bottom: 80px; }
+        
+        /* CARDS */
+        .q-card { background: var(--surface); border-radius: 8px; box-shadow: var(--shadow); padding: 16px; margin-bottom: 15px; border: 1px solid var(--border); }
+        .q-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .q-number { font-size: 13px; font-weight: 600; color: var(--text-sub); }
+        .exam-tag { background: #FFF3E0; color: #E65100; font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: 700; border: 1px solid #FFE0B2; }
+        .q-text { font-size: 16px; line-height: 1.5; color: var(--text-main); font-weight: 500; margin-bottom: 20px; }
+
+        /* OPTIONS */
+        .option-item { display: flex; align-items: center; padding: 12px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; background: white; }
+        .opt-circle { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #BDBDBD; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--text-sub); margin-right: 12px; flex-shrink: 0; }
+        
+        .option-item.correct { background: #E8F5E9; border-color: var(--success); }
+        .option-item.correct .opt-circle { background: var(--success); border-color: var(--success); color: white; }
+        .option-item.wrong { background: #FFEBEE; border-color: var(--error); }
+        .option-item.wrong .opt-circle { background: var(--error); border-color: var(--error); color: white; }
+
+        /* SOLUTION */
+        .solution-box { background: #F1F8E9; border-left: 4px solid var(--success); padding: 16px; border-radius: 4px; margin-top: 20px; display: none; animation: slideDown 0.3s ease; }
+        .sol-desc { font-size: 14px; color: #333; line-height: 1.6; white-space: pre-line; }
+
+        /* FOOTER */
+        footer { background: var(--surface); border-top: 1px solid var(--border); height: 60px; position: fixed; bottom: 0; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; z-index: 20; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .nav-btn { background: white; border: 1px solid var(--border); border-radius: 4px; height: 36px; padding: 0 16px; font-weight: 600; font-size: 13px; color: var(--text-sub); }
+        .btn-next { background: var(--primary); color: white; border: none; }
+        .btn-mark { color: #7B1FA2; border-color: #E1BEE7; }
+        .btn-star { font-size: 24px; border: none; color: #CCC; background: transparent; padding: 0 15px; }
+        .btn-star.active { color: #FFC107; }
+
+        /* DRAWER */
+        .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40; display: none; }
+        .drawer { position: fixed; top: 0; right: -85%; width: 85%; height: 100%; background: white; z-index: 50; transition: right 0.3s; display: flex; flex-direction: column; }
+        .drawer.open { right: 0; }
+        .palette-grid { padding: 16px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; overflow-y: auto; }
+        .p-item { aspect-ratio: 1; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; background: #eee; color: #666; border: 1px solid #e0e0e0; cursor: pointer; }
+        .p-item.ans { background: var(--success); color: white; border: none; }
+        .p-item.rev { background: #7B1FA2; color: white; border: none; }
+        .p-item.curr { border: 2px solid var(--primary); background: #E3F2FD; }
+
+        /* SCREENS */
+        .full-screen { position: fixed; inset: 0; background: white; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
+        .big-btn { background: var(--primary); color: white; width: 100%; max-width: 300px; padding: 14px; border-radius: 8px; border: none; font-size: 16px; font-weight: 700; margin-top: 15px; box-shadow: 0 4px 12px rgba(18, 99, 241, 0.3); }
+        .btn-sec { background: white; color: var(--primary); border: 2px solid var(--primary); }
+        
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen" class="full-screen">
+        <h1 style="color:#333; margin:0 0 5px 0;">Civil Engineering</h1>
+        <p style="color:#666; margin-bottom:30px">Test Series: Q731 - Q764</p>
+        
+        <button class="big-btn" onclick="app.init('full')">START FULL TEST</button>
+        <button class="big-btn btn-sec" onclick="app.init('bookmark')">
+            ATTEMPT BOOKMARKS (<span id="bm-count">0</span>)
+        </button>
+        <div style="margin-top:20px; font-size:12px; color:#999; text-decoration:underline" onclick="app.clearData()">Clear All Data</div>
+    </div>
+
+    <header id="app-header" style="display:none">
+        <div class="h-title" onclick="app.exit()">
+            <span style="font-size:20px; color:var(--error);">✖</span>
+            <span id="header-title" style="margin-left:10px">Test</span>
+        </div>
+        <div class="timer-badge">⏱ <span id="timer">02:00:00</span></div>
+        <button class="btn-submit" onclick="app.submit()">Submit</button>
+    </header>
+
+    <div id="main-container" style="display:none">
+        <div id="question-area"></div>
+    </div>
+
+    <footer id="app-footer" style="display:none">
+        <button class="nav-btn" onclick="app.prev()">PREV</button>
+        <button class="nav-btn btn-mark" onclick="app.markReview()">REVIEW</button>
+        <button class="btn-star" id="bm-btn" onclick="app.toggleBm()">☆</button>
+        <button class="nav-btn btn-next" onclick="app.next()">NEXT</button>
+    </footer>
+
+    <div id="drawer-btn" style="position:fixed; bottom:80px; right:20px; background:white; width:48px; height:48px; border-radius:50%; box-shadow:0 4px 12px rgba(0,0,0,0.15); display:none; align-items:center; justify-content:center; font-size:24px; z-index:30; cursor:pointer;" onclick="app.toggleDrawer()">📑</div>
+
+    <div class="drawer-overlay" id="overlay" onclick="app.toggleDrawer()"></div>
+    <div class="drawer" id="drawer">
+        <div style="padding:16px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+            <b>Question Palette</b> <span onclick="app.toggleDrawer()" style="font-size:20px; padding:5px">✕</span>
+        </div>
+        <div class="palette-grid" id="palette"></div>
+    </div>
+
+    <div id="result-screen" class="full-screen" style="display:none">
+        <h2>Test Submitted!</h2>
+        <div style="text-align:left; background:#f9f9f9; padding:20px; border-radius:8px; width:100%; max-width:300px">
+            <p>Total Questions: <b id="r-total">0</b></p>
+            <p style="color:var(--success)">Correct: <b id="r-corr">0</b></p>
+            <p style="color:var(--error)">Wrong: <b id="r-wrong">0</b></p>
+        </div>
+        <button class="big-btn" onclick="location.reload()">HOME</button>
+    </div>
+
+<script>
+const MASTER_DB = [
+    {id:731, exam:"UJVNL JE 2016", q:"In hydration process of cement which compound is responsible for initial setting time:", opts:["C3S","C3A","C2S","C4AF"], ans:1, exp:"C3A (Tricalcium Aluminate) is characteristically fast reacting with water causing flash set. It is responsible for initial setting time."},
+    {id:732, exam:"SSC JE 2012", q:"The compound first to settle in cement is:", opts:["Tricalcium aluminate","Dicalcium silicate","Tricalcium silicate","Tetra calcium alumino-ferrite"], ans:0, exp:"C3A is the fastest reacting compound causing flash set."},
+    {id:733, exam:"HPSSC JE 2019", q:"In the cement, the compound quickest to react with water, is", opts:["Tricalcium aluminate","Tetra-calcium alumino-ferrite","Dicalcium silicate","Tricalcium silicate"], ans:0, exp:"Tricalcium aluminate (C3A) constitutes 5-11% of cement and reacts rapidly with water."},
+    {id:734, exam:"SSC JE 2009", q:"The main constituent of cement which is responsible for initial setting of cement is", opts:["Dicalcium silicate","Tricalcium silicate","Tricalcium aluminate","All of the above"], ans:2, exp:"C3A is responsible for initial setting and evolves high heat."},
+    {id:735, exam:"SSC JE 2019", q:"Which of the following cement is supposed to be the best cementing material and is well burnt cement?", opts:["Tricalcium silicate","Tetracalcium alumino ferrite","Dicalcium silicate","Tricalcium aluminate"], ans:0, exp:"C3S is considered the best cementing material (25-50%)."},
+    {id:736, exam:"SSC JE 2018", q:"Which of the following compounds of Portland cement reacts immediately with the water and set early?", opts:["Dicalcium silicate","Tetracalcium aluminoferrite","Tricalcium aluminate","Tricalcium silicate"], ans:2, exp:"C3A reacts immediately causing flash set."},
+    {id:737, exam:"Raj JEn 2020", q:"The two main compounds of Portland cement are:", opts:["C3S and C3A","C3S and C2S","C2S and C3A","C3A and C4AF"], ans:1, exp:"C3S and C2S are the main compounds providing strength."},
+    {id:738, exam:"HSSC JE 2015", q:"Low percentage of tricalcium silicate and high percentage of dicalcium silicate in cement result in", opts:["Rapid hardening","High early strength","High heat generation","None of these"], ans:3, exp:"Answer is None. High C2S and Low C3S results in SLOW hardening."},
+    {id:739, exam:"KPSC 2016", q:"The abbreviated form of complex compound of cement C3S, C2S, C3A and C4AF are also called:", opts:["Aspdin's compounds","Bogue's compounds","Vicat's compound","James Frost's compounds"], ans:1, exp:"They are called Bogue's compounds (Alite, Belite, Celite, Felite)."},
+    {id:740, exam:"ESE 2020", q:"The cement and water slurry coming on the top and setting on the surface is called:", opts:["Crazing","Efflorescence","Sulphate deterioration","Laitance"], ans:3, exp:"Laitance is the weak layer of cement/fines on the surface due to bleeding."},
+    {id:741, exam:"PGVCL JE 2017", q:"Ultimate strength to cement is provided by", opts:["Tricalcium silicate","Dicalcium silicate","Tetracalcium Alumino ferrite","Tricalcium Aluminate"], ans:1, exp:"Dicalcium Silicate (C2S) hydrates slowly and is responsible for ultimate strength."},
+    {id:742, exam:"KPSC 2020", q:"Rapid hardening Portland Cement having quick rate of gain of strength due to higher content of", opts:["Tricalcium Silicate","Dicalcium Silicate","Tricalcium Aluminates","Tetracalcium Aluminates"], ans:0, exp:"Rapid hardening requires high C3S content for early strength gain."},
+    {id:743, exam:"PGCIL DET 2018", q:"Which of the following compounds in Portland cement helps in achieving good ultimate strength?", opts:["Tricalcium silicate","Dicalcium silicate","Tetracalcium aluminoferrite","Tricalcium aluminate"], ans:1, exp:"C2S (Belite) is responsible for ultimate strength."},
+    {id:744, exam:"PGCIL DET 2018", q:"____ is a compound composition responsible for enhancing the strength of concrete considerably in later years.", opts:["Dicalcium silicate","Tetracalcium alumina ferrite","Tricalcium silicate","Tricalcium aluminate"], ans:0, exp:"C2S is responsible for strength in later years."},
+    {id:745, exam:"SSC JE 2007", q:"Compound of cement which reacts immediately with water and sets first is", opts:["Tricalcium silicate","Tricalcium aluminate","Dicalcium silicate","All of the above"], ans:1, exp:"C3A sets first (Flash set)."},
+    {id:746, exam:"SSC JE 2017", q:"Hydration of cement is due to chemical action of water with:", opts:["C3S and C2S","C2S and C3A","C3A and C4AF","All options are correct"], ans:3, exp:"Hydration involves reaction with all Bogue's compounds."},
+    {id:747, exam:"GPSC AM 2020", q:"Which of the following components of ordinary Portland cement is responsible for flash setting?", opts:["C3A","C3S","C2S","C4AF"], ans:0, exp:"C3A is responsible for flash setting."},
+    {id:748, exam:"Kerala PSC 2019", q:"Volume of 1 bag cement weighing 50 kg is:", opts:["0.034 m3","3.4 m3","1.05 m3","0.020 m3"], ans:0, exp:"Volume = Mass/Density = 50/1440 = 0.0347 m3."},
+    {id:749, exam:"Bihar WRD 2016", q:"The density of cement is lies to be:", opts:["1250 kg/m3","1800 kg/m3","1440 kg/m3","1000 kg/m3"], ans:2, exp:"Standard density is 1440 kg/m3."},
+    {id:750, exam:"DSSSB JE 2021", q:"One bag of ordinary Portland cement weights:", opts:["40 kg","50 kg","60 kg","None"], ans:1, exp:"Standard bag weight is 50kg."},
+    {id:751, exam:"HPSSC JE 2019", q:"Volume of bag of cement is", opts:["35 litre","20 litre","50 litre","40 litre"], ans:0, exp:"0.0347 m3 = 34.7 Litres ≈ 35 Litres."},
+    {id:752, exam:"ESE-2010", q:"A cement bag contains 0.035 cubic meter of cement by volume. How many bags will one tonne of cement comprise?", opts:["16","17","18","20"], ans:3, exp:"1 Tonne = 1000kg. Bags = 1000/50 = 20."},
+    {id:753, exam:"ISRO TA 2018", q:"Cement is packed in gunny bags of capacity (m3)", opts:["0.035","0.005","0.05","0.25"], ans:0, exp:"Capacity is 0.035 m3."},
+    {id:754, exam:"SSC JE 2010", q:"Water required per bag of cement is:", opts:["7 kg","14 kg","28 kg","35 kg"], ans:2, exp:"Standard approximation is ~28kg water per bag."},
+    {id:755, exam:"SSC JE 2017", q:"For a 50 kg cement bag, water required is ...", opts:["16.5 liters","18.5 liters","20.5 liters","22.5 liters"], ans:3, exp:"Taking w/c ratio 0.45: 50 * 0.45 = 22.5 Litres."},
+    {id:756, exam:"DFCCIL JE 2018", q:"Water cement ratio is generally expressed in volume of water required per...", opts:["10 kg","20 kg","30 kg","50 kg"], ans:3, exp:"Expressed per 50 kg bag of cement."},
+    {id:757, exam:"SSC JE 2008", q:"Water cement ratio is generally expressed volume of water required per", opts:["10 Kg Cement","20 Kg Cement","50 Kg Cement","40 Kg Cement"], ans:2, exp:"Per 50 kg bag."},
+    {id:758, exam:"HPSSC JE 2018", q:"Weight of cement in a standard bag of cement available in the open market is :", opts:["50 kg net","50 kg gross","50 kg tare","None"], ans:0, exp:"It is 50 kg Net weight."},
+    {id:759, exam:"Sub engg 2012", q:"500 Kg of cement is equal to", opts:["5 bags","10 bags","20 bags","25 bags"], ans:1, exp:"500 / 50 = 10 bags."},
+    {id:760, exam:"Bihar WRD 2016", q:"What is a standard weight of a cement bag?", opts:["50 kg","100 kg","25 kg","75 kg"], ans:0, exp:"50 kg."},
+    {id:761, exam:"WBPSC JE 2016", q:"Maximum quantity of water needed per 50 kg of cement for M15 grade of concrete is", opts:["25 lit","30 lit","32 lit","35 lit"], ans:2, exp:"Per IS 456 for M15, approx 32 Litres per bag."},
+    {id:762, exam:"HPSSC JE 2019", q:"Weight of water per bag of cement 50 kg is _____ (As per question image data)", opts:["27 litres","28 litres","29 litres","None of these"], ans:3, exp:"Usually calculated via w/c ratio. The specific question in image marked 'None of these'."},
+    {id:763, exam:"KPSC 2020", q:"One cubic meter of Portland cement weights", opts:["1400 kg","1440 kg","1540 kg","1340 kg"], ans:1, exp:"1440 kg."},
+    {id:764, exam:"MH PWD 2016", q:"In Vicat's apparatus, the diameter of Vicat's plunger is", opts:["5 mm","10 mm","15 mm","20 mm"], ans:1, exp:"Plunger is 10mm diameter, 50mm length."}
+];
+
+const app = {
+    activeDB: [],
+    curr: 0,
+    time: 7200,
+    timerInt: null,
+    answers: {},
+    bms: [],
+
+    init: function(mode) {
+        // Load Bookmarks
+        try {
+            this.bms = JSON.parse(localStorage.getItem('bms') || '[]');
+        } catch(e) { this.bms = []; }
+        
+        // Mode Selection
+        if (mode === 'bookmark') {
+            if (this.bms.length === 0) {
+                alert("No bookmarks saved! Start Full Test and click the Star icon to save questions.");
+                return;
+            }
+            // Filter logic
+            this.activeDB = MASTER_DB.filter(q => this.bms.includes(q.id));
+            if(this.activeDB.length === 0) {
+                alert("Error loading bookmarks. Clearing data...");
+                localStorage.removeItem('bms');
+                location.reload();
+                return;
+            }
+            document.getElementById('header-title').innerText = "Bookmark Test";
+        } else {
+            this.activeDB = [...MASTER_DB];
+            document.getElementById('header-title').innerText = "Full Test (731-764)";
+        }
+
+        // RESET STATE
+        this.curr = 0;
+        this.answers = {};
+        
+        // UI SWITCH
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('app-header').style.display = 'flex';
+        document.getElementById('main-container').style.display = 'block';
+        document.getElementById('app-footer').style.display = 'flex';
+        document.getElementById('drawer-btn').style.display = 'flex';
+
+        // ORDER MATTERS: Render Palette FIRST to create DOM elements
+        this.renderPalette();
+        // THEN Render Question (which updates palette colors)
+        this.renderQ();
+        this.startTimer();
+    },
+
+    startTimer: function() {
+        clearInterval(this.timerInt);
+        this.timerInt = setInterval(() => {
+            this.time--;
+            let h = Math.floor(this.time/3600), m = Math.floor((this.time%3600)/60), s = this.time%60;
+            const tEl = document.getElementById('timer');
+            if(tEl) tEl.innerText = `${h<10?'0'+h:h}:${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
+            if(this.time<=0) this.submit();
+        }, 1000);
+    },
+
+    renderQ: function() {
+        if (!this.activeDB || !this.activeDB[this.curr]) return;
+
+        const q = this.activeDB[this.curr];
+        const state = this.answers[this.curr];
+        const isBm = this.bms.includes(q.id);
+
+        // Update Star Icon
+        const bmBtn = document.getElementById('bm-btn');
+        if(bmBtn) {
+            bmBtn.className = isBm ? 'btn-star active' : 'btn-star';
+            bmBtn.innerText = isBm ? '★' : '☆';
+        }
+
+        let html = `
+            <div class="q-card">
+                <div class="q-meta">
+                    <span class="q-number">Question ${this.curr+1} / ${this.activeDB.length}</span>
+                    <span class="exam-tag">${q.exam}</span>
+                </div>
+                <div class="q-text">${q.q}</div>
+                <div class="opt-list">
+        `;
+
+        q.opts.forEach((o, i) => {
+            let cls = 'option-item';
+            let style = '';
+            
+            if (state && state.opt !== undefined) {
+                style = 'pointer-events:none;';
+                if (i === q.ans) cls += ' correct';
+                else if (i === state.opt) cls += ' wrong';
+            }
+
+            html += `
+                <div class="${cls}" style="${style}" onclick="app.check(${i})">
+                    <div class="opt-circle">${['A','B','C','D'][i]}</div>
+                    <div class="opt-text">${o}</div>
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+        
+        // Show Solution
+        if (state && state.opt !== undefined) {
+            html += `
+                <div class="solution-box" style="display:block">
+                    <b>💡 Detailed Solution:</b><br>
+                    <div class="sol-desc">${q.exp}</div>
+                </div>
+            `;
+        }
+
+        html += `</div>`;
+        document.getElementById('question-area').innerHTML = html;
+        
+        // Safe Update Palette
+        this.updatePaletteUI();
+    },
+
+    check: function(optIdx) {
+        if(this.answers[this.curr]?.opt !== undefined) return;
+        this.answers[this.curr] = {
+            opt: optIdx,
+            status: 'ans',
+            correct: optIdx === this.activeDB[this.curr].ans
+        };
+        this.renderQ();
+    },
+
+    toggleBm: function() {
+        const qId = this.activeDB[this.curr].id;
+        const idx = this.bms.indexOf(qId);
+        
+        if(idx === -1) this.bms.push(qId);
+        else this.bms.splice(idx, 1);
+        
+        localStorage.setItem('bms', JSON.stringify(this.bms));
+        this.renderQ(); // Refresh visual state
+    },
+
+    next: function() {
+        if(this.curr < this.activeDB.length - 1) { this.curr++; this.renderQ(); }
+    },
+
+    prev: function() {
+        if(this.curr > 0) { this.curr--; this.renderQ(); }
+    },
+
+    markReview: function() {
+        if(!this.answers[this.curr]) this.answers[this.curr] = { status: 'rev' };
+        else this.answers[this.curr].status = 'rev';
+        this.updatePaletteUI();
+        this.next();
+    },
+
+    renderPalette: function() {
+        const p = document.getElementById('palette');
+        p.innerHTML = '';
+        this.activeDB.forEach((_, i) => {
+            const el = document.createElement('div');
+            el.className = 'p-item';
+            el.innerText = i+1;
+            el.id = `pal-${i}`;
+            el.onclick = () => { 
+                this.curr = i; 
+                this.renderQ(); 
+                this.toggleDrawer(); 
+            };
+            p.appendChild(el);
+        });
+    },
+
+    updatePaletteUI: function() {
+        this.activeDB.forEach((_, i) => {
+            const el = document.getElementById(`pal-${i}`);
+            if(!el) return; // Safety check
+
+            const st = this.answers[i];
+            el.className = 'p-item'; // Reset
+            
+            if (i === this.curr) el.classList.add('curr');
+            
+            if (st) {
+                if (st.status === 'ans') el.classList.add('ans');
+                else if (st.status === 'rev') el.classList.add('rev');
+            }
+        });
+    },
+
+    toggleDrawer: function() {
+        const d = document.getElementById('drawer');
+        const o = document.getElementById('overlay');
+        const isOpen = d.classList.contains('open');
+        if(isOpen) { d.classList.remove('open'); o.style.display='none'; }
+        else { d.classList.add('open'); o.style.display='block'; }
+    },
+
+    submit: function() {
+        clearInterval(this.timerInt);
+        document.getElementById('app-header').style.display = 'none';
+        document.getElementById('main-container').style.display = 'none';
+        document.getElementById('app-footer').style.display = 'none';
+        document.getElementById('drawer-btn').style.display = 'none';
+        
+        let c = 0, w = 0;
+        Object.values(this.answers).forEach(a => {
+            if (a.status === 'ans') { a.correct ? c++ : w++; }
+        });
+
+        document.getElementById('r-total').innerText = this.activeDB.length;
+        document.getElementById('r-corr').innerText = c;
+        document.getElementById('r-wrong').innerText = w;
+        document.getElementById('result-screen').style.display = 'flex';
+    },
+
+    exit: function() { if(confirm("Quit Test?")) location.reload(); },
+    
+    clearData: function() {
+        if(confirm("Delete all bookmarks and history?")) {
+            localStorage.clear();
+            location.reload();
+        }
+    }
+};
+
+// Initial Load
+window.onload = function() {
+    try {
+        const bms = JSON.parse(localStorage.getItem('bms') || '[]');
+        const countEl = document.getElementById('bm-count');
+        if(countEl) countEl.innerText = bms.length;
+    } catch(e) {
+        console.error("Init Error", e);
+    }
+};
+</script>
+</body>
+</html>
