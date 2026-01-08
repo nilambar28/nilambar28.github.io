@@ -14,29 +14,21 @@
 
         /* --- HEADER --- */
         .header {
-            background: var(--primary-grad);
-            padding: 15px 10px;
+            background: var(--primary-grad); padding: 15px 10px;
             position: sticky; top: 0; z-index: 100;
             display: flex; align-items: center; justify-content: space-between;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15); color: white;
         }
-
         .nav-btn {
-            background: rgba(255,255,255,0.15); 
-            border: 1px solid rgba(255,255,255,0.2);
-            color: white; font-size: 20px;
-            cursor: pointer; width: 40px; height: 40px;
+            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);
+            color: white; font-size: 20px; cursor: pointer; width: 40px; height: 40px;
             display: flex; align-items: center; justify-content: center;
             border-radius: 50%; transition: 0.2s; backdrop-filter: blur(4px);
         }
-        .nav-btn:hover { background: white; color: #2563eb; transform: scale(1.1); }
         .hidden-btn { visibility: hidden; pointer-events: none; } 
-
         .header-center { text-align: center; flex: 1; }
-        .header-center h1 { margin: 0; font-size: 16px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
+        .header-center h1 { margin: 0; font-size: 16px; font-weight: 800; text-transform: uppercase; }
         .header-center p { margin: 2px 0 0; font-size: 10px; opacity: 0.9; }
-
         .container { max-width: 800px; margin: 0 auto; padding: 15px; }
 
         /* --- GRIDS & CARDS --- */
@@ -44,20 +36,10 @@
         .grid-test { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; }
 
         .card {
-            background: white; padding: 20px; border-radius: 15px;
-            text-align: center; cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-            border-bottom: 5px solid #ddd;
-            transition: all 0.2s;
+            background: white; padding: 20px; border-radius: 15px; text-align: center; cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02); border-bottom: 5px solid #ddd; transition: all 0.2s;
         }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
-
-        .icon-box {
-            width: 50px; height: 50px; margin: 0 auto 10px;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 50%; font-size: 24px;
-        }
-        
+        .icon-box { width: 50px; height: 50px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 24px; }
         .sub-title { font-weight: 700; font-size: 14px; color: #334155; display: block; }
         .sub-count { font-size: 11px; color: #94a3b8; margin-top: 5px; display: block; }
 
@@ -65,8 +47,7 @@
         .topic-item { 
             background: white; padding: 15px; margin-bottom: 12px; border-radius: 12px; 
             display: flex; align-items: center; cursor: pointer;
-            border-left: 5px solid #ccc;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            border-left: 5px solid #ccc; box-shadow: 0 2px 4px rgba(0,0,0,0.03);
         }
         .topic-num { 
             background: #f1f5f9; color: #475569; width: 30px; height: 30px; 
@@ -79,59 +60,49 @@
         .t-btn { 
             background: white; border: 1px solid #e2e8f0; padding: 12px 5px; border-radius: 10px; 
             text-align: center; text-decoration: none; color: #333; display: block; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02); cursor: pointer;
         }
-        .t-btn:hover { background: #2563eb; color: white; border-color: #2563eb; }
         .t-lbl { font-size: 10px; text-transform: uppercase; color: #94a3b8; display: block; font-weight: 600; }
         .t-val { font-size: 18px; font-weight: 800; }
 
-        /* --- NEW ADDITION: BOOKMARK BUTTON STYLE (ONLY CHANGE IN CSS) --- */
-        .btn-gold { 
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); 
-            border-color: #b45309; 
-            color: white !important;
+        /* --- BOOKMARK GOLD BUTTON --- */
+        .btn-gold {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white !important; border: 1px solid #b45309;
         }
-        .btn-gold .t-lbl { color: rgba(255,255,255,0.8); }
+        .btn-gold .t-lbl { color: rgba(255,255,255,0.9); }
 
-        /* --- CONTACT MODAL --- */
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1000;
-        }
-        .modal-content {
-            background: white; padding: 25px; border-radius: 15px; width: 85%; max-width: 350px;
-            text-align: center;
-        }
-        .input-box {
-            width: 100%; height: 100px; padding: 10px; border: 2px solid #e2e8f0;
-            border-radius: 10px; margin: 15px 0; font-family: inherit; resize: none;
-            box-sizing: border-box;
-        }
-        .email-btn { background: #EA4335; color: white; padding: 12px; width: 100%; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .close-btn { background: #f1f5f9; color: #64748b; padding: 10px; width: 100%; border: none; border-radius: 8px; margin-top: 5px; cursor: pointer; }
+        /* --- BOOKMARK VIEW STYLES (NEW) --- */
+        .bm-controls { display: flex; justify-content: flex-end; margin-bottom: 15px; }
+        .btn-print { background: #ea580c; color: white; padding: 8px 15px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        
+        .q-card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .q-text { font-weight: bold; margin-bottom: 10px; font-size: 16px; }
+        .opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .opt { background: #f8fafc; padding: 8px; border: 1px solid #e2e8f0; border-radius: 5px; font-size: 14px; }
+        .ans-box { margin-top: 10px; padding: 10px; background: #f0fdf4; border-left: 4px solid #16a34a; font-size: 14px; display: none; }
+        .show-ans .ans-box { display: block; }
 
-        /* --- OWNER NAME FOOTER --- */
-        .footer-name {
-            position: fixed;
-            bottom: 10px;
-            right: 15px;
-            font-weight: 800;
-            font-size: 14px;
-            color: #1e293b;
-            text-shadow: 0px 0px 1px rgba(255,255,255,0.8);
-            z-index: 99;
-        }
-
+        /* Screen Management */
         .screen { display: none; }
         .active { display: block; }
+        .footer-name { position: fixed; bottom: 10px; right: 15px; font-weight: 800; font-size: 14px; color: #1e293b; z-index: 99; }
 
-        /* Theme Colors */
+        /* Themes */
         .theme-blue { border-bottom-color: #3b82f6; } .theme-blue .icon-box { background: #eff6ff; color: #3b82f6; }
         .theme-green { border-bottom-color: #10b981; } .theme-green .icon-box { background: #ecfdf5; color: #10b981; }
         .theme-orange { border-bottom-color: #f59e0b; } .theme-orange .icon-box { background: #fffbeb; color: #f59e0b; }
         .theme-red { border-bottom-color: #ef4444; } .theme-red .icon-box { background: #fef2f2; color: #ef4444; }
         .theme-purple { border-bottom-color: #8b5cf6; } .theme-purple .icon-box { background: #f5f3ff; color: #8b5cf6; }
 
+        /* --- PRINT PDF SETTINGS --- */
+        @media print {
+            .header, .nav-btn, .footer-name, .bm-controls, .no-print { display: none !important; }
+            body { background: white; padding: 0; }
+            .container { max-width: 100%; padding: 0; }
+            .q-card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+            .ans-box { display: block !important; }
+        }
     </style>
 </head>
 <body>
@@ -142,41 +113,28 @@
             <h1 id="page-title">Civil Engg Hub</h1>
             <p id="page-subtitle">Select Subject</p>
         </div>
-        <div style="display:flex; gap:10px;">
-            <button class="nav-btn" onclick="openContact()">💬</button>
-            <button id="btn-home" class="nav-btn" onclick="goHome()">&#8962;</button>
-        </div>
+        <button id="btn-home" class="nav-btn" onclick="goHome()">&#8962;</button>
     </div>
 
     <div class="container">
         <div id="screen-sub" class="screen active"><div class="grid-sub" id="sub-list"></div></div>
+        
         <div id="screen-top" class="screen"><div id="top-list"></div></div>
+        
         <div id="screen-test" class="screen"><div class="grid-test" id="test-list"></div></div>
+        
+        <div id="screen-bookmark" class="screen">
+            <div class="bm-controls">
+                <button onclick="window.print()" class="btn-print">🖨️ Print / Save PDF</button>
+            </div>
+            <div id="bm-list"></div>
+        </div>
     </div>
 
     <div class="footer-name">Er.Nilambar Yadav</div>
 
-    <div id="contact-modal" class="modal">
-        <div class="modal-content">
-            <h3 style="margin-top:0;">Ask Your Doubt</h3>
-            <textarea id="user-msg" class="input-box" placeholder="Write your doubt here..."></textarea>
-            <button class="email-btn" onclick="sendToEmail()">📧 Send via Email</button>
-            <button class="close-btn" onclick="closeContact()">Cancel</button>
-        </div>
-    </div>
-
     <script>
-        const myEmail = "nilambar28@gmail.com"; 
-
-        function sendToEmail() {
-            let msg = document.getElementById('user-msg').value;
-            if(!msg) { alert("Please type something!"); return; }
-            window.location.href = "mailto:" + myEmail + "?subject=App%20Doubt&body=" + encodeURIComponent(msg);
-        }
-
-        function openContact() { document.getElementById('contact-modal').style.display = 'flex'; }
-        function closeContact() { document.getElementById('contact-modal').style.display = 'none'; }
-
+        // --- DATA ---
         const db = [
             { code: "irri", name: "Irrigation Engg.", icon: "💧", theme: "theme-blue", topics: ["Introduction & Methods", "Soil Moisture Plant Relation", "Water Requirement of Crops", "Canal Irrigation System", "Design of Lined/Unlined Canals", "Water Logging & Reclamation", "River Training Works", "Diversion Head Works", "Canal Regulation Works", "Cross Drainage Works", "Dams & Reservoirs", "Spillways & Energy Dissipators"] },
             { code: "envi", name: "Environmental Engg.", icon: "🌳", theme: "theme-green", topics: ["Water Demand & Population", "Quality Control of Water", "Water Treatment", "Disinfection & Softening", "Distribution System", "System of Sanitation", "Characteristics of Sewage", "Sewage Treatment", "Disposal of Sewage", "Solid Waste Management", "Air & Noise Pollution"] },
@@ -195,8 +153,10 @@
         ];
 
         let currSub = null;
-        const subList = document.getElementById('sub-list');
+        let currTopicIdx = 0;
 
+        // --- RENDER SUBJECTS ---
+        const subList = document.getElementById('sub-list');
         db.forEach(sub => {
             subList.innerHTML += `
             <div class="card ${sub.theme}" onclick="openTopics('${sub.code}')">
@@ -206,6 +166,7 @@
             </div>`;
         });
 
+        // --- NAVIGATION LOGIC ---
         function switchScreen(id, title, subtitle) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -222,7 +183,7 @@
             const list = document.getElementById('top-list');
             list.innerHTML = '';
             
-            let color = "#3b82f6"; // Default
+            let color = "#3b82f6";
             if(currSub.theme.includes("green")) color="#10b981";
             if(currSub.theme.includes("orange")) color="#f59e0b";
             if(currSub.theme.includes("red")) color="#ef4444";
@@ -238,27 +199,26 @@
             switchScreen('screen-top', currSub.name, "Select Topic");
         }
 
-        // --- UPDATED FUNCTION HERE ---
         function openTests(index) {
+            currTopicIdx = index;
             const list = document.getElementById('test-list');
             list.innerHTML = '';
 
-            // 1. CHECK BOOKMARKS IN LOCAL STORAGE
+            // --- CHECK FOR SAVED BOOKMARKS ---
             const allBookmarks = JSON.parse(localStorage.getItem('civilHubBookmarks')) || {};
-            // Check if currSub.code (e.g., 'irri') has an array for 'index' (e.g., Topic 0)
-            if (allBookmarks[currSub.code] && allBookmarks[currSub.code][index] && allBookmarks[currSub.code][index].length > 0) {
-                
-                const count = allBookmarks[currSub.code][index].length;
-
-                // Create Bookmark Button
-                const b = document.createElement('a');
-                b.className = 't-btn btn-gold'; // Using existing style + new color
-                b.href = `bookmark_test.html?sub=${currSub.code}&topic=${index}&name=${encodeURIComponent(currSub.topics[index])}`;
-                b.innerHTML = `<span class="t-lbl">SAVED</span><span class="t-val">★ (${count})</span>`;
+            const subData = allBookmarks[currSub.code]; 
+            
+            // If bookmarks exist for this topic, create Gold Button
+            if (subData && subData[index] && subData[index].length > 0) {
+                const count = subData[index].length;
+                const b = document.createElement('div');
+                b.className = 't-btn btn-gold';
+                b.onclick = function() { openBookmarkView(); }; // Opens functionality inside this file
+                b.innerHTML = `<span class="t-lbl">SAVED</span><span class="t-val">★ BOOKMARKS (${count})</span>`;
                 list.appendChild(b);
             }
-            // -----------------------------
 
+            // Normal Tests
             for(let i=1; i<=50; i++) {
                 const a = document.createElement('a');
                 a.className = 't-btn';
@@ -269,10 +229,71 @@
             switchScreen('screen-test', currSub.topics[index], "Select Test");
         }
 
+        // --- NEW: OPEN BOOKMARK SCREEN ---
+        function openBookmarkView() {
+            const list = document.getElementById('bm-list');
+            list.innerHTML = '';
+
+            const allBookmarks = JSON.parse(localStorage.getItem('civilHubBookmarks')) || {};
+            const questions = allBookmarks[currSub.code][currTopicIdx];
+
+            if(questions && questions.length > 0) {
+                questions.forEach((q, i) => {
+                    let html = `
+                    <div class="q-card" onclick="this.classList.toggle('show-ans')">
+                        <div class="q-text">Q${i+1}. ${q.q}</div>
+                        <div class="opt-grid">
+                            <div class="opt">(A) ${q.a}</div>
+                            <div class="opt">(B) ${q.b}</div>
+                            <div class="opt">(C) ${q.c}</div>
+                            <div class="opt">(D) ${q.d}</div>
+                        </div>
+                        <div class="ans-box">
+                            <b>Answer: (${q.ans.toUpperCase()})</b><br>
+                            <span style="color:#666;">${q.sol || ""}</span>
+                            <div class="no-print" style="margin-top:10px; text-align:right;">
+                                <button onclick="deleteBookmark(${i})" style="color:red; background:none; border:none; cursor:pointer;">🗑️ Delete Question</button>
+                            </div>
+                        </div>
+                        <div class="no-print" style="text-align:center; font-size:10px; color:#999; margin-top:5px;">(Click card to see answer)</div>
+                    </div>`;
+                    list.innerHTML += html;
+                });
+            } else {
+                list.innerHTML = "<p>No bookmarks found.</p>";
+            }
+
+            switchScreen('screen-bookmark', "Saved Questions", currSub.topics[currTopicIdx]);
+        }
+
+        function deleteBookmark(qIndex) {
+            event.stopPropagation(); // Stop card from toggling answer
+            if(confirm("Remove this question?")) {
+                let db = JSON.parse(localStorage.getItem('civilHubBookmarks'));
+                db[currSub.code][currTopicIdx].splice(qIndex, 1); // Remove
+                
+                // If empty, delete the key
+                if(db[currSub.code][currTopicIdx].length === 0) {
+                    delete db[currSub.code][currTopicIdx];
+                }
+                
+                localStorage.setItem('civilHubBookmarks', JSON.stringify(db));
+                
+                // Re-render
+                if(db[currSub.code][currTopicIdx]) {
+                    openBookmarkView(); 
+                } else {
+                    goBack(); // If no questions left, go back to test list
+                }
+            }
+        }
+
         function goBack() {
-            if(document.getElementById('screen-test').classList.contains('active')) openTopics(currSub.code);
+            if(document.getElementById('screen-bookmark').classList.contains('active')) openTests(currTopicIdx);
+            else if(document.getElementById('screen-test').classList.contains('active')) openTopics(currSub.code);
             else if(document.getElementById('screen-top').classList.contains('active')) goHome();
         }
+
         function goHome() {
             currSub = null;
             switchScreen('screen-sub', "Civil Engg Hub", "Select Subject");
