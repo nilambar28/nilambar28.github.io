@@ -65,14 +65,14 @@
         .t-lbl { font-size: 10px; text-transform: uppercase; color: #94a3b8; display: block; font-weight: 600; }
         .t-val { font-size: 18px; font-weight: 800; }
 
-        /* --- BOOKMARK GOLD BUTTON --- */
+        /* --- GOLD BUTTON (BOOKMARK) --- */
         .btn-gold {
             background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
             color: white !important; border: 1px solid #b45309;
         }
         .btn-gold .t-lbl { color: rgba(255,255,255,0.9); }
 
-        /* --- BOOKMARK VIEW STYLES (NEW) --- */
+        /* --- BOOKMARK VIEW STYLES (NEW SCREEN) --- */
         .bm-controls { display: flex; justify-content: flex-end; margin-bottom: 15px; }
         .btn-print { background: #ea580c; color: white; padding: 8px 15px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
         
@@ -97,11 +97,11 @@
 
         /* --- PRINT PDF SETTINGS --- */
         @media print {
-            .header, .nav-btn, .footer-name, .bm-controls, .no-print { display: none !important; }
+            .header, .nav-btn, .footer-name, .bm-controls, .no-print, #dev-tools { display: none !important; }
             body { background: white; padding: 0; }
             .container { max-width: 100%; padding: 0; }
-            .q-card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
-            .ans-box { display: block !important; }
+            .q-card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; margin-bottom: 20px; }
+            .ans-box { display: block !important; border-top: 1px solid #eee; }
         }
     </style>
 </head>
@@ -132,6 +132,14 @@
     </div>
 
     <div class="footer-name">Er.Nilambar Yadav</div>
+
+    <div id="dev-tools" style="text-align:center; margin-top:50px; padding:20px; background:#f1f5f9; border-top:1px solid #ccc;">
+        <h4 style="margin:0 0 10px 0;">Developer Tools (Check Bookmark Facility)</h4>
+        <button onclick="injectDemoData()" style="padding:10px; cursor:pointer;">
+            🛠️ Add Demo Bookmarks to Irrigation (Ch 1) & Soil (Ch 3)
+        </button>
+        <p style="font-size:12px; color:red;">Click this button, then check Irrigation->Topic 1 or Soil->Topic 3</p>
+    </div>
 
     <script>
         // --- DATA ---
@@ -166,7 +174,7 @@
             </div>`;
         });
 
-        // --- NAVIGATION LOGIC ---
+        // --- NAVIGATION ---
         function switchScreen(id, title, subtitle) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -199,26 +207,28 @@
             switchScreen('screen-top', currSub.name, "Select Topic");
         }
 
+        // --- THIS FUNCTION ADDS THE BOOKMARK BUTTON FOR ALL SUBJECTS/CHAPTERS AUTOMATICALLY ---
         function openTests(index) {
             currTopicIdx = index;
             const list = document.getElementById('test-list');
             list.innerHTML = '';
 
-            // --- CHECK FOR SAVED BOOKMARKS ---
+            // 1. Check LocalStorage for bookmarks in THIS Subject + THIS Topic
             const allBookmarks = JSON.parse(localStorage.getItem('civilHubBookmarks')) || {};
-            const subData = allBookmarks[currSub.code]; 
+            const subData = allBookmarks[currSub.code]; // e.g., gets data for 'irri' or 'soil'
             
-            // If bookmarks exist for this topic, create Gold Button
+            // 2. If data exists, show the Gold Button
             if (subData && subData[index] && subData[index].length > 0) {
                 const count = subData[index].length;
                 const b = document.createElement('div');
                 b.className = 't-btn btn-gold';
-                b.onclick = function() { openBookmarkView(); }; // Opens functionality inside this file
+                // Click opens internal bookmark view
+                b.onclick = function() { openBookmarkView(); }; 
                 b.innerHTML = `<span class="t-lbl">SAVED</span><span class="t-val">★ BOOKMARKS (${count})</span>`;
                 list.appendChild(b);
             }
 
-            // Normal Tests
+            // 3. Render Normal Tests
             for(let i=1; i<=50; i++) {
                 const a = document.createElement('a');
                 a.className = 't-btn';
@@ -229,7 +239,7 @@
             switchScreen('screen-test', currSub.topics[index], "Select Test");
         }
 
-        // --- NEW: OPEN BOOKMARK SCREEN ---
+        // --- INTERNAL BOOKMARK VIEWER (PRINTABLE) ---
         function openBookmarkView() {
             const list = document.getElementById('bm-list');
             list.innerHTML = '';
@@ -250,9 +260,9 @@
                         </div>
                         <div class="ans-box">
                             <b>Answer: (${q.ans.toUpperCase()})</b><br>
-                            <span style="color:#666;">${q.sol || ""}</span>
+                            <span style="color:#666;">${q.sol || "Solution not available."}</span>
                             <div class="no-print" style="margin-top:10px; text-align:right;">
-                                <button onclick="deleteBookmark(${i})" style="color:red; background:none; border:none; cursor:pointer;">🗑️ Delete Question</button>
+                                <button onclick="deleteBookmark(${i})" style="color:red; background:none; border:none; cursor:pointer;">🗑️ Delete</button>
                             </div>
                         </div>
                         <div class="no-print" style="text-align:center; font-size:10px; color:#999; margin-top:5px;">(Click card to see answer)</div>
@@ -267,23 +277,20 @@
         }
 
         function deleteBookmark(qIndex) {
-            event.stopPropagation(); // Stop card from toggling answer
+            event.stopPropagation();
             if(confirm("Remove this question?")) {
                 let db = JSON.parse(localStorage.getItem('civilHubBookmarks'));
-                db[currSub.code][currTopicIdx].splice(qIndex, 1); // Remove
+                db[currSub.code][currTopicIdx].splice(qIndex, 1);
                 
-                // If empty, delete the key
                 if(db[currSub.code][currTopicIdx].length === 0) {
                     delete db[currSub.code][currTopicIdx];
                 }
-                
                 localStorage.setItem('civilHubBookmarks', JSON.stringify(db));
                 
-                // Re-render
-                if(db[currSub.code][currTopicIdx]) {
+                if(db[currSub.code] && db[currSub.code][currTopicIdx]) {
                     openBookmarkView(); 
                 } else {
-                    goBack(); // If no questions left, go back to test list
+                    goBack(); 
                 }
             }
         }
@@ -297,6 +304,25 @@
         function goHome() {
             currSub = null;
             switchScreen('screen-sub', "Civil Engg Hub", "Select Subject");
+        }
+
+        // --- DEVELOPER FUNCTION TO TEST IT ---
+        function injectDemoData() {
+            const demo = {
+                "irri": {
+                    "0": [ // Topic 0 (Intro)
+                        { q: "Water logging is caused by?", a: "Over irrigation", b: "Good drainage", c: "Evaporation", d: "None", ans: "a", sol: "Over irrigation raises water table." },
+                        { q: "Delta is measured in?", a: "cm", b: "hours", c: "cumec", d: "None", ans: "a", sol: "Delta is depth of water." }
+                    ]
+                },
+                "soil": {
+                    "2": [ // Topic 2 (Classification)
+                        { q: "Clay particle size is?", a: ">2mm", b: "<0.002mm", c: "4.75mm", d: "None", ans: "b", sol: "Less than 2 microns." }
+                    ]
+                }
+            };
+            localStorage.setItem('civilHubBookmarks', JSON.stringify(demo));
+            alert("Demo data added! \nNow go to:\n1. Irrigation -> Intro\n2. Soil -> Classification\nYou will see the Bookmark Test there.");
         }
     </script>
 </body>
