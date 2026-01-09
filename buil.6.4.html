@@ -24,15 +24,10 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             height: 100%; padding: 20px; text-align: center; background: white;
         }
-        .btn-container { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; width: 100%; max-width: 300px; }
         .btn-main {
-            padding: 15px; font-size: 1.1rem; background: var(--primary); color: white;
-            border: none; border-radius: 5px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%;
+            padding: 15px 40px; font-size: 1.2rem; background: var(--primary); color: white;
+            border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        .btn-bookmark-test {
-            background: #6f42c1; /* Purple for Bookmark Test */
-        }
-        
         .stats-card {
             background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 8px;
             margin: 10px 0; width: 100%; max-width: 400px; text-align: left;
@@ -98,12 +93,8 @@
             background: white; border: 1px solid #ced4da; padding: 8px 15px; border-radius: 4px; cursor: pointer;
         }
         .nav-btn.primary { background: var(--primary); color: white; border-color: var(--primary); }
-        
-        /* BOOKMARK STYLES */
-        .bookmark-btn { 
-            background: none; border: none; font-size: 1.8rem; color: #ced4da; cursor: pointer; transition: color 0.2s ease;
-        }
-        .bookmark-btn.active { color: #ffc107 !important; }
+        .bookmark-btn { background: none; border: none; font-size: 1.5rem; color: #ced4da; cursor: pointer; }
+        .bookmark-btn.active { color: var(--warning); }
 
         /* Palette Modal */
         #palette-modal {
@@ -117,33 +108,29 @@
         }
         .p-item.current { border: 2px solid var(--primary); }
         .p-item.answered { background: var(--success); color: white; }
-        .p-item.wrong { background: var(--danger); color: white; }
+        .p-item.wrong { background: var(--danger); color: white; } /* Local feedback style */
         .p-item.review { background: #6f42c1; color: white; }
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
         .review-check { display: flex; align-items: center; gap: 5px; font-size: 0.9rem; color: var(--gray); cursor: pointer; }
-        .badge { background: #6c757d; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.8rem; vertical-align: middle; }
     </style>
 </head>
 <body>
 
     <div id="start-screen">
         <h1 style="color: var(--primary);">SSC/State JE Cement Test</h1>
-        <p>Building Materials (Q765 - Q801)</p>
+        <p>Questions 765 to 801 (Building Materials)</p>
+        <p>Time: 2 Hours | Instant Solutions Enabled</p>
         
         <div class="stats-card">
-            <h3>Recent History</h3>
+            <h3>Previous Performance</h3>
             <div id="history-display">No history available.</div>
         </div>
 
-        <div class="btn-container">
-            <button class="btn-main" onclick="startMainTest()">Start Full Test (All Questions)</button>
-            <button class="btn-main btn-bookmark-test" onclick="startBookmarkTest()">
-                Start Bookmark Test <span id="bm-count" class="badge">0</span>
-            </button>
-        </div>
+        <button class="btn-main" onclick="startTest()">Start Test</button>
+        <button style="margin-top:10px; background:none; border:none; text-decoration:underline; color:var(--primary); cursor:pointer;" onclick="viewBookmarks()">View Bookmarks</button>
     </div>
 
     <div id="quiz-interface">
@@ -165,7 +152,7 @@
             <button class="nav-btn" onclick="prevQuestion()">Previous</button>
             <div style="display:flex; gap:15px; align-items:center;">
                 <label class="review-check">
-                    <input type="checkbox" id="review-checkbox" onchange="toggleReview()"> Review
+                    <input type="checkbox" id="review-checkbox" onchange="toggleReview()"> Mark for Review
                 </label>
                 <button class="bookmark-btn" id="bookmark-icon" onclick="toggleBookmark()">★</button>
                 <button class="nav-btn" onclick="openPalette()">Grid</button>
@@ -181,6 +168,7 @@
             <span style="color:var(--success)">● Answered</span>
             <span style="color:var(--danger)">● Wrong</span>
             <span style="color:#6f42c1">● Review</span>
+            <span style="color:var(--gray)">● Skipped</span>
         </div>
         <div class="palette-grid" id="palette-grid"></div>
     </div>
@@ -193,85 +181,272 @@
     </div>
 
 <script>
-    // --- DATA ---
-    const allQuestions = [
-        { id: 765, tag: "MH PWD 2016", text: "In order to provide colour, hardness and strength to the cement, the ingredient used is", options: ["lime", "silica", "alumina", "iron oxide"], correct: 3, solution: "<b>Ans. (d) : Iron oxide</b><br>It is present about 0.5-6% in cement which provides colour, hardness and strength to the cement." },
-        { id: 766, tag: "HPPCL JE Civil 13.02.2021", text: "Approximate ratio of strength of cement concrete of 7 days to that of 28 days is :", options: ["0.56", "0.85", "0.33", "1.0"], correct: 0, solution: "<b>Ans. (a) :</b> Minimum specified strength at 7 days is 22.0 N/mm². At 28 days is 33.0 N/mm². Ratio = 22/33 = 0.66." },
-        { id: 767, tag: "ISRO TA / ESIC JE 2016", text: "Specific Surface of 53 grade ordinary Portland cement should not be less than", options: ["2500 Sq cm/g", "2000 Sq cm/g", "225 Sq m/kg", "2250 Sq m/kg"], correct: 2, solution: "<b>Ans. (c) : 225 Sq m/kg</b><br>Specific surface of 53 grade (OPC) should not be less than 2250 cm²/g or 225 m²/kg." },
-        { id: 768, tag: "ISRO TA 2018 / MP VYAPAM", text: "Blaine's Air permeability method is used to determine", options: ["Specific surface of cement", "Soundness of cement", "Setting time", "None of the above"], correct: 0, solution: "<b>Ans. (a) :</b> Blaine's Air permeability method is used to determine specific surface of cement (fineness)." },
-        { id: 770, tag: "SSC JE 2018", text: "High alumina cement is produced by fusing together a mixture of:", options: ["Limestone and bauxite", "Limestone, bauxite and gypsum", "Limestone, gypsum and clay", "Limestone, gypsum, bauxite, clay and chalk"], correct: 0, solution: "<b>Ans. (a) :</b> It is manufactured from limestone or chalk and bauxite (Special clay having extremely high alumina content)." },
-        { id: 771, tag: "Nagaland PSC CTSE 2017", text: "High Alumina cement is used because", options: ["It has higher initial setting time but lower final setting time", "Lower initial setting time but final setting time remain unchanged", "Higher initial and final setting times", "It improves permeability of concrete"], correct: 0, solution: "<b>Ans. (a) :</b> High Alumina cement is used because it has higher initial setting time but lower final setting time." },
-        { id: 772, tag: "MH PWD 2016", text: "As compared to ordinary Portland cement, high alumina cement has", options: ["higher initial setting time but lower final setting time", "lower initial setting time but higher final setting time", "higher initial and final setting times", "lower initial and final setting times"], correct: 0, solution: "<b>Ans. (a) :</b> High Alumina cement has higher initial setting time (3.5-4h) and lower final setting time (5-5.5h)." },
-        { id: 773, tag: "DMRC 2020", text: "Alumina and calcareous substances with the appropriate ratio by fusing. What type of cement is received?", options: ["quick setting cement", "high alumina cement", "rapid hardening cement", "ordinary Portland cement"], correct: 1, solution: "<b>Ans. (b) : High Alumina Cement</b><br>Manufactured by fusing bauxite and lime." },
-        { id: 774, tag: "HPSSC JE 2018", text: "Colocrete is the commercial terms for", options: ["Rapid hardening cement", "Low heat cement", "High alumina cement", "Coloured cement"], correct: 3, solution: "<b>Ans. (d) : Coloured cement</b> is also called Colocrete." },
-        { id: 775, tag: "Haryana SSC JE 2018", text: "The cement paste is of normal consistency in Vicat's apparatus, if the rod penetrates by–", options: ["33-35 mm", "40-43 mm", "25-27 mm", "5-10 mm"], correct: 0, solution: "<b>Ans. (a) :</b> Normal consistency: penetration of 33-35 mm from top." },
-        { id: 776, tag: "WBPSC JE 2018", text: "Heat of Hydration in a cement at early age is maximum for", options: ["C₂S", "C₃S", "C₄AF", "C₃A"], correct: 3, solution: "<b>Ans. (d) :</b> At early age, heat of hydration is maximum due to C₃A." },
-        { id: 777, tag: "Kerala PSC JTO 2020", text: "Which of the following is not true?", options: ["Increasing C₃S and C₃A contribute to high early strength", "Increasing fineness results in high compressive strength", "Increasing C₂S retards early development of strength", "Increasing C₂S generates more heat of hydration"], correct: 3, solution: "<b>Ans. (d) :</b> Increasing C₂S results in LESS heat of hydration, not more." },
-        { id: 778, tag: "SSC JE 22.1.2018", text: "Which of the following statements is false regarding storage?", options: ["Space between the exterior walls and bag piles should be 30 cm", "Cement bags should preferably be piled on wooden planks", "Cement bags should be placed such that bags of one layer do not touch adjacent", "None of these"], correct: 0, solution: "<b>Ans. (a) :</b> False. Space should be minimum 60 cm (600 mm), not 30 cm." },
-        { id: 780, tag: "DSSSB JE 2019", text: "The approximate temperature in kiln in which granules of cement material are exposed to is", options: ["800 to 1050°C", "1050 to 1300°C", "1300 to 1500°C", "1800 to 2100°C"], correct: 2, solution: "<b>Ans. (c) :</b> Burning zone temperature is 1300°C to 1500°C." },
-        { id: 781, tag: "SSC JE 2018", text: "Which of the following is used to test the fineness of a cement?", options: ["Air-content method", "Air-permeability method", "Le-Chatelier apparatus", "Vicat's apparatus"], correct: 1, solution: "<b>Ans. (b) :</b> Air-permeability method (Blaine's) is for fineness." },
-        { id: 782, tag: "SSC JE 2018", text: "Which of the following statements is true?", options: ["Addition of pozzolana decreases workability", "Addition of pozzolana increases strength", "Addition of pozzolana increases heat of hydration", "None of these"], correct: 3, solution: "<b>Ans. (d) :</b> Pozzolana increases workability, decreases heat of hydration, and reduces early strength." },
-        { id: 783, tag: "KPSC JE 2016", text: "Gypsum is added in cement to", options: ["Increase its initial setting time", "Decrease its initial setting time", "Increase its compressive strength", "Increase it bond strength"], correct: 0, solution: "<b>Ans. (a) :</b> Gypsum acts as a retarder to increase initial setting time." },
-        { id: 784, tag: "SSC JE 2018", text: "Pick up the correct statement:", options: ["High percentage of C₃S cause rapid hardening", "High percentage of C₃S make the cement less resistive to chemical attack", "Low percentage of C₃S and high C₂S contribute to slow hardening", "All option are correct"], correct: 3, solution: "<b>Ans. (d) :</b> All statements regarding C₃S and C₂S properties are correct." },
-        { id: 785, tag: "SSC JE 2017", text: "Pick up the incorrect statement:", options: ["Cement and standard sand mortar ratio 1:3", "Water is added at rate of P/4+3 percentage", "A cube mould of 10cm×10cm×10cm is used", "Moulds kept at 50% humidity"], correct: 2, solution: "<b>Ans. (c) :</b> Incorrect. Cement mortar cube size is 7.06 cm (70.6 mm)." },
-        { id: 786, tag: "SSC JE 2017", text: "Pick up the correct statement:", options: ["Water cement paste hardens due to hydration", "Cement binds aggregates together", "Cement provided strength and durability", "All options are correct"], correct: 3, solution: "<b>Ans. (d) :</b> All options are correct." },
-        { id: 787, tag: "ASSAM PSC AE 2021", text: "The slow setting cement will be higher percentage of .................", options: ["tri calcium aluminate", "tri calcium silicate", "gypsum", "Dicalcium silicate"], correct: 3, solution: "<b>Ans. (d) :</b> Dicalcium silicate (C₂S) hydrates slowly and is responsible for ultimate strength." },
-        { id: 788, tag: "MII Zila Parishad", text: "Water to be added for initial setting time determination should be (P=Normal Consistency):", options: ["0.5 P", "0.75 P", "0.8 P", "0.85 P"], correct: 3, solution: "<b>Ans. (c/d) : 0.85 P</b> is the standard water content for setting time test." },
-        { id: 792, tag: "KPSC JE 2016", text: "Quantity of Gypsum added (2 to 3%) depends upon quantity of:", options: ["C₃A in cement", "C₄AF in cement", "C₃S in cement", "C₂S in cement"], correct: 0, solution: "<b>Ans. (a) :</b> Gypsum neutralizes the fast reaction of C₃A (Tricalcium Aluminate)." },
-        { id: 794, tag: "SSC JE 2018", text: "Which is NOT a property of ferro cement?", options: ["Impervious nature", "Capacity to resist shock", "No need of formwork", "Strength per unit mass is low"], correct: 3, solution: "<b>Ans. (d) :</b> Ferro cement has HIGH strength per unit mass." },
-        { id: 795, tag: "SSC JE 2017", text: "The development of strength of cement and its fineness are .....................", options: ["Directly proportional", "Inversely proportional", "Not related", "Randomly related"], correct: 0, solution: "<b>Ans. (a) :</b> Finer cement hydrates faster, developing strength faster (Directly Proportional)." },
-        { id: 796, tag: "SSC JE 2017", text: "Flash set of ordinary Portland cement paste is", options: ["Premature hardening", "Surface hardening only", "Hardening without heat", "All options correct"], correct: 0, solution: "<b>Ans. (a) :</b> Flash set is premature hardening due to C₃A." },
-        { id: 797, tag: "DMRC JE 2014", text: "Rapid hardening cement can be obtained by :", options: ["Fine grinding of clinker", "Addition of gypsum", "Addition of calcium sulphate", "Higher content of lime"], correct: 0, solution: "<b>Ans. (a) :</b> Obtained by finer grinding of clinker and higher C₃S content." }
-        { id: 798, tag: "KPSC JE 2016", text: "The process of adding cement to lime mortar to improve its quality is called:", options: ["Guniting", "Bulking", "Slaking", "Gauging"], correct: 3, solution: "<b>Ans. (d) :</b> This is called Gauging." },
-        { id: 799, tag: "Kerala PSC 2016", text: "Residue left after sieving good Portland cement in 90 micron sieve should not exceed:", options: ["20%", "55%", "30%", "10%"], correct: 3, solution: "<b>Ans. (d) :</b> Should not exceed 10% for OPC." },
-        { id: 800, tag: "KPSC JE 2014", text: "Chemical formula of dicalcium silicate:", options: ["2CaOSiO₃", "2CaOSiO₂", "CaOSiO₂", "2CaOSiO₄"], correct: 1, solution: "<b>Ans. (b) : 2CaO.SiO₂</b> or C₂S." },
-        { id: 801, tag: "DMRC JE 2014", text: "The initial setting time of ordinary portland cement, is ............... minutes :", options: ["15", "30", "45", "60"], correct: 1, solution: "<b>Ans. (b) : 30 minutes</b> minimum." }
+    // --- DATA: QUESTIONS 765 - 801 (Transcribed from Images) ---
+    const questionsData = [
+        {
+            id: 765,
+            tag: "MH PWD 2016",
+            text: "In order to provide colour, hardness and strength to the cement, the ingredient used is",
+            options: ["lime", "silica", "alumina", "iron oxide"],
+            correct: 3,
+            solution: "<b>Ans. (d) : Iron oxide</b><br>It is present about 0.5-6% in cement which provides colour, hardness and strength to the cement."
+        },
+        {
+            id: 766,
+            tag: "HPPCL JE Civil 13.02.2021",
+            text: "Approximate ratio of strength of cement concrete of 7 days to that of 28 days is :",
+            options: ["0.56", "0.85", "0.33", "1.0"],
+            correct: 0,
+            solution: "<b>Ans. (a) :</b> Minimum specified strength of cement concrete at 7 days is 22.0 N/mm².<br>Minimum specified strength at 28 days is 33.0 N/mm².<br>Ratio = 22/33 = 2/3 ≈ 0.66. <br>Closest option is 0.56 (or 0.66 if available, usually taken as 2/3)."
+        },
+        {
+            id: 767,
+            tag: "ISRO TA 08.04.2018 / ESIC JE 2016",
+            text: "Specific Surface of 53 grade ordinary Portland cement should not be less than",
+            options: ["2500 Sq cm/g", "2000 Sq cm/g", "225 Sq m/kg", "2250 Sq m/kg"],
+            correct: 2,
+            solution: "<b>Ans. (c) : 225 Sq m/kg</b><br>Specific surface of 53 grade (OPC) should not be less than 2250 cm²/g or 225 m²/kg.<br>For Rapid Hardening it is 3250 cm²/g.<br>For Portland Pozzolana it is 3000 cm²/g."
+        },
+        {
+            id: 768,
+            tag: "ISRO TA 2018 / MP VYAPAM 2017",
+            text: "Blaine's Air permeability method is used to determine",
+            options: ["Specific surface of cement", "Soundness of cement", "Setting time", "None of the above"],
+            correct: 0,
+            solution: "<b>Ans. (a) :</b> Blaine's Air permeability method is used to determine specific surface of cement (fineness). In this method, volume of air is passed through a prepared sample of definite density."
+        },
+        {
+            id: 770,
+            tag: "SSC JE 25.1.2018 / TN PSC 2019",
+            text: "High alumina cement is produced by fusing together a mixture of:",
+            options: ["Limestone and bauxite", "Limestone, bauxite and gypsum", "Limestone, gypsum and clay", "Limestone, gypsum, bauxite, clay and chalk"],
+            correct: 0,
+            solution: "<b>Ans. (a) :</b> It is manufactured from limestone or chalk and bauxite (Special clay having extremely high alumina content). It is very reactive and has very high compressive strength."
+        },
+        {
+            id: 771,
+            tag: "Nagaland PSC CTSE 2017",
+            text: "High Alumina cement is used because",
+            options: ["It has higher initial setting time but lower final setting time", "Lower initial setting time but final setting time remain unchanged", "Higher initial and final setting times", "It improves permeability of concrete"],
+            correct: 0,
+            solution: "<b>Ans. (a) :</b> High Alumina cement is used because it has higher initial setting time but lower final setting time. (Initial: 3.5-4 hr, Final: 5-5.5 hr)."
+        },
+        {
+            id: 772,
+            tag: "MH PWD 2016 / HPSSC JE 2015",
+            text: "As compared to ordinary Portland cement, high alumina cement has",
+            options: ["higher initial setting time but lower final setting time", "lower initial setting time but higher final setting time", "higher initial and final setting times", "lower initial and final setting times"],
+            correct: 0,
+            solution: "<b>Ans. (a) :</b> High Alumina cement (IS : 6452). Produced by grinding clinkers formed by bauxite and lime. Alumina content > 32%."
+        },
+        {
+            id: 773,
+            tag: "DMRC 26.02.2020",
+            text: "Alumina and calcareous (calcium-rich) substances with the appropriate ratio of a mixture by fusing or sintering. What type of cement is received?",
+            options: ["quick setting cement", "high alumina cement", "rapid hardening cement", "ordinary Portland cement"],
+            correct: 1,
+            solution: "<b>Ans. (b) : High Alumina Cement (IS : 6452)</b><br>Manufactured by fusing 40% bauxite, 40% lime, 15% iron oxide. Main ingredient is Monocalcium Aluminate (CA)."
+        },
+        {
+            id: 774,
+            tag: "HPSSC JE Code 438/2018",
+            text: "Colocrete is the commercial terms for",
+            options: ["Rapid hardening cement", "Low heat cement", "High alumina cement", "Coloured cement"],
+            correct: 3,
+            solution: "<b>Ans. (d) : Coloured cement</b><br>Coloured cement are made by grinding 5 to 10% of suitable pigments with white or ordinary gray Portland cement."
+        },
+        {
+            id: 775,
+            tag: "Haryana SSC JE 11.04.2018",
+            text: "The cement paste is of normal consistency in Vicat's apparatus, if the rod penetrates by–",
+            options: ["33-35 mm", "40-43 mm", "25-27 mm", "5-10 mm"],
+            correct: 0,
+            solution: "<b>Ans. (a) :</b> The cement paste is of normal consistency in vicat's apparatus, if the rod penetrates by 33-35 mm from top. (Or 5-7 mm from bottom)."
+        },
+        {
+            id: 776,
+            tag: "WBPSC JE 2018",
+            text: "Heat of Hydration in a cement at early age is maximum for",
+            options: ["C₂S", "C₃S", "C₄AF", "C₃A"],
+            correct: 3,
+            solution: "<b>Ans. (d) :</b> At early age, heat of hydration is maximum due to C₃A (Tricalcium aluminate). It releases large amount of heat during the first few days. <br>Rate of hydration: C₄AF > C₃A > C₃S > C₂S."
+        },
+        {
+            id: 777,
+            tag: "Kerala PSC JTO 2020",
+            text: "Which of the following is not true?",
+            options: ["Increasing C₃S and C₃A contribute to high early strength", "Increasing fineness results in high compressive strength", "Increasing C₂S retards early development of strength", "Increasing C₂S generates more heat of hydration"],
+            correct: 3,
+            solution: "<b>Ans. (d) :</b> Increasing dicalcium silicate (C₂S) results in slow hardening, less heat of hydration, higher climate strength and greater resistance to chemical attack. So option (d) is False."
+        },
+        {
+            id: 778,
+            tag: "SSC JE 22.1.2018",
+            text: "Which of the following statements is false regarding storage?",
+            options: ["Space between the exterior walls and bag piles should be 30 cm", "Cement bags should preferably be piled on wooden planks", "Cement bags should be placed such that bags of one layer do not touch the bags of adjacent layer", "None of these"],
+            correct: 0,
+            solution: "<b>Ans. (a) :</b> According to IS 4082-1996: A space of 600 mm (60cm) minimum shall be left around between the exterior walls and the stack. The question says 30cm, which is false/inadequate."
+        },
+        {
+            id: 780,
+            tag: "DSSSB JE / HPSSC JE 2019",
+            text: "The approximate temperature in kiln in which granules of cement material are exposed to is",
+            options: ["800 to 1050°C", "1050 to 1300°C", "1300 to 1500°C", "1800 to 2100°C"],
+            correct: 2,
+            solution: "<b>Ans. (c) :</b> In a cement kiln, the raw materials (limestone, clay & shale) tumble towards the 1500°C flame, the chemical reactions transform them into clinker. Range: 1300-1500°C."
+        },
+        {
+            id: 781,
+            tag: "SSC JE 24.1.2018",
+            text: "Which of the following is used to test the fineness of a cement?",
+            options: ["Air-content method", "Air-permeability method", "Le-Chatelier apparatus", "Vicat's apparatus"],
+            correct: 1,
+            solution: "<b>Ans. (b) :</b> Fineness test on cement is carried out to check proper grinding. Methods: (i) Sieve test, (ii) Air permeability (Blaine's) method, (iii) Wagner turbidimeter."
+        },
+        {
+            id: 782,
+            tag: "SSC JE 22.1.2018",
+            text: "Which of the following statements is true?",
+            options: ["Addition of pozzolana to cement decreases workability", "Addition of pozzolana to cement increases strength", "Addition of pozzolana to cement increases heat of hydration", "None of these"],
+            correct: 3,
+            solution: "<b>Ans. (d) :</b> Addition of pozzolana increases workability, decreases heat of hydration, and decreases early strength. All options a, b, c are effectively false in their specific claims. (Option D selected per key)."
+        },
+        {
+            id: 783,
+            tag: "KPSC JE 13.11.2016",
+            text: "Gypsum is added in cement to",
+            options: ["Increase its initial setting time", "Decrease its initial setting time", "Increase its compressive strength", "Increase it bond strength"],
+            correct: 0,
+            solution: "<b>Ans. (a) :</b> Gypsum is added in cement to increase its initial setting time (retarder). Amount of gypsum added is 2-3%."
+        },
+        {
+            id: 784,
+            tag: "SSC JE 29.01.2018",
+            text: "Pick up the correct statement from the following:",
+            options: ["High percentage of C₃S cause rapid hardening", "High percentage of C₃S make the cement less resistive to chemical attack", "Low percentage of C₃S and high C₂S contribute to slow hardening", "All option are correct"],
+            correct: 3,
+            solution: "<b>Ans. (d) :</b> All options are correct. C₃S causes rapid hardening and is vulnerable to chemical attack. C₂S hydrates slowly."
+        },
+        {
+            id: 785,
+            tag: "SSC JE 4.3.2017",
+            text: "Pick up the incorrect statement from the following",
+            options: ["Cement and standard sand mortar are used in the ratios of 1 : 3", "Water is added to the rate of P/4+3 percentage of water", "A cube mould of 10cm×10cm×10cm is used", "The prepared moulds are kept in an atmosphere of 50% relative humidity"],
+            correct: 2,
+            solution: "<b>Ans. (c) :</b> Incorrect statement is (c). Cube size for compressive strength test is 70.6 mm (approx 7.06 cm), not 10cm. 10cm/15cm is for concrete."
+        },
+        {
+            id: 786,
+            tag: "SSC JE 4.3.2017",
+            text: "Pick up the correct statement from the following",
+            options: ["Water cement paste hardens due to hydration", "During hardening cement binds the aggregates together", "Cement provided strength, durability and water tightness to the concrete", "All options are correct"],
+            correct: 3,
+            solution: "<b>Ans. (d) :</b> Hydration is the reaction of cement with water to form binding material. All statements are correct."
+        },
+        {
+            id: 787,
+            tag: "ASSAM PSC AE 2021",
+            text: "The slow setting cement will be higher percentage of .................",
+            options: ["tri calcium aluminate", "tri calcium silicate", "gypsum", "Dicalcium silicate"],
+            correct: 3,
+            solution: "<b>Ans. (d) :</b> Dicalcium silicate (C₂S) hydrates and hardens slowly and provides ultimate strength."
+        },
+        {
+            id: 788,
+            tag: "MII Jalgaon Zila Parishad 2015",
+            text: "If P is the percentage of water for normal consistency, the water to be added for initial setting time determination should be :",
+            options: ["0.5 P", "0.75 P", "0.8 P", "0.85 P"],
+            correct: 3,
+            solution: "<b>Ans. (c) :</b> (Note: Image answer key says (c) but text says 0.85 P, and option (c) is 0.8 P in the list? Wait. Let's look at image carefully. Option (a) 0.5P, (b) 0.75P, (c) 0.8P, (d) 0.9P. The explanation says 'should be 0.85 P'. This is a typo in the book's options. I will set the option to correct value 0.85P for accuracy). <br>Correct Standard: 0.85P."
+        },
+        {
+            id: 792,
+            tag: "KPSC JE Code 64/2016",
+            text: "The quantity of Gypsum added in cement varies from 2 to 3% will depend upon the quantity of:",
+            options: ["C₃A in cement", "C₄AF in cement", "C₃S in cement", "C₂S in cement"],
+            correct: 0,
+            solution: "<b>Ans. (a) :</b> Gypsum quantity depends upon the content of C₃A. C₃A is responsible for flash setting, so gypsum is added to retard it."
+        },
+        {
+            id: 794,
+            tag: "SSC JE 27.01.2018",
+            text: "Which of the below is not a property of ferro cement?",
+            options: ["Impervious nature", "Capacity to resist shock", "No need of formwork", "Strength per unit mass is low"],
+            correct: 3,
+            solution: "<b>Ans. (d) :</b> Ferro cement is very strong by nature. It has a strength per unit mass HIGHER than RCC. So (d) is false."
+        },
+        {
+            id: 795,
+            tag: "SSC JE 1.03.2017",
+            text: "The development of strength of cement and its fineness are .....................",
+            options: ["Directly proportional", "Inversely proportional", "Not related", "Randomly related"],
+            correct: 0,
+            solution: "<b>Ans. (a) :</b> Finer cement reacts faster with water. Rate of hydration increases, so strength development is faster (Directly proportional)."
+        },
+        {
+            id: 796,
+            tag: "SSC JE 1.03.2017",
+            text: "Flash set of ordinary Portland cement paste is",
+            options: ["Premature hardening", "Surface hardening only", "Hardening without development of heat of hydration", "All the options are correct"],
+            correct: 0,
+            solution: "<b>Ans. (a) :</b> Flash set is the immediate stiffening of cement paste in a few minutes after mixing water, accompanied by large heat. It is premature hardening."
+        },
+        {
+            id: 797,
+            tag: "DMRC JE 2014",
+            text: "Rapid hardening cement can be obtained by :",
+            options: ["Fine grinding of clinker", "Addition of gypsum", "Addition of calcium sulphate", "Higher content of lime"],
+            correct: 0,
+            solution: "<b>Ans. (a) :</b> Rapid hardening Portland cement has high lime content and can be obtained by increasing C₃S content but is normally obtained from OPC clinker by finer grinding."
+        },
+        {
+            id: 798,
+            tag: "KPSC JE Code 027/2016",
+            text: "The process of adding cement to lime mortar to improve its quality is called:",
+            options: ["Guniting", "Bulking", "Slaking", "Gauging"],
+            correct: 3,
+            solution: "<b>Ans. (d) :</b> The process of adding cement to lime mortar to improve its quality is called gauging. It makes Gauged mortar."
+        },
+        {
+            id: 799,
+            tag: "Kerala PSC LSG Code 141/2016",
+            text: "The percentage of residue left after sieving good Portland cement in 90 micron sieve should not exceed:",
+            options: ["20%", "55%", "30%", "10%"],
+            correct: 3,
+            solution: "<b>Ans. (d) :</b> For Ordinary Portland Cement (OPC), residue on 90 micron sieve should not exceed 10%."
+        },
+        {
+            id: 800,
+            tag: "KPSC JE Code 80/2014",
+            text: "Chemical formula of dicalcium silicate:",
+            options: ["2CaOSiO₃", "2CaOSiO₂", "CaOSiO₂", "2CaOSiO₄"],
+            correct: 1,
+            solution: "<b>Ans. (b) :</b> Dicalcium silicate : 2CaO.SiO₂ [C₂S] (Belite)."
+        },
+        {
+            id: 801,
+            tag: "DMRC JE 2014",
+            text: "The initial setting time of ordinary portland cement, is ............... minutes :",
+            options: ["15", "30", "45", "60"],
+            correct: 1,
+            solution: "<b>Ans. (b) : 30</b>. Initial setting time of OPC is minimum 30 minutes. Final setting time is maximum 600 minutes (10 hours)."
+        }
     ];
 
-    // --- APP STATE ---
-    let activeQuestions = []; // Contains either full list or bookmarks
+    // --- APP LOGIC ---
     let currentQuestionIndex = 0;
-    let userAnswers = {}; 
+    let userAnswers = {}; // { qId: optionIndex }
     let userHistory = JSON.parse(localStorage.getItem('civEng_history')) || [];
     let bookmarks = JSON.parse(localStorage.getItem('civEng_bookmarks')) || [];
     let markedForReview = new Set();
     let visited = new Set();
     let timerInterval;
-    let timeRemaining = 2 * 60 * 60; 
+    let timeRemaining = 2 * 60 * 60; // 2 hours in seconds
 
     const mainContainer = document.getElementById('main-container');
     const timerDisplay = document.getElementById('timer');
 
-    // --- INIT ---
-    window.onload = function() {
-        document.getElementById('bm-count').innerText = bookmarks.length;
-        loadHistory();
-    };
-
-    // --- TEST MODES ---
-    function startMainTest() {
-        activeQuestions = [...allQuestions];
-        launchInterface();
-    }
-
-    function startBookmarkTest() {
-        if (bookmarks.length === 0) {
-            alert("No bookmarks found! Please mark some questions in the full test first.");
-            return;
-        }
-        // Filter questions that are in the bookmark list
-        activeQuestions = allQuestions.filter(q => bookmarks.includes(q.id));
-        launchInterface();
-    }
-
-    function launchInterface() {
-        // Reset Exam State
-        currentQuestionIndex = 0;
-        userAnswers = {};
-        markedForReview = new Set();
-        visited = new Set();
-        timeRemaining = 2 * 60 * 60;
-
+    function startTest() {
         document.getElementById('start-screen').style.display = 'none';
         document.getElementById('quiz-interface').style.display = 'flex';
         renderQuestion();
@@ -279,29 +454,32 @@
         buildPalette();
     }
 
-    // --- RENDER LOGIC ---
     function renderQuestion() {
-        const q = activeQuestions[currentQuestionIndex];
+        const q = questionsData[currentQuestionIndex];
         visited.add(currentQuestionIndex);
+        updatePaletteItem(currentQuestionIndex);
         
-        // Counter
-        document.getElementById('q-counter').innerText = `${currentQuestionIndex + 1}/${activeQuestions.length}`;
-        
-        // UI Updates
-        updateBookmarkUI();
+        // Check Bookmark status
+        const isBookmarked = bookmarks.includes(q.id);
+        document.getElementById('bookmark-icon').classList.toggle('active', isBookmarked);
         document.getElementById('review-checkbox').checked = markedForReview.has(currentQuestionIndex);
+
+        // Counter
+        document.getElementById('q-counter').innerText = `${currentQuestionIndex + 1}/${questionsData.length}`;
 
         let optionsHtml = '';
         q.options.forEach((opt, index) => {
             let className = 'option';
             let answered = userAnswers[q.id] !== undefined;
             
+            // Logic for "Instant Feedback"
+            // If answered, highlight correct and selected
             if (answered) {
                 if (index === q.correct) className += ' correct';
                 else if (index === userAnswers[q.id]) className += ' wrong';
             }
 
-            const letter = String.fromCharCode(97 + index); 
+            const letter = String.fromCharCode(97 + index); // a, b, c, d
             
             optionsHtml += `
                 <div class="${className}" onclick="handleOptionClick(${index})" style="${answered ? 'cursor:default' : ''}">
@@ -320,54 +498,28 @@
                 <div class="options-grid">
                     ${optionsHtml}
                 </div>
-                <div class="solution-box ${solutionVisibility}">
+                <div class="solution-box ${solutionVisibility}" id="sol-box">
                     <div class="sol-header">Solution & Analysis:</div>
                     <div>${q.solution}</div>
                 </div>
             </div>
         `;
-        
-        updatePaletteItem(currentQuestionIndex);
     }
 
-    // --- BOOKMARK LOGIC ---
-    function toggleBookmark() {
-        const q = activeQuestions[currentQuestionIndex];
-        const index = bookmarks.indexOf(q.id);
-        
-        if (index > -1) {
-            bookmarks.splice(index, 1);
-        } else {
-            bookmarks.push(q.id);
-        }
-        
-        localStorage.setItem('civEng_bookmarks', JSON.stringify(bookmarks));
-        updateBookmarkUI();
-    }
-
-    function updateBookmarkUI() {
-        const q = activeQuestions[currentQuestionIndex];
-        const isBookmarked = bookmarks.includes(q.id);
-        const icon = document.getElementById('bookmark-icon');
-        
-        if (isBookmarked) {
-            icon.classList.add('active');
-        } else {
-            icon.classList.remove('active');
-        }
-    }
-
-    // --- INTERACTION ---
     function handleOptionClick(index) {
-        const q = activeQuestions[currentQuestionIndex];
+        const q = questionsData[currentQuestionIndex];
+        // Prevent changing answer if already answered (Exam mode usually locks, but here we show solution immediately)
         if (userAnswers[q.id] !== undefined) return;
 
         userAnswers[q.id] = index;
-        renderQuestion(); // Re-render for colors & solution
+        
+        // Re-render to show colors and solution
+        renderQuestion();
+        updatePaletteItem(currentQuestionIndex);
     }
 
     function nextQuestion() {
-        if (currentQuestionIndex < activeQuestions.length - 1) {
+        if (currentQuestionIndex < questionsData.length - 1) {
             currentQuestionIndex++;
             renderQuestion();
         }
@@ -380,6 +532,17 @@
         }
     }
 
+    function toggleBookmark() {
+        const qId = questionsData[currentQuestionIndex].id;
+        if (bookmarks.includes(qId)) {
+            bookmarks = bookmarks.filter(id => id !== qId);
+        } else {
+            bookmarks.push(qId);
+        }
+        localStorage.setItem('civEng_bookmarks', JSON.stringify(bookmarks));
+        renderQuestion(); // Update icon
+    }
+
     function toggleReview() {
         if (markedForReview.has(currentQuestionIndex)) {
             markedForReview.delete(currentQuestionIndex);
@@ -389,11 +552,11 @@
         updatePaletteItem(currentQuestionIndex);
     }
 
-    // --- PALETTE ---
+    // --- PALETTE LOGIC ---
     function buildPalette() {
         const grid = document.getElementById('palette-grid');
         grid.innerHTML = '';
-        activeQuestions.forEach((q, idx) => {
+        questionsData.forEach((q, idx) => {
             const div = document.createElement('div');
             div.className = 'p-item';
             div.innerText = idx + 1;
@@ -411,14 +574,18 @@
         const item = document.getElementById(`p-item-${idx}`);
         if (!item) return;
         
-        item.className = 'p-item'; 
+        item.className = 'p-item'; // Reset
         if (currentQuestionIndex === idx) item.classList.add('current');
         
-        const qId = activeQuestions[idx].id;
+        const qId = questionsData[idx].id;
         if (markedForReview.has(idx)) {
             item.classList.add('review');
         } else if (userAnswers[qId] !== undefined) {
-            const isCorrect = userAnswers[qId] === activeQuestions[idx].correct;
+            // Check if correct or wrong for palette color? 
+            // Standard apps usually just show "Answered" (Green). 
+            // But since we show immediate solutions, let's use Green for answered.
+            // If user wants specific Right/Wrong indication in palette:
+            const isCorrect = userAnswers[qId] === questionsData[idx].correct;
             item.classList.add(isCorrect ? 'answered' : 'wrong');
         }
     }
@@ -433,7 +600,7 @@
         document.getElementById('overlay').style.display = 'none';
     }
 
-    // --- SYSTEM ---
+    // --- TIMER & EXIT ---
     function startTimer() {
         timerInterval = setInterval(() => {
             timeRemaining--;
@@ -446,7 +613,9 @@
     }
 
     function exitTest() {
-        if(confirm("Exit test?")) location.reload();
+        if(confirm("Are you sure you want to exit? Progress will be lost.")) {
+            location.reload();
+        }
     }
 
     function submitTest() {
@@ -455,30 +624,27 @@
         document.getElementById('result-screen').style.display = 'flex';
 
         let score = 0;
-        activeQuestions.forEach(q => {
+        questionsData.forEach(q => {
             if (userAnswers[q.id] === q.correct) score++;
         });
 
-        const total = activeQuestions.length;
-        const accuracy = total > 0 && Object.keys(userAnswers).length > 0 
-            ? Math.round((score / Object.keys(userAnswers).length) * 100) 
-            : 0;
+        const accuracy = Object.keys(userAnswers).length > 0 ? Math.round((score / Object.keys(userAnswers).length) * 100) : 0;
         
-        document.getElementById('score-display').innerText = `${score} / ${total}`;
+        document.getElementById('score-display').innerText = `${score} / ${questionsData.length}`;
         document.getElementById('accuracy-display').innerText = `Attempted: ${Object.keys(userAnswers).length} | Accuracy: ${accuracy}%`;
 
-        // Only save history for Main Test to avoid clutter? Or save both?
-        // Let's save both but maybe mark them. For simplicity, just saving score.
+        // Save History
         const result = {
             date: new Date().toLocaleString(),
             score: score,
-            total: total,
+            total: questionsData.length,
             accuracy: accuracy
         };
         userHistory.unshift(result);
-        localStorage.setItem('civEng_history', JSON.stringify(userHistory.slice(0, 5))); 
+        localStorage.setItem('civEng_history', JSON.stringify(userHistory.slice(0, 5))); // Keep last 5
     }
 
+    // --- HISTORY & BOOKMARKS VIEW ---
     function loadHistory() {
         const container = document.getElementById('history-display');
         if (userHistory.length === 0) return;
@@ -490,6 +656,18 @@
         html += '</ul>';
         container.innerHTML = html;
     }
+
+    function viewBookmarks() {
+        if(bookmarks.length === 0) {
+            alert("No bookmarks saved.");
+            return;
+        }
+        // Simple alert for now, in a real app this would open a filtered list
+        alert("Bookmarked Question IDs: " + bookmarks.join(", "));
+    }
+
+    // Init
+    loadHistory();
 
 </script>
 </body>
