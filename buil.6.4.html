@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civil Engineering Hub - Cement Test</title>
+    <style>
+        :root {
+            --primary: #007bff;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray: #6c757d;
+            --selected-bg: #e7f1ff;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        body { margin: 0; background-color: #f0f2f5; height: 100vh; display: flex; flex-direction: column; }
+
+        /* --- START SCREEN --- */
+        #start-screen, #result-screen {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100%; padding: 20px; text-align: center; background: white;
+        }
+        .btn-container { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; width: 100%; max-width: 300px; }
+        .btn-main {
+            padding: 15px; font-size: 1.1rem; background: var(--primary); color: white;
+            border: none; border-radius: 5px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%;
+        }
+        .btn-bookmark-test {
+            background: #6f42c1; /* Purple for Bookmark Test */
+        }
+        
+        .stats-card {
+            background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 8px;
+            margin: 10px 0; width: 100%; max-width: 400px; text-align: left;
+        }
+
+        /* --- QUIZ INTERFACE --- */
+        #quiz-interface { display: none; height: 100%; flex-direction: column; }
+        
+        /* Header */
+        header {
+            background: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .timer { font-weight: bold; font-family: monospace; font-size: 1.1rem; color: var(--dark); }
+        .submit-btn { background: var(--success); color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; }
+        .exit-btn { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 10px;}
+
+        /* Main Content */
+        main { flex: 1; overflow-y: auto; padding: 15px; max-width: 800px; margin: 0 auto; width: 100%; }
+        
+        .question-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .exam-tag {
+            display: inline-block; background: #e2e6ea; color: var(--gray); font-size: 0.8rem;
+            padding: 2px 8px; border-radius: 4px; margin-bottom: 10px; font-weight: bold;
+        }
+        .q-text { font-size: 1.1rem; font-weight: 500; margin-bottom: 20px; line-height: 1.5; }
+        
+        .options-grid { display: flex; flex-direction: column; gap: 10px; }
+        .option {
+            display: flex; align-items: center; padding: 12px; border: 1px solid #dee2e6;
+            border-radius: 6px; cursor: pointer; transition: all 0.2s;
+        }
+        .option:hover { background-color: var(--light); }
+        .option-circle {
+            height: 24px; width: 24px; border-radius: 50%; border: 2px solid #adb5bd;
+            margin-right: 15px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #adb5bd;
+        }
+        
+        /* States */
+        .option.selected { background-color: var(--selected-bg); border-color: var(--primary); }
+        .option.selected .option-circle { border-color: var(--primary); background: var(--primary); color: white; }
+        
+        .option.correct { background-color: #d4edda; border-color: var(--success); }
+        .option.correct .option-circle { border-color: var(--success); background: var(--success); color: white; }
+        
+        .option.wrong { background-color: #f8d7da; border-color: var(--danger); }
+        .option.wrong .option-circle { border-color: var(--danger); background: var(--danger); color: white; }
+
+        /* Solution Box */
+        .solution-box {
+            display: none; margin-top: 20px; background: #f1faff; border: 1px solid #b8daff;
+            padding: 15px; border-radius: 6px;
+        }
+        .solution-box.visible { display: block; animation: fadeIn 0.3s; }
+        .sol-header { font-weight: bold; color: var(--primary); margin-bottom: 5px; }
+
+        /* Footer */
+        footer {
+            background: white; padding: 10px 15px; border-top: 1px solid #ddd;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .nav-btn {
+            background: white; border: 1px solid #ced4da; padding: 8px 15px; border-radius: 4px; cursor: pointer;
+        }
+        .nav-btn.primary { background: var(--primary); color: white; border-color: var(--primary); }
+        
+        /* BOOKMARK STYLES */
+        .bookmark-btn { 
+            background: none; border: none; font-size: 1.8rem; color: #ced4da; cursor: pointer; transition: color 0.2s ease;
+        }
+        .bookmark-btn.active { color: #ffc107 !important; }
+
+        /* Palette Modal */
+        #palette-modal {
+            display: none; position: fixed; top: 0; right: 0; width: 80%; max-width: 300px; height: 100%;
+            background: white; box-shadow: -2px 0 10px rgba(0,0,0,0.1); z-index: 1000; padding: 20px; overflow-y: auto;
+        }
+        .palette-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 20px; }
+        .p-item {
+            height: 40px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; background: #f1f3f4; cursor: pointer; font-size: 0.9rem;
+        }
+        .p-item.current { border: 2px solid var(--primary); }
+        .p-item.answered { background: var(--success); color: white; }
+        .p-item.wrong { background: var(--danger); color: white; }
+        .p-item.review { background: #6f42c1; color: white; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .review-check { display: flex; align-items: center; gap: 5px; font-size: 0.9rem; color: var(--gray); cursor: pointer; }
+        .badge { background: #6c757d; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.8rem; vertical-align: middle; }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen">
+        <h1 style="color: var(--primary);">SSC/State JE Cement Test</h1>
+        <p>Building Materials (Q765 - Q801)</p>
+        
+        <div class="stats-card">
+            <h3>Recent History</h3>
+            <div id="history-display">No history available.</div>
+        </div>
+
+        <div class="btn-container">
+            <button class="btn-main" onclick="startMainTest()">Start Full Test (All Questions)</button>
+            <button class="btn-main btn-bookmark-test" onclick="startBookmarkTest()">
+                Start Bookmark Test <span id="bm-count" class="badge">0</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="quiz-interface">
+        <header>
+            <div style="display:flex; align-items:center;">
+                <button class="exit-btn" onclick="exitTest()">Exit</button>
+                <div class="timer" id="timer">02:00:00</div>
+            </div>
+            <div>
+                <span id="q-counter" style="margin-right:10px; font-size:0.9rem; color:var(--gray);">1/36</span>
+                <button class="submit-btn" onclick="submitTest()">Submit</button>
+            </div>
+        </header>
+
+        <main id="main-container">
+            </main>
+
+        <footer>
+            <button class="nav-btn" onclick="prevQuestion()">Previous</button>
+            <div style="display:flex; gap:15px; align-items:center;">
+                <label class="review-check">
+                    <input type="checkbox" id="review-checkbox" onchange="toggleReview()"> Review
+                </label>
+                <button class="bookmark-btn" id="bookmark-icon" onclick="toggleBookmark()">★</button>
+                <button class="nav-btn" onclick="openPalette()">Grid</button>
+            </div>
+            <button class="nav-btn primary" onclick="nextQuestion()">Next</button>
+        </footer>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="closePalette()"></div>
+    <div id="palette-modal">
+        <h3>Question Palette</h3>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; font-size:0.8rem; margin-bottom:15px;">
+            <span style="color:var(--success)">● Answered</span>
+            <span style="color:var(--danger)">● Wrong</span>
+            <span style="color:#6f42c1">● Review</span>
+        </div>
+        <div class="palette-grid" id="palette-grid"></div>
+    </div>
+
+    <div id="result-screen" style="display:none;">
+        <h2 style="color: var(--primary);">Test Summary</h2>
+        <h1 id="score-display" style="font-size: 3rem; margin: 10px 0;">0/0</h1>
+        <p id="accuracy-display">Accuracy: 0%</p>
+        <button class="btn-main" onclick="location.reload()">Back to Home</button>
+    </div>
+
+<script>
+    // --- DATA ---
+    const allQuestions = [
+        { id: 765, tag: "MH PWD 2016", text: "In order to provide colour, hardness and strength to the cement, the ingredient used is", options: ["lime", "silica", "alumina", "iron oxide"], correct: 3, solution: "<b>Ans. (d) : Iron oxide</b><br>It is present about 0.5-6% in cement which provides colour, hardness and strength to the cement." },
+        { id: 766, tag: "HPPCL JE Civil 13.02.2021", text: "Approximate ratio of strength of cement concrete of 7 days to that of 28 days is :", options: ["0.56", "0.85", "0.33", "1.0"], correct: 0, solution: "<b>Ans. (a) :</b> Minimum specified strength at 7 days is 22.0 N/mm². At 28 days is 33.0 N/mm². Ratio = 22/33 = 0.66." },
+        { id: 767, tag: "ISRO TA / ESIC JE 2016", text: "Specific Surface of 53 grade ordinary Portland cement should not be less than", options: ["2500 Sq cm/g", "2000 Sq cm/g", "225 Sq m/kg", "2250 Sq m/kg"], correct: 2, solution: "<b>Ans. (c) : 225 Sq m/kg</b><br>Specific surface of 53 grade (OPC) should not be less than 2250 cm²/g or 225 m²/kg." },
+        { id: 768, tag: "ISRO TA 2018 / MP VYAPAM", text: "Blaine's Air permeability method is used to determine", options: ["Specific surface of cement", "Soundness of cement", "Setting time", "None of the above"], correct: 0, solution: "<b>Ans. (a) :</b> Blaine's Air permeability method is used to determine specific surface of cement (fineness)." },
+        { id: 770, tag: "SSC JE 2018", text: "High alumina cement is produced by fusing together a mixture of:", options: ["Limestone and bauxite", "Limestone, bauxite and gypsum", "Limestone, gypsum and clay", "Limestone, gypsum, bauxite, clay and chalk"], correct: 0, solution: "<b>Ans. (a) :</b> It is manufactured from limestone or chalk and bauxite (Special clay having extremely high alumina content)." },
+        { id: 771, tag: "Nagaland PSC CTSE 2017", text: "High Alumina cement is used because", options: ["It has higher initial setting time but lower final setting time", "Lower initial setting time but final setting time remain unchanged", "Higher initial and final setting times", "It improves permeability of concrete"], correct: 0, solution: "<b>Ans. (a) :</b> High Alumina cement is used because it has higher initial setting time but lower final setting time." },
+        { id: 772, tag: "MH PWD 2016", text: "As compared to ordinary Portland cement, high alumina cement has", options: ["higher initial setting time but lower final setting time", "lower initial setting time but higher final setting time", "higher initial and final setting times", "lower initial and final setting times"], correct: 0, solution: "<b>Ans. (a) :</b> High Alumina cement has higher initial setting time (3.5-4h) and lower final setting time (5-5.5h)." },
+        { id: 773, tag: "DMRC 2020", text: "Alumina and calcareous substances with the appropriate ratio by fusing. What type of cement is received?", options: ["quick setting cement", "high alumina cement", "rapid hardening cement", "ordinary Portland cement"], correct: 1, solution: "<b>Ans. (b) : High Alumina Cement</b><br>Manufactured by fusing bauxite and lime." },
+        { id: 774, tag: "HPSSC JE 2018", text: "Colocrete is the commercial terms for", options: ["Rapid hardening cement", "Low heat cement", "High alumina cement", "Coloured cement"], correct: 3, solution: "<b>Ans. (d) : Coloured cement</b> is also called Colocrete." },
+        { id: 775, tag: "Haryana SSC JE 2018", text: "The cement paste is of normal consistency in Vicat's apparatus, if the rod penetrates by–", options: ["33-35 mm", "40-43 mm", "25-27 mm", "5-10 mm"], correct: 0, solution: "<b>Ans. (a) :</b> Normal consistency: penetration of 33-35 mm from top." },
+        { id: 776, tag: "WBPSC JE 2018", text: "Heat of Hydration in a cement at early age is maximum for", options: ["C₂S", "C₃S", "C₄AF", "C₃A"], correct: 3, solution: "<b>Ans. (d) :</b> At early age, heat of hydration is maximum due to C₃A." },
+        { id: 777, tag: "Kerala PSC JTO 2020", text: "Which of the following is not true?", options: ["Increasing C₃S and C₃A contribute to high early strength", "Increasing fineness results in high compressive strength", "Increasing C₂S retards early development of strength", "Increasing C₂S generates more heat of hydration"], correct: 3, solution: "<b>Ans. (d) :</b> Increasing C₂S results in LESS heat of hydration, not more." },
+        { id: 778, tag: "SSC JE 22.1.2018", text: "Which of the following statements is false regarding storage?", options: ["Space between the exterior walls and bag piles should be 30 cm", "Cement bags should preferably be piled on wooden planks", "Cement bags should be placed such that bags of one layer do not touch adjacent", "None of these"], correct: 0, solution: "<b>Ans. (a) :</b> False. Space should be minimum 60 cm (600 mm), not 30 cm." },
+        { id: 780, tag: "DSSSB JE 2019", text: "The approximate temperature in kiln in which granules of cement material are exposed to is", options: ["800 to 1050°C", "1050 to 1300°C", "1300 to 1500°C", "1800 to 2100°C"], correct: 2, solution: "<b>Ans. (c) :</b> Burning zone temperature is 1300°C to 1500°C." },
+        { id: 781, tag: "SSC JE 2018", text: "Which of the following is used to test the fineness of a cement?", options: ["Air-content method", "Air-permeability method", "Le-Chatelier apparatus", "Vicat's apparatus"], correct: 1, solution: "<b>Ans. (b) :</b> Air-permeability method (Blaine's) is for fineness." },
+        { id: 782, tag: "SSC JE 2018", text: "Which of the following statements is true?", options: ["Addition of pozzolana decreases workability", "Addition of pozzolana increases strength", "Addition of pozzolana increases heat of hydration", "None of these"], correct: 3, solution: "<b>Ans. (d) :</b> Pozzolana increases workability, decreases heat of hydration, and reduces early strength." },
+        { id: 783, tag: "KPSC JE 2016", text: "Gypsum is added in cement to", options: ["Increase its initial setting time", "Decrease its initial setting time", "Increase its compressive strength", "Increase it bond strength"], correct: 0, solution: "<b>Ans. (a) :</b> Gypsum acts as a retarder to increase initial setting time." },
+        { id: 784, tag: "SSC JE 2018", text: "Pick up the correct statement:", options: ["High percentage of C₃S cause rapid hardening", "High percentage of C₃S make the cement less resistive to chemical attack", "Low percentage of C₃S and high C₂S contribute to slow hardening", "All option are correct"], correct: 3, solution: "<b>Ans. (d) :</b> All statements regarding C₃S and C₂S properties are correct." },
+        { id: 785, tag: "SSC JE 2017", text: "Pick up the incorrect statement:", options: ["Cement and standard sand mortar ratio 1:3", "Water is added at rate of P/4+3 percentage", "A cube mould of 10cm×10cm×10cm is used", "Moulds kept at 50% humidity"], correct: 2, solution: "<b>Ans. (c) :</b> Incorrect. Cement mortar cube size is 7.06 cm (70.6 mm)." },
+        { id: 786, tag: "SSC JE 2017", text: "Pick up the correct statement:", options: ["Water cement paste hardens due to hydration", "Cement binds aggregates together", "Cement provided strength and durability", "All options are correct"], correct: 3, solution: "<b>Ans. (d) :</b> All options are correct." },
+        { id: 787, tag: "ASSAM PSC AE 2021", text: "The slow setting cement will be higher percentage of .................", options: ["tri calcium aluminate", "tri calcium silicate", "gypsum", "Dicalcium silicate"], correct: 3, solution: "<b>Ans. (d) :</b> Dicalcium silicate (C₂S) hydrates slowly and is responsible for ultimate strength." },
+        { id: 788, tag: "MII Zila Parishad", text: "Water to be added for initial setting time determination should be (P=Normal Consistency):", options: ["0.5 P", "0.75 P", "0.8 P", "0.85 P"], correct: 3, solution: "<b>Ans. (c/d) : 0.85 P</b> is the standard water content for setting time test." },
+        { id: 792, tag: "KPSC JE 2016", text: "Quantity of Gypsum added (2 to 3%) depends upon quantity of:", options: ["C₃A in cement", "C₄AF in cement", "C₃S in cement", "C₂S in cement"], correct: 0, solution: "<b>Ans. (a) :</b> Gypsum neutralizes the fast reaction of C₃A (Tricalcium Aluminate)." },
+        { id: 794, tag: "SSC JE 2018", text: "Which is NOT a property of ferro cement?", options: ["Impervious nature", "Capacity to resist shock", "No need of formwork", "Strength per unit mass is low"], correct: 3, solution: "<b>Ans. (d) :</b> Ferro cement has HIGH strength per unit mass." },
+        { id: 795, tag: "SSC JE 2017", text: "The development of strength of cement and its fineness are .....................", options: ["Directly proportional", "Inversely proportional", "Not related", "Randomly related"], correct: 0, solution: "<b>Ans. (a) :</b> Finer cement hydrates faster, developing strength faster (Directly Proportional)." },
+        { id: 796, tag: "SSC JE 2017", text: "Flash set of ordinary Portland cement paste is", options: ["Premature hardening", "Surface hardening only", "Hardening without heat", "All options correct"], correct: 0, solution: "<b>Ans. (a) :</b> Flash set is premature hardening due to C₃A." },
+        { id: 797, tag: "DMRC JE 2014", text: "Rapid hardening cement can be obtained by :", options: ["Fine grinding of clinker", "Addition of gypsum", "Addition of calcium sulphate", "Higher content of lime"], correct: 0, solution: "<b>Ans. (a) :</b> Obtained by finer grinding of clinker and higher C₃S content." },
+        { id: 798, tag: "KPSC JE 2016", text: "The process of adding cement to lime mortar to improve its quality is called:", options: ["Guniting", "Bulking", "Slaking", "Gauging"], correct: 3, solution: "<b>Ans. (d) :</b> This is called Gauging." },
+        { id: 799, tag: "Kerala PSC 2016", text: "Residue left after sieving good Portland cement in 90 micron sieve should not exceed:", options: ["20%", "55%", "30%", "10%"], correct: 3, solution: "<b>Ans. (d) :</b> Should not exceed 10% for OPC." },
+        { id: 800, tag: "KPSC JE 2014", text: "Chemical formula of dicalcium silicate:", options: ["2CaOSiO₃", "2CaOSiO₂", "CaOSiO₂", "2CaOSiO₄"], correct: 1, solution: "<b>Ans. (b) : 2CaO.SiO₂</b> or C₂S." },
+        { id: 801, tag: "DMRC JE 2014", text: "The initial setting time of ordinary portland cement, is ............... minutes :", options: ["15", "30", "45", "60"], correct: 1, solution: "<b>Ans. (b) : 30 minutes</b> minimum." }
+    ];
+
+    // --- APP STATE ---
+    let activeQuestions = []; // Contains either full list or bookmarks
+    let currentQuestionIndex = 0;
+    let userAnswers = {}; 
+    let userHistory = JSON.parse(localStorage.getItem('civEng_history')) || [];
+    let bookmarks = JSON.parse(localStorage.getItem('civEng_bookmarks')) || [];
+    let markedForReview = new Set();
+    let visited = new Set();
+    let timerInterval;
+    let timeRemaining = 2 * 60 * 60; 
+
+    const mainContainer = document.getElementById('main-container');
+    const timerDisplay = document.getElementById('timer');
+
+    // --- INIT ---
+    window.onload = function() {
+        document.getElementById('bm-count').innerText = bookmarks.length;
+        loadHistory();
+    };
+
+    // --- TEST MODES ---
+    function startMainTest() {
+        activeQuestions = [...allQuestions];
+        launchInterface();
+    }
+
+    function startBookmarkTest() {
+        if (bookmarks.length === 0) {
+            alert("No bookmarks found! Please mark some questions in the full test first.");
+            return;
+        }
+        // Filter questions that are in the bookmark list
+        activeQuestions = allQuestions.filter(q => bookmarks.includes(q.id));
+        launchInterface();
+    }
+
+    function launchInterface() {
+        // Reset Exam State
+        currentQuestionIndex = 0;
+        userAnswers = {};
+        markedForReview = new Set();
+        visited = new Set();
+        timeRemaining = 2 * 60 * 60;
+
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('quiz-interface').style.display = 'flex';
+        renderQuestion();
+        startTimer();
+        buildPalette();
+    }
+
+    // --- RENDER LOGIC ---
+    function renderQuestion() {
+        const q = activeQuestions[currentQuestionIndex];
+        visited.add(currentQuestionIndex);
+        
+        // Counter
+        document.getElementById('q-counter').innerText = `${currentQuestionIndex + 1}/${activeQuestions.length}`;
+        
+        // UI Updates
+        updateBookmarkUI();
+        document.getElementById('review-checkbox').checked = markedForReview.has(currentQuestionIndex);
+
+        let optionsHtml = '';
+        q.options.forEach((opt, index) => {
+            let className = 'option';
+            let answered = userAnswers[q.id] !== undefined;
+            
+            if (answered) {
+                if (index === q.correct) className += ' correct';
+                else if (index === userAnswers[q.id]) className += ' wrong';
+            }
+
+            const letter = String.fromCharCode(97 + index); 
+            
+            optionsHtml += `
+                <div class="${className}" onclick="handleOptionClick(${index})" style="${answered ? 'cursor:default' : ''}">
+                    <div class="option-circle">${letter}</div>
+                    <div>${opt}</div>
+                </div>
+            `;
+        });
+
+        const solutionVisibility = userAnswers[q.id] !== undefined ? 'visible' : '';
+
+        mainContainer.innerHTML = `
+            <div class="question-card">
+                <span class="exam-tag">${q.tag}</span>
+                <div class="q-text">Q.${q.id}: ${q.text}</div>
+                <div class="options-grid">
+                    ${optionsHtml}
+                </div>
+                <div class="solution-box ${solutionVisibility}">
+                    <div class="sol-header">Solution & Analysis:</div>
+                    <div>${q.solution}</div>
+                </div>
+            </div>
+        `;
+        
+        updatePaletteItem(currentQuestionIndex);
+    }
+
+    // --- BOOKMARK LOGIC ---
+    function toggleBookmark() {
+        const q = activeQuestions[currentQuestionIndex];
+        const index = bookmarks.indexOf(q.id);
+        
+        if (index > -1) {
+            bookmarks.splice(index, 1);
+        } else {
+            bookmarks.push(q.id);
+        }
+        
+        localStorage.setItem('civEng_bookmarks', JSON.stringify(bookmarks));
+        updateBookmarkUI();
+    }
+
+    function updateBookmarkUI() {
+        const q = activeQuestions[currentQuestionIndex];
+        const isBookmarked = bookmarks.includes(q.id);
+        const icon = document.getElementById('bookmark-icon');
+        
+        if (isBookmarked) {
+            icon.classList.add('active');
+        } else {
+            icon.classList.remove('active');
+        }
+    }
+
+    // --- INTERACTION ---
+    function handleOptionClick(index) {
+        const q = activeQuestions[currentQuestionIndex];
+        if (userAnswers[q.id] !== undefined) return;
+
+        userAnswers[q.id] = index;
+        renderQuestion(); // Re-render for colors & solution
+    }
+
+    function nextQuestion() {
+        if (currentQuestionIndex < activeQuestions.length - 1) {
+            currentQuestionIndex++;
+            renderQuestion();
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            renderQuestion();
+        }
+    }
+
+    function toggleReview() {
+        if (markedForReview.has(currentQuestionIndex)) {
+            markedForReview.delete(currentQuestionIndex);
+        } else {
+            markedForReview.add(currentQuestionIndex);
+        }
+        updatePaletteItem(currentQuestionIndex);
+    }
+
+    // --- PALETTE ---
+    function buildPalette() {
+        const grid = document.getElementById('palette-grid');
+        grid.innerHTML = '';
+        activeQuestions.forEach((q, idx) => {
+            const div = document.createElement('div');
+            div.className = 'p-item';
+            div.innerText = idx + 1;
+            div.id = `p-item-${idx}`;
+            div.onclick = () => {
+                currentQuestionIndex = idx;
+                renderQuestion();
+                closePalette();
+            };
+            grid.appendChild(div);
+        });
+    }
+
+    function updatePaletteItem(idx) {
+        const item = document.getElementById(`p-item-${idx}`);
+        if (!item) return;
+        
+        item.className = 'p-item'; 
+        if (currentQuestionIndex === idx) item.classList.add('current');
+        
+        const qId = activeQuestions[idx].id;
+        if (markedForReview.has(idx)) {
+            item.classList.add('review');
+        } else if (userAnswers[qId] !== undefined) {
+            const isCorrect = userAnswers[qId] === activeQuestions[idx].correct;
+            item.classList.add(isCorrect ? 'answered' : 'wrong');
+        }
+    }
+
+    function openPalette() {
+        document.getElementById('palette-modal').style.display = 'block';
+        document.getElementById('overlay').style.display = 'block';
+    }
+
+    function closePalette() {
+        document.getElementById('palette-modal').style.display = 'none';
+        document.getElementById('overlay').style.display = 'none';
+    }
+
+    // --- SYSTEM ---
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            const h = Math.floor(timeRemaining / 3600);
+            const m = Math.floor((timeRemaining % 3600) / 60);
+            const s = timeRemaining % 60;
+            timerDisplay.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            if (timeRemaining <= 0) submitTest();
+        }, 1000);
+    }
+
+    function exitTest() {
+        if(confirm("Exit test?")) location.reload();
+    }
+
+    function submitTest() {
+        clearInterval(timerInterval);
+        document.getElementById('quiz-interface').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'flex';
+
+        let score = 0;
+        activeQuestions.forEach(q => {
+            if (userAnswers[q.id] === q.correct) score++;
+        });
+
+        const total = activeQuestions.length;
+        const accuracy = total > 0 && Object.keys(userAnswers).length > 0 
+            ? Math.round((score / Object.keys(userAnswers).length) * 100) 
+            : 0;
+        
+        document.getElementById('score-display').innerText = `${score} / ${total}`;
+        document.getElementById('accuracy-display').innerText = `Attempted: ${Object.keys(userAnswers).length} | Accuracy: ${accuracy}%`;
+
+        // Only save history for Main Test to avoid clutter? Or save both?
+        // Let's save both but maybe mark them. For simplicity, just saving score.
+        const result = {
+            date: new Date().toLocaleString(),
+            score: score,
+            total: total,
+            accuracy: accuracy
+        };
+        userHistory.unshift(result);
+        localStorage.setItem('civEng_history', JSON.stringify(userHistory.slice(0, 5))); 
+    }
+
+    function loadHistory() {
+        const container = document.getElementById('history-display');
+        if (userHistory.length === 0) return;
+        
+        let html = '<ul style="padding-left:20px; font-size:0.9rem;">';
+        userHistory.forEach(h => {
+            html += `<li>${h.date}: <b>${h.score}/${h.total}</b> (${h.accuracy}%)</li>`;
+        });
+        html += '</ul>';
+        container.innerHTML = html;
+    }
+
+</script>
+</body>
+</html>
