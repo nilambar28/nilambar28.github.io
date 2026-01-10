@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civil Engineering Hub - Full Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #007bff;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --text-color: #333;
+            --border-color: #e0e0e0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f0f2f5; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* --- Header --- */
+        header {
+            background: white;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            height: 60px;
+            z-index: 10;
+        }
+        .header-title { font-weight: bold; font-size: 1.1rem; }
+        .timer-box { background: #ffeeba; padding: 5px 10px; border-radius: 5px; font-weight: bold; color: #856404; }
+        .header-actions i { font-size: 1.2rem; margin-left: 15px; cursor: pointer; color: var(--dark); }
+        .submit-btn { background: var(--success); color: white; border: none; padding: 5px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+
+        /* --- Main Layout --- */
+        .main-container { display: flex; flex: 1; overflow: hidden; position: relative; }
+
+        /* Question Area */
+        .question-section {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #fff;
+            padding-bottom: 80px; /* Space for footer */
+        }
+        
+        .exam-tag {
+            background: #e3f2fd;
+            color: #0d47a1;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .question-text { font-size: 1.1rem; font-weight: 600; margin-bottom: 20px; line-height: 1.5; }
+
+        .options-container { display: flex; flex-direction: column; gap: 10px; }
+        .option-btn {
+            background: white;
+            border: 2px solid var(--border-color);
+            padding: 12px 15px;
+            border-radius: 8px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .option-btn:hover { background: #f8f9fa; }
+        
+        /* Interactive States */
+        .option-btn.correct { border-color: var(--success); background-color: #d4edda; color: #155724; }
+        .option-btn.wrong { border-color: var(--danger); background-color: #f8d7da; color: #721c24; }
+        .option-btn.disabled { pointer-events: none; opacity: 0.9; }
+
+        /* Solution Box (Hidden initially) */
+        .solution-box {
+            margin-top: 20px;
+            background: #f1f8ff;
+            border: 1px solid #cce5ff;
+            border-radius: 8px;
+            padding: 15px;
+            display: none; /* Hidden by default */
+        }
+        .solution-header { color: var(--primary); font-weight: bold; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+        .solution-text { font-size: 0.95rem; line-height: 1.6; color: #444; white-space: pre-line; }
+
+        /* --- Question Palette (Sidebar) --- */
+        .palette-section {
+            width: 280px;
+            background: white;
+            border-left: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 5;
+        }
+        .palette-header { padding: 10px; border-bottom: 1px solid #eee; font-weight: bold; display: flex; justify-content: space-between; align-items: center;}
+        .grid-container {
+            padding: 10px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .grid-item {
+            height: 35px;
+            width: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #eee;
+            border-radius: 50%; /* Circular Testbook style */
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        /* Palette Colors */
+        .grid-item.current { border: 2px solid var(--primary); background: #fff; }
+        .grid-item.answered { background: var(--success); color: white; }
+        .grid-item.review { background: #6f42c1; color: white; } /* Purple for Review */
+        .grid-item.skipped { background: var(--danger); color: white; } 
+
+        /* Mobile Responsive Palette */
+        @media (max-width: 768px) {
+            .palette-section { transform: translateX(100%); width: 80%; }
+            .palette-section.active { transform: translateX(0); }
+        }
+
+        /* --- Footer Navigation --- */
+        footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 60px;
+            background: white;
+            border-top: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            z-index: 9;
+        }
+        .nav-btn {
+            padding: 8px 16px;
+            border: 1px solid #ccc;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .btn-primary { background: var(--primary); color: white; border: none; }
+        .btn-review { background: #6f42c1; color: white; border: none; }
+
+        /* --- Screens (Start, Result) --- */
+        .overlay-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: white;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .start-card, .result-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        .history-list { margin-top: 20px; text-align: left; max-height: 200px; overflow-y: auto; width: 100%; }
+        .history-item { border-bottom: 1px solid #eee; padding: 8px 0; font-size: 0.9rem; display: flex; justify-content: space-between; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="startScreen" class="overlay-screen">
+        <div class="start-card">
+            <h2><i class="fas fa-hard-hat"></i> Civil Engineering Hub</h2>
+            <p style="margin: 10px 0; color: #666;">Topic: Building Materials (Cement)</p>
+            <p style="margin-bottom: 20px;">Questions: 835 - 881 (Complete Set)</p>
+            
+            <div style="text-align: left; background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                <h4>Instructions:</h4>
+                <ul style="margin-left: 20px; font-size: 0.9rem;">
+                    <li>Total Time: 120 Minutes.</li>
+                    <li><strong>Immediate Solution:</strong> Click to see analysis.</li>
+                    <li>Green: Correct, Red: Wrong.</li>
+                </ul>
+            </div>
+
+            <button class="submit-btn" style="font-size: 1.2rem; padding: 10px 30px;" onclick="startTest()">Start Test</button>
+            <br><br>
+            <button class="nav-btn" onclick="showHistory()">View History</button>
+            <button class="nav-btn" onclick="startBookmarkMode()">Review Bookmarks</button>
+        </div>
+    </div>
+
+    <div id="resultScreen" class="overlay-screen hidden">
+        <div class="result-card">
+            <h2>Test Submitted!</h2>
+            <div style="font-size: 3rem; font-weight: bold; color: var(--primary); margin: 20px 0;">
+                <span id="scoreDisplay">0</span>%
+            </div>
+            <p id="statsDisplay"></p>
+            <button class="submit-btn" onclick="location.reload()">Back to Home</button>
+        </div>
+    </div>
+
+    <header>
+        <div class="header-title">Civil Eng. Mock</div>
+        <div class="timer-box" id="timer">02:00:00</div>
+        <div class="header-actions">
+            <button class="submit-btn" onclick="submitTest()">Submit</button>
+            <i class="fas fa-th-large" onclick="togglePalette()"></i>
+            <i class="fas fa-sign-out-alt" onclick="location.reload()" title="Exit"></i>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="question-section" id="questionArea">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="exam-tag" id="examTag">Exam Info</div>
+                <i class="far fa-bookmark" id="bookmarkIcon" style="font-size: 1.2rem; cursor: pointer; color: #aaa;" onclick="toggleBookmark()"></i>
+            </div>
+            
+            <div class="question-text" id="qText">Loading...</div>
+            
+            <div class="options-container" id="optionsBox">
+                </div>
+
+            <div class="solution-box" id="solutionBox">
+                <div class="solution-header">
+                    <i class="fas fa-lightbulb"></i> Detailed Solution:
+                </div>
+                <div class="solution-text" id="solutionText">
+                    </div>
+            </div>
+        </div>
+
+        <div class="palette-section" id="paletteBox">
+            <div class="palette-header">
+                <span>Question Palette</span>
+                <i class="fas fa-times" style="cursor: pointer;" onclick="togglePalette()"></i>
+            </div>
+            <div class="grid-container" id="gridContainer">
+                </div>
+            <div style="padding: 10px; font-size: 0.8rem;">
+                <div><span style="display:inline-block;width:10px;height:10px;background:var(--success);border-radius:50%"></span> Answered</div>
+                <div><span style="display:inline-block;width:10px;height:10px;background:#6f42c1;border-radius:50%"></span> Review</div>
+                <div><span style="display:inline-block;width:10px;height:10px;background:#eee;border-radius:50%"></span> Not Visited</div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <button class="nav-btn" onclick="prevQuestion()"><i class="fas fa-chevron-left"></i> Prev</button>
+        <button class="nav-btn btn-review" onclick="markReview()">Mark for Review</button>
+        <button class="nav-btn btn-primary" onclick="nextQuestion()">Next <i class="fas fa-chevron-right"></i></button>
+    </footer>
+
+    <script>
+        // --- DATA SECTION: Full Database Q835-881 ---
+        const allQuestions = [
+            {
+                id: 835,
+                text: "The minimum compressive strength of 43 grade OPC cement is :",
+                options: ["43 N/m²", "43 kg/m²", "43 N/mm²", "43 kg/mm²"],
+                correct: 2,
+                exam: "UPSSSC JE 31-07-2016 / UJVNL JE 2016",
+                explanation: "Ans. (c) : 43 grade of cement – As per IS code (8112-2013) The digits 33, 43 and 53 grade of OPC are 33, 43 and 53 represents 28 days compressive strength (N/mm²) of standard cube of face area 50 cm². Made up of cement mortar 1:3."
+            },
+            {
+                id: 836,
+                text: "Following compounds can be used as accelerators except",
+                options: ["CaCl₂", "CaSO₄", "NaCl", "Na₂SO₄"],
+                correct: 1,
+                exam: "Gujarat PSC AE 2020",
+                explanation: "Ans. (b) : Accelerating admixtures are added to concrete to increase the rate of early strength development.\nEx - CaCl₂, NaCl and Na₂SO₄ etc.\nCaSO₄ (gypsum) is not an accelerating admixture. It is a retarding admixture."
+            },
+            {
+                id: 837,
+                text: "Which of the following statements is true?\nI. A gap of 0.3m is to be maintained between cement bag and wall, while storing cement.\nII. A gap of 100 cm is to be maintained between cement bag and wall, while storing cement.",
+                options: ["Only I", "Only II", "Both I and II", "None of these"],
+                correct: 3,
+                exam: "NCL Overseer 22.02.2020",
+                explanation: "Ans. (*) : According to IS 4082-1996, clause no. 4.2.2.2, Design of godown of cement–\n(i) A space of 600 mm minimum shall be left around between the exterior walls and the stacks.\n(ii) A gap of one lot to another lot is about 1.2 m.\n(iii) The height of one lot is about 27 m.\nNote: Commission has recommended option (a) but option (d) is correct."
+            },
+            {
+                id: 838,
+                text: "As per IS – 456 – 1978 the pH value of water shall be",
+                options: ["Less than 6", "Equal to 6", "Not less than 6", "Equal to 7"],
+                correct: 2,
+                exam: "HPSSC JE Code 438/2018",
+                explanation: "Ans. (c) : As per IS – 456 – 1978 the pH value of water shall be less than 6.\npH value of water in cement concrete lies between 6 – 8.5."
+            },
+            {
+                id: 839,
+                text: "Match apparatus with their respective properties as given below :\nA. Briquette testing machine -> 1. Compressive strength\nB. Le Chatelier Apparatus -> 2. Consistency\nC. Vicat Apparatus -> 3. Soundness\n ... -> 4. Tensile strength",
+                options: ["A-1, B-3, C-2", "A-4, B-3, C-2", "A-4, B-2, C-3", "A-1, B-2, C-3"],
+                correct: 1,
+                exam: "HPSSC JE 396/2018",
+                explanation: "Ans. (b) : Correct Matching:\nA. Briquette testing machine -> Tensile strength\nB. Le Chatelier Apparatus -> Soundness\nC. Vicat Apparatus -> Consistency"
+            },
+            {
+                id: 840,
+                text: "Water cement ratio is weight of mixing water and",
+                options: ["Weight of mixing water", "Weight of cement", "Weight of mixing concrete", "None of these"],
+                correct: 1,
+                exam: "HPSSC JE Code 438/2018",
+                explanation: "Ans. (b) : Water cement ratio is weight of mixing water and weight of cement.\nWater cement ratio = weight of water / weight of cement"
+            },
+            {
+                id: 841,
+                text: "Which of the following property of ordinary Portland cement is improved by the pozzolana?",
+                options: ["Bleeding", "Heat of hydration", "Permeability", "Shrinkage"],
+                correct: 2,
+                exam: "SSC JE 27.01.2018, 10.15 am",
+                explanation: "Ans. (c) : Pozzolana reacts with the free lime. The pozzolanic materials are essentially siliceous or aluminous compounds which in itself do not possess any cementous property but when it reacts with Ca(OH)2, released during the hydration of cement, leads to formation of cementous compound.\nWhen use pozzolana the water content is reduced for a given slump, thus the shrinkage after drying is also reduced."
+            },
+            {
+                id: 842,
+                text: "Which of the following represents the normal consistency of ordinary Portland cement?",
+                options: ["0.15", "0.3", "0.45", "0.55"],
+                correct: 1,
+                exam: "SSC JE 27.01.2018, 10.15 am",
+                explanation: "Ans. (b) : 'The normal consistency of cement paste is defined as that consistency which will permit a vicat plunger having dia 10mm and length 50mm to penetrate to depth of 33-35mm from top of mould'.\nNormal consistency of different types of cement are different.\nFor OPC the normal consistency is 30% (0.3)."
+            },
+            {
+                id: 843,
+                text: "Which of the following cements is recommended for under water construction ?",
+                options: ["Portland Cement", "Pozzolanic Cement", "Sulphate resisting Cement", "Quick setting Cement"],
+                correct: 3,
+                exam: "Rajasthan J.En (Diploma) 2016 Shift-I",
+                explanation: "Ans. (d) : Quick setting cement - The early setting property is brought out by reducing the gypsum content at the time of clinker grinding.\nIts contain higher percentage of C3A, and required to the mixed, placed and completed very early.\nUse: Under water construction, Grouting operation\nInitial setting time 5 min and final setting time take is 30 min."
+            },
+            {
+                id: 844,
+                text: "Rapid hardening cement attains early strength due to ..........",
+                options: ["Larger proportion of lime grounded finer than normal cement", "lesser proportion of lime grounded coarser than normal cement", "lesser proportion of lime grounded finer than normal cement", "larger proportion of lime grounded coarser than normal cement"],
+                correct: 0,
+                exam: "MH Asst. Town Planning 2018",
+                explanation: "Ans. (a) : Rapid hardening cement – Also known as early gain in strength of cement, this cement contain more percentage of C3S and less percentage of C2S high proportion of C3S and lime grounded finer than normal cement will import quicker hydration.\nRapid hardening Cement (8041) – Larger proportion of lime grounded finer than in ordinary cement."
+            },
+            {
+                id: 845,
+                text: "In the process of hydration of OPC, to complete all chemical reaction, the water requirement (expressed as the percentage of cement) is .........",
+                options: ["5 to 8%", "8 to 16%", "20 to 25%", "35 to 45%"],
+                correct: 2,
+                exam: "SSC JE 22.1.2018, Morning Shift",
+                explanation: "Ans. (c) About an average 23% of water by weight of cement is required for complete hydration of portland cement and 15% of water by weight of cement is required to fill the gel process. (Total approx 38%)."
+            },
+            {
+                id: 846,
+                text: "Pick up the correct statement from the following",
+                options: ["Water enables chemical reaction to take place with cement", "Water lubricates the mixture of gravel, sand and cement", "Only a small quantity of water is required for hydration of cement", "All option are correct"],
+                correct: 3,
+                exam: "SSC JE 27.01.2018, 10.15 am",
+                explanation: "Ans. (d) Water and its quality plays an important role in determining the quality of concrete. Strength durability of concrete is to a large extent determined by its water to cement ratio. Water starts the chemical reaction in the cement. About 38% of water is needed for the complete chemical reaction of the cement."
+            },
+            {
+                id: 847,
+                text: "The cement whose strength is a little lower than the ordinary cement during the first three months but attains afterwards the same strength is known as",
+                options: ["low-heated Portland cement", "rapid hardening Portland cement", "Portland blast slag cement", "Portland pozzolana cement"],
+                correct: 0,
+                exam: "ASSAM PSC AE (IWT) 2021",
+                explanation: "Ans. (a) Low heat Portland cement is obtained by reducing the more rapidly hydrating compound, C3S & C3A and increasing C2S. Low heat cement is used in massive construction works like abutments, retaining wall etc. where the rate at which the heat can be lost at the surface is slower than at which the heat is initially generated."
+            },
+            {
+                id: 848,
+                text: "Tricalcium aluminate (C3A)",
+                options: ["reacts fast with water", "generates less heat of hydration", "causes initial setting and early strength of cement", "does not contribute to develop ultimate strength"],
+                correct: 0,
+                exam: "SSC JE 27.01.2018, 10.15 am",
+                explanation: "Ans. (a) : Tricalcium Aluminate (C3A) is a Bogue's compound in cement which is responsible for the flash setting of cement. This reacts with water very quickly. Since it reacts very fast so it generates very large amount of heat. It also doesn't contribute to develop the ultimate strength."
+            },
+            {
+                id: 849,
+                text: "Identify the correct statements.",
+                options: ["Expanding cement is used for filling the cracks", "White cement is mostly used for decorative works", "Portland pozzolana cement produces less heat of hydration", "High strength Portland cement is produced from the special materials"],
+                correct: 2,
+                exam: "SSC JE 27.01.2018, 10.15 am",
+                explanation: "Ans. (c) Expending cement is special type of cement which expands after setting so due to this property they are used to fill the gaps. White cement is same as the ordinary cement but only difference is that in white cement iron oxide is very less. Portland pozzolana cements are used because they have very less heat of hydration."
+            },
+            {
+                id: 850,
+                text: "Ordinary Portland cement is ______ cement.",
+                options: ["Type 4", "Type 2", "Type 3", "Type 1"],
+                correct: 3,
+                exam: "UPPCL JE 25.02.2020",
+                explanation: "Ans. (d) :\nType-I : General purpose OPC\nType-II : Moderately sulphate resistant\nType-III : High early strength\nType-IV : Low heat of hydration"
+            },
+            {
+                id: 851,
+                text: "______ cement is a specialty cement made for oil and Gas industry.",
+                options: ["Class O & G", "Class I", "Class O", "Class G"],
+                correct: 3,
+                exam: "UPPCL JE 25.02.2020",
+                explanation: "Ans. (d) : Class (G) cement used specially for oil and gas industry:\nClass G -> No addition other than calcium sulphate or water or both, shall be inter ground or blended with the clinker during manufacturing of class or well cement."
+            },
+            {
+                id: 852,
+                text: "Which of the following has the highest Sulphate Resistance (SR)?",
+                options: ["Type V", "Type III", "Type II", "Type I"],
+                correct: 0,
+                exam: "UPPCL JE 25.02.2020",
+                explanation: "Ans. (a) : Type IV and Type V are often used in special construction application which where high sulphate resistance is required or low heat of hydration is important."
+            },
+            {
+                id: 853,
+                text: "Which of the following material is used for manufacturing of slag cement?",
+                options: ["Fly ash", "Chromium sludge", "Ferro alloy", "Blast furnace slag"],
+                correct: 3,
+                exam: "UPPCL JE 25.02.2020",
+                explanation: "Ans. (d) : Blast furnace slag is used for manufacturing of slag cement.\nSlag cement is hydraulic cement formed when granulated blast furnace slag is ground to suitable finners and used to replace a portion of portland cement."
+            },
+            {
+                id: 854,
+                text: "Which of the following is an artificial pozzolana?",
+                options: ["Fly ash", "Shales", "Clay", "Opalinc cherts"],
+                correct: 0,
+                exam: "UPPCL JE 25.02.2020",
+                explanation: "Ans. (a) : Flyash is an artificial industrial waste from of thermal power plants is used in the cement manufacturing.\nPortland pozzolana cement produce less heat of hydration and offer great resistance."
+            },
+            {
+                id: 855,
+                text: "In quick setting cement, the compound added is",
+                options: ["Aluminium sulphate", "Gypsum", "Aluminium silicate", "Calcium sulphate"],
+                correct: 0,
+                exam: "TNPSC JE/Supervisor 2012",
+                explanation: "Ans. (a) : The cement clinkers are grinded with aluminium sulphate, which accelerators the setting time of cement, aluminium sulphate is used as accelerating admixture in the dosage range of 1% to 3% by weight of cement clinkers."
+            },
+             {
+                id: 856,
+                text: "Approximate content of CaO in OPC",
+                options: ["60–67%", "33–45%", "17–25%", "03–80%"],
+                correct: 0,
+                exam: "SJVNL JE 07.10.2018",
+                explanation: "Ans. (a) : Approximate content of CaO in OPC 60–67%."
+            },
+             {
+                id: 857,
+                text: "For marine work the best suited cement is",
+                options: ["low heat portland cement", "rapid hardening cement", "ordinary portland cement", "blast furnace slag cement"],
+                correct: 3,
+                exam: "ISRO TA 08.04.2018",
+                explanation: "Ans. (d) : For marine work the best suited cement is blast furnace slag cement.\nIt is made by blending portland cement clinker with granulated blast furnace slag.\nUse–Mass concreting, in marine work (It is better sulphate resistance)"
+            },
+            {
+                id: 858,
+                text: "Largest constituent of ordinary Portland cement is",
+                options: ["CaO", "SiO₂", "Al₂O₃", "Fe₂O₃"],
+                correct: 0,
+                exam: "ISRO TA 08.04.2018",
+                explanation: "Ans. (a) : Largest constituent of ordinary Portland cement is CaO.\nIngredients: Lime (CaO) 60-65%, Silica (SiO₂) 17-25%, Alumina 3-8%."
+            },
+            {
+                id: 859,
+                text: "Initial setting time of OPC shall be",
+                options: ["not less than 1 hour", "not more than 1 hour", "not less than 30 min", "not more than 30 min"],
+                correct: 2,
+                exam: "ISRO TA 08.04.2018",
+                explanation: "Ans. (c) : Initial setting time of OPC shall be not less than 30 min.\nInitial setting time - It is regarded as the time elapsed between the moment that the water is added to the cement, to the time that the paste starts losing its plasticity."
+            },
+            {
+                id: 860,
+                text: "Le Chatelier's method is used to determine which of the following properties of cement?",
+                options: ["setting time", "consistency", "soundness", "both (a) and (b)"],
+                correct: 2,
+                exam: "ISRO TA 08.04.2018",
+                explanation: "Ans. (c) : Le Chatelier's method is used to determine soundness properties of cement.\nLe Chatelier's method - Test for soundness or test for expansion due to excess lime."
+            },
+            {
+                id: 861,
+                text: "Portland cement manufactured from pure white chalk and clay but free from iron oxide is known as ______",
+                options: ["Quick setting cement", "Rapid hardening cement", "White cement", "Low heat portland cement"],
+                correct: 2,
+                exam: "ISRO Draftsman 27.11.2018",
+                explanation: "Ans. (c) : White cement (IS : 8042-1989) – White cement are manufactured from pure store (chalk) and clay that are totally free from iron oxides and any other pigments like manganese and chromium."
+            },
+            {
+                id: 862,
+                text: "Fineness of cement is measured in the units of",
+                options: ["Volume/mass", "Mass/Volume", "Area/Mass", "Mass/Area"],
+                correct: 2,
+                exam: "RPSC ACF & FRO 24.02.2021",
+                explanation: "Ans. (c) : Fineness of cement is measured in units of area upon mass.\nOPC : 2250 cm²/g"
+            },
+            {
+                id: 863,
+                text: "Grade of Cement refers to:",
+                options: ["Particle size", "Order of grinding", "Soundness", "Compressive strength"],
+                correct: 3,
+                exam: "KPSC JTO Code 10/2020",
+                explanation: "Ans. (d) : Grade of cement refers to compressive strength.\nOPC 33 : 33 N/mm²\nOPC 43 : 43 N/mm²\nOPC 53 : 53 N/mm²"
+            },
+            {
+                id: 864,
+                text: "The rate of hydration and hydrolysis of cement depends on its :",
+                options: ["Soundness", "Fineness", "Setting test", "Tensile strength"],
+                correct: 1,
+                exam: "ESIC JE 2016",
+                explanation: "Ans. (b) Finer the cement, more is the strength since surface area of hydration will be large, with increase in fineness the early development of strength is enhanced but the ultimate strength is not affected."
+            },
+            {
+                id: 865,
+                text: "Asbestos cement is",
+                options: ["brittle", "wraps by humidity", "strength lowers by water", "All above"],
+                correct: 3,
+                exam: "MH PWD 2016",
+                explanation: "Ans. (d) : Asbestos cement – Asbestos cement paste obtained by mixing 15% asbestos fibre with cement and mixed with water is pressed under grooved or toothed rollers to give a series of waves or corrugations.\nAsbestos cement is strength lower by water."
+            },
+            {
+                id: 866,
+                text: "Portland cement manufacturing proportions of lime, silica other constituents are",
+                options: ["63,22,15", "22,63,15", "40,40,20", "20,70,10"],
+                correct: 0,
+                exam: "MH PWD 2016",
+                explanation: "Ans. (a) : The properties of various ingredient of Portland cement are as follows :\nLime (CaO): 60-65%\nSilica (SiO₂): 17-25%\nAlumina, etc: Remainder."
+            },
+            {
+                id: 867,
+                text: "As compared to ordinary Portland cement, use of pozzolanic cement..............",
+                options: ["reduces workability", "increases bleeding", "increases shrinkage", "increases strength"],
+                correct: 2,
+                exam: "MH PWD 2016",
+                explanation: "Ans. (c) : Portland pozzolana cement – It is manufactured by grinding opc and pozzolana.\nThe hydration of PPC is a slower process than hydration of OPC. Mass concrete (dam), retaining walls, large foundation etc."
+            },
+            {
+                id: 868,
+                text: "Gypsum is a.............",
+                options: ["mechanically formed sedimentary rock", "igneous rock", "chemically precipitated sedimentary rock", "metamorphic rock"],
+                correct: 2,
+                exam: "MH PWD 2016",
+                explanation: "Ans. (c) Gypsum is a chemically precipitate sedimentary rock. It is also under calcareous rock."
+            },
+            {
+                id: 869,
+                text: "The maximum quantity of calcium chloride used as an accelerator in cement in percentage by weight of cement is.............",
+                options: ["1", "2", "33", "4"],
+                correct: 1,
+                exam: "MH PWD 2016",
+                explanation: "Ans. (b) : Calcium chlorides (CaCl₂) has the ability to accelerate cement hydration and reduce set time by as much as two third. It is used in cement 2% of weight of cement."
+            },
+            {
+                id: 870,
+                text: "The number of cement bags stored in godown with heap of ............ bags",
+                options: ["10", "15", "20", "25"],
+                correct: 0,
+                exam: "MH PWD 2016",
+                explanation: "Ans. (a) : Normally store cement is weather proof sheds –\nThe number of cement bags stored in godown with heap of 10 bags."
+            },
+            {
+                id: 871,
+                text: "The compound in cement which is quickest to react with water is",
+                options: ["Tri-calcium aluminate", "Tri-calcium silicate", "Tri-calcium alumino-ferrite", "Di-calcium silicate"],
+                correct: 0,
+                exam: "MH PWD 2016",
+                explanation: "Ans. (a) : Tricalcium Aluminate (C3A)\nIt rapidly react with water.\nIt is responsible for flash set.\nIt is high heat of hydration."
+            },
+            {
+                id: 872,
+                text: "The main constituent of fly ash is",
+                options: ["Aluminium oxide", "Silica", "Ferrous oxide", "All above"],
+                correct: 3,
+                exam: "MH PWD 2016",
+                explanation: "Ans. (d) : Fly ash – It is consists, primarily of oxide of silicon, aluminium, iron and calcium, magnesium, potassium, sodium, titanium and sulphur are also present to a lesser degree."
+            },
+            {
+                id: 873,
+                text: "Cement is tested for parameters",
+                options: ["Fineness", "Soundness", "setting time", "All of these"],
+                correct: 3,
+                exam: "MH PWD 2016",
+                explanation: "Ans. (d) : Cement is tested for parameters –\n(i) Fineness test\n(ii) Setting time\n(iii) Soundness"
+            },
+            {
+                id: 874,
+                text: "Finer grinding of cement",
+                options: ["affects only the early development of strength", "affects only the ultimate strength", "both (a) and (b)", "does not affect the strength"],
+                correct: 0,
+                exam: "MH PWD 2016",
+                explanation: "Ans. (a) : Finer grading increase the speed of hydration when reacts with water and early developed of strength.\nFineness of grinding is some importance in relation on the workability of concrete mixes."
+            },
+            {
+                id: 875,
+                text: "Compressive strength developed by concrete made with ordinary Portland cement at the fourteenth day after casting is about ......... % of its 28 days compressive strength.",
+                options: ["None of these", "37", "85", "70"],
+                correct: 2,
+                exam: "MH PWD 2016",
+                explanation: "Ans. (c) : Compressive strength developed by concrete made with ordinary Portland cement at the fourteenth day is roughly 90%. (Option C 85 is closest). 7 day is 65%."
+            },
+            {
+                id: 876,
+                text: "The apparatus used to determine water content required to prepare cement water paste of standard consistency is",
+                options: ["Blain's air permeability apparatus", "Le chatelier's apparatus", "Vicat's apparatus", "Any of these"],
+                correct: 2,
+                exam: "KPSC Overseer, Gr-II, Irri. Dept. 2017",
+                explanation: "Ans. (c) : The apparatus used to determine water content required to prepare cement water paste of standard consistency is vicat's apparatus."
+            },
+            {
+                id: 877,
+                text: "Number of cement bags required to produce 14 Cu.m of compacted concrete with a concrete mix having cement factor 7 is",
+                options: ["21 Bags", "2 Bags", "89 Bags", "7 Bags"],
+                correct: 2,
+                exam: "MH PWD 2016",
+                explanation: "Ans. (c) : Given cement factor 7.\nConcrete to produce 1 cum of concrete 1.52 cum dry mortar required.\nNumber of bag required = (3.04 / 0.034) = 89 bags."
+            },
+            {
+                id: 878,
+                text: "For laying 7cm thick concrete floor with 1:3:6 concrete on area of 100 eq. m, number of cement bags required will be approximately",
+                options: ["50", "34", "20", "30"],
+                correct: 3,
+                exam: "MH PWD 2016",
+                explanation: "Ans. (d) : 7 cm thick concrete floor on area of 100 sqm.\nVolume = 100 * 0.07 = 7 cum\nConcrete to produced 1 cum of concrete 1.52 cum of dry mortar required\n1.52*7/10 = 1.064 cum or 30 bag"
+            },
+            {
+                id: 879,
+                text: "When cement is tested for fineness by Blaine's air permeability method as described in IS4031-1968, the specific surface area of cement shall not be less than ______.",
+                options: ["225 mm²/kg", "2250 x 10² mm²/kg", "225 x 10⁴ mm²/kg", "225 x 10⁶ mm²/kg"],
+                correct: 0,
+                exam: "LMRC J.E. 13.05.2018 (shift-I)",
+                explanation: "Ans. (a) : The specific surface area of OPC cement shall not be less than 2250 cm²/g or 225 m²/kg."
+            },
+            {
+                id: 880,
+                text: "Gypsum is added in manufacturing of cement:",
+                options: ["to increase its life span", "to control setting of cement", "to give strength to cement", "to give grey color to cement"],
+                correct: 1,
+                exam: "MH Chandrapur MNC 2017",
+                explanation: "Ans. (b) : Gypsum used in manufacturing of cement Reacts as retarder.\nRetarder – These are admixture that down the process of hydration or to control setting of cement."
+            },
+            {
+                id: 881,
+                text: "Which of the following cement shall be used when more freeze thaw durability is required?",
+                options: ["Portland pozzolana cement", "Ordinary Portland cement", "None of these", "Rapid hardening Portland cement"],
+                correct: 0,
+                exam: "MH WRD 2016",
+                explanation: "Ans. (a) : Portland pozzolana cement– It is manufactured by grinding OPC and pozzolana (usually flyash 10 to 25% by mass).\nIt is used when more freeze thaw durability is required.\nIt can be confidently employed in construction of hydraulic structures, marine works, mass concreting."
+            }
+        ];
+
+        // --- STATE VARIABLES ---
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let userState = {}; 
+        let bookmarks = JSON.parse(localStorage.getItem('ceHubBookmarks')) || [];
+        let timeRemaining = 7200; 
+        let timerInterval;
+
+        // --- INITIALIZATION ---
+        function startTest() {
+            currentQuestions = [...allQuestions];
+            userState = {};
+            currentIndex = 0;
+            document.getElementById('startScreen').classList.add('hidden');
+            initGrid();
+            renderQuestion();
+            startTimer();
+        }
+
+        function startBookmarkMode() {
+            if(bookmarks.length === 0) {
+                alert("No bookmarks found!");
+                return;
+            }
+            currentQuestions = allQuestions.filter(q => bookmarks.includes(q.id));
+            userState = {};
+            currentIndex = 0;
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('timer').style.visibility = 'hidden';
+            initGrid();
+            renderQuestion();
+        }
+
+        // --- CORE FUNCTIONS ---
+
+        function renderQuestion() {
+            const q = currentQuestions[currentIndex];
+            const state = userState[currentIndex];
+
+            document.getElementById('qText').innerText = `Q${currentIndex + 1}. ${q.text}`;
+            document.getElementById('examTag').innerText = q.exam;
+
+            const icon = document.getElementById('bookmarkIcon');
+            if(bookmarks.includes(q.id)) {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+                icon.style.color = 'var(--primary)';
+            } else {
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+                icon.style.color = '#aaa';
+            }
+
+            const optionsBox = document.getElementById('optionsBox');
+            optionsBox.innerHTML = '';
+            
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('div');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<span style="font-weight:bold; margin-right:10px;">${String.fromCharCode(97+idx)})</span> ${opt}`;
+                
+                if (state && state.selectedOption !== undefined) {
+                    btn.classList.add('disabled');
+                    if (idx === q.correct) btn.classList.add('correct');
+                    if (idx === state.selectedOption && idx !== q.correct) btn.classList.add('wrong');
+                } else {
+                    btn.onclick = () => handleAnswer(idx);
+                }
+                
+                optionsBox.appendChild(btn);
+            });
+
+            const solutionBox = document.getElementById('solutionBox');
+            const solutionText = document.getElementById('solutionText');
+            
+            if (state && state.selectedOption !== undefined) {
+                solutionBox.style.display = 'block';
+                solutionText.innerText = q.explanation;
+            } else {
+                solutionBox.style.display = 'none';
+            }
+
+            updateGridHighlight();
+        }
+
+        function handleAnswer(selectedIndex) {
+            const q = currentQuestions[currentIndex];
+            const isCorrect = selectedIndex === q.correct;
+
+            userState[currentIndex] = {
+                selectedOption: selectedIndex,
+                isCorrect: isCorrect,
+                status: 'answered'
+            };
+
+            renderQuestion();
+            updateGridStatus(currentIndex, 'answered');
+        }
+
+        function markReview() {
+            if (!userState[currentIndex]) {
+                userState[currentIndex] = { status: 'review' };
+            } else {
+                userState[currentIndex].status = 'review';
+            }
+            updateGridStatus(currentIndex, 'review');
+            nextQuestion();
+        }
+
+        function toggleBookmark() {
+            const qId = currentQuestions[currentIndex].id;
+            const index = bookmarks.indexOf(qId);
+            if (index > -1) {
+                bookmarks.splice(index, 1);
+            } else {
+                bookmarks.push(qId);
+            }
+            localStorage.setItem('ceHubBookmarks', JSON.stringify(bookmarks));
+            renderQuestion();
+        }
+
+        // --- NAVIGATION ---
+        function nextQuestion() {
+            if (currentIndex < currentQuestions.length - 1) {
+                currentIndex++;
+                renderQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderQuestion();
+            }
+        }
+
+        function jumpTo(index) {
+            currentIndex = index;
+            renderQuestion();
+            if(window.innerWidth < 768) togglePalette();
+        }
+
+        // --- PALETTE / GRID ---
+        function initGrid() {
+            const grid = document.getElementById('gridContainer');
+            grid.innerHTML = '';
+            currentQuestions.forEach((_, idx) => {
+                const item = document.createElement('div');
+                item.className = 'grid-item';
+                item.innerText = idx + 1;
+                item.onclick = () => jumpTo(idx);
+                item.id = `grid-${idx}`;
+                grid.appendChild(item);
+            });
+        }
+
+        function updateGridStatus(idx, status) {
+            const item = document.getElementById(`grid-${idx}`);
+            item.classList.remove('answered', 'review', 'skipped');
+            item.classList.add(status);
+        }
+
+        function updateGridHighlight() {
+            document.querySelectorAll('.grid-item').forEach(el => el.classList.remove('current'));
+            document.getElementById(`grid-${currentIndex}`).classList.add('current');
+        }
+
+        function togglePalette() {
+            document.getElementById('paletteBox').classList.toggle('active');
+        }
+
+        // --- TIMER ---
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                const hrs = Math.floor(timeRemaining / 3600);
+                const mins = Math.floor((timeRemaining % 3600) / 60);
+                const secs = timeRemaining % 60;
+                document.getElementById('timer').innerText = 
+                    `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                
+                if (timeRemaining <= 0) submitTest();
+            }, 1000);
+        }
+
+        // --- SUBMIT & HISTORY ---
+        function submitTest() {
+            clearInterval(timerInterval);
+            let correctCount = 0;
+            let attempted = 0;
+            
+            Object.values(userState).forEach(state => {
+                if (state.selectedOption !== undefined) {
+                    attempted++;
+                    if (state.isCorrect) correctCount++;
+                }
+            });
+
+            const score = Math.round((correctCount / currentQuestions.length) * 100);
+            
+            const history = JSON.parse(localStorage.getItem('ceHubHistory')) || [];
+            history.unshift({
+                date: new Date().toLocaleString(),
+                score: score,
+                correct: correctCount,
+                total: currentQuestions.length
+            });
+            localStorage.setItem('ceHubHistory', JSON.stringify(history));
+
+            document.getElementById('scoreDisplay').innerText = score;
+            document.getElementById('statsDisplay').innerText = 
+                `Correct: ${correctCount} | Wrong: ${attempted - correctCount} | Skipped: ${currentQuestions.length - attempted}`;
+            document.getElementById('resultScreen').classList.remove('hidden');
+        }
+
+        function showHistory() {
+            const history = JSON.parse(localStorage.getItem('ceHubHistory')) || [];
+            let html = '<div class="start-card" style="position:relative"><i class="fas fa-times" style="position:absolute;top:10px;right:10px;cursor:pointer" onclick="location.reload()"></i><h3>Past Scores</h3><div class="history-list">';
+            if(history.length === 0) html += '<p>No history yet.</p>';
+            history.forEach(h => {
+                html += `<div class="history-item"><span>${h.date}</span> <strong>${h.score}% (${h.correct}/${h.total})</strong></div>`;
+            });
+            html += '</div></div>';
+            document.getElementById('startScreen').innerHTML = html;
+        }
+
+        document.addEventListener('click', function(event) {
+            const palette = document.getElementById('paletteBox');
+            const icon = document.querySelector('.fa-th-large');
+            if (!palette.contains(event.target) && !icon.contains(event.target) && palette.classList.contains('active')) {
+                palette.classList.remove('active');
+            }
+        });
+
+    </script>
+</body>
+</html>
