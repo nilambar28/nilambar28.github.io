@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Civil Exam App - Bookmark Test Mode</title>
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --green: #00c853;
+            --red: #d50000;
+            --purple: #aa00ff;
+            --text: #202124;
+            --gray-bg: #f1f3f4;
+            --border: #dadce0;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: 'Roboto', sans-serif; background-color: var(--gray-bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* HEADER */
+        header { background: white; height: 60px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 4px rgba(0,0,0,0.1); z-index: 10; }
+        .timer-badge { background: #e8f0fe; color: var(--primary); font-weight: 700; padding: 6px 12px; border-radius: 4px; font-size: 14px; display: flex; align-items: center; }
+        .btn-submit { background-color: var(--green); color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: 600; cursor: pointer; }
+
+        /* CONTENT */
+        #app-body { flex: 1; overflow-y: auto; scroll-behavior: smooth; padding-bottom: 80px; }
+        .screen { display: none; height: 100%; flex-direction: column; }
+        .screen.active { display: flex; }
+        .center-content { align-items: center; justify-content: center; text-align: center; padding: 24px; background: white; height: 100%; }
+
+        /* CARDS */
+        .question-container { background: white; margin: 12px; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .q-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 13px; color: #5f6368; }
+        .exam-tag { background: #fce4ec; color: #c2185b; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-size: 11px; text-transform: uppercase; }
+        
+        /* ICONS */
+        .bm-btn-container { cursor: pointer; padding: 5px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .q-text { font-size: 17px; font-weight: 500; line-height: 1.5; margin-bottom: 24px; }
+
+        /* OPTIONS */
+        .option-item { display: flex; align-items: flex-start; padding: 14px 16px; margin-bottom: 12px; border: 2px solid #f1f3f4; border-radius: 10px; background: white; cursor: pointer; transition: 0.2s; }
+        .option-circle { height: 24px; width: 24px; border-radius: 50%; border: 2px solid #bdc1c6; margin-right: 16px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: #5f6368; flex-shrink: 0; margin-top: 2px; }
+        .option-item.correct { border-color: var(--green); background-color: #e8f5e9; }
+        .option-item.correct .option-circle { border-color: var(--green); background-color: var(--green); color: white; }
+        .option-item.wrong { border-color: var(--red); background-color: #ffebee; }
+        .option-item.wrong .option-circle { border-color: var(--red); background-color: var(--red); color: white; }
+
+        /* SOLUTION */
+        .solution-box { display: none; background: #e3f2fd; border-left: 4px solid var(--primary); padding: 16px; margin: 12px; border-radius: 6px; font-size: 14px; line-height: 1.5; }
+
+        /* FOOTER */
+        footer { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid var(--border); height: 64px; display: flex; align-items: center; padding: 0 10px; z-index: 20; }
+        .footer-btn { flex: 1; margin: 0 6px; height: 44px; border-radius: 8px; border: none; font-weight: 600; font-size: 15px; cursor: pointer; background: white; color: #5f6368; border: 1px solid var(--border); }
+        .btn-main { background-color: var(--primary); color: white; border: none; flex: 1.5; }
+        .btn-review.active { background-color: var(--purple); color: white; border-color: var(--purple); }
+
+        /* TOAST */
+        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 80px; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s; }
+        #toast.show { visibility: visible; opacity: 1; }
+
+        /* PALETTE */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 90; display: none; }
+        .palette-drawer { position: fixed; top: 0; right: -80%; width: 80%; height: 100%; background: white; z-index: 100; transition: right 0.3s; display: flex; flex-direction: column; }
+        .palette-drawer.open { right: 0; }
+        .palette-grid { padding: 16px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; overflow-y: auto; }
+        .p-item { aspect-ratio: 1; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; background: #f1f3f4; border: 1px solid var(--border); cursor:pointer; }
+        .p-item.current { border: 2px solid var(--primary); }
+        .p-item.answered { background: var(--green); color: white; border-color: var(--green); }
+        .p-item.review { background: var(--purple); color: white; border-color: var(--purple); }
+
+        .big-btn { width: 100%; padding: 15px; background: var(--primary); color: white; font-size: 16px; border: none; border-radius: 8px; font-weight: bold; margin-top: 15px; cursor: pointer; }
+        .outline-btn { width: 100%; padding: 15px; background: white; color: var(--primary); font-size: 16px; border: 2px solid var(--primary); border-radius: 8px; font-weight: bold; margin-top: 15px; cursor: pointer; }
+
+    </style>
+</head>
+<body>
+
+    <header id="main-header" style="display:none;">
+        <div class="timer-badge">
+            <span style="margin-right:8px;">⏱</span><span id="timer">00:00:00</span>
+        </div>
+        <div>
+            <button class="btn-submit" onclick="submitTest()">SUBMIT</button>
+            <button style="background:none; border:none; font-size:24px; margin-left:10px; cursor:pointer;" onclick="togglePalette()">☰</button>
+        </div>
+    </header>
+
+    <div id="app-body">
+        
+        <div id="screen-start" class="screen active">
+            <div class="center-content">
+                <h1>Civil Engineering Hub</h1>
+                <p style="color:#666;">Building Materials: Cement</p>
+                <p><strong>Questions 926 - 973</strong></p>
+                
+                <div style="background:#f8f9fa; padding:15px; border-radius:8px; margin:20px 0; border:1px solid #ddd; width:100%;">
+                    <p style="margin:0; font-size:14px; color:#555;">Saved Bookmarks</p>
+                    <div id="bm-count" style="font-size:24px; font-weight:bold; color:var(--primary);">0</div>
+                </div>
+
+                <button class="big-btn" onclick="startFullTest()">Start Full Test (All 48)</button>
+                <button class="outline-btn" onclick="startBookmarkTest()">Test From Bookmarks Only</button>
+            </div>
+        </div>
+
+        <div id="screen-quiz" class="screen">
+            <div class="question-container">
+                <div class="q-meta">
+                    <span id="q-index" style="font-weight:bold;">Q. 1</span>
+                    <span id="exam-tag" class="exam-tag">SSC JE</span>
+                    <div id="bm-btn" class="bm-btn-container" onclick="toggleBookmark()"></div>
+                </div>
+
+                <div id="q-text" class="q-text">Loading...</div>
+                <div id="options-list"></div>
+            </div>
+
+            <div id="solution-box" class="solution-box">
+                <strong style="color:var(--primary); display:block; margin-bottom:5px;">💡 Detailed Solution:</strong>
+                <span id="sol-text"></span>
+            </div>
+        </div>
+
+        <div id="screen-result" class="screen">
+            <div class="center-content">
+                <h2>Test Submitted!</h2>
+                <div style="width:120px; height:120px; background:var(--green); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:bold; margin:20px auto;">
+                    <span id="final-score">0</span>
+                </div>
+                <p>Accuracy: <strong id="final-acc">0%</strong></p>
+                <button class="big-btn" onclick="location.reload()">Back to Home</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="toast"></div>
+
+    <footer id="quiz-footer" style="display:none;">
+        <button class="footer-btn" onclick="nav(-1)">Prev</button>
+        <button class="footer-btn btn-review" id="btn-review" onclick="markReview()">Review</button>
+        <button class="footer-btn btn-main" onclick="nav(1)">Next</button>
+    </footer>
+
+    <div class="overlay" id="overlay" onclick="togglePalette()"></div>
+    <div class="palette-drawer" id="palette">
+        <div style="padding:16px; border-bottom:1px solid #eee; font-weight:bold;">Question Grid</div>
+        <div class="palette-grid" id="p-grid"></div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        const allQuestions = [
+            { id: 926, q: "The commercial name of white and colored cement in India is ...........", opt: ["colocrete", "rainbow cement", "silvicrete", "all options are correct"], ans: 3, sol: "Ans. (d) : The commercial name of white and colored cement in India is colored, rainbow cement and silvicrete.", exam: "SSC JE 2.3.2017, Afternoon Shift" },
+            { id: 927, q: "Pick up the correct statement from the following.", opt: ["Gypsum in cement decreases the setting time", "The first compound of cement which reacts with water is C3A", "Bulking of sand is less when its particles are fine", "all options are correct"], ans: 1, sol: "Ans. (b) : The first compound of cement which reacts with water is C3A.\n• Gypsum is added in cement to increase the initial setting time.\n• Bulking of sand is more if its particles are fine.", exam: "SSC JE 4.3.2017, Afternoon Shift" },
+            { id: 928, q: "Super Sulphated Cement is IS Code ____", opt: ["6220-1980", "5820-2015", "6909-1990", "6700-1980"], ans: 2, sol: "Ans. (c) : IS code (6909-1990) Super Sulphated Cement – Super sulphated cement made with (80-85)% granulated slag +(10-15)% calcium sulphate +5% Portland cement clinker.", exam: "Kerala PSC Draftsman 2019" },
+            { id: 929, q: "The cement chosen to build a concrete structure in the vicinity of sea water is", opt: ["High alumina cement", "Rapid hardening cement", "Low heat cement", "Sulphate resisting cement"], ans: 0, sol: "Ans. (a) : High alumina cement–(IS : 6452)\nIt is partially suitable to sea and under water work. It is used in pre-casting initial setting time is (3.5-4) hr and final setting time is (5-5.5) hr.", exam: "Karnataka PSC JE Code 126/2018" },
+            { id: 930, q: "A thin, rough (unfinished) coat of portland cement plaster on a masonry wall is generally called as ...............", opt: ["Parging", "Distempering", "Painting", "Dressing"], ans: 0, sol: "Ans. (a) : Parging : Parging is usually applied with a trowel and pressed into the existing surface.", exam: "KPSC JE 13.11.2016" },
+            { id: 931, q: "Pozzlonic reaction is", opt: ["Reaction of SiO₂ with CH", "Reaction of SiO₂ with C₃S", "Reaction of SiO₂ with C₃A", "None of the above"], ans: 0, sol: "Ans. (b) : Pozzolana - Pozzolana are silicate based materials that react with the calcium, hydroxide generated by hydrating cement to form additional cementitious materials.\n• Pozzolinic reaction of SiO₂ with Ca(OH)₂ (CH).", exam: "KPSC JE 2.7.2016" },
+            { id: 932, q: "The percentage of voids in cement is approximately :", opt: ["60%", "20%", "40%", "80%"], ans: 2, sol: "Ans. (c) : The percentage of voids in cement approximate 40%.\n• The sieve use cement testing size is 90µ.", exam: "HPSSC JE 2015" },
+            { id: 933, q: "In the construction of ................. elements, partial or complete elimination of formwork is possible.", opt: ["ferrocement", "concrete beam", "lintel", "PSC"], ans: 0, sol: "Ans. (a) : Ferrocement – Its a system of construction using reinforced mortar or plaster (lime or cement, sand, water) applied over an 'armature' of metal mesh... spaced thin steel rods such as rebar.", exam: "KPSC JE 9.9.2017" },
+            { id: 934, q: "Workability of concrete is measured in a concrete lab by compaction factor test. If the partial compacted concrete weight after deducting empty weight of cylinder = 11.4 kg and fully compacted concrete weight after decucting empty weight of cylinder = 11.98 kg. determine compaction factor value.", opt: ["0.58", "11.69", "0.86", "0.95"], ans: 3, sol: "Ans. (d) : Workability of partial concrete\n= Compacted concrete / fully compacted concrete\n= 11.4 / 11.98 = 0.95", exam: "NWDA JE 2018, AFTERNOON" },
+            { id: 935, q: "The chemical reaction of cement with water; by virtue of which cement becomes a bonding agent is known as", opt: ["Incineration", "Oxidation", "Hydration", "Hardening"], ans: 2, sol: "Ans. (c) : Hydration – The quantity of heat liberated depends upon the amount of different constituents in the cement.\n• In other words, hydration of cement can be defined as the reaction taking place in water and cement paste by virtue of which Portland cement becomes a bonding agent.", exam: "Mizoram PSC JE 2016" },
+            { id: 936, q: "In cement fineness test is done on IS sieve no ........... :", opt: ["9", "7", "8", "11"], ans: 0, sol: "Ans. (a) : For an ordinary Portland cement –\n• Residual does not exceed 10% when sieved through I.S. sieve NO - 9.\n• Initial setting time is not less than 30 minutes.\n• Final setting time is 10 hour.", exam: "KPSC Overseer, Gr-II (code 42/2017)" },
+            { id: 937, q: "After storage, the strength of cement", opt: ["Decreases", "Increases", "Remain same", "May increase or decrease"], ans: 0, sol: "Ans. (a) : After storage, the strength of cement – Decreases as –\nAfter 3 month = 20%\nAfter 6 month = 30%\nAfter 1 year = 40%\nAfter 2 year = 50%", exam: "Mizoram PSC JE Oct 2018" },
+            { id: 938, q: "Rate of increase of compressive strength of pozzolanic cement as compared to Portland cement during first week of setting remains :", opt: ["Slow", "Fast", "Random", "None of the above"], ans: 0, sol: "Ans. (a) : The minimum compressive strength of PPC after 28 day as prescribed by BIS is 33 MPa or 330 kg/cm².\n• Pozzolanic cements are mixtures of Portland cement and a pozzolanic material that may be either natural or artificial.", exam: "Rajasthan JE (Diploma) 2016" },
+            { id: 939, q: "For the manufacture of Portland cement the proportions of raw material used are ...........", opt: ["lime 63%; silica 22%; other ingredients 15%", "lime 22%; silica 63%; other ingredients 15%", "silica 40%; lime 40%; other ingredients 20%", "silica 70%; lime 20%; other ingredients 10%"], ans: 0, sol: "Ans. (a) The manufacture of portland cement the proportions of raw material are lime (cal) – 60 to 65% – Average 63.\nSilica (SiO₂) – 17 to 25% – Average 22%\nOther ingredients 15% .\nLime is a main part of the cement.", exam: "SSC JE 4.3.2017" },
+            { id: 940, q: "Air permeability test of cement is conducted to find the .................", opt: ["Unsoundness", "Ignition loss", "Specific gravity", "Fineness"], ans: 3, sol: "Ans. (d) Fineness test – It is the measure of mean size of grain in it.\nWith increase in fineness, the early development of strength is enhanced but the ultimate strength is not affected.\nSetting time decrease with increase in the fineness.", exam: "GSPHCL AE 2020 / SSC JE 2017" },
+            { id: 941, q: "Match List-I with List-II.\nList-I: A. Fineness, B. Consistency, C. Final setting, D. Soundness\nList-II: 1. Index of density/stiffness, 2. Stage where paste loses property, 3. Ability to retain volume, 4. Overall particle size", opt: ["A-1, B-2, C-3, D-4", "A-4, B-1, C-2, D-3", "A-4, B-1, C-3, D-2", "A-4, B-3, C-2, D-1"], ans: 1, sol: "Ans. (a) [Corrected logic]:\nFineness -> Overall particle size (4)\nConsistency -> Degree of density/stiffness (1)\nFinal setting -> Stage where paste loses property (2)\nSoundness -> Ability to retain volume (3)", exam: "TSPSC HMWSSB Manager 2020" },
+            { id: 942, q: "For testing compressive and tensile strength of cement, the cement mortar is made by mixing cement and standard sand in the proportions of", opt: ["1 : 2", "1 : 3", "1 : 4", "1 : 6"], ans: 1, sol: "Ans. (b) : Compressive strength of cement – The test for compressive strength is generally carries out by crushing the cube of hardened cement-sand mortar (1 : 3) in a compression testing machine.\n• Size of cube for cement = 70.6 mm (3 cube require).", exam: "ASSAM PSC AE 2020 / SSC JE 2018" },
+            { id: 943, q: "The Ordinary Portland Cement (OPC) has been classified into the following types of cement", opt: ["OPC 33 only", "OPC 33 and OPC 43 only", "OPC 33, OPC 43 and OPC 53 only", "OPC 33, OPC 43, OPC 53 and OPC 63 only"], ans: 2, sol: "Ans. (c) : Ordinary Portland Cement is classified into three grades i.e., 33, 43 and 53 grades.", exam: "TSPSC HMWSSB Manager 2020" },
+            { id: 944, q: "Identify correct pair from the following:\n(Chemical component - Function of OPC)", opt: ["CaO - Controls strength and soundness", "Al₂O₃ - Gives colour", "Fe₂O₃ - Responsible for quick setting", "SiO₂ - Imparts colour"], ans: 0, sol: "Ans. (a) : CaO – Control soundness and strength. Deficiency reduces strength and setting action.\nAl₂O₃ – Responsible for quick setting.\nFe₂O₃ – Gives colour and helps in fusion.\nSiO₂ – If in excess, it causes slow setting.", exam: "TSPSC HMWSSB Manager 2020" },
+            { id: 945, q: "In determination of flakiness index, the test is NOT applicable to sizes smaller than ____.", opt: ["6.6 mm aggregate", "3.3 mm aggregate", "5.3 mm aggregate", "5.5 mm aggregate"], ans: 0, sol: "Ans. (a) : Flakiness Index : The flakiness index of aggregate is the percentage by weight of particles whose least dimension (thickness) is less than three - fifths (0.6 times) of their mean dimension.\nThis test is not applicable to sizes smaller than 6.3 mm.", exam: "PGCIL DET 17.11.2018 Shift - II" },
+            { id: 946, q: "Identify the correct sequence of the given materials based on their fineness value.", opt: ["Silica fume > fly ash > Cement", "Flay ash > Cement", "Cement > fly ash > Silica fume", "Silica fume = fly ash = Cement"], ans: 0, sol: "Ans. (a) The correct sequence of material on the basis of fineness value silica fumes > fly ash > cement.\n• On the basis diameter of size of particles fineness is determined.", exam: "PGCIL DET 17.11.2018" },
+            { id: 947, q: "The commonly used raw material of cement is :", opt: ["Slate", "Sand stone", "Lime stone", "Basalt"], ans: 2, sol: "Ans. (c) :\nCement (Raw material) -> Calcareous 65% (commonly lime stone, chalk, shells) + Argillaceous 35% (clay, marl, shale).", exam: "KPSC JE Code 115/2014" },
+            { id: 948, q: "Gypsum is added in cement:", opt: ["After burning", "Before burning", "After grinding", "At the time of mixing"], ans: 2, sol: "Ans. (d) [Note: The book option key says (d) but explanation confirms added during grinding].\nExplanation: 'Gypsum is (2-3%) added in cement during the grinding of clinker.'", exam: "KPSC JE Code 115/2014" },
+            { id: 949, q: "Water Cement ratio to determine compressive strength of cement is taken as :", opt: ["0.2", "0.3", "0.4", "0.5"], ans: 2, sol: "Ans. (c) : Water cement ratio to determine compressive strength of cement is taken as 0.4.", exam: "Rajasthan JEn (Diploma) 2016" },
+            { id: 950, q: "Which of the following has maximum percentage in composition of Cement :", opt: ["Silica", "Alumina", "Lime", "Sulphur"], ans: 2, sol: "Ans. (c) : The maximum percentage in composition of cement is lime :\nLime – 60 -65%\nSilica – 17 - 25%\nAlumina – 3 - 8%", exam: "Rajasthan JEn (Diploma) 2016" },
+            { id: 951, q: "Ordinary Portland cement is available in _____ distinct grades.", opt: ["4", "3", "5", "6"], ans: 1, sol: "Ans. (b) : Ordinary Portland cement is available in 3 distinct grades–\n1. 33 Grade ordinary Portland cement conforming to IS 269.\n2. 43 Grade ordinary Portland cement conforming to IS 8112.\n3. 53 Grade ordinary Portland cement conforming to IS 12269.", exam: "KPSC Overseer (Irrigation) 2017" },
+            { id: 952, q: "For determining the initial setting time by Vicat apparatus, the weight of cement to be taken is _______.", opt: ["500 gm", "400 gm", "300 gm", "1000 gm"], ans: 2, sol: "Ans. (c) : Initial setting time (by vicat apparatus)–\n• In order to perform this test 300 gm of cement sample is taken and gauged with '0.85 P' (85% of the water required to prepare the cement paste of standard consistency).", exam: "KPSC Overseer (Irrigation) 2017" },
+            { id: 953, q: "The property of increase in volume of the aggregate due to moisture is called", opt: ["Slacking", "Bulking", "Warping", "Shrinkage"], ans: 1, sol: "Ans. (b) : The property of increase in volume of the aggregate due to moisture is called bulking.\n• In a fine sand more bulking than coarse sand because fine sand have more surface area than coarse sand.\n• Water content up to 5 to 6% increase the volume by 40%.", exam: "KPSC Overseer 2020" },
+            { id: 954, q: "To construct a massive dam the type of cement used is:", opt: ["Low heat cement", "Ordinary Portland cement", "Rapid hardening cement", "Blast furnace slag cement"], ans: 0, sol: "Ans. (a) : Low heat cement :\n• It is a Portland cement with low C₃S and C₃A and high C₂S content.\n• It is suitable for mass concreting works such as dams due to low heat of hydration.", exam: "PGCIL DET 17.11.2018" },
+            { id: 955, q: "Which of the following ingredients imparts quick setting property of cement?", opt: ["Silica", "Iron Oxide", "Sulphur", "Alumina"], ans: 3, sol: "Ans. (d) Alumina : Responsible for quick setting. If in excess, it lowers, the strength.\nSilica : Gives strength, excess of it causes slow setting.\nSulphur : Excess of it makes cement unsound.", exam: "KPSC Overseer 2017" },
+            { id: 956, q: "The diameter of plunger used in Vicat apparatus is of–", opt: ["20mm", "10mm", "5mm", "25mm"], ans: 1, sol: "Ans. (b) : The diameter of plunger used in vicat apparatus is of 10 mm.\n• Height of plunger 50 mm\n• Use of vicat apparatus – (i) Setting time of cement paste (ii) Consistency of cement paste", exam: "RPSC ACF & FRO 24.02.2021" },
+            { id: 957, q: "It is estimated that about.......calories of heat is generated in the hydration of 1 gm of cement.", opt: ["120", "320", "220", "20"], ans: 0, sol: "Ans. (a) : It is estimated that about 120 calories of heat is generated in the hydration of 1 gm of cement.", exam: "Haryana SSC JE 11.04.2018" },
+            { id: 958, q: "The bulk density of cement is–", opt: ["1.62", "1.44", "1.6", "1.68"], ans: 1, sol: "Ans. (b) The bulk density of cement is 1.44.\n• Cement has approximately 40% voids.\n• Standard density = 1.44 g/cm³\n• Tolerance in measurement of cement is ± 2%", exam: "Haryana SSC JE 11.04.2018" },
+            { id: 959, q: "The function of calcium sulphate as a cement ingredient is to–", opt: ["decrease the initial setting time of cement", "increase the initial setting time of cement", "imparts colour", "making sound cement"], ans: 1, sol: "Ans. (b) Calcium Sulphate : It is present in the form of gypsum in the cement (CaSO₄. 2H₂O). Gypsum retards the setting of cement i.e. it increase the setting time of cement.", exam: "Haryana SSC JE 11.04.2018" },
+            { id: 960, q: "Cement and water when poured into the form work for hardening normally takes.............. days to acquire fixed properties.", opt: ["7", "14", "21", "28"], ans: 3, sol: "Ans. (d) Cement and water when poured into the form work for hardening normally takes 28 days to acquire fixed properties.", exam: "UPPCL JE 13.11.2016" },
+            { id: 961, q: "On increasing the water-cement ratio, strength of cement paste:", opt: ["Increases", "Decreases", "May increases or decreases", "Doesn't change"], ans: 1, sol: "Ans. (b) Water-cement ratio = weight of water / weight of cement\nWater - cement ratio ↑ = strength ↓", exam: "UPPCL JE 13.11.2016" },
+            { id: 962, q: "Particles of cement over 40 micron in size contribute to the compressive strength of concrete :", opt: ["for 7 days", "for 28 days", "only over long periods", "for 1-2 days"], ans: 2, sol: "Ans. (c) : Particle of cement having size over 40 µ contribute the compressive strength of concrete over long period of time.", exam: "PGCIL 13.09.2018" },
+            { id: 963, q: "For 53-grade ordinary Portland cement, the final setting time shall NOT be more than:", opt: ["600 min", "650 min", "550 min", "500 min"], ans: 0, sol: "Ans. (a) :\nOPC (33, 43, 53) -> IST: 30 min, FST: 600 min\nQuick setting cement -> IST: 5 min, FST: 30 min", exam: "DMRC 26.02.2020 / SSC JE 2017" },
+            { id: 964, q: "Red Coloured cement is produced by", opt: ["Manganese", "Chromium Oxide", "Iron Oxide", "None of these"], ans: 2, sol: "Ans. (c) : Red Coloured cement is produced by mixing Iron Oxide.", exam: "HPSSC JE Code 521/2019" },
+            { id: 965, q: "Heat of Hydration in a cement at early age is maximum for", opt: ["C₂S", "C₃S", "C₄AF", "C₃A"], ans: 3, sol: "Ans. (d) : At early age, heat of hydration is maximum due to C₃A.\nTricalcium aluminate (C₃A) is mostly related to the heat of hydration. It releases large amount of heat during the first few days of hardening which generally results in early age cracking.", exam: "WBPSC JE 2018" },
+            { id: 966, q: "Which of the following admixtures are called as water reducers?", opt: ["Plasticizer", "Waterproofing agents", "Retarders", "Acceleration"], ans: 0, sol: "Ans. (a) : Plasticizer– It is the mixture of organic and inorganic substances which permits the reduction in water cement ratio at same workability or after high workability at same water cement ratio.\n• Usually reduces water content by 5-15%.", exam: "PGCIL 13.09.2018" },
+            { id: 967, q: "Plastic shrinkage can be reduced by :", opt: ["using aggregate of bigger size", "replacing cement with other pozzolanic material", "preventing rapid loss of water from the surface", "dense compacting"], ans: 1, sol: "Ans. (b) : Plastic shrinkage– It occurs very soon after pouring the concrete in the forms the hydration of cement result in the reduction in the volume of concrete due to evaporation from the surface of concrete... shrinkage can be reduced by replacing cement with other pozzolanic material.", exam: "PGCIL 13.09.2018" },
+            { id: 968, q: "Gypsum is added during grinding operation of cement production to facilitate", opt: ["increasing compressive strength", "delay in setting action", "increase the soundness", "increase the fineness"], ans: 1, sol: "Ans. (b) : Gypsum is added during grinding operation of cement production to facilitate delay in setting action.\n• It is a retarder material during grinding operation of cement production. It add 2-3%.", exam: "WBPSC JE 2016" },
+            { id: 969, q: "Blast furnace slag cement is used for", opt: ["dams", "bridge abutments", "retaining walls", "All of the above"], ans: 3, sol: "Ans. (d) : Blast furnace slag cement is used dam bridge abutments and retaining wall. It is a combination of OPC and fine granulated blast furnace slag obtained as a by product in the manufacturing of steel with percent under 70% to that of cement.", exam: "WBPSC 2018" },
+            { id: 970, q: "The reaction during hydration of cement is:", opt: ["Exothermic", "Endothermic", "Both (a) and (b)", "Either (a) or (b)"], ans: 0, sol: "Ans. (a) Exothermic reaction are reactions or process that release energy. Usually in the form of heat.", exam: "KPSC Code 41/2015" },
+            { id: 971, q: "Which of the following is a key ingredient that makes cement sound and strong?", opt: ["Iron oxide", "Alumina", "Lime", "Silica"], ans: 2, sol: "Ans. (c) : Lime is a key ingredient that makes cement sound and strong. Deficiency reduces strength and setting action.", exam: "PGCIL DET 17.11.2018" },
+            { id: 972, q: "The reaction of water with cement is called:", opt: ["Hydration", "Hydrolysis", "Oxidation", "Reduction"], ans: 0, sol: "Ans. (a) : Hydration is the process of combining a substance chemically with water molecule e.g. when water is added to cement, the cement particle absorbs water and gets hydrated.", exam: "KPSC Code 41/2015" },
+            { id: 973, q: "The test conducted by Vicat's apparatus is, for", opt: ["Soundness of cement", "Consistency of cement", "Fineness of cement", "Shrinkage of cement"], ans: 1, sol: "Ans. (b) Consistency of cement.\nVicat's apparatus is used to measure :\n(b) Consistency of cement\nInitial and Final setting time.", exam: "RRB JE CBT-II 28-08-2019" }
+        ];
+
+        // --- APP STATE ---
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let userAnswers = [];
+        let reviewStatus = [];
+        let bookmarks = [];
+        let timerInterval;
+        let timeRemaining = 7200;
+
+        window.onload = function() {
+            if(localStorage.getItem('civil_bm')) bookmarks = JSON.parse(localStorage.getItem('civil_bm'));
+            document.getElementById('bm-count').innerText = bookmarks.length;
+        };
+
+        function startFullTest() {
+            currentQuestions = allQuestions;
+            setupTest("Full Test");
+        }
+
+        function startBookmarkTest() {
+            if(bookmarks.length === 0) {
+                alert("No bookmarks saved yet! Save some questions first.");
+                return;
+            }
+            // Filter questions
+            currentQuestions = allQuestions.filter(q => bookmarks.includes(q.id));
+            setupTest("Bookmark Test");
+        }
+
+        function setupTest(type) {
+            // Reset states for new test
+            userAnswers = new Array(currentQuestions.length).fill(null);
+            reviewStatus = new Array(currentQuestions.length).fill(false);
+            currentIndex = 0;
+            timeRemaining = 7200; // Reset timer
+
+            // Build Palette for this specific set of questions
+            const grid = document.getElementById('p-grid');
+            grid.innerHTML = '';
+            currentQuestions.forEach((_,i) => {
+                const d = document.createElement('div');
+                d.className = 'p-item';
+                d.id = `p-${i}`;
+                d.innerText = i+1;
+                d.onclick = () => { loadQuestion(i); togglePalette(); };
+                grid.appendChild(d);
+            });
+
+            // UI Switch
+            document.getElementById('screen-start').classList.remove('active');
+            document.getElementById('screen-quiz').classList.add('active');
+            document.getElementById('main-header').style.display = 'flex';
+            document.getElementById('quiz-footer').style.display = 'flex';
+            
+            loadQuestion(0);
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                let h = Math.floor(timeRemaining/3600), m = Math.floor((timeRemaining%3600)/60), s = timeRemaining%60;
+                document.getElementById('timer').innerText = `${h<10?'0'+h:h}:${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
+                if(timeRemaining<=0) submitTest();
+            }, 1000);
+        }
+
+        function loadQuestion(i) {
+            currentIndex = i;
+            const q = currentQuestions[i];
+            const ans = userAnswers[i];
+
+            document.getElementById('q-index').innerText = `Q. ${i+1} / ${currentQuestions.length}`;
+            document.getElementById('exam-tag').innerText = q.exam;
+            document.getElementById('q-text').innerText = `(${q.id}) ` + q.q;
+
+            // Bookmark Icon Logic
+            const bmBtn = document.getElementById('bm-btn');
+            const isSaved = bookmarks.includes(q.id);
+            bmBtn.innerHTML = isSaved 
+                ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="#1a73e8"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>`
+                : `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5f6368" stroke-width="2"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>`;
+
+            // Options
+            const list = document.getElementById('options-list');
+            list.innerHTML = '';
+            q.opt.forEach((txt, idx) => {
+                const el = document.createElement('div');
+                el.className = 'option-item';
+                if(ans !== null) {
+                    el.style.cursor = 'default';
+                    if(idx === q.ans) el.classList.add('correct');
+                    if(idx === ans && idx !== q.ans) el.classList.add('wrong');
+                } else {
+                    el.onclick = () => selectAnswer(idx);
+                }
+                el.innerHTML = `<div class="option-circle">${String.fromCharCode(65+idx)}</div><div>${txt}</div>`;
+                list.appendChild(el);
+            });
+
+            // Review Btn
+            const rBtn = document.getElementById('btn-review');
+            if(reviewStatus[i]) rBtn.classList.add('active'); else rBtn.classList.remove('active');
+
+            // Solution
+            const solBox = document.getElementById('solution-box');
+            if(ans !== null) {
+                solBox.style.display = 'block';
+                document.getElementById('sol-text').innerText = q.sol;
+            } else {
+                solBox.style.display = 'none';
+            }
+            updatePalette();
+        }
+
+        function toggleBookmark() {
+            const id = currentQuestions[currentIndex].id;
+            const toast = document.getElementById('toast');
+            
+            if(bookmarks.includes(id)) {
+                bookmarks = bookmarks.filter(b => b !== id);
+                toast.innerText = "Bookmark Removed";
+            } else {
+                bookmarks.push(id);
+                toast.innerText = "Question Saved!";
+            }
+            
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2000);
+
+            localStorage.setItem('civil_bm', JSON.stringify(bookmarks));
+            loadQuestion(currentIndex); // Refresh icon
+        }
+
+        function selectAnswer(idx) {
+            if(userAnswers[currentIndex] !== null) return;
+            userAnswers[currentIndex] = idx;
+            loadQuestion(currentIndex);
+        }
+
+        function markReview() {
+            reviewStatus[currentIndex] = !reviewStatus[currentIndex];
+            loadQuestion(currentIndex);
+        }
+
+        function nav(d) {
+            const n = currentIndex + d;
+            if(n >= 0 && n < currentQuestions.length) loadQuestion(n);
+        }
+
+        function togglePalette() {
+            const d = document.getElementById('palette');
+            const o = document.getElementById('overlay');
+            if(d.classList.contains('open')) { d.classList.remove('open'); o.style.display='none'; }
+            else { d.classList.add('open'); o.style.display='block'; }
+        }
+
+        function updatePalette() {
+            currentQuestions.forEach((q,i) => {
+                const el = document.getElementById(`p-${i}`);
+                if(el) {
+                    el.className = 'p-item';
+                    if(i === currentIndex) el.classList.add('current');
+                    if(reviewStatus[i]) el.classList.add('review');
+                    else if(userAnswers[i] !== null) {
+                        if(userAnswers[i] === q.ans) el.classList.add('answered');
+                        else el.classList.add('wrong');
+                    }
+                }
+            });
+        }
+
+        function submitTest() {
+            clearInterval(timerInterval);
+            let score = 0;
+            userAnswers.forEach((a, i) => { if(a === currentQuestions[i].ans) score++; });
+            const acc = Math.round((score/currentQuestions.length)*100);
+            
+            document.getElementById('final-score').innerText = score + "/" + currentQuestions.length;
+            document.getElementById('final-acc').innerText = acc + '%';
+
+            document.getElementById('main-header').style.display='none';
+            document.getElementById('quiz-footer').style.display='none';
+            document.getElementById('screen-quiz').classList.remove('active');
+            document.getElementById('screen-result').classList.add('active');
+        }
+
+    </script>
+</body>
+</html>
