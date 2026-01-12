@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Civil Eng. Master Test</title>
+    <style>
+        :root {
+            --primary: #007bff;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --gray: #6c757d;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { margin: 0; padding: 0; background-color: #f4f6f8; height: 100vh; display: flex; flex-direction: column; }
+
+        /* --- Screens --- */
+        .screen { display: none; height: 100%; width: 100%; flex-direction: column; background: #f4f6f8; }
+        .active { display: flex; }
+
+        /* --- Start Screen --- */
+        #start-screen { justify-content: center; align-items: center; padding: 20px; overflow-y: auto; }
+        .hero-card { background: white; padding: 30px; border-radius: 15px; box-shadow: var(--shadow); width: 100%; max-width: 400px; text-align: center; margin-bottom: 20px; }
+        .btn-start { background: var(--primary); color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 1.2rem; cursor: pointer; width: 100%; font-weight: 700; margin-top: 15px; box-shadow: 0 4px 10px rgba(0,123,255,0.3); transition: transform 0.2s; }
+        .btn-start:active { transform: scale(0.98); }
+        .btn-bookmark-view { background: white; color: var(--dark); border: 2px solid var(--warning); padding: 12px; border-radius: 30px; width: 100%; font-weight: 600; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+        /* --- Quiz Header --- */
+        .header { height: 60px; background: white; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 10; flex-shrink: 0; }
+        .timer { font-weight: 700; font-family: monospace; font-size: 1.2rem; background: #e9ecef; padding: 6px 12px; border-radius: 6px; color: var(--dark); }
+        .btn-submit { background: var(--success); color: white; border: none; padding: 8px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
+        .icon-exit { font-size: 1.5rem; cursor: pointer; color: var(--danger); padding: 5px; }
+
+        /* --- Main Quiz Area --- */
+        .quiz-container { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 80px; }
+        .question-card { background: white; padding: 20px; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 15px; position: relative; }
+        .tag-badge { display: inline-block; background: #e3f2fd; color: #0d47a1; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; margin-bottom: 12px; font-weight: 700; letter-spacing: 0.5px; }
+        .question-text { font-size: 1.15rem; font-weight: 600; color: var(--dark); margin-bottom: 25px; line-height: 1.5; }
+        
+        .options-grid { display: flex; flex-direction: column; gap: 12px; }
+        .option-btn { background: #fff; border: 2px solid #e9ecef; padding: 14px 15px; border-radius: 10px; text-align: left; cursor: pointer; transition: all 0.2s; font-size: 1rem; color: #495057; position: relative; }
+        .option-btn:hover { background: #f8f9fa; border-color: #dee2e6; }
+        
+        /* State Colors */
+        .option-btn.correct { border-color: var(--success); background: #d4edda; color: #155724; font-weight: 600; }
+        .option-btn.wrong { border-color: var(--danger); background: #f8d7da; color: #721c24; opacity: 0.8; }
+        .option-btn.missed { border-color: var(--success); background: #fff; color: var(--success); border-style: dashed; }
+
+        /* --- Solution Box --- */
+        .solution-box { margin-top: 20px; background: #fff3cd; border-left: 5px solid #ffc107; border-radius: 4px; padding: 15px; animation: fadeIn 0.3s; }
+        .solution-header { font-weight: 700; color: #856404; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .solution-text { font-size: 0.95rem; color: #212529; white-space: pre-wrap; line-height: 1.6; }
+
+        /* --- Footer Navigation --- */
+        .footer { height: 70px; background: white; border-top: 1px solid #dee2e6; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; position: fixed; bottom: 0; width: 100%; z-index: 100; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .nav-btn { background: white; border: 2px solid var(--primary); color: var(--primary); padding: 10px 24px; border-radius: 25px; cursor: pointer; font-weight: 700; font-size: 0.9rem; transition: all 0.2s; }
+        .nav-btn:active { background: var(--primary); color: white; }
+        .nav-btn:disabled { border-color: #e9ecef; color: #adb5bd; cursor: not-allowed; }
+        .palette-toggle { font-size: 1.4rem; color: var(--gray); cursor: pointer; padding: 10px; border-radius: 50%; background: #f8f9fa; }
+
+        /* --- Palette Modal --- */
+        #palette-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; backdrop-filter: blur(2px); }
+        .palette-content { width: 85%; max-width: 400px; background: white; height: 100%; position: absolute; right: 0; padding: 25px; overflow-y: auto; box-shadow: -5px 0 15px rgba(0,0,0,0.2); animation: slideIn 0.3s; }
+        .palette-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 20px; }
+        .p-btn { aspect-ratio: 1; border-radius: 8px; border: 1px solid #dee2e6; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 0.9rem; font-weight: 600; color: #495057; }
+        .p-btn.current { border: 2px solid var(--primary); color: var(--primary); }
+        .p-btn.answered { background: var(--success); color: white; border-color: var(--success); }
+        .p-btn.skipped { background: var(--danger); color: white; border-color: var(--danger); }
+
+        /* --- Report & Bookmarks --- */
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 10px solid var(--primary); display: flex; justify-content: center; align-items: center; font-size: 2.5rem; font-weight: 800; margin: 20px auto; color: var(--primary); background: white; }
+        .stats-row { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
+        .stat-card { background: white; padding: 15px; border-radius: 10px; text-align: center; min-width: 80px; box-shadow: var(--shadow); }
+        
+        .bookmark-icon { font-size: 1.5rem; cursor: pointer; color: #ccc; transition: color 0.2s; position: absolute; top: 20px; right: 20px; z-index: 5; }
+        .bookmark-icon.active { color: #ffc107; }
+
+        /* --- Practice Mode Specifics --- */
+        .practice-card { background: white; margin-bottom: 20px; padding: 20px; border-radius: 10px; box-shadow: var(--shadow); }
+        .practice-controls { display: flex; justify-content: space-between; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen" class="screen active">
+        <div class="hero-card">
+            <h1 style="color:var(--primary); margin:0;">Civil JE/AE</h1>
+            <p style="color:var(--gray); margin-top:5px;">Master Test Series</p>
+            <div style="text-align:left; margin: 20px 0; background:#f8f9fa; padding:15px; border-radius:10px;">
+                <div>&#128221; <strong>Questions:</strong> 1017 - 1044</div>
+                <div>&#9201; <strong>Time:</strong> 120 Minutes</div>
+                <div>&#128218; <strong>Topic:</strong> Building Materials</div>
+            </div>
+            <button class="btn-start" onclick="startTest()">START TEST</button>
+            <button class="btn-bookmark-view" onclick="openBookmarksScreen()">
+                <span style="font-size:1.2rem;">&#9733;</span> Practice Bookmarks
+            </button>
+        </div>
+        
+        <div class="hero-card" style="text-align:left;">
+            <h3 style="margin-top:0;">History</h3>
+            <div id="history-list"></div>
+        </div>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div class="header">
+            <div class="icon-exit" onclick="confirmExit()">&#10006;</div>
+            <div class="timer" id="timer">02:00:00</div>
+            <button class="btn-submit" onclick="submitTest()">Finish</button>
+        </div>
+
+        <div class="quiz-container" id="question-area">
+            </div>
+
+        <div class="footer">
+            <button class="nav-btn" id="prev-btn" onclick="nav(-1)">Prev</button>
+            <div class="palette-toggle" onclick="togglePalette()">&#9776;</div>
+            <button class="nav-btn" id="next-btn" onclick="nav(1)">Next</button>
+        </div>
+    </div>
+
+    <div id="result-screen" class="screen" style="overflow-y: auto; padding: 20px;">
+        <h2 style="text-align:center;">Test Report</h2>
+        <div class="score-circle" id="score-val">0%</div>
+        
+        <div class="stats-row">
+            <div class="stat-card">
+                <div style="font-size:1.2rem; font-weight:bold; color:var(--success)" id="res-correct">0</div>
+                <div style="font-size:0.8rem; color:gray">Correct</div>
+            </div>
+            <div class="stat-card">
+                <div style="font-size:1.2rem; font-weight:bold; color:var(--danger)" id="res-wrong">0</div>
+                <div style="font-size:0.8rem; color:gray">Wrong</div>
+            </div>
+            <div class="stat-card">
+                <div style="font-size:1.2rem; font-weight:bold; color:var(--gray)" id="res-skipped">0</div>
+                <div style="font-size:0.8rem; color:gray">Skipped</div>
+            </div>
+        </div>
+
+        <button class="btn-start" onclick="location.reload()">Back to Home</button>
+        
+        <h3 style="margin-top:30px;">Detailed Analysis</h3>
+        <p style="font-size:0.9rem; color:gray;">Tap the star to bookmark for later revision.</p>
+        <div id="review-list"></div>
+    </div>
+
+    <div id="bookmark-screen" class="screen" style="overflow-y: auto; padding: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2 style="margin:0;">My Bookmarks</h2>
+            <button onclick="location.reload()" style="background:none; border:none; font-size:1rem; color:var(--primary); font-weight:bold;">&#8592; Home</button>
+        </div>
+        <div id="bookmark-list-container">
+            </div>
+    </div>
+
+    <div id="palette-modal" onclick="if(event.target===this) togglePalette()">
+        <div class="palette-content">
+            <h3 style="margin-top:0;">Question Palette</h3>
+            <div class="palette-grid" id="palette-grid"></div>
+            <button onclick="togglePalette()" style="width:100%; margin-top:20px; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold;">Close</button>
+        </div>
+    </div>
+
+<script>
+/* ================= DATA ================= */
+const DB = [
+  { id: 1017, q: "According to India Standard 9103, the minimum water reduction achieved using a super plasticizing admixture is:", opts: ["40%", "10%", "20%", "30%"], ans: 1, tag: "DDA 23.04.2018 Shift-I", exp: "According to India Standard 9103, the minimum water reduction achieved using a super plasticizing admixture is 10%.\nSuper plasticizing admixtures- An admixture for mortar or concrete which imparts very high workability or allows a large decrease in water content for a given workability.\n• Some super plasticizing admixture are sulphonated melamine, formaldehyde, modified lignosulphonate.\n• Finer the cement, higher will be dose reduced water requirement by 10-20%." },
+  { id: 1018, q: "Which of the following is not a quality control test of cement?", opts: ["Compressive strength", "Soundness", "Normal consistency", "Slump"], ans: 3, tag: "DDA 23.04.2018 Shift-I", exp: "Slump is not a quality control test of cement.\nTest on cement to check the quality– Quality test on cement are carried out to check the strength and quality of the cement used in construction.\n• It help to identify the usage of cement for different purposes based on its durability and performance." },
+  { id: 1019, q: "According to the India Standard 12269, the initial setting time of ordinary Portland cement should be not be less than:", opts: ["15 min", "30 min", "45 min", "600 min"], ans: 1, tag: "DDA 23.04.2018 Shift-I", exp: "According to IS : 12269, The initial setting time of ordinary Portland cement should not be less than 30 minutes.\n• For ordinary Portland cement, the final setting time of cement should not be more than 10 hours (600 minute.)" },
+  { id: 1020, q: "Which of the following equipment/method is used for estimating soundness of a cement?", opts: ["Marsh flow cone", "Le-Chatelier", "Abrams' slump cone", "Kelly ball"], ans: 1, tag: "DDA JE 24.04.2018 Shift-II", exp: "Le-Chatelier Method: To measure soundness of cement.\nAutoclave test: To measure soundness of cement.\nVicat apparatus test: To measure consistency of cement & setting time of cement." },
+  { id: 1021, q: "Which of the following oxides dominate ordinary portland cement?", opts: ["Aluminium", "Calcium", "Iron", "Magnesium"], ans: 1, tag: "DDA JE 24.04.2018 Shift-II", exp: "Calcium oxides dominate ordinary cement.\nApproximate oxide composition limits of ordinary Portland cement:\nCaO (Lime): 60-67%\nSiO₂ (Silica): 17-25%\nAl₂O₃ (Alumina): 3-8%\nFe₂O₃ (Iron Oxide): 0.5-6%" },
+  { id: 1022, q: "Which of the following admixtures is used in concrete in cold regions to enhance concrete's freeze/thaw resistance?", opts: ["Plasticizers", "Air entraining agent", "Viscosity modifying agent", "Water reducing agent"], ans: 1, tag: "DDA JE 24.04.2018 Shift-II", exp: "Air entraining agent: An air entraining agent introduces air in the form of minute bubbles distributed uniformly throughout the cement. Such concrete has been found to resist action of frost (freeze/thaw)." },
+  { id: 1023, q: "During the manufacture of cement in a rotary kiln, the Clinker formation takes place when the temperature ranges between.", opts: ["1100 to 1250 °C", "1400 to 1500 °C", "750 to 1200 °C", "1600 to 2000 °C"], ans: 1, tag: "DMRC JE 12.04.2018", exp: "About 1300-1450°C also known as the firing zone.\n• The burning zone is at lower end of the rotary kiln." },
+  { id: 1024, q: "Why is gypsum added at the time of grinding cement?", opts: ["To increase durability", "To increase plasticity", "To impart resistance to chemical attack", "To prevent flash setting"], ans: 3, tag: "M.P. VYAPAM Sub Engg. 4.9.2018", exp: "To prevent flash setting:\n• Gypsum is often added to Portland cement to prevent early hardening or 'flash setting', allowing a longer working time.\n• Gypsum slows down the setting of cement so that cement is adequately hardened." },
+  { id: 1025, q: "Which of the following is an ingredient present both in cement and bricks?", opts: ["Iron oxide", "Magnesium", "Alumina", "Alkalies"], ans: 2, tag: "KPSC Code 41/2015", exp: "Alumina is present in both.\nIn Brick: Absorbs water and renders the clay Plastic.\nIn Cement: Tricalcium Aluminate (C₃A) reacts immediately with water and is responsible for flash set." },
+  { id: 1026, q: "The clinker is formed at a temperature of :", opts: ["500 °C", "1000 °C", "1200 °C", "1500 °C"], ans: 3, tag: "UKSSSC JE 2017", exp: "It is then burnt in a large rotary kiln at temperature of about 1500°C, when the material sinters and partially fuse into ball known as clinker." },
+  { id: 1027, q: "Which one of the following compounds is responsible for quick setting of cement?", opts: ["MgO", "SiO₂", "Fe₂O₃", "Al₂O₃"], ans: 3, tag: "M.P. VYAPAM Sub Engg. 2.9.2018", exp: "The compounds is responsible for quick setting of cement is Al₂O₃ (Alumina)." },
+  { id: 1028, q: "Hydration of cement is a/an ______ action, which produces a large quantity of heat.", opts: ["heat evolution", "endothermic", "exothermic", "all of the above"], ans: 2, tag: "M.P. VYAPAM Sub Engg. 4.9.2018", exp: "The reactions that cause setting and hardening are collectively described as exothermic hydration reactions.\n• The average heat evaluation is 120 calories per gram during complete hydration of the cement." },
+  { id: 1029, q: "Which type of 'Bogue compound' will control the sulphate attack?", opts: ["C₄AF content of 6%", "C₃A content of 7%", "C₃S content of 7%", "C₂S content of 6%"], ans: 1, tag: "M.P. VYAPAM Sub Engg. 9.07.2017", exp: "C₃A is linked to sulphate attack resistance. Lower C₃A content improves sulphate resistance." },
+  { id: 1030, q: "Which of the following cement is suitable for mass concreting ?", opts: ["Ordinary Portland cement", "Rapid hardening cement", "Portland slag cement", "High alumina cement"], ans: 2, tag: "MP VYAPAM Sub Engg. 2017", exp: "Portland Slag Cement (PSC) is used for mass concreting work because it has low heat of hydration." },
+  { id: 1031, q: "Coloured cement (white cement) consists of ______ percentage of pigment.", opts: ["2 to 4", "8 to 12", "4 to 10", "5 to 10"], ans: 3, tag: "MP VYAPAM Sub Engg. 2017", exp: "Coloured cement are made by grinding 5 to 10 percent of suitable pigments with white or ordinary gray Portland cement." },
+  { id: 1032, q: "Besemer process is used for the manufacture of", opts: ["Wrought iron", "Pig iron", "Steel", "Cast iron"], ans: 2, tag: "M.P. VYAPAM Draftsman 2018", exp: "Besemer process → Steel\nCast Iron → Cupola furnace\nWrought Iron → Reverberatory furnace\nPig Iron → Blast furnace" },
+  { id: 1033, q: "What is the minimum percentage of lime saturation present in 53 Grade OPC?", opts: ["1.20%", "0.8%", "0.66%", "1.02%"], ans: 1, tag: "M.P. VYAPAM Sub Engg. 2017", exp: "Chemical characteristics OPC 53 grade (BIS 12269-1987):\nLime saturation factor: 0.80 min & 1.02 max." },
+  { id: 1034, q: "Cement ratio for durable concrete is 0.8 for?", opts: ["maximum water", "minimum water", "minimum sand", "maximum sand"], ans: 0, tag: "MP VYAPAM Sub Engg. 2016", exp: "The practical range of the w/c ratio is from about 0.3 to over 0.8. A ratio of 0.8 makes a wet and fairly weak concrete (Maximum water)." },
+  { id: 1035, q: "The cement used for making concrete should possess the following values of setting time:", opts: ["Initial > 30 min, Final < 10 hours", "Initial > 30 min, Final > 10 hours", "Initial < 30 min, Final > 10 hours", "Initial > 60 min, Final < 600 min"], ans: 0, tag: "MP VYAPAM Sub Engg. 2015", exp: "Initial setting time should not be less than 30 min.\nFinal setting time should not exceed 10 hours." },
+  { id: 1036, q: "In which test conducted on cement Le-Chatelier apparatus is used?", opts: ["Soundness test", "Setting test", "Compressive strength test", "Tensile strength test"], ans: 0, tag: "MP VYAPAM Draftsman 2016", exp: "Soundness test is determined by Le-Chatelier apparatus (for lime) or autoclave test." },
+  { id: 1037, q: "For marine work, the best suited cement is", opts: ["Low heat portland cement", "Rapid hardening cement", "Ordinary portland cement", "Blast furnace slag cement"], ans: 3, tag: "Tamil Nadu PSC 2019", exp: "Blast furnace slag cement is more resistant to sea water and other chemical agents than Portland cement." },
+  { id: 1038, q: "According to IS specifications, the compressive strength of ordinary portland cement after three days should not be less than", opts: ["7 MPa", "15 MPa", "16 MPa", "21 MPa"], ans: 2, tag: "MH Nanded Zila Parishad 2014", exp: "The compressive strength of OPC after 3 days should not be less than 16 N/mm² (MPa)." },
+  { id: 1039, q: "According to IS 10262 : 1982, what should be the compressive strenght of OPC of grade C?", opts: ["42.5 to 47.5 MPa", "47.5 to 52.5 MPa", "32.5 to 37.5 MPa", "37.5 to 42.5 MPa"], ans: 0, tag: "SSC JE 23.09.2019", exp: "Grade C corresponds to 42.5 to 47.5 MPa according to the older classification in IS 10262:1982." },
+  { id: 1040, q: "The process of mixing, transporting, placing and compacting concrete using Ordinary Portland cement should not take more than how much time?", opts: ["30 minutes", "40 minutes", "75 minutes", "None of these"], ans: 0, tag: "SSC JE 27.01.2018", exp: "It should not take more than 30 min because the initial setting time of OPC is 30 min." },
+  { id: 1041, q: "A concrete using an air entrained cement", opts: ["has strength less than 10% to 15%", "has more resistance to weathering", "is more plastic and workable", "is free from segregation and bleeding"], ans: 2, tag: "SSC JE 24.01.2018", exp: "Note: The commission marked no option correct, but typically air entrainment increases workability & plasticity. (Book answer: c)" },
+  { id: 1042, q: "A sample of cement is said to be sound when it does not contain free", opts: ["lime", "silica", "iron oxide", "alumina"], ans: 0, tag: "SSC JE 24.01.2018", exp: "Free Lime (in excess) makes cement unsound." },
+  { id: 1043, q: "In ordinary cement, about 99% of its final strength is achieved in ______.", opts: ["3 days", "7 days", "28 days", "1 year"], ans: 2, tag: "SSC JE 27.01.2018", exp: "The cement achieves its 99% of final strength after 28 days." },
+  { id: 1044, q: "The autoclave test is used to determine the ................. in Portland cement.", opts: ["expansion", "sulphur content", "rate of hydration", "calcium content"], ans: 0, tag: "SSC JE 23.09.2019", exp: "Autoclave test is used to determine the expansion (unsoundness) due to lime and magnesia." }
+];
+
+/* ================= STATE ================= */
+let currentIdx = 0;
+let userAnswers = {}; // { qID: optionIdx }
+let visited = new Set();
+let timerInterval;
+let timeLeft = 7200;
+let bookmarks = JSON.parse(localStorage.getItem('civil_bookmarks_v2')) || [];
+
+/* ================= STARTUP ================= */
+window.onload = function() {
+    renderHistory();
+};
+
+/* ================= NAVIGATION ================= */
+function switchScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+function startTest() {
+    currentIdx = 0;
+    userAnswers = {};
+    visited.clear();
+    visited.add(0);
+    timeLeft = 7200;
+    
+    switchScreen('quiz-screen');
+    startTimer();
+    renderQuestion(0);
+}
+
+function confirmExit() {
+    if(confirm("Exit test? Progress will be lost.")) {
+        clearInterval(timerInterval);
+        location.reload();
+    }
+}
+
+/* ================= QUIZ ENGINE ================= */
+function renderQuestion(idx) {
+    currentIdx = idx;
+    visited.add(idx);
+    
+    const q = DB[idx];
+    const isAns = userAnswers[q.id] !== undefined;
+    const isMarked = bookmarks.includes(q.id);
+
+    // Bookmark Icon
+    let starClass = isMarked ? 'active' : '';
+    let starChar = isMarked ? '&#9733;' : '&#9734;';
+
+    let html = `
+        <div class="question-card">
+            <div class="bookmark-icon ${starClass}" id="bm-btn-${q.id}" onclick="toggleBookmark(${q.id}, 'bm-btn-${q.id}')">${starChar}</div>
+            <span class="tag-badge">${q.tag}</span>
+            <div class="question-text">Q${q.id}. ${q.q}</div>
+            <div class="options-grid">
+    `;
+
+    q.opts.forEach((opt, i) => {
+        let cls = 'option-btn';
+        if(isAns) {
+            if(i === q.ans) cls += ' correct';
+            else if(i === userAnswers[q.id]) cls += ' wrong';
+            else cls += ' disabled'; // disable others
+        }
+        
+        let onClick = isAns ? '' : `handleAnswer(${q.id}, ${i})`;
+        html += `<div class="${cls}" onclick="${onClick}">${String.fromCharCode(65+i)}. ${opt}</div>`;
+    });
+    html += `</div>`; // end grid
+
+    // Solution
+    if(isAns) {
+        html += `
+            <div class="solution-box">
+                <div class="solution-header">&#128161; Explanation</div>
+                <div class="solution-text">${q.exp}</div>
+            </div>
+        `;
+    }
+
+    html += `</div>`; // end card
+    document.getElementById('question-area').innerHTML = html;
+
+    // Buttons
+    document.getElementById('prev-btn').disabled = (idx === 0);
+    document.getElementById('next-btn').disabled = (idx === DB.length - 1);
+    
+    updatePaletteUI();
+}
+
+function handleAnswer(qId, optIdx) {
+    userAnswers[qId] = optIdx;
+    renderQuestion(currentIdx); // Re-render to show result
+}
+
+function nav(dir) {
+    let newIdx = currentIdx + dir;
+    if(newIdx >= 0 && newIdx < DB.length) renderQuestion(newIdx);
+}
+
+/* ================= TIMER ================= */
+function startTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        let h = Math.floor(timeLeft/3600).toString().padStart(2,'0');
+        let m = Math.floor((timeLeft%3600)/60).toString().padStart(2,'0');
+        let s = (timeLeft%60).toString().padStart(2,'0');
+        document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+        if(timeLeft <= 0) submitTest();
+    }, 1000);
+}
+
+/* ================= PALETTE ================= */
+function togglePalette() {
+    const modal = document.getElementById('palette-modal');
+    if(modal.style.display === 'block') {
+        modal.style.display = 'none';
+    } else {
+        renderPaletteGrid();
+        modal.style.display = 'block';
+    }
+}
+
+function renderPaletteGrid() {
+    let html = '';
+    DB.forEach((q, i) => {
+        let state = '';
+        if(userAnswers[q.id] !== undefined) state = 'answered';
+        else if(visited.has(i)) state = 'skipped';
+        
+        let border = (i === currentIdx) ? 'current' : '';
+        html += `<div class="p-btn ${state} ${border}" onclick="renderQuestion(${i}); togglePalette()">${q.id}</div>`;
+    });
+    document.getElementById('palette-grid').innerHTML = html;
+}
+
+function updatePaletteUI() {
+    // Only updates if palette is open, otherwise handled by toggle
+}
+
+/* ================= SUBMIT & REPORT ================= */
+function submitTest() {
+    clearInterval(timerInterval);
+    let correct = 0, wrong = 0, skipped = 0;
+    
+    DB.forEach(q => {
+        if(userAnswers[q.id] === undefined) skipped++;
+        else if(userAnswers[q.id] === q.ans) correct++;
+        else wrong++;
+    });
+
+    let score = Math.round((correct / DB.length) * 100);
+    
+    // Save History
+    let history = JSON.parse(localStorage.getItem('civil_history')) || [];
+    history.unshift({ date: new Date().toLocaleDateString(), score: score + '%' });
+    localStorage.setItem('civil_history', JSON.stringify(history.slice(0,5)));
+
+    // Fill UI
+    document.getElementById('score-val').innerText = score + '%';
+    document.getElementById('res-correct').innerText = correct;
+    document.getElementById('res-wrong').innerText = wrong;
+    document.getElementById('res-skipped').innerText = skipped;
+
+    // Generate Review List
+    let html = '';
+    DB.forEach(q => {
+        let u = userAnswers[q.id];
+        let status = (u===undefined) ? 'Skipped' : (u===q.ans ? 'Correct' : 'Wrong');
+        let color = (u===q.ans) ? 'green' : 'red';
+        if(u===undefined) color = 'gray';
+
+        let isMarked = bookmarks.includes(q.id);
+        let starChar = isMarked ? '&#9733;' : '&#9734;';
+        let starClass = isMarked ? 'active' : '';
+
+        html += `
+            <div class="question-card" style="padding:15px;">
+                <div class="bookmark-icon ${starClass}" id="rev-bm-${q.id}" onclick="toggleBookmark(${q.id}, 'rev-bm-${q.id}')">${starChar}</div>
+                <div style="font-weight:bold; color:${color}; margin-bottom:5px;">Q${q.id}: ${status}</div>
+                <div>${q.q}</div>
+                <div style="background:#f8f9fa; padding:10px; margin-top:10px; border-radius:5px; font-size:0.9rem;">
+                    <strong>Ans:</strong> ${q.opts[q.ans]}<br>
+                    <small>${q.exp}</small>
+                </div>
+            </div>
+        `;
+    });
+    document.getElementById('review-list').innerHTML = html;
+
+    switchScreen('result-screen');
+}
+
+function renderHistory() {
+    let h = JSON.parse(localStorage.getItem('civil_history')) || [];
+    let html = h.map(x => `<div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding:8px 0;"><span>${x.date}</span><b>${x.score}</b></div>`).join('');
+    document.getElementById('history-list').innerHTML = html || '<small>No history yet</small>';
+}
+
+/* ================= BOOKMARK SYSTEM ================= */
+function toggleBookmark(qId, btnId) {
+    let idx = bookmarks.indexOf(qId);
+    let btn = document.getElementById(btnId);
+    
+    if(idx === -1) {
+        bookmarks.push(qId);
+        if(btn) {
+            btn.innerHTML = '&#9733;';
+            btn.classList.add('active');
+        }
+    } else {
+        bookmarks.splice(idx, 1);
+        if(btn) {
+            btn.innerHTML = '&#9734;';
+            btn.classList.remove('active');
+        }
+        // If we are on bookmark screen, re-render to remove it
+        if(document.getElementById('bookmark-screen').classList.contains('active')) {
+            openBookmarksScreen(); 
+        }
+    }
+    localStorage.setItem('civil_bookmarks_v2', JSON.stringify(bookmarks));
+}
+
+function openBookmarksScreen() {
+    if(bookmarks.length === 0) {
+        alert("No bookmarks yet! Mark questions with the star icon.");
+        return;
+    }
+    switchScreen('bookmark-screen');
+    
+    let container = document.getElementById('bookmark-list-container');
+    let html = '';
+
+    bookmarks.forEach(bid => {
+        let q = DB.find(x => x.id === bid);
+        if(!q) return;
+
+        // Create a unique ID for this practice card option group
+        let cardId = `bm-card-${q.id}`;
+        
+        html += `
+            <div class="question-card" id="${cardId}">
+                <div class="bookmark-icon active" onclick="toggleBookmark(${q.id}, 'bm-star-${q.id}')" id="bm-star-${q.id}">&#9733;</div>
+                <div class="tag-badge">${q.tag}</div>
+                <div class="question-text">Q${q.id}. ${q.q}</div>
+                <div class="options-grid">
+        `;
+        
+        // Render Options (Clickable for Practice)
+        q.opts.forEach((opt, i) => {
+            html += `<div class="option-btn" onclick="revealPracticeAnswer(${q.id}, ${i}, '${cardId}')">${String.fromCharCode(65+i)}. ${opt}</div>`;
+        });
+
+        // Hidden Solution Div
+        html += `</div>
+                 <div class="solution-box" id="sol-${cardId}" style="display:none; margin-top:15px;">
+                    <div class="solution-header">Result & Explanation</div>
+                    <div id="res-text-${cardId}" style="margin-bottom:10px; font-weight:bold;"></div>
+                    <div class="solution-text">${q.exp}</div>
+                 </div>
+            </div>`;
+    });
+    
+    container.innerHTML = html;
+}
+
+function revealPracticeAnswer(qId, selectedIdx, cardId) {
+    let q = DB.find(x => x.id === qId);
+    let card = document.getElementById(cardId);
+    let opts = card.querySelectorAll('.option-btn');
+    let solBox = document.getElementById(`sol-${cardId}`);
+    let resText = document.getElementById(`res-text-${cardId}`);
+
+    // Lock options
+    opts.forEach((btn, i) => {
+        btn.onclick = null; // disable clicks
+        if(i === q.ans) btn.classList.add('correct');
+        else if(i === selectedIdx) btn.classList.add('wrong');
+        else btn.style.opacity = '0.6';
+    });
+
+    // Show result
+    if(selectedIdx === q.ans) {
+        resText.innerHTML = "<span style='color:var(--success)'>&#10004; Correct!</span>";
+    } else {
+        resText.innerHTML = "<span style='color:var(--danger)'>&#10008; Wrong! Correct is " + String.fromCharCode(65+q.ans) + "</span>";
+    }
+    solBox.style.display = 'block';
+}
+</script>
+</body>
+</html>
