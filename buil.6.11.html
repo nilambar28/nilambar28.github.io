@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Pro Civil Engineering Exam Engine</title>
+<style>
+    :root {
+        --primary: #1a73e8;
+        --success: #00c853;
+        --danger: #d50000;
+        --light: #f5f7fa;
+        --dark: #2d3436;
+        --gray: #dfe6e9;
+        --text-gray: #636e72;
+    }
+
+    * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; -webkit-tap-highlight-color: transparent; }
+    
+    body { margin: 0; padding: 0; background-color: var(--light); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* --- SCREENS --- */
+    .screen {
+        display: none;
+        height: 100%;
+        width: 100%;
+        flex-direction: column;
+    }
+    .screen.active { display: flex; }
+
+    /* --- START SCREEN --- */
+    #startScreen {
+        background: white;
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+        text-align: center;
+    }
+
+    .app-logo {
+        width: 80px; height: 80px; background: var(--primary); color: white;
+        border-radius: 20px; font-size: 40px; display: flex; align-items: center; justify-content: center;
+        margin-bottom: 20px; box-shadow: 0 10px 20px rgba(26, 115, 232, 0.3);
+    }
+
+    .app-title { font-size: 24px; font-weight: 800; color: var(--dark); margin-bottom: 10px; }
+    .app-subtitle { color: var(--text-gray); font-size: 14px; margin-bottom: 40px; }
+
+    .action-card {
+        width: 100%; max-width: 350px; background: var(--light);
+        padding: 20px; border-radius: 12px; margin-bottom: 15px;
+        display: flex; align-items: center; justify-content: space-between;
+        cursor: pointer; transition: transform 0.2s; border: 1px solid #eee;
+    }
+    .action-card:active { transform: scale(0.98); }
+
+    .ac-icon {
+        width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        font-size: 20px; color: white; margin-right: 15px; flex-shrink: 0;
+    }
+    .ac-text { text-align: left; flex: 1; }
+    .ac-title { font-weight: 700; color: var(--dark); display: block; }
+    .ac-sub { font-size: 12px; color: var(--text-gray); }
+
+    .last-score { margin-top: 30px; font-size: 12px; color: #999; }
+
+    /* --- HEADER (Test Mode) --- */
+    .header {
+        background: #fff;
+        padding: 0 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 100;
+        height: 60px;
+        flex-shrink: 0;
+    }
+
+    .timer-box {
+        font-weight: 700; font-size: 16px; color: var(--dark);
+        display: flex; align-items: center; gap: 5px;
+        background: #f1f2f6; padding: 5px 10px; border-radius: 20px;
+    }
+
+    .btn-submit {
+        background-color: var(--primary); color: white; border: none;
+        padding: 6px 16px; border-radius: 4px; font-weight: 600; font-size: 14px; cursor: pointer;
+    }
+
+    .btn-exit { color: var(--danger); font-size: 24px; cursor: pointer; padding: 5px; }
+
+    /* --- CONTENT AREA --- */
+    .content-area {
+        flex: 1; overflow-y: auto; padding: 15px;
+        padding-bottom: 80px; position: relative;
+    }
+
+    .question-card {
+        background: white; border-radius: 8px; padding: 15px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1); animation: fadeIn 0.3s;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .q-header {
+        display: flex; justify-content: space-between; margin-bottom: 15px;
+        border-bottom: 1px solid #eee; padding-bottom: 10px;
+    }
+
+    .q-badge {
+        background: #e3f2fd; color: var(--primary); padding: 4px 8px;
+        border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase;
+    }
+
+    .bookmark-btn { background: none; border: none; cursor: pointer; font-size: 22px; color: #ccc; transition: color 0.2s; }
+    .bookmark-btn.active { color: #f1c40f; }
+
+    .q-text { font-size: 16px; font-weight: 500; color: var(--dark); margin-bottom: 20px; line-height: 1.5; }
+
+    /* --- OPTIONS --- */
+    .options-list { list-style: none; padding: 0; margin: 0; }
+    
+    .option-item {
+        display: flex; align-items: center; padding: 14px;
+        border: 1px solid var(--gray); border-radius: 8px;
+        margin-bottom: 12px; cursor: pointer; transition: all 0.2s;
+    }
+
+    .option-circle {
+        width: 26px; height: 26px; border-radius: 50%; border: 2px solid #bdc3c7;
+        margin-right: 12px; display: flex; align-items: center; justify-content: center;
+        font-size: 12px; font-weight: bold; color: #bdc3c7; flex-shrink: 0;
+    }
+
+    /* States */
+    .option-item.selected { border-color: var(--primary); background: #f0f7ff; }
+    .option-item.selected .option-circle { border-color: var(--primary); background: var(--primary); color: white; }
+    
+    .option-item.correct { border-color: var(--success); background: #e8f5e9; }
+    .option-item.correct .option-circle { border-color: var(--success); background: var(--success); color: white; }
+
+    .option-item.wrong { border-color: var(--danger); background: #ffebee; }
+    .option-item.wrong .option-circle { border-color: var(--danger); background: var(--danger); color: white; }
+
+    /* --- SOLUTION --- */
+    .solution-box {
+        display: none; background: #f8f9fa; border: 1px solid #e9ecef;
+        border-left: 4px solid var(--primary); padding: 15px; margin-top: 20px;
+        border-radius: 4px; font-size: 14px;
+    }
+    .sol-title { font-weight: 700; margin-bottom: 8px; display: block; color: var(--dark); }
+    .sol-text { color: var(--text-gray); white-space: pre-wrap; line-height: 1.6; }
+
+    /* --- FOOTER --- */
+    .footer {
+        position: fixed; bottom: 0; width: 100%; background: white;
+        border-top: 1px solid #eee; padding: 10px 15px;
+        display: flex; justify-content: space-between; align-items: center;
+        z-index: 100; height: 60px;
+    }
+
+    .nav-btn {
+        background: white; border: 1px solid var(--gray); padding: 8px 20px;
+        border-radius: 4px; font-weight: 600; cursor: pointer; min-width: 90px;
+    }
+    .nav-btn.primary { background: var(--primary); color: white; border-color: var(--primary); }
+    
+    .palette-toggle {
+        display: flex; flex-direction: column; align-items: center;
+        font-size: 10px; color: var(--text-gray); cursor: pointer;
+    }
+
+    /* --- PALETTE OVERLAY --- */
+    .palette-overlay {
+        position: fixed; top: 0; right: -100%; width: 85%; max-width: 320px; height: 100%;
+        background: white; z-index: 200; box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+        transition: right 0.3s ease; display: flex; flex-direction: column;
+    }
+    .palette-overlay.open { right: 0; }
+
+    .palette-header { padding: 15px; border-bottom: 1px solid #eee; font-weight: bold; display: flex; justify-content: space-between; align-items: center;}
+    .palette-grid { padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; overflow-y: auto; }
+    
+    .p-item {
+        height: 40px; width: 40px; border-radius: 50%; background: #f1f2f6;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 14px; font-weight: 600; cursor: pointer; border: 1px solid #ddd;
+    }
+    .p-item.current { border: 2px solid var(--primary); }
+    .p-item.answered { background: var(--success); color: white; border: none; }
+    .p-item.skipped { background: var(--danger); color: white; border: none; } /* Visited logic handled by JS */
+
+    /* --- RESULT SCREEN --- */
+    #resultScreen { overflow-y: auto; background: white; }
+    .result-header { padding: 30px 20px; background: var(--primary); color: white; text-align: center; border-radius: 0 0 20px 20px; }
+    
+    .score-circle {
+        width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,0.2);
+        color: white; margin: 20px auto; border: 4px solid white;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+    }
+    .score-val { font-size: 36px; font-weight: 800; }
+    .score-label { font-size: 12px; opacity: 0.9; }
+
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; margin-top: -30px; }
+    .stat-card { background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .stat-val { font-weight: bold; font-size: 20px; margin-top: 5px; }
+
+    .action-row { padding: 20px; display: flex; gap: 15px; flex-direction: column; }
+    .btn-full { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
+    .btn-home { background: var(--dark); color: white; }
+    .btn-restart { background: var(--primary); color: white; }
+
+</style>
+</head>
+<body>
+
+    <div id="startScreen" class="screen active">
+        <div class="app-logo">&#127970;</div>
+        <h1 class="app-title">Civil Engineering JE</h1>
+        <p class="app-subtitle">SSC JE • RRB JE • State Exams</p>
+
+        <div class="action-card" onclick="startTest('full')">
+            <div class="ac-icon" style="background: var(--primary);">
+                &#9658;
+            </div>
+            <div class="ac-text">
+                <span class="ac-title">Start Full Mock Test</span>
+                <span class="ac-sub">Questions 1045 - 1077 (2 Hours)</span>
+            </div>
+        </div>
+
+        <div class="action-card" onclick="startTest('bookmark')">
+            <div class="ac-icon" style="background: var(--success);">
+                &#9733;
+            </div>
+            <div class="ac-text">
+                <span class="ac-title">Take Bookmark Test</span>
+                <span class="ac-sub">Re-attempt saved questions only</span>
+            </div>
+        </div>
+
+        <div class="last-score" id="lastScoreDisplay">No previous test history found</div>
+    </div>
+
+    <div id="testScreen" class="screen">
+        <div class="header">
+            <div class="btn-exit" onclick="exitTest()">&#10006;</div>
+            <div class="timer-box">
+                <span>&#9201;</span> <span id="timer">00:00:00</span>
+            </div>
+            <button class="btn-submit" onclick="submitTest()">SUBMIT</button>
+        </div>
+
+        <div class="content-area" id="questionContainer">
+            </div>
+
+        <div class="footer">
+            <button class="nav-btn" onclick="changeQuestion(-1)">Prev</button>
+            <div class="palette-toggle" onclick="togglePalette()">
+                <span style="font-size:18px;">&#9638;</span>
+                <span>Palette</span>
+            </div>
+            <button class="nav-btn primary" onclick="changeQuestion(1)">Next</button>
+        </div>
+    </div>
+
+    <div id="resultScreen" class="screen">
+        <div class="result-header">
+            <h2>Test Summary</h2>
+            <div class="score-circle">
+                <span class="score-val" id="finalScore">0</span>
+                <span class="score-label">MARKS</span>
+            </div>
+            <p id="accuracyDisplay">Accuracy: 0%</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div style="color:var(--text-gray); font-size:12px;">CORRECT</div>
+                <div class="stat-val" id="correctCount" style="color:var(--success)">0</div>
+            </div>
+            <div class="stat-card">
+                <div style="color:var(--text-gray); font-size:12px;">WRONG</div>
+                <div class="stat-val" id="wrongCount" style="color:var(--danger)">0</div>
+            </div>
+        </div>
+
+        <div class="action-row">
+            <button class="btn-full btn-restart" onclick="startTest(currentMode)">Re-Attempt Test</button>
+            <button class="btn-full btn-home" onclick="goHome()">Back to Home</button>
+        </div>
+    </div>
+
+    <div class="palette-overlay" id="paletteOverlay">
+        <div class="palette-header">
+            <span>Question Palette</span>
+            <span onclick="togglePalette()" style="cursor:pointer; padding:5px;">&#10006;</span>
+        </div>
+        <div class="palette-grid" id="paletteGrid"></div>
+        <div style="margin-top: auto; padding: 15px; border-top:1px solid #eee;">
+            <div style="display:flex; gap:10px; align-items:center; margin-bottom:5px;">
+                <div style="width:12px; height:12px; background:var(--success); border-radius:50%"></div> Answered
+            </div>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <div style="width:12px; height:12px; background:#f1f2f6; border:1px solid #ddd; border-radius:50%"></div> Unanswered
+            </div>
+        </div>
+    </div>
+
+<script>
+    // --- DATABASE ---
+    const fullDb = [
+        { id: 1045, tag: "Haryana SSC JE 11.04.2018", q: "Soundness test is also known as-", options: ["Shrinkage test", "Expansion test", "Contraction test", "Split test"], ans: 1, sol: "Ans. (b) : Soundness test of cement is also known as expansion test.\n• It ensures that the cement after setting shall not undergo any appreciable change of volume." },
+        { id: 1046, tag: "ESIC JE 2016", q: "The expansion in Portland cement can be tested by :", options: ["Fineness test", "Soundness test", "Setting time test", "Normal consistency test"], ans: 1, sol: "Ans. (b) Soundness test– Soundness refer to the ability of cement of maintain constant volume." },
+        { id: 1047, tag: "GPHC JE 2018", q: "Which test is carried out to know about free lime in cement?", options: ["Consistency test", "Soundness test", "Setting time test", "Fineness test"], ans: 1, sol: "Ans. (b) : Soundness test is carried out free lime in cement." },
+        { id: 1048, tag: "DDA JE 23.04.2018", q: "Which of the following tests is used to estimate the soundness of ordinary portland cement?", options: ["Le Chatelier", "Blaine's", "Bogue's", "Daval"], ans: 0, sol: "Ans. (a) : Soundness of cement is determined either by Le Chatelier's method or by means of a 'Autoclave' test." },
+        { id: 1049, tag: "PGCIL JE CE 17.12.2020", q: "Which equipment is used for finding soundness of cement?", options: ["Phycnometer apparatus", "Le-Chatelier apparatus", "Permeability apparatus", "Vicat apparatus"], ans: 1, sol: "Ans. (b) : Soundness of cement measured by Le-Chatelier apparatus." },
+        { id: 1050, tag: "Mizoram PSC JE 2018", q: "Which of the following is determined with the help of Le Chatelier's device?", options: ["Abrasion resistance", "Chemical resistance", "Soundness", "Strength"], ans: 2, sol: "Ans. (c) Soundness of cement may be tested by Le-Chatelier apparatus." },
+        { id: 1051, tag: "RRB JE CBT-II 2019", q: "The apparatus used to test the soundness of cement is", options: ["Any of these", "Le Chatelier's apparatus", "Blain's air permeability apparatus", "Vicat's apparatus"], ans: 1, sol: "Ans. (b) : Le-Chatelier method – Apparatus gives unsoundness due to excess lime only." },
+        { id: 1052, tag: "CG PHE Sub Engg Exam 2016", q: "The presence of following chemical which cause efflorescences in cement is:", options: ["Allumina", "Calcium oxide", "Silica", "Alkalies"], ans: 3, sol: "Ans. (d) : Alkalies in excess cause efflorescence and staining." },
+        { id: 1053, tag: "IDJE Cgvyapam Exam 2016", q: "Laboratory test for cement is:", options: ["Workability test", "Compacting factor test", "Compressive strength test", "Soundness test"], ans: 3, sol: "Ans. (d) : Soundness tests (Le-Chatelier, autoclave) are performed in laboratory." },
+        { id: 1054, tag: "CGPSC SES Exam 2014", q: "The Le-Chatelier test on cement pastes detects unsoundness due to the following:", options: ["Alumina content", "Calcium sulfate content", "Magnesium oxide", "Free lime content", "Iron oxide content"], ans: 3, sol: "Ans. (d) : Soundness test is conducted to determine free lime content." },
+        { id: 1055, tag: "CGPSC SES Exam 2014", q: "To prevent flash setting of cement, which of the following is added to cement?", options: ["Fly ash", "Silica flume", "Gypsum", "Lime", "Sodium oxide"], ans: 2, sol: "Ans. (c) : Gypsum act as retarder in concrete so it prevent flash setting." },
+        { id: 1056, tag: "CGPSC SES Exam 2014", q: "The minimum cement content (in kg/cum) for plain cement required for severe expose condition as per IS 456 (2000) is", options: ["220", "240", "250", "260", "280"], ans: 2, sol: "Ans. (c) : For PCC exposed to severe conditions, minimum cement content is 250 kg/m³." },
+        { id: 1057, tag: "CG PWD, NRDA Exam 2015", q: "Finer grinding of cement:", options: ["Affects only the early development of strength", "Affects only the ultimate strength", "Both a and b", "Does not effect strength"], ans: 0, sol: "Ans. (a) : Finer grinding gives early development of strength." },
+        { id: 1058, tag: "CG PWD, NRDA Exam 2015", q: "Vicat apparatus is used to determination of:", options: ["Consistency of standard cement paste", "Initial and final setting time of cement", "Both of above", "None of these"], ans: 2, sol: "Ans. (c) : Vicat apparatus determines consistency and setting times." },
+        { id: 1059, tag: "CG PWD Exam", q: "Sequence of increasing rate of strength gain?", options: ["B, C, D, A", "A, C, D, B", "B, A, C, D", "C, A, B, D"], ans: 1, sol: "Ans. (c): Pulverized fuel ash < OPC < Rapid Hardening < High Alumina." },
+        { id: 1060, tag: "CG Housing Board JE 2014", q: "Initial setting time of cement is determine by", options: ["Vicat apparatus", "L-C apparatus", "Briquette apparatus", "All of above"], ans: 0, sol: "Ans. (a) : Vicat apparatus determines initial setting time." },
+        { id: 1061, tag: "HPSSC JE Code 438/2018", q: "Percentage of lime in cement is:", options: ["62%", "22%", "3%", "2%"], ans: 0, sol: "Ans. (a) : Lime (CaO): 62 to 67%." },
+        { id: 1062, tag: "Sub engg cgvyapam Exam 2012", q: "How many bags one tonne cement comprise:", options: ["16", "17", "19", "20"], ans: 3, sol: "Ans. (d) : 1000 kg / 50 kg = 20 bags." },
+        { id: 1063, tag: "Sub engg cgvyapam Exam 2012", q: "The percentage of fly ash in PPC permitted by Indian standard varies from:", options: ["15% - 35%", "15% - 30%", "10% - 35%", "20% - 35%"], ans: 0, sol: "Ans. (a) : Fly ash proportion is 15 to 35%." },
+        { id: 1064, tag: "Sub engg cgvyapam Exam 2012", q: "Minimum compressing strength of 43-Grade OPC at 7 days?", options: ["23 MPa", "28 MPa", "33 MPa", "38 MPa"], ans: 2, sol: "Ans. (c) : 43 Grade at 7 days is 33 MPa." },
+        { id: 1065, tag: "Sub engg cgvyapam Exam 2012", q: "Setting time test of cement is done by:", options: ["Compression machine", "Shear apparatus", "Vicat apparatus", "Tension machine"], ans: 2, sol: "Ans. (c) : Vicat apparatus." },
+        { id: 1066, tag: "MH Aurangabad MNC 2019", q: "Curing days for OPC in dry/hot weather:", options: ["7 days", "10 days", "14 days", "21 days"], ans: 1, sol: "Ans. (b) : At least 10 days." },
+        { id: 1067, tag: "MH PWD 2019", q: "Property evaluated by air permeability test?", options: ["Soundness of cement", "Setting time", "Consistency of cement", "Fineness"], ans: 3, sol: "Ans. (d) : Blaine air permeability determines fineness." },
+        { id: 1068, tag: "MH PWD 2019", q: "Property evaluated by Vicat Apparatus?", options: ["Soundness of cement", "Setting time", "Fineness", "None of the above"], ans: 1, sol: "Ans. (b) : Setting time." },
+        { id: 1069, tag: "MH WCD 2019", q: "Low heat cement minimum Initial setting time:", options: ["15 minutes", "30 minutes", "45 minutes", "60 minutes"], ans: 3, sol: "Ans. (d) : Low heat cement IST is 60 min." },
+        { id: 1070, tag: "MH WCD 2019", q: "Rapid hardening cement minimum Initial setting time:", options: ["15 minutes", "30 minutes", "45 minutes", "60 minutes"], ans: 1, sol: "Ans. (b) : Rapid hardening cement IST is 30 min." },
+        { id: 1071, tag: "MH Beed ZP 2013", q: "OPC fineness should not be less than", options: ["50,000 mm²/g", "20,000 mm²/g", "225,000 mm²/g", "10,000 mm²/g"], ans: 2, sol: "Ans. (c) : Not less than 225,000 mm²/kg (2250 cm²/gm)." },
+        { id: 1072, tag: "MH Beed ZP 2013", q: "Apparatus to find normal consistency:", options: ["Le-chatelier's", "Vicat plunger", "Rankines", "All true"], ans: 1, sol: "Ans. (b) : Vicat plunger apparatus." },
+        { id: 1073, tag: "MH Yavatmal ZP 2013", q: "Heating lime stone to redness in absence of air:", options: ["oxidation", "burning", "carbonization", "calcinations"], ans: 3, sol: "Ans. (d) : Calcination." },
+        { id: 1074, tag: "MH PWD Mumbai 2015", q: "Cement bags stacking clearance:", options: ["Wooden planks, 200mm", "Aluminium sheet, 200mm", "Lean Concrete, 150mm", "GI Sheet, 150mm"], ans: 0, sol: "Ans. (a) : Wooden planks, 200mm clear above floor." },
+        { id: 1075, tag: "MH PWD Nashik 2015", q: "Sequence for mix design:", options: ["Batching-Mixing-Trans-Placing-Compact-Finish-Curing", "Mixing-Batching-Trans-Placing-Compact-Finish-Curing", "Mixing-Batching-Trans-Compact-Placing-Finish-Curing", "Batching-mixing-Trans-Placing-Finish-Placing-Curing"], ans: 0, sol: "Ans. (a) : Batching → Mixing → Transportation → Placing → Compacting → Finishing → Curing." },
+        { id: 1076, tag: "MH Jalgaon ZP 2015", q: "Cement preferred for gravity dam:", options: ["Rapid Hardening", "Quick setting", "Low heat", "Sulphur resistant"], ans: 2, sol: "Ans. (c) : Low heat cement." },
+        { id: 1077, tag: "MH Pune MNC 2016", q: "Ultimate strength of cement is provided by", options: ["silica", "tri-calcium aluminate", "di-calcium silicate", "tri-calcium silicate"], ans: 2, sol: "Ans. (c) : C2S (di-calcium silicate) imparts ultimate strength." }
+    ];
+
+    // --- STATE MANAGEMENT ---
+    let activeQuestions = [];
+    let currentIndex = 0;
+    let userAnswers = {}; // { 1045: 0, 1046: 2 }
+    let bookmarks = JSON.parse(localStorage.getItem('civil_bookmarks') || '[]');
+    let currentMode = 'full'; // 'full' or 'bookmark'
+    let timerInterval;
+    let timeRemaining = 0;
+
+    // --- INIT ---
+    window.onload = function() {
+        showScreen('startScreen');
+        updateLastScore();
+    };
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function updateLastScore() {
+        const last = JSON.parse(localStorage.getItem('civil_test_last_score'));
+        const el = document.getElementById('lastScoreDisplay');
+        if (last) {
+            el.innerHTML = `Last Attempt: <b>${last.score}/${last.total}</b> (${last.date})`;
+        }
+    }
+
+    // --- TEST ENGINE ---
+    function startTest(mode) {
+        currentMode = mode;
+        
+        if (mode === 'bookmark') {
+            if (bookmarks.length === 0) {
+                alert("No bookmarks found! Mark some questions in the Full Test first.");
+                return;
+            }
+            // Filter DB for Bookmarked IDs
+            activeQuestions = fullDb.filter(q => bookmarks.includes(q.id));
+            timeRemaining = activeQuestions.length * 60; // 1 min per question
+        } else {
+            activeQuestions = [...fullDb];
+            timeRemaining = 7200; // 2 Hours
+        }
+
+        // Reset Session State
+        currentIndex = 0;
+        userAnswers = {};
+        
+        // UI Setup
+        showScreen('testScreen');
+        startTimer();
+        renderQuestion();
+        renderPalette();
+    }
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        const display = document.getElementById('timer');
+        
+        timerInterval = setInterval(() => {
+            if(timeRemaining <= 0) {
+                submitTest();
+                return;
+            }
+            timeRemaining--;
+            let h = Math.floor(timeRemaining / 3600);
+            let m = Math.floor((timeRemaining % 3600) / 60);
+            let s = timeRemaining % 60;
+            display.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        }, 1000);
+    }
+
+    function renderQuestion() {
+        const qData = activeQuestions[currentIndex];
+        const container = document.getElementById('questionContainer');
+        const isAnswered = userAnswers[qData.id] !== undefined;
+        const selectedOpt = userAnswers[qData.id];
+        const isBookmarked = bookmarks.includes(qData.id);
+
+        let optionsHtml = '';
+        qData.options.forEach((opt, idx) => {
+            let className = 'option-item';
+            let circleText = String.fromCharCode(65 + idx);
+            
+            if (isAnswered) {
+                if (idx === qData.ans) className += ' correct';
+                else if (idx === selectedOpt) className += ' wrong';
+                else if (idx === selectedOpt && idx === qData.ans) className += ' correct selected';
+            }
+
+            optionsHtml += `
+                <li class="${className}" onclick="selectOption(${idx})">
+                    <div class="option-circle">${circleText}</div>
+                    <span>${opt}</span>
+                </li>
+            `;
+        });
+
+        // Question Count Display
+        const countDisplay = `Question ${currentIndex + 1} of ${activeQuestions.length}`;
+
+        container.innerHTML = `
+            <div class="question-card">
+                <div class="q-header">
+                    <span class="q-badge">${qData.tag}</span>
+                    <div>
+                        <span style="font-size:12px; color:#999; margin-right:10px;">ID: ${qData.id}</span>
+                        <button class="bookmark-btn ${isBookmarked ? 'active' : ''}" onclick="toggleBookmark(${qData.id})">&#9733;</button>
+                    </div>
+                </div>
+                <div style="font-size:12px; color:#999; margin-bottom:5px;">${countDisplay}</div>
+                <div class="q-text">${qData.q}</div>
+                <ul class="options-list">${optionsHtml}</ul>
+                <div class="solution-box" style="display: ${isAnswered ? 'block' : 'none'}">
+                    <span class="sol-title">Detailed Solution:</span>
+                    <div class="sol-text">${qData.sol}</div>
+                </div>
+            </div>
+        `;
+        
+        updatePaletteHighlight();
+    }
+
+    function selectOption(optIdx) {
+        const qData = activeQuestions[currentIndex];
+        if (userAnswers[qData.id] !== undefined) return; // Prevent re-answering
+        
+        userAnswers[qData.id] = optIdx;
+        renderQuestion();
+        renderPalette();
+    }
+
+    function toggleBookmark(id) {
+        if (bookmarks.includes(id)) {
+            bookmarks = bookmarks.filter(b => b !== id);
+        } else {
+            bookmarks.push(id);
+        }
+        localStorage.setItem('civil_bookmarks', JSON.stringify(bookmarks));
+        renderQuestion(); // Update star
+    }
+
+    function changeQuestion(dir) {
+        const newIdx = currentIndex + dir;
+        if (newIdx >= 0 && newIdx < activeQuestions.length) {
+            currentIndex = newIdx;
+            renderQuestion();
+        }
+    }
+
+    // --- PALETTE ---
+    function togglePalette() {
+        document.getElementById('paletteOverlay').classList.toggle('open');
+    }
+
+    function renderPalette() {
+        const grid = document.getElementById('paletteGrid');
+        grid.innerHTML = '';
+        activeQuestions.forEach((q, idx) => {
+            const isAns = userAnswers[q.id] !== undefined;
+            const className = isAns ? 'p-item answered' : 'p-item';
+            grid.innerHTML += `<div class="${className}" onclick="jumpTo(${idx})">${idx + 1}</div>`;
+        });
+        updatePaletteHighlight();
+    }
+
+    function jumpTo(idx) {
+        currentIndex = idx;
+        renderQuestion();
+        togglePalette();
+    }
+
+    function updatePaletteHighlight() {
+        document.querySelectorAll('.p-item').forEach((item, idx) => {
+            if(idx === currentIndex) item.classList.add('current');
+            else item.classList.remove('current');
+        });
+    }
+
+    // --- SUBMIT ---
+    function submitTest() {
+        clearInterval(timerInterval);
+        
+        let correct = 0;
+        let wrong = 0;
+        
+        activeQuestions.forEach(q => {
+            if (userAnswers[q.id] !== undefined) {
+                if (userAnswers[q.id] === q.ans) correct++;
+                else wrong++;
+            }
+        });
+
+        const total = activeQuestions.length;
+        const accuracy = correct > 0 ? Math.round((correct / (correct + wrong)) * 100) : 0;
+
+        // Save Score (Only for Full Test)
+        if (currentMode === 'full') {
+            const scoreData = { score: correct, total: total, date: new Date().toLocaleDateString() };
+            localStorage.setItem('civil_test_last_score', JSON.stringify(scoreData));
+        }
+
+        // Render Result
+        document.getElementById('finalScore').innerText = correct + "/" + total;
+        document.getElementById('accuracyDisplay').innerText = `Accuracy: ${accuracy}%`;
+        document.getElementById('correctCount').innerText = correct;
+        document.getElementById('wrongCount').innerText = wrong;
+
+        showScreen('resultScreen');
+    }
+
+    function exitTest() {
+        if(confirm("Exit current test? Progress will be lost.")) {
+            goHome();
+        }
+    }
+
+    function goHome() {
+        clearInterval(timerInterval);
+        showScreen('startScreen');
+        updateLastScore();
+    }
+</script>
+</body>
+</html>
