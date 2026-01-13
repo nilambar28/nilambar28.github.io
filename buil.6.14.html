@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Building Materials Test (Cement)</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building Materials Test (Part 2)</title>
     <style>
         :root {
             --primary: #2962FF; /* Testbook Blue */
@@ -24,10 +23,11 @@
         * { box-sizing: border-box; font-family: 'Roboto', 'Segoe UI', sans-serif; margin: 0; padding: 0; }
         body { background-color: var(--bg-light); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* --- Start Screen --- */
+        /* --- Screens --- */
         .screen { display: none; height: 100%; flex-direction: column; }
         .screen.active { display: flex; }
-        
+
+        /* --- Start Screen --- */
         #start-screen { justify-content: center; align-items: center; text-align: center; padding: 20px; overflow-y: auto; }
         .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 400px; width: 100%; margin-bottom: 20px; }
         
@@ -37,65 +37,94 @@
         .btn-bookmark-start { background: white; color: var(--text-dark); border: 2px solid var(--gold); padding: 12px 24px; border-radius: 6px; font-size: 15px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 15px; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; }
         .btn-bookmark-start:hover { background: #FFF8E1; }
 
+        .btn-outline { background: white; color: var(--primary); border: 2px solid var(--primary); padding: 10px 20px; border-radius: 4px; font-size: 14px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; }
+        
+        .history-item { border-bottom: 1px solid var(--border); padding: 10px 0; font-size: 14px; text-align: left; }
+        .history-stat { float: right; font-weight: bold; }
+
         /* --- Test Interface --- */
         header { background: white; padding: 10px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; height: 60px; }
         .timer-box { font-weight: bold; color: var(--text-dark); background: #eee; padding: 5px 10px; border-radius: 4px; }
         .submit-btn { background: var(--success); color: white; border: none; padding: 6px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; }
         .exit-btn { background: var(--error); color: white; border: none; padding: 6px 15px; border-radius: 4px; margin-right: 10px; cursor: pointer; }
 
+        /* Main Content */
         #test-body { flex: 1; display: flex; overflow: hidden; position: relative; }
         #question-area { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 80px; }
         
+        /* Question Styling */
         .q-header { display: flex; justify-content: space-between; margin-bottom: 10px; align-items: center; }
         .exam-tag { font-size: 11px; background: #FFF3E0; color: #E65100; padding: 2px 6px; border-radius: 3px; border: 1px solid #FFCC80; }
         .q-text { font-size: 16px; font-weight: 500; margin-bottom: 15px; line-height: 1.5; color: var(--text-dark); }
-        
+        .q-text strong { font-weight: 700; }
+
         /* Options */
         .options-list { list-style: none; }
         .option-item { display: flex; align-items: center; padding: 12px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 10px; cursor: pointer; transition: background 0.2s; }
+        .option-item:hover { background-color: #f9f9f9; }
         .option-circle { width: 25px; height: 25px; border: 2px solid #999; border-radius: 50%; margin-right: 12px; display: flex; justify-content: center; align-items: center; font-size: 12px; color: #666; font-weight: bold; flex-shrink: 0; }
         
+        .option-item.selected { border-color: var(--primary); background: #E3F2FD; }
+        .option-item.selected .option-circle { border-color: var(--primary); color: var(--primary); background: white; }
         .option-item.correct { border-color: var(--success); background: #E8F5E9; }
-        .option-item.correct .option-circle { background: var(--success); border-color: var(--success); color: white; }
+        .option-item.correct .option-circle { background: var(--success); border-color: var(--success); color: white; content: '✔'; }
         .option-item.wrong { border-color: var(--error); background: #FFEBEE; }
         .option-item.wrong .option-circle { background: var(--error); border-color: var(--error); color: white; }
-        .option-item.disabled { pointer-events: none; }
 
         /* Explanation */
         .solution-box { margin-top: 20px; background: #F1F8E9; border: 1px solid #C5E1A5; border-radius: 6px; padding: 15px; display: none; }
+        .solution-box.visible { display: block; animation: fadeIn 0.3s; }
         .sol-title { font-weight: bold; color: var(--success); margin-bottom: 5px; font-size: 14px; }
-        .sol-text { font-size: 14px; color: #333; line-height: 1.4; }
-        
-        /* Image Tags */
-        .img-tag { display: inline-block; background: #E3F2FD; color: var(--primary); padding: 4px 8px; border-radius: 4px; font-size: 12px; margin: 5px 0; border: 1px dashed var(--primary); cursor: pointer; }
-        .citation { font-size: 0.8em; color: #666; font-style: italic; margin-left: 5px; }
+        .sol-text { font-size: 14px; color: #333; white-space: pre-wrap; line-height: 1.4; }
 
-        /* Footer */
-        footer { background: white; padding: 10px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: absolute; bottom: 0; width: 100%; z-index: 10; }
+        /* Bottom Navigation */
+        footer { background: white; padding: 10px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: absolute; bottom: 0; width: 100%; z-index: 10; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
         .nav-btn { background: white; border: 1px solid var(--border); padding: 8px 16px; border-radius: 4px; font-weight: bold; color: var(--text-light); cursor: pointer; }
         .nav-btn.primary { background: var(--primary); color: white; border: none; }
-        .bookmark-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #aaa; padding: 0 10px; }
-        .bookmark-btn.active { color: var(--gold); }
+        .bookmark-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #aaa; padding: 0 10px; transition: transform 0.2s; }
+        .bookmark-btn.active { color: var(--gold); transform: scale(1.2); }
 
-        /* Palette */
+        /* Palette Drawer */
         #palette-drawer { width: 280px; background: white; border-left: 1px solid var(--border); display: flex; flex-direction: column; position: absolute; right: -280px; top: 0; bottom: 0; transition: right 0.3s; z-index: 20; height: 100%; }
         #palette-drawer.open { right: 0; }
-        .palette-header { padding: 15px; background: #f5f5f5; border-bottom: 1px solid var(--border); font-weight: bold; display: flex; justify-content: space-between; }
+        .palette-header { padding: 15px; border-bottom: 1px solid var(--border); font-weight: bold; display: flex; justify-content: space-between; align-items: center; background: #f5f5f5; }
         .grid-container { padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; overflow-y: auto; }
-        .grid-item { width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 12px; cursor: pointer; background: var(--palette-skipped); color: #333; }
-        .grid-item.current { border: 2px solid var(--palette-current); }
+        .grid-item { width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 12px; cursor: pointer; background: var(--palette-skipped); color: #333; transition: 0.2s; }
+        .grid-item.current { border: 2px solid var(--palette-current); transform: scale(1.1); }
         .grid-item.answered { background: var(--palette-answered); color: white; }
-        .grid-item.review { background: var(--palette-review); color: white; }
+        .grid-item.review { background: var(--palette-review); color: white; border-radius: 4px; } 
 
-        /* Result Screen */
+        /* Legend */
+        .legend { padding: 10px; font-size: 11px; border-top: 1px solid var(--border); background: #fff; }
+        .legend-item { display: flex; align-items: center; margin-bottom: 5px; }
+        .dot { width: 10px; height: 10px; margin-right: 8px; border-radius: 50%; }
+
+        /* Overlay */
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 15; display: none; }
+        #overlay.active { display: block; }
+
+        /* Results */
         #result-screen { padding: 20px; overflow-y: auto; background: #f0f2f5; }
         .score-circle { width: 120px; height: 120px; border-radius: 50%; border: 8px solid var(--primary); display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 0 auto 20px; font-size: 24px; font-weight: bold; background: white; }
-        .stat-row { display: flex; justify-content: space-between; margin-bottom: 10px; padding: 12px; background: white; border-radius: 6px; }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 10px; padding: 12px; background: white; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        
+        .report-header { margin-top: 30px; margin-bottom: 15px; font-size: 18px; font-weight: bold; color: var(--text-dark); border-left: 5px solid var(--gold); padding-left: 10px; }
+        .report-card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ddd; position: relative; }
+        .report-q { font-weight: bold; margin-bottom: 10px; color: #333; }
+        .report-ans { color: var(--success); font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        .report-sol { font-size: 13px; color: #555; background: #f9f9f9; padding: 10px; border-radius: 4px; margin-top: 5px; }
+        .report-tag { position: absolute; top: 10px; right: 10px; font-size: 10px; background: #eee; padding: 2px 5px; border-radius: 3px; color: #666; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         @media (min-width: 769px) {
             #test-body { padding-right: 280px; }
             #palette-drawer { right: 0; border-left: 1px solid var(--border); }
+            #overlay { display: none !important; }
             .toggle-palette { display: none; }
+        }
+        @media (max-width: 768px) {
+            #test-body { padding-right: 0; }
         }
     </style>
 </head>
@@ -103,22 +132,23 @@
 
     <div id="start-screen" class="screen active">
         <div class="card">
-            <h2 style="color: var(--primary);">Cement Technology</h2>
-            <p style="margin: 10px 0; color: #666;">Questions 1109 - 1139</p>
+            <h2 style="color: var(--primary);">Cement & Concrete (Part 2)</h2>
+            <p style="margin: 10px 0; color: #666;">Questions 1140 - 1174</p>
             <div style="text-align: left; margin: 15px 0; font-size: 14px; background: #f5f5f5; padding: 10px; border-radius: 6px;">
-                <p>✅ <strong>Total Qs:</strong> 31</p>
-                <p>✅ <strong>Time:</strong> 2 Hours</p>
-                <p>✅ <strong>Source:</strong> Previous Year Papers</p>
+                <p style="margin-bottom:5px;">✅ <strong>Total Qs:</strong> 35</p>
+                <p style="margin-bottom:5px;">✅ <strong>Time:</strong> 2 Hours</p>
+                <p>✅ <strong>Mode:</strong> Instant Solution</p>
             </div>
             
-            <button class="btn-primary" onclick="app.startTest('full')">START FULL TEST</button>
+            <button class="btn-primary" onclick="app.startTest()">START FULL TEST</button>
             
-            <button class="btn-bookmark-start" onclick="app.startTest('bookmark')">
-                <span>🔖</span> PRACTICE BOOKMARKS
+            <button class="btn-bookmark-start" onclick="app.startBookmarkTest()">
+                <span style="font-size: 18px;">🔖</span> START BOOKMARK TEST
             </button>
         </div>
+
         <div class="card">
-            <h3>History</h3>
+            <h3>Test History</h3>
             <div id="history-list"></div>
         </div>
     </div>
@@ -131,14 +161,24 @@
         </header>
 
         <div id="test-body">
-            <div id="question-area"></div>
+            <div id="question-area">
+                </div>
+            
+            <div id="overlay" onclick="app.togglePalette()"></div>
             
             <div id="palette-drawer">
                 <div class="palette-header">
                     <span>Question Grid</span>
-                    <span class="toggle-palette" onclick="app.togglePalette()" style="cursor:pointer;">✕</span>
+                    <span class="toggle-palette" onclick="app.togglePalette()" style="cursor:pointer; font-size: 20px;">✕</span>
                 </div>
-                <div class="grid-container" id="grid-box"></div>
+                <div class="grid-container" id="grid-box">
+                    </div>
+                <div class="legend">
+                    <div class="legend-item"><div class="dot" style="background:var(--palette-answered)"></div>Answered</div>
+                    <div class="legend-item"><div class="dot" style="background:var(--palette-review)"></div>Marked for Review</div>
+                    <div class="legend-item"><div class="dot" style="background:var(--palette-skipped)"></div>Not Visited</div>
+                    <div class="legend-item"><div class="dot" style="background:var(--palette-current); border: 2px solid var(--palette-current);"></div>Current</div>
+                </div>
             </div>
         </div>
 
@@ -146,10 +186,10 @@
             <button class="nav-btn" onclick="app.prevQuestion()">Prev</button>
             <div style="display: flex; gap: 10px; align-items: center;">
                 <button class="bookmark-btn" id="bookmark-btn" onclick="app.toggleBookmark()">
-                    <i class="fas fa-bookmark"></i>
+                    <span id="bm-icon">🔖</span>
                 </button>
                 <button class="nav-btn" style="color: var(--palette-review); border-color: var(--palette-review);" onclick="app.markReview()">Review</button>
-                <button class="nav-btn toggle-palette" onclick="app.togglePalette()">☰</button>
+                <button class="nav-btn" onclick="app.togglePalette()">☰</button>
             </div>
             <button class="nav-btn primary" onclick="app.nextQuestion()">Next</button>
         </footer>
@@ -165,7 +205,7 @@
             
             <div class="stat-row">
                 <span>Total Questions</span>
-                <span id="res-total" style="font-weight:bold;">31</span>
+                <span id="res-total" style="font-weight:bold;">35</span>
             </div>
             <div class="stat-row">
                 <span>Attempted</span>
@@ -176,230 +216,378 @@
                 <span id="res-accuracy" style="font-weight:bold; color:var(--primary);">0%</span>
             </div>
 
-            <button class="btn-primary" onclick="location.reload()">Back to Home</button>
+            <button class="btn-outline" onclick="location.reload()">Back to Home</button>
         </div>
+
+        <div id="bookmark-report" style="max-width: 600px; margin: 0 auto; padding-bottom: 50px;"></div>
     </div>
 
 <script>
-// --- DATA: Transcribed from Images 1109-1139 ---
+/**
+ * Data Range: 1140 - 1174
+ */
 const rawData = [
-    {id: 1109, question: "The apparatus used to determine water content required to prepare cement water paste of standard consistency is", options: ["Blain's air permeability apparatus", "Le Chatelier's apparatus", "Vicat's apparatus", "Any of these"], ans: 2, tag: "NWRD SHIFT 1, 25.11.2016", explanation: "Vicat's apparatus is used to determine consistency and initial / final setting times of cement pastes.<br>Amount of water used to make paste of normal consistency is about 25-30% generally.<br>"},
-    {id: 1110, question: "Compressive strength developed by concrete made with ordinary Portland cement at the fourteenth day after casting is about % of its 28 days compressive strength.", options: ["None of these", "37", "85", "70"], ans: 2, tag: "NWRD SHIFT 1, 25.11.2016", explanation: "Strength gain table:<br>1 day: 16%<br>3 days: 40%<br>7 days: 65%<br>14 days: 90% (Closest option is 85%)<br>28 days: 99%<br>"},
-    {id: 1111, question: "Which of the following statement is true?", options: ["The first compound of cement which first react with water is C₂S.", "If the particles of sand are fine, bulking is less.", "Curing of concrete increase its shrinkage.", "Adding gypsum in cement increases the setting time"], ans: 3, tag: "UPRVUNL JE 2014", explanation: "Generally, gypsum is added in the range of 2%-3% to cement for delaying the setting time of cement.<br>Statement (a) is false, C3A reacts first."},
-    {id: 1112, question: "Reducing the water-cement ratio :", options: ["Increase to creaps", "Increase the leakage", "Reduce to fast resistance", "Increase to wearing resistance"], ans: 3, tag: "UPRVUNL JE 2014", explanation: "If water cement ratio decrease then workability will reduce but compressive strength will increases.<br>Increased strength leads to increased wearing resistance."},
-    {id: 1113, question: "Which of the following mixture is fused to make high alumina cement?", options: ["Lime stone, bauxite or gypsum", "Lime stone, gypsum, bauxite clay and chalk", "Lime stone, gypsum and soil clay", "Lime stone and bauxite"], ans: 3, tag: "UPRVUNL JE 2014", explanation: "High alumina cement = Bauxite (40%), lime stone (40%), iron oxide (15%).<br>Initial setting time - 3.5 to 4 hours.<br>Final setting time - 5 to 5.5 hours."},
-    {id: 1114, question: "Low heat cement contains lower percentage of which of the following?", options: ["C₃A", "C₂S", "C₃S", "C₄AF"], ans: 0, tag: "HPSSC JE Code 519/2018", explanation: "Low heat cement contains C₃A lower in percentage compare to C₂S because heat of hydration produced by C₃A is more compare to C₂S."},
-    {id: 1115, question: "Which type of cement is obtained by mixing Portland cement clinker, gypsum and granulated blast furnace slag in suitable proportions and grinding?", options: ["Ordinary Portland cement", "Portland slag cement", "Quick setting cement", "Sulphate resisting cement"], ans: 1, tag: "DMRC JE 19.2.2020 (Evening)", explanation: "Portland slag cement is produced by inter grinding cement clinkers, hard burnt gypsum and granulated blast furnace slag.<br>Properties: Higher resistance against chemical attack, Low heat of hydration."},
-    {id: 1116, question: "When kept in upright position, the dimensions in cm (in sequence of top dia, height and bottom dia) of the slump cone used for determining workability by slump test are :", options: ["10, 20, 30", "10, 30, 20", "30, 20, 10", "20, 30, 10"], ans: 1, tag: "HPSSC JE CODE 552/2018", explanation: "The apparatus consists of a metallic mould shape of frustum having bottom dia 20 cm, top dia 10 cm & height 30 cm.<br>"},
-    {id: 1117, question: "The type of cement, most commonly available in open market in Himachal Pradesh is :", options: ["OPC", "White Cement", "Fibre Cement", "PPC"], ans: 3, tag: "HPSSC JE CODE 552/2018", explanation: "Portland pozzolana cement (PPC) is mostly available in open market in Himachal Pradesh. It is used where more freezing, thawing and durability is required."},
-    {id: 1118, question: "Which of the following does not belong to bogue compounds?", options: ["Tri-calcium aluminate", "Di-calcium silicate", "Tetra-calcium alumino ferrate", "Di-calcium aluminate"], ans: 3, tag: "HPSSC JE Code 545/2018", explanation: "Bogue's compounds are: C3A, C4AF, C3S, and C2S. Di-calcium aluminate is NOT one."},
-    {id: 1119, question: "The Silica in portland cement is:", options: ["10 to 20%", "20 to 25%", "25 to 40%", "40 to 60%"], ans: 1, tag: "HPSSC JE CODE 502/2018", explanation: "Chemical composition of cement:<br>Lime (CaO): 62-67%<br>Silica (SiO₂): 17-25%<br>Alumina (Al₂O₃): 3-8%"},
-    {id: 1120, question: "How much quantity of gypsum is added during the manufacturing of Portland cement?", options: ["3 to 5%", "1 to 2%", "3 to 6%", "2 to 4%"], ans: 0, tag: "HSSC JE 12.4.2018", explanation: "Generally, gypsum is added in the range of 3-5% to cement for delaying the setting time of cement."},
-    {id: 1121, question: "Which of the following Bogue's compounds of cement liberates maximum heat of hydration?", options: ["C₃A", "C₂S", "C₃S", "C₄AF"], ans: 0, tag: "SSC JE 2012", explanation: "Heat of hydration data:<br>C₃A: 865 J/gm (Highest)<br>C₃S: 500 J/gm<br>C₂S: 260 J/gm (Lowest)"},
-    {id: 1122, question: "As per IS : 456-2000, the organic content of water used for making concrete should NOT be more than", options: ["100 mg/L", "150 mg/L", "200 mg/L", "250 mg/L"], ans: 2, tag: "SSC JE 2012", explanation: "As per IS : 456-2000, the organic content of water used for making concrete should NOT be more than 200mg/L."},
-    {id: 1123, question: "Soundness test of cement determines", options: ["Quality of free lime", "Ultimate strength", "Durability", "Initial setting time"], ans: 0, tag: "SSC JE 2013", explanation: "Soundness test detects the presence of uncombined lime (free lime) and magnesia in cement.<br>"},
-    {id: 1124, question: "For ordinary Portland cement, the initial setting time should not be less than:", options: ["10 minutes", "30 minutes", "60 minutes", "600 minutes"], ans: 1, tag: "SSC JE 2013", explanation: "For Ordinary Portland Cement (OPC), initial setting time should not be less than 30 minutes and final setting time not more than 10 hours."},
-    {id: 1125, question: "The main ingredients of Portland cement are:", options: ["Lime and Silica", "Lime and Alumina", "Silica and Alumina", "Lime and Iron"], ans: 0, tag: "SSC JE 2014", explanation: "Lime (CaO) ~63% and Silica (SiO2) ~20% are the two major constituents of Portland Cement."},
-    {id: 1126, question: "Specific gravity of OPC is generally:", options: ["4.92", "3.15", "2.10", "1.75"], ans: 1, tag: "SSC JE 2014", explanation: "The specific gravity of Ordinary Portland Cement is generally taken as 3.15."},
-    {id: 1127, question: "In concrete, if the maximum size of aggregate is increased, the workability:", options: ["Increases", "Decreases", "Remains same", "None of these"], ans: 0, tag: "SSC JE 2015", explanation: "For the same water-cement ratio, larger aggregate has less surface area, requiring less water for lubrication, thus increasing workability."},
-    {id: 1128, question: "One bag of cement (50 kg) is equal to:", options: ["0.023 m³", "0.035 m³", "0.050 m³", "0.025 m³"], ans: 1, tag: "SSC JE 2016", explanation: "Volume of 50kg cement = Mass / Density = 50 / 1440 = 0.0347 m³ ≈ 0.035 m³ (35 Liters)."},
-    {id: 1129, question: "To determine the modulus of rupture, the size of test specimen used is:", options: ["150x150x500 mm", "100x100x500 mm", "150x150x700 mm", "100x100x700 mm"], ans: 2, tag: "SSC JE 2016", explanation: "For modulus of rupture (flexural strength), beam specimens of size 150x150x700 mm are typically used.<br>"},
-    {id: 1130, question: "The property of fresh concrete, in which the water in the mix tends to rise to the surface while placing and compacting, is called:", options: ["Segregation", "Bleeding", "Bulking", "Creep"], ans: 1, tag: "SSC JE 2016", explanation: "Bleeding is a form of segregation where water comes out to the surface of the concrete, being the lightest ingredient."},
-    {id: 1131, question: "Identify the correct statement:", options: ["White cement is suitable for ordinary work", "Pozzolana cement is grey in colour", "C3S is responsible for 28 day strength", "C3A is responsible for 28 day strength"], ans: 2, tag: "SSC JE 2016", explanation: "C3S (Tricalcium Silicate) is responsible for early strength (first 28 days). C2S contributes to ultimate strength."},
-    {id: 1132, question: "Workability of concrete is measured by:", options: ["Vicat apparatus test", "Slump test", "Minimum void method", "Talbot Richard test"], ans: 1, tag: "SSC JE 2016", explanation: "Slump test is the most common field test to measure the workability (consistency) of fresh concrete.<br>"},
-    {id: 1133, question: "Le-Chatelier's method can be used to determine:", options: ["Fineness of cement", "Fineness of aggregate", "Soundness of cement", "Compressive strength"], ans: 2, tag: "SSC JE 2016", explanation: "Le-Chatelier's apparatus is used to determine the soundness of cement (expansion due to free lime)."},
-    {id: 1134, question: "According to IS 456, the approximate estimated flexural strength of concrete of grade M25 is:", options: ["3.5 MPa", "2.5 MPa", "4.5 MPa", "5.5 MPa"], ans: 0, tag: "SSC JE 2016", explanation: "Flexural strength (fcr) = 0.7 * √fck. For M25: 0.7 * √25 = 0.7 * 5 = 3.5 MPa."},
-    {id: 1135, question: "The entrained air in concrete:", options: ["Increases workability", "Decreases workability", "Decreases resistance to weathering", "Increases strength"], ans: 0, tag: "SSC JE 2016", explanation: "Air entrainment acts like ball bearings, increasing workability and resistance to freezing/thawing, but slightly reduces strength."},
-    {id: 1136, question: "The standard consistency of cement paste is defined as consistency which will permit a Vicat plunger to penetrate to a depth of:", options: ["33-35 mm from top", "33-35 mm from bottom", "40-45 mm from top", "5-7 mm from bottom"], ans: 3, tag: "SSC JE 2017", explanation: "Standard consistency permits Vicat plunger to penetrate to a depth of 33-35 mm from the TOP, or 5-7 mm from the BOTTOM. (Note: Check wording carefully, usually stated as 5-7mm from bottom)."},
-    {id: 1137, question: "Fineness of cement is measured in the units of:", options: ["Volume / mass", "Mass / volume", "Area / mass", "Mass / area"], ans: 2, tag: "SSC JE 2017", explanation: "Fineness is expressed as specific surface area (cm²/gm or m²/kg), which is Area / Mass."},
-    {id: 1138, question: "Consistency of concrete can be measured by:", options: ["Finness modulus", "Kelly ball test", "Viscosity meter", "None"], ans: 1, tag: "SSC JE 2017", explanation: "Kelly ball test is a simple field method for determining the consistency (workability) of fresh concrete."},
-    {id: 1139, question: "Generally the strength of concrete is considered as:", options: ["Tensile strength", "Compressive strength", "Flexural strength", "Shear strength"], ans: 1, tag: "SSC JE 2017", explanation: "Concrete is strong in compression and weak in tension. Its 'grade' (e.g., M20) refers to its characteristic compressive strength."}
+    {id: 1140, question: "The standard consistency test is done in a", options: ["Blaine's apparatus", "Le-Chatelier's apparatus", "Vane apparatus", "Vicat's apparatus"], ans: 3, tag: "SSC JE 2011 (Evening)", explanation: "The standard consistency test is done in vicat's apparatus.\nThis test to be conducted in controlled condition of temp 27 ± 2°C and humidity 65 ± 5%."},
+    {id: 1141, question: "The quantity of Gypsum added in cement varies from 2 to 3% will depend upon the quantity of?", options: ["C₃A in cement", "C₄AF in cement", "C₃S in cement", "C₃S and C₂S in cement"], ans: 0, tag: "MESCOM AE 2017", explanation: "The reaction of pure C₃A with water is very fast and may lead to flash set. Gypsum is added at time of grinding to prevent this flash set."},
+    {id: 1142, question: "Gypsum is added to cement", options: ["To prevent cracks", "To help C₂S and C₃S", "To give a uniform texture", "To counteract C₃A"], ans: 3, tag: "SSC JE 2007 / SJVNL JE 07.10.2018", explanation: "C₃A is about 5-11% of cement. It rapidly react with water and is responsible for flash set of finely grounded clincker. The rapidity of action is regulated by the addition of 2-3 % of Gypsum at the time of griding cement."},
+    {id: 1143, question: "Commonly used raw materials in manufacturing cement is", options: ["slate", "sand stone", "lime stone", "basalt"], ans: 2, tag: "MIZORAM PSC JE 26 MARCH 2010 PAPER-I", explanation: "Lime (CaO) constitutes 60-67% of the raw material ingredients. Other materials: Silica (17-25%), Alumina (3-8%)."},
+    {id: 1144, question: "The maximum range of the chemicals in cement is", options: ["silica (SiO₂)", "Alumina (Al₂O₃)", "magnesia (MgO)", "Lime (CaO)"], ans: 3, tag: "MIZORAM PSC JE 26 MARCH 2010 PAPER-I", explanation: "O.P.C. has the following approximate chemical composition:\nLime (CaO): 60-63%\nSilica (SiO₂): 17-25%\nAlumina (Al₂O₃): 3-8%\nIron oxide: 0.5-6%\nMagnesia: 1.5-3%"},
+    {id: 1145, question: "The period of storage of cement when stored in bags should not exceed more than", options: ["1 month", "2 months", "3 months", "4 months"], ans: 2, tag: "MIZORAM PSC JE 26 MARCH 2010 PAPER-I", explanation: "It is preferred that the cement should not be store for more than 3 months. However, if it is stored more than 3 months the strength of cement should be tested before using it."},
+    {id: 1146, question: "Hydrophobic cement relates with IS code of:", options: ["IS : 8041 - 1900", "IS : 6452 - 1989", "IS : 8043 - 1991", "IS : 6909 - 1990"], ans: 2, tag: "LMRC JE 2015", explanation: "Hydrophilic Portland cement IS 8043-1991\nWhite Portland cement IS 8042\nRapid hardening Portland cement IS 8041."},
+    {id: 1147, question: "Match the items in List 1 (Property of cement) with those under List 2 (Method for conduct of test) using the codes in the list.\nList 1:\nP. Soundness Test, Q. Fineness, R. Setting time, S. Tensile strength\nList 2:\n1. Vicat's Apparatus test, 2. Le-Chatelier Apparatus, 3. Briquette test, 4. Air permeability method", options: ["P-4, Q-2, R-3, S-1", "P-1, Q-4, R-2, S-1", "P-3, Q-4, R-2, S-1", "P-2, Q-4, R-1, S-3"], ans: 3, tag: "SSC JE Civil 11.12.2020 / SSC JE 25.09.2019", explanation: "P. Soundness Test -> 2. Le-Chatelier Apparatus\nQ. Fineness -> 4. Air permeability method\nR. Setting time -> 1. Vicat's Apparatus\nS. Tensile strength -> 3. Briquette test"},
+    {id: 1148, question: "The major compounds in Ordinary Portland Cement responsible for its strength are:", options: ["Tricalcium silicate and Dicalcium silicate", "Tetracalcium alumino ferrite", "Tricalcium aluminate", "Dicalcium silicate and Tetracalcium alumino ferrite"], ans: 0, tag: "SSC JE Civil 11.12.2020 (Evening)", explanation: "Tricalcium silicate (C₃S): Supposed to be the best cementing material. 25-50% of cement. Hydrates rapidly generating high heat and early hardness/strength.\nDicalcium Silicate (C₂S): 25-40%. Hydrates slowly, takes long time to add strength (progressive strength)."},
+    {id: 1149, question: "The calcined product in cement production is known as-", options: ["gypsum", "ash", "silica", "Clinker"], ans: 3, tag: "SSC JE 2019 (Evening)", explanation: "Clinker produced by calcining to incipient fusion, an intimate and properly proportioned mixture of argillaceous and calcareous materials. The size of clinker varies from 5-10mm."},
+    {id: 1150, question: "For under-water construction .......... cement is used.", options: ["expansive", "ordinary portland", "portland pozzolona", "quick setting"], ans: 3, tag: "SSC JE 2019 (Evening)", explanation: "Quick Setting Cement— The quantity of gypsum is reduced and small percentage of aluminium sulphate is added. It is used when concrete is to be laid under water or in running water.\nInitial setting time = 5 minutes\nFinal setting time = 30 minutes"},
+    {id: 1151, question: "What is the percentage of sulphur trioxide in ordinary Portland cement?", options: ["1% to 2%", "60% to 65%", "17% to 25%", "3.5% to 9%"], ans: 0, tag: "SSC JE 23.09.2019 (Morning)", explanation: "Constituents of Portland Cement:\nLime: 60-65%\nSilica: 17-25%\nAlumina: 3-8%\nIron Oxide: 0.5-6%\nMagnesia: 0.5-4%\nSulphur trioxide (SO₃): 1-2% (Makes cement sound)\nAlkalies: 0.5-1.3%"},
+    {id: 1152, question: "The type of cement used in lining of deep tube wells is :", options: ["Blast furnace slag cement", "Portland pozzolana cement", "Oil well cement", "High alumina cement"], ans: 1, tag: "SSC JE 23.09.2019 (Morning)", explanation: "Portland pozzolana cement is used in lining of deep tube wells. It is prepared by grinding pozzolanic clinker with Portland cement. It has high resistance to various chemical attacks on concrete. Also used in marine structures, sewage works, dams."},
+    {id: 1153, question: "How many types of chemical admixture are there?", options: ["2", "3", "4", "5"], ans: 2, tag: "SSC JE 24.1.2018, Morning Shift", explanation: "There are following 4 types of chemical admixtures for concrete:\n(1) Air - Entraining Admixture.\n(2) Accelerating Admixture.\n(3) Water reducing admixture.\n(4) Retarding admixture."},
+    {id: 1154, question: "Which of the following are the specifications of a cement bag for storage?\nA. weight 50 kg\nB. height 18 cm\nC. plan area 3000 sq. cm\nD. volume 35 liters", options: ["A and B Only", "B and C only", "A, B and C only", "A, B, C and D"], ans: 3, tag: "SSC JE 24.1.2018, Morning Shift", explanation: "Specification of a cement bag for storage:\n• Weight of a bag of cement is 50 kg.\n• Volume of a bag of cement is 35 litre or 0.035 m³.\n• Plan area is 3000 cm².\n• Height of a bag of cement is taken as 18cm."},
+    {id: 1155, question: "The percentage of water for normal consistency is ..........", options: ["5% to 15%", "10% to 25%", "15% to 25%", "20% to 30%"], ans: 3, tag: "SSC JE 2.3.2017, Evening Shift", explanation: "The percentage of water for normal consistency is 20-30%. Standard consistency is defined as that consistency which will permit a vicat plunger having 10 mm dia and 50 mm length to penetrate to a depth of 33-35 mm from the top of the mould."},
+    {id: 1156, question: "The compound of Portland cement which react immediately with water and also sets first is ..........", options: ["Tri-calcium silicate", "Di-calcium silicate", "Tri-calcium aluminate", "Tetra calcium alumino ferrite"], ans: 2, tag: "SSC JE 2.3.2017, Evening Shift", explanation: "Tricalcium Aluminate (C₃A) – The reaction of C₃A with water is very fast and may lead to and immediate setting of paste and this process is termed as flash set."},
+    {id: 1157, question: "For the construction of thin R.C.C. structures the type of cement to be avoided is ..........", options: ["ordinary Portland cement", "rapid hardening cement", "low heat cement", "blast furnace slag cement"], ans: 1, tag: "SSC JE 2.3.2017, Evening Shift", explanation: "Rapid hardening cement is used in cold weathering condition, pavement construction. It is unsuitable for this RCC structure (thin RCC)."},
+    {id: 1158, question: "Percentage of pozzolanic material containing clay upto 80% used for the manufacture of pozzolana cement is ..........", options: ["30%", "40%", "50%", "60%"], ans: 0, tag: "SSC JE 2.3.2017, Evening Shift", explanation: "Portland pozzolana cement (IS : 1489-1991) (Part 1 and 2): It is manufactures percentage of pozzolanic material containing clay up to 80% and pozolonic cement is used 30%."},
+    {id: 1159, question: "Pick up the incorrect statement applicable to the field test of good cement.", options: ["When one thrusts one's hand into a bag of cement, one should feel warm", "The colour of the cement is bluish", "A handful of cement thrown into a bucket of water should sink immediately", "All options are correct"], ans: 3, tag: "SSC JE 2.3.2017, Evening Shift", explanation: "Field test of good cement:\n(i) Colour should be greenish gray.\n(ii) Should get cool feeling when thrusted hand in bag.\n(iii) When we throw the cement on a bucket full of water before it sinks the particles should float for sometime.\nAll options given in question describe incorrect behavior (Warm, Bluish, Sink immediately), hence All options are correct (as incorrect statements)."},
+    {id: 1160, question: "An ordinary Portland cement when tested for its fineness, should not leave any residue on I.S. Sieve No. 9, more than ...........", options: ["5%", "10%", "15%", "20%"], ans: 1, tag: "SSC JE 2.3.2017, Evening Shift", explanation: "A good portland cement when tested for fineness, the percentage of residue left after sinking in sieve should not exceed 10%."},
+    {id: 1161, question: "Hardening of cement occurs at ...........", options: ["rapid rate during the first few days and afterwards it continues to increase at a decreased rate", "slow rate during the first few days and afterwards it continues to increase at a rapid rate", "uniform rate throughout its age", "None of these"], ans: 0, tag: "SSC JE 2.3.2017, Evening Shift", explanation: "Hardening rate during the first few day and afterward if continuous to increase at a decrease rate. Hardening refers to the gain of strength of a set of cement paste."},
+    {id: 1162, question: "The main purpose of the soundness test of the cement is to determine the ......", options: ["Change in volume of cement after setting", "strength", "fineness", "time taken to harden"], ans: 0, tag: "SSC JE 25.1.2018, Morning Shift", explanation: "Soundness test refers to the ability of cement paste to retain its volume after it has get hardened. This is ensured by limiting the quantities of free lime and magnesia."},
+    {id: 1163, question: "As water cement ratio increases, ......... also increases.", options: ["Compressive strength", "Tensile strength", "Bleeding", "Workability"], ans: 3, tag: "SSC JE 25.1.2018, Morning Shift", explanation: "In general, a water cement ratio of 0.45 to 0.6 is used. Higher the water/cement ratio, Higher will be workability but strength decreases as water/cement ratio increases. (Wait, Question says 'also increases'. Workability increases. Strength decreases)."},
+    {id: 1164, question: "How many methods of ferro cementing are there?", options: ["3", "2", "4", "6"], ans: 0, tag: "SSC JE 25.1.2018, Morning Shift", explanation: "There are 3 methods of ferro cementing :-\n(a) Armature method.\n(b) Closed mould system.\n(c) Integrated mould system."},
+    {id: 1165, question: "Initial setting time of rapid-hardening Portland cement is nearly:", options: ["half a minute", "5 minutes", "30 minutes", "45 minutes"], ans: 2, tag: "SSC JE 22.1.2018, Evening Shift", explanation: "According to IS 8041-1990 the initial setting time of rapid hardening Portland cement is nearly about 30 minute. And the final setting time is 10 hours."},
+    {id: 1166, question: "Which of the following is calcareous raw material used in the cement production?", options: ["Cement rock", "Lime stone", "Marine shells", "All option are correct"], ans: 3, tag: "SSC JE 29.01.2018, Evening Shift", explanation: "Calcareous raw materials are lime stone, and chalk etc. Argillaceous raw materials are clay, shells, slate etc. Marine shell & cement rock contain both the calcareous and argillaceous components."},
+    {id: 1167, question: "Water cement ratio is", options: ["volume of water to that of cement", "weight of water to that of cement", "Both 'volume of water to that of cement' and 'weight of water to that of cement'", "weight of concrete to that of water"], ans: 1, tag: "SSC JE 29.01.2018, Evening Shift", explanation: "The water cement ratio (w/c ratio) is the ratio of quantity of water to the cement. This may be given either in the form of ratio of their weights or ratio of their volume. Usually taken as weight ratio."},
+    {id: 1168, question: "The compound constituent of cement abbreviated by C₃A represents:", options: ["tricalcium alumino ferrite", "tricalcium aluminate", "tricalcium silicate", "dicalcium silicate"], ans: 1, tag: "SSC JE 29.01.2018, Evening Shift", explanation: "C₃A stands for the tricalcium aluminate. This causes the flash setting of cement. It does also have very high heat of hydration."},
+    {id: 1169, question: "For construction of structures in sea water, the cement generally preferred to is", options: ["Portland-pozzolana cement", "quick setting cement", "low heat portland cement", "None of these"], ans: 0, tag: "SSC JE 29.01.2018, Evening Shift", explanation: "Portland – pozzolana cement is composed of 10-15% puzzolanic materials. Used in construction of structure near sea sites because it has high water tightness, low heat of hydration & high resistance against Cl₂ & SO₄."},
+    {id: 1170, question: "The cement compound that reacts and sets immediately after addition of water is ...........", options: ["C₂S", "C₃A", "C₃S", "C₄AF"], ans: 1, tag: "SSC JE 25.01.2018, Evening Shift", explanation: "C₃A (Tricalcium aluminate) reacts immediately with water and set early. Responsible for flash setting."},
+    {id: 1171, question: "Di-calcium silicate (C₂S)", options: ["hydrates rapidly", "generates less heat of hydration", "hardens rapidly", "provides less ultimate strength to cement"], ans: 1, tag: "SSC JE 25.01.2018, Evening Shift", explanation: "Dicalcium Silicate (C₂S) provides the progressive strength to the cement. C₂S has minimum heat of hydration as compare to other Bogue's compounds."},
+    {id: 1172, question: "In fineness test of rapid hardening Portland cement the residue on I.S. sieve No. 9 should not be more than", options: ["0.01", "0.05", "0.1", "0.15"], ans: 1, tag: "SSC JE 25.01.2018, Evening Shift", explanation: "Rapid hardening cement attains it's strength rapidly than normal cements. It's residue by weight is not to be exceed 5% when sieved through IS sieve number 9. (5% = 0.05)"},
+    {id: 1173, question: "Identify the correct statements.", options: ["White cement is unsuitable for ordinary work.", "Pozzolana cement is grey in colour", "C₃S is tricalcium silicate", "Strength of cement should not be disturbed until it is to be used"], ans: 2, tag: "SSC JE 25.01.2018, Evening Shift", explanation: "C₃S is tricalcium silicate. It is the best cementing property of Bogue's compound present in cement.\nWhite cement can be used for the ordinary work. It is same as ordinary Portland cement. The only difference is that in white cement Fe₂O₃ is very less."},
+    {id: 1174, question: "To hydrate 500 kg cement fully water needed is ...............", options: ["100 kg", "110 kg", "120 kg", "130 kg"], ans: 3, tag: "SSC JE 4.3.2017, Morning Shift", explanation: "According to IS standard for fully (complete) hydration of cement required water is 25-27%.\nRequired water = 500 x (26/100) = 130 kg."}
 ];
 
-// --- APP LOGIC ---
 const app = {
-    currentQ: 0,
-    activeList: [],
-    answers: {},
-    reviews: new Set(),
-    timer: null,
-    timeLeft: 7200,
+    questions: [], 
+    isBookmarkMode: false,
+    
+    state: {
+        currentIndex: 0,
+        answers: {},
+        bookmarks: [],
+        review: [],
+        visited: [],
+        timeLeft: 7200, 
+        timerId: null
+    },
 
-    startTest: (mode) => {
-        if (mode === 'bookmark') {
-            const saved = JSON.parse(localStorage.getItem('cement_bookmarks') || '[]');
-            if (saved.length === 0) return alert("No bookmarks found!");
-            app.activeList = rawData.filter(q => saved.includes(q.id));
+    init: function() {
+        // Load Bookmarks from LocalStorage
+        this.state.bookmarks = JSON.parse(localStorage.getItem('cementTestBookmarks_Part2')) || [];
+
+        // Load History
+        const history = JSON.parse(localStorage.getItem('cementTestHistory_Part2')) || [];
+        const historyList = document.getElementById('history-list');
+        if (history.length === 0) {
+            historyList.innerHTML = '<p style="text-align:center; padding:10px; color:#999;">No previous tests found.</p>';
         } else {
-            app.activeList = [...rawData];
+            history.forEach((h, i) => {
+                historyList.innerHTML += `
+                    <div class="history-item">
+                        <span>${h.date} (${h.mode})</span>
+                        <span class="history-stat">${h.score}/${h.total} (${h.percent}%)</span>
+                    </div>
+                `;
+            });
+        }
+    },
+
+    startTest: function() {
+        this.questions = rawData; 
+        this.isBookmarkMode = false;
+        this.resetState();
+        this.launchInterface();
+    },
+
+    startBookmarkTest: function() {
+        const saved = JSON.parse(localStorage.getItem('cementTestBookmarks_Part2')) || [];
+        if (saved.length === 0) {
+            alert("No bookmarks found! Bookmark some questions during a full test first.");
+            return;
         }
         
-        app.currentQ = 0;
-        app.answers = {};
-        app.reviews = new Set();
-        document.getElementById('start-screen').classList.remove('active');
-        document.getElementById('test-screen').classList.add('active');
-        app.loadQuestion();
-        app.startTimer();
-        app.updatePalette();
+        // Filter questions that are in the bookmark list
+        this.questions = rawData.filter(q => saved.includes(q.id));
+        this.isBookmarkMode = true;
+        this.resetState();
+        
+        // Keep the bookmark IDs loaded so we can see them active
+        this.state.bookmarks = saved; 
+        this.state.timeLeft = this.questions.length * 120; // 2 mins per question
+        
+        this.launchInterface();
     },
 
-    loadQuestion: () => {
-        const q = app.activeList[app.currentQ];
-        const area = document.getElementById('question-area');
-        const isAns = app.answers[q.id] !== undefined;
-        const userOpt = app.answers[q.id];
-        const isBookmarked = (JSON.parse(localStorage.getItem('cement_bookmarks') || '[]')).includes(q.id);
+    resetState: function() {
+        this.state.currentIndex = 0;
+        this.state.answers = {};
+        this.state.review = [];
+        this.state.visited = [];
+        // Note: We do NOT reset bookmarks here as we load them from storage
+        this.state.bookmarks = JSON.parse(localStorage.getItem('cementTestBookmarks_Part2')) || [];
+        this.state.timeLeft = this.isBookmarkMode ? this.state.timeLeft : 7200;
+    },
 
-        document.getElementById('bookmark-btn').classList.toggle('active', isBookmarked);
+    launchInterface: function() {
+        document.getElementById('start-screen').classList.remove('active');
+        document.getElementById('result-screen').classList.remove('active');
+        document.getElementById('test-screen').classList.add('active');
+        
+        this.renderGrid();
+        this.loadQuestion(0);
+        this.startTimer();
+    },
 
-        area.innerHTML = `
-            <div style="background:white; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.05);">
-                <div class="q-header">
-                    <span style="font-weight:bold; color:var(--primary);">Question ${app.currentQ + 1} / ${app.activeList.length}</span>
-                    <span class="exam-tag">${q.tag}</span>
-                </div>
-                <div class="q-text">${q.question}</div>
-                <ul class="options-list">
-                    ${q.options.map((opt, i) => `
-                        <li class="option-item ${isAns ? (i===q.ans ? 'correct' : (i===userOpt ? 'wrong' : 'disabled')) : ''}" 
-                            onclick="app.handleAnswer(${i})">
-                            <div class="option-circle">${['A','B','C','D'][i]}</div>
-                            ${opt}
-                        </li>
-                    `).join('')}
-                </ul>
-                <div class="solution-box ${isAns ? 'visible' : ''}">
-                    <div class="sol-title"><i class="fas fa-lightbulb"></i> SOLUTION</div>
-                    <div class="sol-text">${q.explanation}</div>
-                </div>
+    startTimer: function() {
+        clearInterval(this.state.timerId); 
+        const timerDisplay = document.getElementById('timer');
+        
+        if(this.isBookmarkMode) {
+             timerDisplay.style.background = "#FFF3E0";
+             timerDisplay.style.color = "#E65100";
+        } else {
+             timerDisplay.style.background = "#eee";
+             timerDisplay.style.color = "#333";
+        }
+
+        this.state.timerId = setInterval(() => {
+            this.state.timeLeft--;
+            if (this.state.timeLeft <= 0) {
+                this.submitTest();
+            }
+            const h = Math.floor(this.state.timeLeft / 3600).toString().padStart(2, '0');
+            const m = Math.floor((this.state.timeLeft % 3600) / 60).toString().padStart(2, '0');
+            const s = (this.state.timeLeft % 60).toString().padStart(2, '0');
+            timerDisplay.innerText = `${h}:${m}:${s}`;
+        }, 1000);
+    },
+
+    loadQuestion: function(index) {
+        if (index < 0 || index >= this.questions.length) return;
+        this.state.currentIndex = index;
+        
+        if (!this.state.visited.includes(index)) this.state.visited.push(index);
+        this.updateGrid();
+
+        const q = this.questions[index];
+        const qArea = document.getElementById('question-area');
+        
+        const userAnswer = this.state.answers[q.id];
+        const isAnswered = userAnswer !== undefined;
+
+        let optionsHtml = '';
+        q.options.forEach((opt, i) => {
+            let className = 'option-item';
+            if (isAnswered) {
+                if (i === q.ans) className += ' correct';
+                else if (i === userAnswer) className += ' wrong';
+            }
+            
+            optionsHtml += `
+                <li class="${className}" onclick="app.checkAnswer(${i})">
+                    <div class="option-circle">${String.fromCharCode(65+i)}</div>
+                    <div>${opt}</div>
+                </li>
+            `;
+        });
+
+        // Check against permanent storage
+        const isBookmarked = this.state.bookmarks.includes(q.id);
+        const bmBtn = document.getElementById('bookmark-btn');
+        bmBtn.classList.toggle('active', isBookmarked);
+
+        qArea.innerHTML = `
+            <div class="q-header">
+                <span class="exam-tag">${q.tag}</span>
+                <span style="font-size:12px; color:#666;">
+                    ${this.isBookmarkMode ? '★ Bookmark Test' : ''} 
+                    Q.${index + 1} / ${this.questions.length}
+                </span>
+            </div>
+            <div class="q-text">
+                <strong>${q.id}.</strong> ${q.question}
+            </div>
+            <ul class="options-list">
+                ${optionsHtml}
+            </ul>
+            <div class="solution-box ${isAnswered ? 'visible' : ''}">
+                <div class="sol-title">Solution:</div>
+                <div class="sol-text">${q.explanation}</div>
             </div>
         `;
-        app.updatePalette();
     },
 
-    handleAnswer: (optIdx) => {
-        const qId = app.activeList[app.currentQ].id;
-        if (app.answers[qId] !== undefined) return;
-        app.answers[qId] = optIdx;
-        app.loadQuestion();
+    checkAnswer: function(selectedIndex) {
+        const q = this.questions[this.state.currentIndex];
+        if (this.state.answers[q.id] !== undefined) return;
+
+        this.state.answers[q.id] = selectedIndex;
+        this.loadQuestion(this.state.currentIndex);
+        this.updateGrid();
     },
 
-    nextQuestion: () => {
-        if (app.currentQ < app.activeList.length - 1) {
-            app.currentQ++;
-            app.loadQuestion();
+    nextQuestion: function() {
+        if (this.state.currentIndex < this.questions.length - 1) {
+            this.loadQuestion(this.state.currentIndex + 1);
         }
     },
 
-    prevQuestion: () => {
-        if (app.currentQ > 0) {
-            app.currentQ--;
-            app.loadQuestion();
+    prevQuestion: function() {
+        if (this.state.currentIndex > 0) {
+            this.loadQuestion(this.state.currentIndex - 1);
         }
     },
 
-    markReview: () => {
-        const qId = app.activeList[app.currentQ].id;
-        if (app.reviews.has(qId)) app.reviews.delete(qId);
-        else app.reviews.add(qId);
-        app.updatePalette();
+    markReview: function() {
+        const id = this.questions[this.state.currentIndex].id;
+        if (this.state.review.includes(id)) {
+            this.state.review = this.state.review.filter(x => x !== id);
+        } else {
+            this.state.review.push(id);
+        }
+        this.updateGrid();
     },
 
-    toggleBookmark: () => {
-        const qId = app.activeList[app.currentQ].id;
-        let bms = JSON.parse(localStorage.getItem('cement_bookmarks') || '[]');
-        if (bms.includes(qId)) bms = bms.filter(id => id !== qId);
-        else bms.push(qId);
-        localStorage.setItem('cement_bookmarks', JSON.stringify(bms));
-        app.loadQuestion();
+    toggleBookmark: function() {
+        const id = this.questions[this.state.currentIndex].id;
+        const btn = document.getElementById('bookmark-btn');
+        
+        if (this.state.bookmarks.includes(id)) {
+            this.state.bookmarks = this.state.bookmarks.filter(x => x !== id);
+            btn.classList.remove('active');
+        } else {
+            this.state.bookmarks.push(id);
+            btn.classList.add('active');
+        }
+        
+        // Save to LocalStorage immediately
+        localStorage.setItem('cementTestBookmarks_Part2', JSON.stringify(this.state.bookmarks));
     },
 
-    updatePalette: () => {
+    renderGrid: function() {
         const grid = document.getElementById('grid-box');
-        grid.innerHTML = app.activeList.map((q, i) => {
-            let cls = 'grid-item';
-            if (i === app.currentQ) cls += ' current';
-            if (app.answers[q.id] !== undefined) cls += ' answered';
-            else if (app.reviews.has(q.id)) cls += ' review';
-            return `<div class="${cls}" onclick="app.jumpTo(${i})">${i + 1}</div>`;
-        }).join('');
+        grid.innerHTML = '';
+        this.questions.forEach((q, i) => {
+            const div = document.createElement('div');
+            div.className = 'grid-item';
+            div.innerText = i + 1;
+            div.onclick = () => {
+                app.loadQuestion(i);
+                if(window.innerWidth <= 768) app.togglePalette();
+            };
+            div.id = `grid-${i}`;
+            grid.appendChild(div);
+        });
     },
 
-    jumpTo: (idx) => {
-        app.currentQ = idx;
-        app.loadQuestion();
-        if (window.innerWidth < 769) app.togglePalette();
+    updateGrid: function() {
+        this.questions.forEach((q, i) => {
+            const el = document.getElementById(`grid-${i}`);
+            el.className = 'grid-item'; 
+            
+            if (i === this.state.currentIndex) el.classList.add('current');
+            
+            if (this.state.review.includes(q.id)) {
+                el.classList.add('review');
+            } else if (this.state.answers[q.id] !== undefined) {
+                el.classList.add('answered');
+            } else if (this.state.visited.includes(i)) {
+                 el.style.border = "1px solid #999";
+            }
+        });
     },
 
-    togglePalette: () => {
+    togglePalette: function() {
         const drawer = document.getElementById('palette-drawer');
         const overlay = document.getElementById('overlay');
-        if (drawer.style.right === '0px' || drawer.classList.contains('open')) {
+        if (drawer.classList.contains('open')) {
             drawer.classList.remove('open');
-            drawer.style.right = '-280px';
             overlay.classList.remove('active');
         } else {
             drawer.classList.add('open');
-            drawer.style.right = '0px';
             overlay.classList.add('active');
         }
     },
 
-    startTimer: () => {
-        app.timer = setInterval(() => {
-            app.timeLeft--;
-            const h = Math.floor(app.timeLeft / 3600);
-            const m = Math.floor((app.timeLeft % 3600) / 60);
-            const s = app.timeLeft % 60;
-            document.getElementById('timer').innerText = 
-                `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-            if (app.timeLeft <= 0) app.submitTest();
-        }, 1000);
+    submitTest: function() {
+        if(!confirm("Are you sure you want to submit?")) return;
+        this.endTest();
     },
 
-    submitTest: () => {
-        clearInterval(app.timer);
-        let correct = 0;
-        app.activeList.forEach(q => {
-            if (app.answers[q.id] === q.ans) correct++;
-        });
-        
-        // Save History
-        const hist = JSON.parse(localStorage.getItem('cement_history') || '[]');
-        hist.unshift({
-            date: new Date().toLocaleDateString(),
-            score: correct,
-            total: app.activeList.length
-        });
-        localStorage.setItem('cement_history', JSON.stringify(hist));
+    exitTest: function() {
+        if(!confirm("Exit test? Progress will be lost.")) return;
+        location.reload();
+    },
 
-        // Show Result
+    endTest: function() {
+        clearInterval(this.state.timerId);
         document.getElementById('test-screen').classList.remove('active');
         document.getElementById('result-screen').classList.add('active');
-        document.getElementById('score-val').innerText = correct;
-        document.getElementById('res-attempted').innerText = Object.keys(app.answers).length;
-        document.getElementById('res-total').innerText = app.activeList.length;
-        document.getElementById('res-accuracy').innerText = Math.round((correct / (Object.keys(app.answers).length || 1)) * 100) + '%';
-    },
 
-    exitTest: () => {
-        if(confirm("Exit test? Progress will be lost.")) location.reload();
-    },
+        let score = 0;
+        let attempted = 0;
+        
+        this.questions.forEach(q => {
+            if (this.state.answers[q.id] !== undefined) {
+                attempted++;
+                if (this.state.answers[q.id] === q.ans) {
+                    score++;
+                }
+            }
+        });
 
-    loadHistory: () => {
-        const hist = JSON.parse(localStorage.getItem('cement_history') || '[]');
-        document.getElementById('history-list').innerHTML = hist.length ? hist.map(h => 
-            `<div style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
-                <span>${h.date}</span>
-                <strong>${h.score}/${h.total}</strong>
-            </div>`
-        ).join('') : '<p style="color:#999">No previous tests taken.</p>';
+        const accuracy = attempted === 0 ? 0 : Math.round((score / attempted) * 100);
+
+        document.getElementById('score-val').innerText = score;
+        document.getElementById('res-attempted').innerText = attempted;
+        document.getElementById('res-accuracy').innerText = accuracy + '%';
+        document.getElementById('res-total').innerText = this.questions.length;
+
+        const historyData = {
+            date: new Date().toLocaleDateString(),
+            score: score,
+            total: this.questions.length,
+            percent: Math.round((score/this.questions.length)*100),
+            mode: this.isBookmarkMode ? 'Bookmarks' : 'Full'
+        };
+        
+        let history = JSON.parse(localStorage.getItem('cementTestHistory_Part2')) || [];
+        history.unshift(historyData);
+        localStorage.setItem('cementTestHistory_Part2', JSON.stringify(history));
+
+        const bmReport = document.getElementById('bookmark-report');
+        
+        if (this.state.bookmarks.length > 0) {
+            let fileHtml = '<div class="report-header">Bookmarked Questions File</div>';
+            
+            // Show all stored bookmarks, not just current test
+            this.state.bookmarks.forEach(bmId => {
+                const q = rawData.find(x => x.id === bmId);
+                if(q) {
+                    fileHtml += `
+                    <div class="report-card">
+                        <span class="report-tag">${q.tag}</span>
+                        <div class="report-q">Q.${q.id} ${q.question}</div>
+                        <div class="report-ans">Correct Ans: ${q.options[q.ans]}</div>
+                        <div class="report-sol"><strong>Solution:</strong> ${q.explanation}</div>
+                    </div>`;
+                }
+            });
+            bmReport.innerHTML = fileHtml;
+        } else {
+            bmReport.innerHTML = '<p style="text-align:center; color:#666; margin-top:20px;">No questions bookmarked yet.</p>';
+        }
     }
 };
 
-// Init
-app.loadHistory();
+app.init();
 </script>
 </body>
 </html>
