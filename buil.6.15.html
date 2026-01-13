@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Civil Engineering Mock Test - Cement</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #007bff;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --text: #212529;
+            --palette-skipped: #6c757d;
+            --palette-answered: #28a745;
+            --palette-review: #6610f2; 
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #eef1f5; color: var(--text); height: 100vh; display: flex; flex-direction: column; }
+
+        /* --- Header --- */
+        header {
+            background: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 100; height: 60px;
+        }
+        .timer-box { font-weight: bold; font-size: 1.1em; color: var(--dark); background: #f0f0f0; padding: 5px 10px; border-radius: 4px; }
+        .submit-btn { background: var(--success); color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .exit-btn { color: var(--danger); font-size: 1.2em; cursor: pointer; margin-right: 10px; }
+
+        /* --- Main Content --- */
+        .main-container { flex: 1; display: flex; overflow: hidden; position: relative; }
+        .quiz-area { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 80px; }
+        
+        .question-card { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .q-meta { display: flex; justify-content: space-between; font-size: 0.85em; color: #666; margin-bottom: 10px; align-items: center; }
+        .exam-tag { background: #e3f2fd; color: #0d47a1; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: 600; }
+        
+        .bookmark-icon { cursor: pointer; color: #ccc; font-size: 1.2em; transition: color 0.2s; padding: 5px; }
+        .bookmark-icon.active { color: var(--warning); }
+
+        .q-text { font-size: 1.05em; font-weight: 600; margin-bottom: 15px; line-height: 1.5; }
+
+        /* Options */
+        .options-list { list-style: none; padding: 0; }
+        .option-item { 
+            display: flex; align-items: center; padding: 12px; margin-bottom: 10px; 
+            border: 1px solid #dee2e6; border-radius: 6px; cursor: pointer; transition: all 0.2s; 
+        }
+        .option-circle { 
+            width: 25px; height: 25px; border: 2px solid #adb5bd; border-radius: 50%; 
+            margin-right: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; 
+            font-size: 12px; font-weight: bold; color: white;
+        }
+        
+        /* Instant Feedback */
+        .option-item.correct { border-color: var(--success); background-color: #d4edda; }
+        .option-item.correct .option-circle { border-color: var(--success); background-color: var(--success); }
+        .option-item.wrong { border-color: var(--danger); background-color: #f8d7da; }
+        .option-item.wrong .option-circle { border-color: var(--danger); background-color: var(--danger); }
+        .option-item.disabled { pointer-events: none; }
+
+        /* Solution */
+        .solution-box { 
+            display: none; background: #fff3cd; border: 1px solid #ffeeba; 
+            padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.9em; line-height: 1.5;
+        }
+        
+        /* Footer */
+        footer {
+            position: absolute; bottom: 0; width: 100%; height: 60px; background: white; border-top: 1px solid #ddd;
+            display: flex; justify-content: space-between; align-items: center; padding: 0 15px; z-index: 90;
+        }
+        .nav-btn { background: var(--primary); color: white; border: none; padding: 8px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .nav-btn:disabled { background: #ccc; }
+        .review-btn { background: white; border: 1px solid var(--palette-review); color: var(--palette-review); }
+        
+        /* Palette Sidebar */
+        .palette-sidebar {
+            position: absolute; right: 0; top: 0; bottom: 60px; width: 280px; background: white; z-index: 95;
+            transform: translateX(100%); transition: transform 0.3s; border-left: 1px solid #ddd; display: flex; flex-direction: column;
+        }
+        .palette-sidebar.open { transform: translateX(0); }
+        .palette-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+        .palette-grid { padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; overflow-y: auto; }
+        .p-item { 
+            height: 35px; display: flex; align-items: center; justify-content: center; 
+            border-radius: 4px; background: #e9ecef; color: #495057; font-size: 0.9em; cursor: pointer; 
+        }
+        .p-item.answered { background: var(--palette-answered); color: white; }
+        .p-item.current { border: 2px solid var(--primary); }
+        .p-item.review { background: var(--palette-review); color: white; border-radius: 50%; }
+        
+        .palette-toggle { 
+            position: absolute; right: 15px; bottom: 80px; background: white; border: 1px solid #ccc; 
+            padding: 10px; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 80; cursor: pointer;
+        }
+
+        /* Screens */
+        .screen { display: none; width: 100%; height: 100%; flex-direction: column; }
+        .screen.active { display: flex; }
+
+        /* Start Screen */
+        #start-screen { align-items: center; justify-content: center; padding: 20px; text-align: center; background: white; overflow-y:auto;}
+        .start-card { max-width: 400px; width: 100%; }
+        .big-btn { 
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            width: 100%; padding: 15px; margin: 10px 0; font-size: 1.1em; border: none; 
+            border-radius: 8px; cursor: pointer; color: white; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .btn-start { background: var(--primary); }
+        .btn-bookmarks { background: var(--warning); color: #212529; }
+        .history-box { margin-top: 20px; text-align: left; max-height: 200px; overflow-y: auto; border: 1px solid #eee; padding: 10px; border-radius: 5px; }
+
+        /* Report Screen */
+        #report-screen { padding: 20px; background: white; overflow-y: auto; }
+        .score-card { text-align: center; padding: 20px; background: #f8f9fa; border-radius: 10px; margin-bottom: 20px; }
+        .score-val { font-size: 2.5em; font-weight: bold; color: var(--primary); }
+        .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .analysis-item { background: white; padding: 10px; border-radius: 5px; text-align: center; border: 1px solid #ddd; }
+
+    </style>
+</head>
+<body>
+
+    <div id="start-screen" class="screen active">
+        <div class="start-card">
+            <h1><i class="fas fa-hard-hat"></i> Building Materials</h1>
+            <h3>Cement (Q1175 - Q1202)</h3>
+            <div style="text-align:left; margin:15px 0; color:#666;">
+                <p><i class="fas fa-check-circle"></i> Total Questions: 28</p>
+                <p><i class="fas fa-clock"></i> Time: 120 Mins</p>
+                <p><i class="fas fa-exclamation-circle"></i> Negative Marking: No</p>
+            </div>
+            
+            <button class="big-btn btn-start" onclick="initTest('full')">
+                <span>Start Full Test</span>
+                <i class="fas fa-play"></i>
+            </button>
+            
+            <button class="big-btn btn-bookmarks" onclick="initTest('bookmark')">
+                <span>Practice Bookmarks</span>
+                <i class="fas fa-bookmark"></i>
+            </button>
+            
+            <div class="history-box">
+                <h4><i class="fas fa-history"></i> Previous Scores</h4>
+                <div id="history-list">
+                    <small>No history yet.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <header>
+            <div class="exit-btn" onclick="confirmExit()"><i class="fas fa-sign-out-alt"></i></div>
+            <div class="timer-box" id="timer">02:00:00</div>
+            <button class="submit-btn" onclick="submitTest()">Submit</button>
+        </header>
+
+        <div class="main-container">
+            <div class="quiz-area" id="quiz-area">
+                </div>
+
+            <div class="palette-toggle" onclick="togglePalette()">
+                <i class="fas fa-th"></i>
+            </div>
+
+            <div class="palette-sidebar" id="palette-sidebar">
+                <div class="palette-header">
+                    <span>Question Palette</span>
+                    <span onclick="togglePalette()" style="cursor:pointer">&times;</span>
+                </div>
+                <div class="palette-grid" id="palette-grid">
+                    </div>
+                <div style="padding: 10px; font-size: 0.8em; border-top: 1px solid #eee;">
+                    <div style="margin-bottom:5px"><span style="display:inline-block;width:10px;height:10px;background:var(--success);border-radius:2px"></span> Answered</div>
+                    <div style="margin-bottom:5px"><span style="display:inline-block;width:10px;height:10px;background:var(--palette-review);border-radius:50%"></span> Review</div>
+                    <div style="margin-bottom:5px"><span style="display:inline-block;width:10px;height:10px;background:#e9ecef;border-radius:2px"></span> Not Visited</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <button class="nav-btn review-btn" onclick="markReview()">Review</button>
+            <div style="display:flex; gap:10px;">
+                <button class="nav-btn" id="prev-btn" onclick="changeQuestion(-1)">Prev</button>
+                <button class="nav-btn" id="next-btn" onclick="changeQuestion(1)">Next</button>
+            </div>
+        </footer>
+    </div>
+
+    <div id="report-screen" class="screen">
+        <div class="start-card" style="margin: 0 auto;">
+            <h2>Test Summary</h2>
+            <div class="score-card">
+                <div class="score-val" id="final-score">0/0</div>
+                <div id="final-accuracy-box">Accuracy: <span id="final-accuracy">0%</span></div>
+            </div>
+            <div class="analysis-grid">
+                <div class="analysis-item">
+                    <h3 style="color:var(--success)" id="report-correct">0</h3>
+                    <small>Correct</small>
+                </div>
+                <div class="analysis-item">
+                    <h3 style="color:var(--danger)" id="report-wrong">0</h3>
+                    <small>Wrong</small>
+                </div>
+                <div class="analysis-item">
+                    <h3 style="color:gray" id="report-skipped">0</h3>
+                    <small>Skipped</small>
+                </div>
+            </div>
+            <button class="big-btn btn-start" onclick="location.reload()">Back to Home</button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        const masterDB = [
+            { id: 1175, text: "The maximum percentage of chemical ingredient of cement is that of .............", options: ["Magnesium oxide", "Iron oxide", "Aluminium", "Lime"], ans: 3, tag: "SSC JE 4.3.2017", explanation: "Lime (CaO): 60-65%<br>Silica (SiO2): 17-25%<br>Alumina: 3-8%" },
+            { id: 1176, text: "Efflorescence in cement is caused due to an excess of", options: ["alumina", "iron oxide", "silica", "alkalies"], ans: 3, tag: "RPSC ACF 2021", explanation: "Efflorescence is caused by excess alkalies. Alumina causes quick setting. Iron oxide gives colour." },
+            { id: 1177, text: "Pick up the incorrect statement from the following.", options: ["Degree of grinding is fineness", "Paste to hard mass is setting", "Soundness does not allow sound transmission", "Heat generated is heat of hydration"], ans: 2, tag: "SSC JE 4.3.2017", explanation: "Statement (c) is incorrect. Soundness refers to volume stability (resistance to expansion), not sound transmission." },
+            { id: 1178, text: "You are asked to construct a massive dam, the type of cement you will use is............", options: ["OPC", "Rapid hardening", "Low heat cement", "Blast furnace slag"], ans: 2, tag: "SSC JE 4.3.2017", explanation: "Low heat cement is used for mass concrete like dams to prevent thermal cracking due to heat of hydration." },
+            { id: 1179, text: "The diameter of the Vicat plunger is 10 mm and its length varies from ...........", options: ["20-30 mm", "30-40 mm", "40-50 mm", "50-60 mm"], ans: 3, tag: "SSC JE 4.3.2017", explanation: "Vicat plunger: Dia 10mm, Length 50mm. Used for consistency test." },
+            { id: 1180, text: "If 1500g cement requires 1875g paste for normal consistency, % of water is...", options: ["20%", "25%", "30%", "35%"], ans: 1, tag: "SSC JE 3.3.2017", explanation: "Water = 1875 - 1500 = 375g. <br>% = (375/1500)*100 = 25%." },
+            { id: 1181, text: "Pozzolana cement is used with confidence for construction of ...............", options: ["Dams", "Massive foundations", "Abutments", "All options are correct"], ans: 3, tag: "SSC JE 4.3.2017", explanation: "PPC is suitable for mass concreting (dams, foundations) and marine works." },
+            { id: 1182, text: "The condition not applicable to water cement ratio law is .................", options: ["Internal moisture continues till complete strength", "Concrete specimens may be tested at any temperature", "Specimens needed to be same age", "Specimens needed to be same size"], ans: 1, tag: "SSC JE 4.3.2017", explanation: "Testing must be done at standard temperature (27±2°C), not 'any' temperature." },
+            { id: 1183, text: "Good variety of cement contains higher percentage of :", options: ["Tricalcium silicate", "Tricalcium Aluminate", "Dicalcium silicate", "None"], ans: 0, tag: "SSC JE 2010", explanation: "High C3S (Alite) provides early strength and is desirable in good cement." },
+            { id: 1184, text: "In ordinary Portland cement, the first one to react with water is:", options: ["C3A", "C2S", "C3S", "C4AF"], ans: 0, tag: "SSC JE 2010", explanation: "C3A reacts immediately (flash set) and releases maximum heat initially." },
+            { id: 1185, text: "Oil well cement IS : CODE :", options: ["8229-1986", "820-1945", "839-1988", "8231-1983"], ans: 0, tag: "Kerala PSC 2019", explanation: "IS 8229-1986 covers Oil Well Cement." },
+            { id: 1186, text: "Initial setting time (in min) for low heat cement is NOT less than:", options: ["30", "120", "90", "60"], ans: 3, tag: "UPRVUNL JE 2019", explanation: "For Low Heat Cement (IS 12600), initial setting time shall not be less than 60 minutes." },
+            { id: 1187, text: "Heat of hydration of low heat Portland cement (7 days) shall NOT be more than:", options: ["75 cal/g", "85 cal/g", "65 cal/g", "55 cal/g"], ans: 2, tag: "UPRVUNL JE 2019", explanation: "7 Days: Max 65 cal/g. <br>28 Days: Max 75 cal/g." },
+            { id: 1188, text: "Unaerated ordinary rapid hardening cement expansion (Le-Chatelier) shall NOT exceed:", options: ["10 mm", "25 mm", "30 mm", "20 mm"], ans: 0, tag: "UPRVUNL JE 2019", explanation: "Soundness by Le-Chatelier method should not exceed 10mm for OPC/Rapid Hardening." },
+            { id: 1189, text: "Cement same as blast furnace but slag is ground wet and separately:", options: ["oilwell cement", "high alumina", "Trief cement", "expansive cement"], ans: 2, tag: "UPRVUNL JE 2019", explanation: "Trief cement uses wet ground slag added to cement at the mixer." },
+            { id: 1190, text: "Time from water addition to complete loss of plasticity (Final Setting) should NOT be greater than:", options: ["500 min", "800 min", "600 min", "700 min"], ans: 2, tag: "UPRVUNL JE 2019", explanation: "Final setting time for OPC max 10 hours (600 minutes)." },
+            { id: 1191, text: "Rapid hardening cement specific surface (Blaine's) must NOT be less than:", options: ["375 m²/kg", "400 m²/kg", "225 m²/kg", "325 m²/kg"], ans: 3, tag: "UPRVUNL JE 2019", explanation: "RH Cement: 3250 cm²/g (325 m²/kg). <br>OPC: 2250 cm²/g." },
+            { id: 1192, text: "In a mortar, the binding material is", options: ["cement", "sand", "surkhi", "cinder"], ans: 0, tag: "BMC TA 2019", explanation: "Mortar = Binder (Cement/Lime) + Fine Aggregate (Sand) + Water." },
+            { id: 1193, text: "Final setting time of cement as per BIS is", options: ["5 hrs", "8 hrs", "10 hrs", "12 hrs"], ans: 2, tag: "Punjab Draftsman", explanation: "Max 10 hours for OPC." },
+            { id: 1194, text: "Initial strength required by cement is primarily due to setting of", options: ["Tri-calcium aluminate", "Di-calcium silicate", "Tri-calcium silicate", "C4AF"], ans: 0, tag: "BSPHCL JE 2019", explanation: "C3A is responsible for initial setting (stiffening). C3S gives early strength." },
+            { id: 1195, text: "After drying, the ordinary cement exhibits the property of", options: ["Efflorescence", "Shrinkage", "Swelling", "Bubbling"], ans: 1, tag: "BSPHCL JE 2019", explanation: "Loss of water causes volume reduction known as drying shrinkage." },
+            { id: 1196, text: "Percentage of di-calcium silicate (C2S) is maximum in:", options: ["OPC", "Rapid hardening", "Low heat cement", "Sulphate resisting"], ans: 2, tag: "BSPHCL JE 2019", explanation: "Low heat cement has increased C2S (slow reacting) and reduced C3S/C3A." },
+            { id: 1197, text: "Which cement is used in structures present in sea shore?", options: ["Sulphate resisting cement", "OPC", "Quick setting", "None"], ans: 0, tag: "ISRO TA 2018", explanation: "SRC resists sulphate attack common in marine environments." },
+            { id: 1198, text: "The mixture of different ingredients of cement, is burnt at", options: ["1000°C", "1200°C", "1400°C", "1600°C"], ans: 2, tag: "SSC JE 2017", explanation: "Clinkering temperature is approx 1400-1500°C." },
+            { id: 1199, text: "Pick up the incorrect statement about C3S:", options: ["Hydrates rapidly", "Generates more heat", "Develops early strength", "Has more resistance to sulphate attack"], ans: 3, tag: "HESCOM AE 2017", explanation: "C3S has POOR resistance to sulphates. C2S is better." },
+            { id: 1200, text: "To produce low heat cements, it is necessary to reduce:", options: ["C3S", "C2S", "C3A", "C4AF"], ans: 2, tag: "KMC 2007", explanation: "C3A produces the most heat per gram. Reducing it lowers heat evolution." },
+            { id: 1201, text: "The unsound cement can undergo :", options: ["large expansion after setting", "cause false set", "reduce workability", "increase durability"], ans: 0, tag: "Gujarat EB 2017", explanation: "Unsoundness = Expansion leading to cracks." },
+            { id: 1202, text: "Le chatelier's device is used for determining", options: ["setting time", "soundness", "tensile strength", "compressive strength"], ans: 1, tag: "DSSSB JE 2019", explanation: "Le Chatelier test measures soundness due to Lime." }
+        ];
+
+        // --- STATE ---
+        let activeDB = []; // This will hold either full DB or Bookmark DB
+        let currentQ = 0;
+        let answers = {};
+        let visited = new Set();
+        let reviews = new Set();
+        let timerInterval;
+        let timeLeft = 0;
+        let isSubmitted = false;
+        let testMode = 'full'; // 'full' or 'bookmark'
+
+        // --- LOCAL STORAGE HELPERS ---
+        function saveLocal(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
+        function getLocal(key) { return JSON.parse(localStorage.getItem(key)) || []; }
+
+        // --- INIT TEST ---
+        function initTest(mode) {
+            testMode = mode;
+            
+            if (mode === 'bookmark') {
+                const bms = getLocal('cement_bookmarks');
+                if (bms.length === 0) {
+                    alert("No bookmarks saved yet! Start a full test and bookmark questions to practice them here.");
+                    return;
+                }
+                // Filter masterDB to only include bookmarked questions
+                activeDB = masterDB.filter(q => bms.includes(q.id));
+            } else {
+                activeDB = [...masterDB];
+            }
+
+            // Reset UI and State
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('quiz-screen').classList.add('active');
+            
+            answers = {};
+            visited = new Set();
+            reviews = new Set();
+            isSubmitted = false;
+            currentQ = 0;
+            timeLeft = mode === 'bookmark' ? activeDB.length * 120 : 7200; // 2 min per Q for bookmarks, else 2 hrs
+            
+            startTimer();
+            loadQuestion(0);
+            renderPalette();
+        }
+
+        // --- QUESTION LOGIC ---
+        function loadQuestion(index) {
+            currentQ = index;
+            visited.add(index);
+            const q = activeDB[index];
+            const area = document.getElementById('quiz-area');
+            
+            const isAnswered = answers[index] !== undefined;
+            const userAns = answers[index];
+            const isBookmarked = getLocal('cement_bookmarks').includes(q.id);
+
+            let html = `
+                <div class="question-card">
+                    <div class="q-meta">
+                        <span>Q.${index + 1} / ${activeDB.length}</span>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                             <span class="exam-tag">${q.tag}</span>
+                             <i class="fas fa-bookmark bookmark-icon ${isBookmarked ? 'active' : ''}" 
+                                onclick="toggleBookmark(${q.id}, this)"></i>
+                        </div>
+                    </div>
+                    <div class="q-text">${q.text}</div>
+                    
+                    <ul class="options-list">
+                        ${q.options.map((opt, i) => {
+                            let className = 'option-item';
+                            if (isAnswered) {
+                                className += ' disabled';
+                                if (i === q.ans) className += ' correct';
+                                if (i === userAns && i !== q.ans) className += ' wrong';
+                            }
+                            return `
+                                <li class="${className}" onclick="handleAnswer(${index}, ${i})">
+                                    <div class="option-circle">${String.fromCharCode(65+i)}</div>
+                                    <span>${opt}</span>
+                                </li>
+                            `;
+                        }).join('')}
+                    </ul>
+
+                    <div class="solution-box" style="display: ${isAnswered ? 'block' : 'none'}">
+                        <span style="font-weight:bold; color:var(--success)">Correct Answer: ${String.fromCharCode(65+q.ans)}</span><br>
+                        <hr style="border:0; border-top:1px solid #e0cda5; margin:5px 0;">
+                        ${q.explanation}
+                    </div>
+                </div>
+            `;
+            area.innerHTML = html;
+            updateButtons();
+            renderPalette();
+        }
+
+        function handleAnswer(qIndex, optIndex) {
+            if (isSubmitted || answers[qIndex] !== undefined) return;
+            answers[qIndex] = optIndex;
+            loadQuestion(qIndex); // Re-render for instant solution
+        }
+
+        function changeQuestion(dir) {
+            const newIndex = currentQ + dir;
+            if (newIndex >= 0 && newIndex < activeDB.length) {
+                loadQuestion(newIndex);
+            }
+        }
+
+        function updateButtons() {
+            document.getElementById('prev-btn').disabled = currentQ === 0;
+            document.getElementById('next-btn').disabled = currentQ === activeDB.length - 1;
+        }
+
+        function markReview() {
+            if (reviews.has(currentQ)) reviews.delete(currentQ);
+            else reviews.add(currentQ);
+            renderPalette();
+        }
+
+        // --- PALETTE & TIMER ---
+        function renderPalette() {
+            const grid = document.getElementById('palette-grid');
+            grid.innerHTML = activeDB.map((_, i) => {
+                let status = '';
+                if (answers[i] !== undefined) status = 'answered';
+                else if (reviews.has(i)) status = 'review';
+                
+                if (i === currentQ) status += ' current';
+                
+                return `<div class="p-item ${status}" onclick="loadQuestion(${i}); togglePalette();">${i+1}</div>`;
+            }).join('');
+        }
+
+        function togglePalette() {
+            document.getElementById('palette-sidebar').classList.toggle('open');
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                const h = Math.floor(timeLeft / 3600);
+                const m = Math.floor((timeLeft % 3600) / 60);
+                const s = timeLeft % 60;
+                document.getElementById('timer').innerText = 
+                    `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                
+                if (timeLeft <= 0) submitTest();
+            }, 1000);
+        }
+
+        // --- SUBMIT ---
+        function submitTest() {
+            clearInterval(timerInterval);
+            isSubmitted = true;
+            
+            let correct = 0;
+            let wrong = 0;
+            
+            Object.keys(answers).forEach(qIdx => {
+                if (answers[qIdx] === activeDB[qIdx].ans) correct++;
+                else wrong++;
+            });
+            
+            const skipped = activeDB.length - (correct + wrong);
+            
+            // Only save history if it's a full test, to keep progress stats clean
+            if (testMode === 'full') {
+                const history = getLocal('cement_history');
+                const date = new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                history.unshift({ date, score: correct, total: activeDB.length });
+                saveLocal('cement_history', history);
+                updateHistoryUI();
+            }
+
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('report-screen').classList.add('active');
+            
+            document.getElementById('final-score').innerText = `${correct} / ${activeDB.length}`;
+            const acc = (correct + wrong) > 0 ? ((correct / (correct+wrong)) * 100).toFixed(1) : 0;
+            document.getElementById('final-accuracy').innerText = `${acc}%`;
+            document.getElementById('report-correct').innerText = correct;
+            document.getElementById('report-wrong').innerText = wrong;
+            document.getElementById('report-skipped').innerText = skipped;
+        }
+
+        function confirmExit() {
+            if(confirm("Exit test? Progress will be lost.")) location.reload();
+        }
+
+        // --- BOOKMARK LOGIC ---
+        function toggleBookmark(qId, el) {
+            let bms = getLocal('cement_bookmarks');
+            if (bms.includes(qId)) {
+                bms = bms.filter(id => id !== qId);
+                el.classList.remove('active');
+            } else {
+                bms.push(qId);
+                el.classList.add('active');
+            }
+            saveLocal('cement_bookmarks', bms);
+        }
+
+        function updateHistoryUI() {
+            const hist = getLocal('cement_history');
+            const container = document.getElementById('history-list');
+            if (hist.length === 0) {
+                container.innerHTML = '<small>No history yet.</small>';
+                return;
+            }
+            container.innerHTML = hist.map(h => `
+                <div style="border-bottom:1px solid #eee; padding:8px 0; display:flex; justify-content:space-between;">
+                    <span style="font-weight:bold; color:var(--dark)">${h.score}/${h.total} Marks</span>
+                    <span style="font-size:0.8em; color:#888;">${h.date}</span>
+                </div>
+            `).join('');
+        }
+
+        // Initialize
+        updateHistoryUI();
+
+    </script>
+</body>
+</html>
