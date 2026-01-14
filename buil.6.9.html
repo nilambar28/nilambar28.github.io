@@ -64,7 +64,7 @@
         .history-item { background: white; padding: 10px; margin-bottom: 8px; border-radius: 4px; font-size: 14px; display: flex; justify-content: space-between; }
 
         /* Test Interface */
-        .question-area { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 80px; }
+        .question-area { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 90px; /* Extra padding for footer */ }
         .q-meta { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 12px; color: #5f6368; }
         .exam-tag { background: #e8f0fe; color: var(--primary); padding: 2px 6px; border-radius: 4px; font-weight: 600; }
         .q-text { font-size: 16px; font-weight: 500; line-height: 1.5; margin-bottom: 20px; color: var(--dark); }
@@ -104,31 +104,33 @@
         .sol-header { font-weight: bold; color: #b7950b; margin-bottom: 8px; font-size: 14px; }
         .sol-text { font-size: 14px; line-height: 1.5; color: #4a4a4a; white-space: pre-line; }
 
-        /* Footer Nav */
+        /* --- UPDATED FOOTER NAV --- */
         .footer-nav {
-            position: absolute; bottom: 0; width: 100%; height: 65px;
-            background: white; border-top: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center; padding: 0 10px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            z-index: 200; /* FIXED: High Z-Index to ensure clickability */
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 70px;
+            background: white; border-top: 1px solid #e0e0e0;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 12px; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); z-index: 100;
         }
-        
-        /* Navigation Buttons */
-        .nav-group { display: flex; gap: 8px; }
+
+        .nav-group-left { display: flex; gap: 8px; }
+
         .nav-btn { 
-            padding: 8px 12px; border-radius: 4px; font-weight: 600; cursor: pointer; 
-            border: 1px solid var(--border); background: white; color: #5f6368; font-size: 13px;
+            height: 40px; padding: 0 12px; border-radius: 6px; font-weight: 600; cursor: pointer; 
+            border: 1px solid #dadce0; background: white; color: #5f6368; font-size: 13px;
             display: flex; align-items: center; justify-content: center;
         }
-        .nav-btn.primary { background: var(--primary); color: white; border: none; }
-        .nav-btn.review { color: var(--yellow); border-color: var(--yellow); }
-        
-        /* Save & Next Button Specifics */
-        .nav-btn.save-next {
-            background: var(--green); color: white; border: none; padding: 10px 16px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        .nav-btn:active { background: #f1f3f4; }
+        .nav-btn.review { color: #f9a825; border-color: #f9a825; }
+
+        /* The Hero Button: Save & Next */
+        .btn-save-next {
+            background: var(--green); color: white; border: none; height: 44px; padding: 0 20px;
+            border-radius: 22px; font-weight: 700; font-size: 14px; cursor: pointer; 
+            display: flex; align-items: center; gap: 8px;
+            box-shadow: 0 4px 12px rgba(10, 207, 131, 0.4);
+            transition: transform 0.1s ease;
         }
-        .nav-btn.save-next:active { transform: scale(0.98); }
+        .btn-save-next:active { transform: scale(0.96); box-shadow: 0 2px 8px rgba(10, 207, 131, 0.4); }
 
         /* Palette Drawer */
         .drawer {
@@ -192,16 +194,16 @@
         <div class="question-area" id="question-container"></div>
 
         <div class="footer-nav">
-            <button class="nav-btn save-next" type="button" onclick="saveAndNext()">
-                💾 Save & Next
-            </button>
-
-            <div class="nav-group">
-                <button class="nav-btn" onclick="changeQuestion(-1)">Prev</button>
-                <button class="nav-btn review" onclick="toggleMark()">Review</button>
-                <button class="nav-btn" onclick="toggleBookmarkIcon()" id="bm-icon-btn">🔖</button>
-                <button class="nav-btn primary" onclick="changeQuestion(1)">Next</button>
+            <div class="nav-group-left">
+                <button class="nav-btn" onclick="changeQuestion(-1)">←</button>
+                <button class="nav-btn review" onclick="toggleMark()">Rev</button>
+                <button class="nav-btn" onclick="toggleBookmarkIcon()" id="bm-icon-btn" style="font-size:16px;">🔖</button>
             </div>
+
+            <button class="btn-save-next" type="button" onclick="saveAndNext()">
+                <span>Save & Next</span>
+                <span style="font-size: 16px;">➔</span>
+            </button>
         </div>
 
         <div id="palette-drawer" class="drawer">
@@ -355,7 +357,7 @@
         const bmBtn = document.getElementById('bm-icon-btn');
         const isBm = state.bookmarks.includes(q.id);
         bmBtn.style.color = isBm ? '#ffc107' : '#5f6368';
-        bmBtn.innerText = isBm ? '🔖' : '🏷';
+        bmBtn.innerText = isBm ? '🔖' : '🏷'; // Switch icon if booked
 
         let html = `
             <div class="q-meta">
@@ -406,13 +408,15 @@
         loadQuestion(state.idx + dir);
     }
 
-    // FIXED: Save and Next Function
+    // --- SAVE AND NEXT LOGIC ---
     function saveAndNext() {
         if (state.idx === state.questions.length - 1) {
-            // If it's the last question, Trigger Submit
-            submitTest();
+            // Last question action
+            if(confirm("Submit Test?")) {
+                submitTest();
+            }
         } else {
-            // Otherwise go to next
+            // Next Question
             changeQuestion(1);
         }
     }
@@ -432,7 +436,7 @@
         else state.bookmarks.splice(idx, 1);
         
         localStorage.setItem('ce_bm', JSON.stringify(state.bookmarks));
-        loadQuestion(state.idx); // refresh icon
+        loadQuestion(state.idx); 
     }
 
     // --- PALETTE ---
@@ -459,7 +463,8 @@
 
     // --- SUBMIT ---
     function submitTest() {
-        if(!confirm("Submit Test?")) return;
+        // Confirm moved to btn click for explicit submit, 
+        // but if time runs out this is called directly.
         clearInterval(state.timerId);
         state.active = false;
         
@@ -471,7 +476,6 @@
         const total = state.questions.length;
         const accuracy = total > 0 ? Math.round((score/total)*100) : 0;
 
-        // Save history only for FULL tests
         if(state.mode === 'FULL') {
             const entry = { date: new Date().toLocaleDateString(), score: score, total: total, acc: accuracy };
             state.history.unshift(entry);
