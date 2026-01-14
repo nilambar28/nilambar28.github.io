@@ -106,10 +106,11 @@
 
         /* Footer Nav */
         .footer-nav {
-            position: absolute; bottom: 0; width: 100%; height: 60px;
+            position: absolute; bottom: 0; width: 100%; height: 65px;
             background: white; border-top: 1px solid var(--border);
             display: flex; justify-content: space-between; align-items: center; padding: 0 10px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 200; /* FIXED: High Z-Index to ensure clickability */
         }
         
         /* Navigation Buttons */
@@ -124,13 +125,15 @@
         
         /* Save & Next Button Specifics */
         .nav-btn.save-next {
-            background: var(--green); color: white; border: none; padding: 8px 14px;
+            background: var(--green); color: white; border: none; padding: 10px 16px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
+        .nav-btn.save-next:active { transform: scale(0.98); }
 
         /* Palette Drawer */
         .drawer {
             position: absolute; top: 0; right: 0; width: 80%; height: 100%;
-            background: white; z-index: 100; transform: translateX(100%);
+            background: white; z-index: 300; transform: translateX(100%);
             transition: transform 0.3s ease; box-shadow: -2px 0 10px rgba(0,0,0,0.1);
             display: flex; flex-direction: column;
         }
@@ -189,7 +192,7 @@
         <div class="question-area" id="question-container"></div>
 
         <div class="footer-nav">
-            <button class="nav-btn save-next" onclick="saveAndNext()">
+            <button class="nav-btn save-next" type="button" onclick="saveAndNext()">
                 💾 Save & Next
             </button>
 
@@ -285,7 +288,7 @@
     // --- STATE ---
     let state = {
         idx: 0,
-        questions: [], // Current Active List (Full or Bookmarked)
+        questions: [], 
         answers: {},
         marked: new Set(),
         bookmarks: JSON.parse(localStorage.getItem('ce_bm') || '[]'),
@@ -318,7 +321,7 @@
         state.idx = 0;
         state.answers = {};
         state.marked.clear();
-        state.timeLeft = (mode === 'BM') ? state.questions.length * 120 : 7200; // 2 min per Q for BM test
+        state.timeLeft = (mode === 'BM') ? state.questions.length * 120 : 7200; 
         state.active = true;
         
         showScreen('screen-test');
@@ -403,11 +406,15 @@
         loadQuestion(state.idx + dir);
     }
 
-    // NEW FUNCTION: SAVE AND NEXT
+    // FIXED: Save and Next Function
     function saveAndNext() {
-        // Since answers are auto-saved on click in this engine, 
-        // this button primarily serves as a "Confirm & Next" action.
-        changeQuestion(1);
+        if (state.idx === state.questions.length - 1) {
+            // If it's the last question, Trigger Submit
+            submitTest();
+        } else {
+            // Otherwise go to next
+            changeQuestion(1);
+        }
     }
 
     function toggleMark() {
