@@ -14,7 +14,6 @@
             --gray: #f1f3f4;
             --border: #dadce0;
             --white: #ffffff;
-            --orange: #ff9800;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Roboto', 'Segoe UI', sans-serif; }
@@ -45,7 +44,7 @@
         }
         
         .timer-box { font-weight: 700; color: var(--dark); font-variant-numeric: tabular-nums; }
-        .submit-btn { background: var(--red); color: white; border: none; padding: 6px 16px; border-radius: 4px; font-weight: 600; cursor: pointer; }
+        .submit-btn { background: var(--red); color: white; border: none; padding: 6px 16px; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 12px;}
         .icon-btn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 5px; color: var(--dark); }
 
         /* --- SCREENS --- */
@@ -54,13 +53,14 @@
 
         .intro-card { padding: 30px 20px; text-align: center; }
         .hero-title { font-size: 22px; margin-bottom: 10px; color: var(--primary); }
-        .btn-block { width: 100%; padding: 14px; margin: 8px 0; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
         
-        .btn-start { background: var(--primary); color: white; }
-        .btn-bm-home { background: var(--orange); color: white; } /* New Bookmark Test Button */
+        /* Buttons */
+        .btn-block { width: 100%; padding: 14px; margin: 8px 0; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-start { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(26, 115, 232, 0.3); }
+        .btn-bm-start { background: var(--yellow); color: #202124; box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3); }
         .btn-outline { background: white; border: 1px solid var(--primary); color: var(--primary); }
         
-        .history-list { text-align: left; padding: 20px; background: var(--gray); margin-top: 20px; flex: 1; overflow-y: auto; }
+        .history-list { text-align: left; padding: 20px; background: var(--gray); margin-top: 20px; }
         .history-item { background: white; padding: 10px; margin-bottom: 8px; border-radius: 4px; font-size: 14px; display: flex; justify-content: space-between; }
 
         /* Test Interface */
@@ -81,8 +81,8 @@
             background: white;
         }
         .opt-circle {
-            height: 24px; width: 24px; min-width: 24px; border-radius: 50%; border: 2px solid #5f6368;
-            margin-right: 12px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: #5f6368;
+            height: 24px; width: 24px; border-radius: 50%; border: 2px solid #5f6368;
+            margin-right: 12px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: #5f6368; flex-shrink: 0;
         }
         
         .option-box.selected { border-color: var(--primary); background: #e8f0fe; } 
@@ -109,15 +109,23 @@
             position: absolute; bottom: 0; width: 100%; height: 60px;
             background: white; border-top: 1px solid var(--border);
             display: flex; justify-content: space-between; align-items: center; padding: 0 10px;
-            gap: 8px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
         }
+        
+        /* Navigation Buttons */
+        .nav-group { display: flex; gap: 8px; }
         .nav-btn { 
-            padding: 0 12px; height: 40px; border-radius: 4px; font-weight: 600; cursor: pointer; 
+            padding: 8px 12px; border-radius: 4px; font-weight: 600; cursor: pointer; 
             border: 1px solid var(--border); background: white; color: #5f6368; font-size: 13px;
             display: flex; align-items: center; justify-content: center;
         }
-        .nav-btn.save-next { background: var(--green); color: white; border: none; flex-grow: 1; justify-content: center; }
-        .nav-btn.review { color: var(--orange); border-color: var(--orange); }
+        .nav-btn.primary { background: var(--primary); color: white; border: none; }
+        .nav-btn.review { color: var(--yellow); border-color: var(--yellow); }
+        
+        /* Save & Next Button Specifics */
+        .nav-btn.save-next {
+            background: var(--green); color: white; border: none; padding: 8px 14px;
+        }
 
         /* Palette Drawer */
         .drawer {
@@ -157,13 +165,11 @@
                 <span>▶</span> START FULL TEST
             </button>
             
-            <button class="btn-block btn-bm-home" onclick="initTest('BM')">
+            <button class="btn-block btn-bm-start" onclick="initTest('BM')">
                 <span>🔖</span> PRACTICE BOOKMARKS
             </button>
-            
-            <button class="btn-block btn-outline" onclick="showBookmarks()">
-                <span>📂</span> View Saved Questions
-            </button>
+
+            <button class="btn-block btn-outline" onclick="showBookmarks()">View Bookmark List</button>
         </div>
         <div class="history-list">
             <h3>Past Performance</h3>
@@ -174,8 +180,8 @@
     <div id="screen-test" class="screen">
         <header>
             <div class="timer-box">⏱ <span id="timer">02:00:00</span></div>
-            <div style="display:flex; gap:10px">
-                <button class="submit-btn" onclick="submitTest()">FINISH</button>
+            <div style="display:flex; gap:10px; align-items: center;">
+                <button class="submit-btn" onclick="submitTest()">SUBMIT</button>
                 <button class="icon-btn" onclick="togglePalette()">☰</button>
             </div>
         </header>
@@ -183,12 +189,16 @@
         <div class="question-area" id="question-container"></div>
 
         <div class="footer-nav">
-            <button class="nav-btn" onclick="changeQuestion(-1)">Prev</button>
-            <button class="nav-btn" onclick="toggleBookmarkIcon()" id="bm-icon-btn">🔖</button>
-            <button class="nav-btn review" onclick="toggleMark()">Review</button>
-            <button class="nav-btn save-next" onclick="changeQuestion(1)">
-                 Save & Next ➡
+            <button class="nav-btn save-next" onclick="saveAndNext()">
+                💾 Save & Next
             </button>
+
+            <div class="nav-group">
+                <button class="nav-btn" onclick="changeQuestion(-1)">Prev</button>
+                <button class="nav-btn review" onclick="toggleMark()">Review</button>
+                <button class="nav-btn" onclick="toggleBookmarkIcon()" id="bm-icon-btn">🔖</button>
+                <button class="nav-btn primary" onclick="changeQuestion(1)">Next</button>
+            </div>
         </div>
 
         <div id="palette-drawer" class="drawer">
@@ -197,9 +207,10 @@
                 <span onclick="togglePalette()" style="cursor:pointer">✕</span>
             </div>
             <div class="grid-container" id="grid-box"></div>
-            <div style="padding:10px; font-size:12px">
-                <span style="color:var(--green)">● Answered</span> | 
-                <span style="color:#7b1fa2">● Review</span>
+            <div style="padding:10px; font-size:12px; text-align:center">
+                <span style="color:var(--green)">● Ans</span> | 
+                <span style="color:#7b1fa2">● Rev</span> |
+                <span style="color:var(--primary)">○ Curr</span>
             </div>
         </div>
     </div>
@@ -219,7 +230,7 @@
             <span style="font-weight:bold">Bookmarked Questions</span>
             <span></span>
         </header>
-        <div id="bookmark-list" style="overflow-y:auto"></div>
+        <div id="bookmark-list"></div>
     </div>
 
 </div>
@@ -274,7 +285,7 @@
     // --- STATE ---
     let state = {
         idx: 0,
-        questions: [],
+        questions: [], // Current Active List (Full or Bookmarked)
         answers: {},
         marked: new Set(),
         bookmarks: JSON.parse(localStorage.getItem('ce_bm') || '[]'),
@@ -307,7 +318,7 @@
         state.idx = 0;
         state.answers = {};
         state.marked.clear();
-        state.timeLeft = (mode === 'BM') ? state.questions.length * 120 : 7200; 
+        state.timeLeft = (mode === 'BM') ? state.questions.length * 120 : 7200; // 2 min per Q for BM test
         state.active = true;
         
         showScreen('screen-test');
@@ -357,8 +368,6 @@
             if(isAns) {
                 if(oIdx === q.ans) cls += ' correct';
                 else if(oIdx === userAnswer) cls += ' wrong';
-            } else if (userAnswer === oIdx) {
-                cls += ' selected';
             }
             html += `
                 <div class="${cls}" onclick="handleOption(${q.id}, ${oIdx})">
@@ -394,6 +403,13 @@
         loadQuestion(state.idx + dir);
     }
 
+    // NEW FUNCTION: SAVE AND NEXT
+    function saveAndNext() {
+        // Since answers are auto-saved on click in this engine, 
+        // this button primarily serves as a "Confirm & Next" action.
+        changeQuestion(1);
+    }
+
     function toggleMark() {
         const qId = state.questions[state.idx].id;
         if(state.marked.has(qId)) state.marked.delete(qId);
@@ -409,7 +425,7 @@
         else state.bookmarks.splice(idx, 1);
         
         localStorage.setItem('ce_bm', JSON.stringify(state.bookmarks));
-        loadQuestion(state.idx); 
+        loadQuestion(state.idx); // refresh icon
     }
 
     // --- PALETTE ---
@@ -448,6 +464,7 @@
         const total = state.questions.length;
         const accuracy = total > 0 ? Math.round((score/total)*100) : 0;
 
+        // Save history only for FULL tests
         if(state.mode === 'FULL') {
             const entry = { date: new Date().toLocaleDateString(), score: score, total: total, acc: accuracy };
             state.history.unshift(entry);
@@ -460,6 +477,14 @@
     }
 
     // --- EXTRAS ---
+    function exitTest() {
+        if(confirm('Exit test?')) {
+            clearInterval(state.timerId);
+            state.active = false;
+            goHome();
+        }
+    }
+
     function goHome() {
         showScreen('screen-home');
         renderHistory();
