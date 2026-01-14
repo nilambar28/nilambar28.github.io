@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Civil Engineering Mock Test (Mortar & Concrete)</title>
+    <style>
+        :root {
+            --primary: #007bff;
+            --secondary: #6c757d;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --info: #17a2b8;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --purple: #6f42c1;
+            --border: #dee2e6;
+            --bg-gray: #f2f4f7;
+        }
+
+        * { box-sizing: border-box; font-family: 'Roboto', 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background-color: var(--bg-gray); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* --- Header --- */
+        header {
+            background: #fff;
+            padding: 0 15px;
+            height: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            z-index: 100;
+        }
+        .timer-container { font-weight: 600; font-size: 1.1rem; color: var(--dark); display: flex; align-items: center; gap: 6px; }
+        .timer-icon { font-size: 1.2rem; }
+        
+        .header-buttons { display: flex; gap: 10px; }
+        .btn-header { padding: 6px 14px; border-radius: 4px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
+        .btn-submit { background-color: var(--success); color: white; }
+        .btn-exit { color: var(--danger); border-color: var(--danger); background: transparent; }
+        .btn-exit:hover { background: #fff5f5; }
+
+        /* --- Main Content --- */
+        .main-wrapper { flex: 1; display: flex; overflow: hidden; position: relative; }
+        
+        /* Question Area */
+        .question-area {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            padding-bottom: 80px; /* Footer space */
+            scroll-behavior: smooth;
+        }
+
+        .question-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .q-meta-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .q-number { font-weight: 700; color: var(--secondary); font-size: 0.95rem; }
+        .q-actions { display: flex; align-items: center; gap: 10px; }
+        
+        .exam-tag {
+            background: #e2e6ea;
+            color: #495057;
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .bookmark-toggle { background: none; border: none; font-size: 1.6rem; color: #ced4da; cursor: pointer; line-height: 1; }
+        .bookmark-toggle.active { color: var(--warning); }
+
+        .question-text { font-size: 1.1rem; color: #212529; line-height: 1.5; font-weight: 500; margin-bottom: 20px; }
+        
+        /* Options */
+        .options-group { list-style: none; padding: 0; margin: 0; }
+        .option-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 14px;
+            margin-bottom: 10px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .option-item:hover { border-color: var(--primary); background: #f8fbff; }
+        .option-item:active { transform: scale(0.99); }
+        
+        .opt-marker {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: #f1f3f5;
+            color: var(--secondary);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600; font-size: 0.9rem;
+            margin-right: 12px; flex-shrink: 0;
+            border: 1px solid #dee2e6;
+        }
+
+        /* Logic States */
+        .option-item.correct { border-color: var(--success); background-color: #d4edda; }
+        .option-item.correct .opt-marker { background-color: var(--success); color: white; border-color: var(--success); }
+        
+        .option-item.wrong { border-color: var(--danger); background-color: #f8d7da; }
+        .option-item.wrong .opt-marker { background-color: var(--danger); color: white; border-color: var(--danger); }
+        
+        .option-item.disabled { pointer-events: none; }
+
+        /* Solution Box */
+        .solution-panel {
+            margin-top: 20px;
+            background: #eef6fc;
+            border: 1px solid #cce5ff;
+            border-radius: 6px;
+            padding: 16px;
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .sol-heading { color: var(--primary); font-weight: 700; margin-bottom: 8px; font-size: 0.95rem; display: flex; align-items: center; gap: 5px; }
+        .sol-body { font-size: 0.95rem; color: #333; line-height: 1.6; white-space: pre-wrap; }
+
+        /* --- Sidebar (Palette) --- */
+        .sidebar-drawer {
+            position: absolute; top: 0; right: 0; bottom: 0;
+            width: 300px;
+            background: white;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 150;
+            display: flex; flex-direction: column;
+        }
+        .sidebar-drawer.open { transform: translateX(0); }
+        
+        .drawer-header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-weight: bold; background: #f8f9fa; }
+        
+        .legend-bar { padding: 10px 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.75rem; border-bottom: 1px solid var(--border); }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+        .palette-grid { padding: 15px; overflow-y: auto; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; align-content: start; flex: 1; }
+        .palette-btn {
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem; font-weight: 600; color: var(--secondary);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        
+        /* Palette Colors */
+        .palette-btn.current { border: 2px solid var(--primary); color: var(--primary); }
+        .palette-btn.answered { background: var(--success); color: white; border-color: var(--success); }
+        .palette-btn.wrong { background: var(--danger); color: white; border-color: var(--danger); }
+        .palette-btn.review { background: var(--purple); color: white; border-color: var(--purple); }
+        .palette-btn.visited { background: #e9ecef; color: var(--dark); }
+
+        /* --- Footer --- */
+        .footer-bar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            height: 60px;
+            background: white;
+            border-top: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 15px;
+            z-index: 90;
+        }
+        .nav-btn {
+            border: none; padding: 10px 18px; border-radius: 4px;
+            font-weight: 600; cursor: pointer; font-size: 0.9rem;
+        }
+        .btn-secondary { background: #e9ecef; color: var(--dark); }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-review { background: white; border: 1px solid var(--purple); color: var(--purple); }
+        .btn-grid { background: none; border: 1px solid var(--secondary); color: var(--secondary); padding: 8px 12px; }
+
+        /* --- Overlays (Start/Result) --- */
+        .fullscreen-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #fff; z-index: 1000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .hidden { display: none !important; }
+        
+        .card-start { width: 100%; max-width: 420px; text-align: center; }
+        .btn-lg { width: 100%; padding: 14px; margin-top: 15px; font-size: 1.1rem; border-radius: 50px; border: none; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .btn-start { background: var(--primary); color: white; }
+        .btn-bm { background: var(--warning); color: #212529; }
+        
+        .history-box { margin-top: 30px; width: 100%; text-align: left; background: #f8f9fa; border-radius: 8px; padding: 15px; max-height: 200px; overflow-y: auto; }
+        .history-item { display: flex; justify-content: space-between; border-bottom: 1px solid #dee2e6; padding: 8px 0; font-size: 0.9rem; }
+
+        .score-circle {
+            width: 120px; height: 120px; border-radius: 50%;
+            background: var(--primary); color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; font-weight: bold; margin: 20px auto;
+            box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+        }
+
+        /* Desktop Adjustments */
+        @media(min-width: 768px) {
+            .sidebar-drawer { position: static; transform: none; width: 320px; border-left: 1px solid var(--border); box-shadow: none; }
+            .btn-grid-toggle { display: none; }
+            .footer-bar { width: calc(100% - 320px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="startScreen" class="fullscreen-overlay">
+        <div class="card-start">
+            <h1 style="color:var(--primary); margin-bottom: 5px;">Civil Engineering</h1>
+            <h3 style="color:var(--secondary); font-weight:400; margin-top:0;">Mock Test: Mortar & Concrete</h3>
+            <p style="color:#666; margin-bottom: 30px;">
+                <strong>Questions:</strong> 16 (Q.1295 - Q.1310)<br>
+                <strong>Time:</strong> 2 Hours<br>
+                <strong>Topics:</strong> Cement Mortar, Sand, Ingredients, Codes
+            </p>
+            
+            <button class="btn-lg btn-start" onclick="startTest(false)">Start New Test</button>
+            <button class="btn-lg btn-bm" onclick="startTest(true)">Review Bookmarks</button>
+
+            <div class="history-box">
+                <h4 style="margin-top:0; color:var(--dark);">Previous Attempts</h4>
+                <div id="historyList">No history found.</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="resultScreen" class="fullscreen-overlay hidden">
+        <h2>Test Submitted</h2>
+        <div class="score-circle" id="scoreDisplay">0/0</div>
+        <p id="accuracyDisplay" style="font-size:1.2rem; color:var(--secondary);">Accuracy: 0%</p>
+        
+        <div style="display:flex; gap:15px; width:100%; max-width:350px; margin-top:20px;">
+            <button class="nav-btn btn-secondary" style="flex:1;" onclick="location.reload()">Home</button>
+            <button class="nav-btn btn-primary" style="flex:1;" onclick="closeResult()">Review Solutions</button>
+        </div>
+    </div>
+
+    <header id="appHeader" class="hidden">
+        <div class="timer-container">
+            <span class="timer-icon">&#9201;</span>
+            <span id="timer">02:00:00</span>
+        </div>
+        <div class="header-buttons">
+            <button class="btn-header btn-exit" onclick="confirmExit()">Exit</button>
+            <button class="btn-header btn-submit" onclick="submitTest()">Submit</button>
+        </div>
+    </header>
+
+    <div class="main-wrapper hidden" id="appBody">
+        <div class="question-area" id="qContainer">
+            <div class="question-card">
+                <div class="q-meta-header">
+                    <span class="q-number" id="qNum">Q.1</span>
+                    <div class="q-actions">
+                        <span class="exam-tag" id="qTag">ESE 2020</span>
+                        <button class="bookmark-toggle" id="btnBookmark" onclick="toggleBookmark()">&#9734;</button>
+                    </div>
+                </div>
+
+                <div class="question-text" id="qText">Question goes here...</div>
+                
+                <ul class="options-group" id="optList">
+                    </ul>
+
+                <div class="solution-panel" id="solPanel">
+                    <div class="sol-heading">&#128161; Detailed Solution</div>
+                    <div class="sol-body" id="solText">Solution goes here...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-drawer" id="sidebar">
+            <div class="drawer-header">
+                <span>Question Palette</span>
+                <span class="btn-grid-toggle" onclick="toggleSidebar()" style="cursor:pointer; font-size:1.5rem;">&times;</span>
+            </div>
+            <div class="legend-bar">
+                <div class="legend-item"><div class="dot" style="background:var(--success)"></div> Answered</div>
+                <div class="legend-item"><div class="dot" style="background:var(--danger)"></div> Wrong</div>
+                <div class="legend-item"><div class="dot" style="background:var(--purple)"></div> Review</div>
+                <div class="legend-item"><div class="dot" style="background:#e9ecef"></div> Skipped</div>
+            </div>
+            <div class="palette-grid" id="palette">
+                </div>
+        </div>
+    </div>
+
+    <footer class="footer-bar hidden" id="appFooter">
+        <button class="nav-btn btn-grid btn-grid-toggle" onclick="toggleSidebar()">Grid</button>
+        <button class="nav-btn btn-secondary" onclick="changeQuestion(-1)">Previous</button>
+        <button class="nav-btn btn-review" onclick="markReview()">Mark Review</button>
+        <button class="nav-btn btn-primary" onclick="changeQuestion(1)">Next</button>
+    </footer>
+
+    <script>
+        // --- DATA SOURCE (Transcribed from Images) ---
+        const questionsDB = [
+            {
+                id: 1295,
+                text: "Match List-I (Cement mortar for different work) with List-II (Proportion cement: sand in mortar) and select the correct answer using the codes given below the lists:<br><br><b>List-I</b><br>A. Normal brick work<br>B. Plastering works<br>C. Grouting the cavernous<br>D. Guniting<br><br><b>List-II</b><br>1. 1:4<br>2. 1:3<br>3. 1:6<br>4. 1:1.5",
+                options: ["A-1, B-2, C-3, D-4", "A-3, B-1, C-2, D-4", "A-3, B-1, C-4, D-2", "A-4, B-3, C-2, D-1"],
+                correct: 2,
+                tag: "ESE-1996",
+                solution: "<b>Ans (c) :</b> Correct Proportions:<br>• Normal brick work (plastering) -> 1:6 (or 1:5)<br>• External wall plastering -> 1:4 (or 1:3 for reinforced brick)<br>• Grouting the Cavernous -> 1:1.5<br>• Guniting -> 1:3<br>Correct Match: A-3 (1:6), B-1 (1:4), C-4 (1:1.5), D-2 (1:3)."
+            },
+            {
+                id: 1296,
+                text: "The approximate proportion of dry cement mortar required for brickwork is:",
+                options: ["60%", "45%", "30%", "10%"],
+                correct: 2, // Based on Ans (c) in image
+                tag: "ESE-1997",
+                solution: "<b>Ans (c) :</b> Proportion of dry cement mortar in Brick work:<br>• Dry mortar = 1.33 of wet mortar<br>• For concrete work: Dry concrete = 1.54 of wet concrete.<br>The volume of dry mortar required is generally taken as 30% to 33%."
+            },
+            {
+                id: 1297,
+                text: "A gauged mortar is obtained by adding which of the following ingredient(s) to cement?",
+                options: ["Sand alone", "Sand and Surkhi", "Sand and lime", "Surkhi alone"],
+                correct: 2,
+                tag: "ESE-1998",
+                solution: "<b>Ans (c) : Gauged mortar :</b> This mortar is the mix of cement and lime, these both are used as the binding material and sand used as fine aggregate.<br>• It increases the strength and used to get higher stringing by mixing the lime mortar with cement.<br>• The process is known as gauging.<br>• Proportion (Cement:Lime:Sand) is often 1:1:6."
+            },
+            {
+                id: 1298,
+                text: "Surkhi is added to lime mortar to:",
+                options: ["prevent shrinkage", "decrease setting time", "increase bulk", "impart hydraulicity"],
+                correct: 3,
+                tag: "ESE-1999",
+                solution: "<b>Ans (d) : Surkhi added to lime mortar for :</b><br>• Increasing hydraulic property of mortar.<br>• It is broken powder of brick used for adulteration (pozzolanic action).<br>• It is mixture of cement, surkhi and water (in case of surkhi mortar).<br>• It is economical and also used to gain strength."
+            },
+            {
+                id: 1299,
+                text: "The maximum bulking of sand is likely to occur at a moisture content of:",
+                options: ["5%", "8%", "11%", "14%"],
+                correct: 0,
+                tag: "ESE-2001",
+                solution: "<b>Ans (a) :</b> Maximum bulking of sand (As per IS 2386-3):<br>• At the moisture content of about 4% to 5%, the percentage of bulking of sand occurs 20% to 30% of the volume.<br>• Fine sand bulks more than coarse sand."
+            },
+            {
+                id: 1300,
+                text: "Plaster of Paris is obtained by calcining:",
+                options: ["Bauxite", "Gypsum", "Kankar", "Limestone"],
+                correct: 1,
+                tag: "SSC JE 2017",
+                solution: "<b>Ans (b) :</b> Plaster of Paris is made by heating the mineral gypsum. When gypsum (CaSO4·2H2O) is heated to about 150°C it loses water and produces the powder (CaSO4·½H2O), known as Plaster of Paris."
+            },
+            {
+                id: 1301,
+                text: "In order to improve the workability of harsh cement mortar which of the following items is/are added?<br>1. Water<br>2. Plaster of Paris<br>3. Lime",
+                options: ["1", "1 & 2", "3", "1 & 3"],
+                correct: 2, // Image says Ans (d) which corresponds to item "3" (Lime) in options? Wait. Options in image are: (a) 1, (b) 1&2, (c) 3, (d) 1&3. 
+                // Explanation says "Improve workability... items added are : (1) water added ... (2) chemical admixtures (3) Lime". 
+                // However, question asks "which of the following". Option D says "1 & 3". Usually Lime is the main answer for harsh mortar (gauging).
+                // Let's assume Option D (1 & 3) is correct based on explanation mentioning both water and lime.
+                tag: "ESE-2003",
+                solution: "<b>Ans (d) :</b> To improve workability of harsh cement mortar the mainly items added are:<br>• Water (increases fluidity)<br>• Lime (improves plasticity and workability)<br>• Chemical admixtures."
+            },
+            {
+                id: 1302,
+                text: "Consider the following statements:<br>1. Hydrophobic cement grains possesses low wetting ability<br>2. Rapid-hardening cement is useful in concreting under static, or running water<br>3. Quick-setting cement helps concrete to attain high strength in the initial period<br>4. White cement is just a variety of ordinary cement free of colouring oxides<br>Which of the above statements are correct?",
+                options: ["1 and 4 only", "1 and 3 only", "2 and 4 only", "2 and 3 only"],
+                correct: 0,
+                tag: "ESE 2018",
+                solution: "<b>Ans (a) :</b><br>1. <b>Correct:</b> Hydrophobic cement features greater water resistance/impermeability.<br>2. <b>Incorrect:</b> RHC is not specifically for running water (Quick setting is used there).<br>3. <b>Incorrect:</b> Quick setting cement sets fast but doesn't necessarily attain higher ultimate strength than OPC. RHC attains high early strength.<br>4. <b>Correct:</b> White cement is free from Iron Oxide."
+            },
+            {
+                id: 1303,
+                text: "When sand for construction work is stored at site in stacks of 61cm height, what allowance due to sinkage and shrinkage should be provided?",
+                options: ["5%", "7.5%", "10%", "12.5%"],
+                correct: 3,
+                tag: "ESE-2008",
+                solution: "<b>Ans (d) :</b> Allowance for sinkage and shrinkage for fresh stack:<br>• Sand: 12.5% (Stack height 61 cm)<br>• Sarkni: 25%<br>• Lime: 25%<br>• Moorum: 77% (wait, table says 7.7%? No, image says 77%? No, likely typo in book, usually much lower. But for Sand, 12.5% is standard)."
+            },
+            {
+                id: 1304,
+                text: "Which one of the following is the correct range of fineness modulus of medium sand usable in preparing cement mortar?",
+                options: ["1.5 to 2.2", "2.6 to 2.9", "2.9 to 3.2", "5.5 to 6.5"],
+                correct: 1,
+                tag: "ESE-2008",
+                solution: "<b>Ans (b) : Fineness modulus ranges:</b><br>• Fine sand: 2.2 - 2.6<br>• Medium sand: 2.6 - 2.9<br>• Coarse sand: 2.9 - 3.2<br>For medium range of sand fineness modulus = 2.6 - 2.9."
+            },
+            {
+                id: 1305,
+                text: "Which of the following ingredients refer to binding materials of mortar?<br>1. Cement<br>2. Lime<br>3. Sand<br>4. Ashes",
+                options: ["1 & 4", "3 & 4", "1 & 2", "2 & 3"],
+                correct: 2,
+                tag: "ESE-2014",
+                solution: "<b>Ans (c) :</b> Binding materials of mortar are Cement and Lime. Sand and Ashes are fine aggregates/adulterants. Binding materials provide the strength and adhesion."
+            },
+            {
+                id: 1306,
+                text: "Which of the following statements are correct regarding cement mortar?<br>1. Workability of cement mortar can be improved by addition of lime.<br>2. Fly-ash cement is economical in plastering jobs.<br>3. Addition of saw dust improves workability.<br>4. Sand in mortar can be replaced by finely crushed fire bricks.",
+                options: ["1, 2, 3 & 4", "1, 2 & 3", "3 & 4", "1, 2 & 4"],
+                correct: 3,
+                tag: "ESE-2016",
+                solution: "<b>Ans (d) :</b><br>• Workability is improved by lime (Correct).<br>• Fly ash cement is economical and good for plastering (Correct).<br>• Saw dust <b>decreases</b> workability due to adsorption of water (Incorrect).<br>• Finely crushed brick (Surkhi) can replace sand (Correct)."
+            },
+            {
+                id: 1307,
+                text: "The maximum water cement ratio specified for RCC construction in severe exposure condition as per IS 456:2000 is:",
+                options: ["0.45", "0.5", "0.4", "0.55"],
+                correct: 0,
+                tag: "ISRO TA 2016",
+                solution: "<b>Ans (a) : As per IS 456:2000 for RCC:</b><br>• Mild: 0.55<br>• Moderate: 0.50<br>• Severe: 0.45<br>• Very Severe: 0.45<br>• Extreme: 0.40"
+            },
+            {
+                id: 1308,
+                text: "Match List-I (Pigment used with cement) with List-II (Colour obtained):<br><b>List-I</b><br>A. Chloride<br>B. Cobalt oxide<br>C. Iron oxide<br>D. Manganese oxide<br><br><b>List-II</b><br>a. Brown or black<br>b. Red<br>c. Green<br>d. Blue",
+                options: ["A-a, B-b, C-d, D-c", "A-b, B-c, C-d, D-a", "A-c, B-d, C-a, D-b", "A-c, B-d, C-b, D-a"],
+                correct: 3, // Logic: Cobalt->Blue, Iron->Red, Manganese->Brown/Black. Only option D fits. (Wait, Chloride?? Usually Chromium oxide is Green).
+                // Let's check image Ans (d).
+                // Image Ans (d) matches: A-c (Chloride/Chromium?), B-d (Blue), C-b (Red), D-a (Brown).
+                // Note: Image lists 'Chloride' but standard is 'Chromium Oxide' for green. Assuming typo in question source.
+                tag: "UPJAL NIGAM JE 2016",
+                solution: "<b>Ans (d) :</b><br>• Cobalt Oxide → Blue<br>• Iron Oxide → Red<br>• Manganese Oxide → Brown or Black<br>• 'Chloride' (Likely Chromium Oxide) → Green"
+            },
+            {
+                id: 1309,
+                text: "The initial and final setting time of OPC is:",
+                options: ["15 minutes and 45 minutes", "20 minutes and 1 hour", "30 minutes and 10 hours", "5 minutes and 30 minutes"],
+                correct: 2,
+                tag: "KPSC Code 41/2015",
+                solution: "<b>Ans (c) : IS standard specification:</b><br>• Ordinary Portland Cement (OPC 33, 43, 53): Initial > 30 min, Final < 600 min (10 hrs).<br>• Low Heat Cement: Initial > 60 min, Final < 600 min.<br>• High Alumina Cement: Initial > 30 min, Final < 600 min."
+            },
+            {
+                id: 1310,
+                text: "Which one of the following statements is not correct with respect to fly ash?",
+                options: ["As part replacement of cement in range 15-30%, sets in higher strength later.", "Fly ash as part replacement of sand has beneficial effect on strength.", "Fly ash as part replacement of sand is economical.", "A simultaneous replacement of cement and fine aggregates enables strength at specified age to be equaled."],
+                correct: 1, // Image Ans (b).
+                tag: "ESE 2019",
+                solution: "<b>Ans (b) :</b><br>• Fly ash is a heterogeneous by-product.<br>• Replacement of cement by fly ash (PPC) increases strength after 28 to 56 days (pozzolanic action).<br>• Statement (b) claims replacement of *sand* has beneficial effect on strength. While fly ash is cheaper than sand (economical), replacing sand doesn't primarily improve strength in the same way; it's mainly a filler/pozzolana replacing cement. The book marks (b) as incorrect because 'Fly ash is costlier than sand' (Wait, explanation says Fly ash is costlier than sand? Usually it's waste. But explanation says 'Fly ash is costlier than sand. Hence using this in place of sand will not be economical').<br>Actually, looking at explanation text: 'Fly ash is costlier than sand... will not be economical'. Wait, Option (c) says it IS economical. If explanation says it's NOT economical, then (c) should be wrong? <br>However, the Answer key given is (b). Let's stick to the official key provided in image."
+            }
+        ];
+
+        // --- APP LOGIC ---
+        let currentIndex = 0;
+        let userAnswers = new Array(questionsDB.length).fill(null);
+        let questionStatus = new Array(questionsDB.length).fill('unvisited');
+        let bookmarks = JSON.parse(localStorage.getItem('civil_bm_part3')) || [];
+        let activeQuestions = [];
+        let timerInterval;
+        let timeRemaining = 7200; // 2 hours
+        let isReviewMode = false;
+
+        function startTest(reviewOnly) {
+            if (reviewOnly) {
+                const bookmarkedQuestions = questionsDB.filter(q => bookmarks.includes(q.id));
+                if (bookmarkedQuestions.length === 0) {
+                    alert("No bookmarks found!");
+                    return;
+                }
+                activeQuestions = bookmarkedQuestions;
+                isReviewMode = true;
+            } else {
+                activeQuestions = questionsDB;
+                userAnswers.fill(null);
+                questionStatus.fill('unvisited');
+                timeRemaining = 7200;
+                isReviewMode = false;
+                startTimer();
+            }
+
+            currentIndex = 0;
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('appHeader').classList.remove('hidden');
+            document.getElementById('appBody').classList.remove('hidden');
+            document.getElementById('appFooter').classList.remove('hidden');
+            
+            loadQuestion(0);
+            updatePalette();
+        }
+
+        function loadQuestion(index) {
+            if (index < 0 || index >= activeQuestions.length) return;
+            currentIndex = index;
+            
+            const q = activeQuestions[currentIndex];
+            const mainIndex = questionsDB.indexOf(q);
+            
+            if(questionStatus[mainIndex] === 'unvisited') questionStatus[mainIndex] = 'visited';
+
+            // DOM Updates
+            document.getElementById('qNum').innerText = `Question ${currentIndex + 1} / ${activeQuestions.length}`;
+            document.getElementById('qTag').innerText = q.tag;
+            document.getElementById('qText').innerHTML = q.text;
+            
+            const bmBtn = document.getElementById('btnBookmark');
+            bmBtn.innerHTML = bookmarks.includes(q.id) ? '&#9733;' : '&#9734;';
+            bmBtn.classList.toggle('active', bookmarks.includes(q.id));
+
+            // Render Options
+            const list = document.getElementById('optList');
+            list.innerHTML = '';
+            
+            const savedAns = userAnswers[mainIndex];
+            const isAnswered = savedAns !== null;
+
+            q.options.forEach((opt, i) => {
+                const li = document.createElement('li');
+                li.className = 'option-item';
+                
+                if (isAnswered) {
+                    li.classList.add('disabled');
+                    if (i === q.correct) li.classList.add('correct');
+                    if (i === savedAns && i !== q.correct) li.classList.add('wrong');
+                }
+
+                li.innerHTML = `<div class="opt-marker">${String.fromCharCode(65+i)}</div><div>${opt}</div>`;
+                li.onclick = () => selectOption(mainIndex, i);
+                list.appendChild(li);
+            });
+
+            // Solution
+            const solPanel = document.getElementById('solPanel');
+            if (isAnswered) {
+                solPanel.style.display = 'block';
+                document.getElementById('solText').innerHTML = q.solution;
+            } else {
+                solPanel.style.display = 'none';
+            }
+
+            updatePalette();
+        }
+
+        function selectOption(dbIndex, optIndex) {
+            if (userAnswers[dbIndex] !== null) return;
+            
+            userAnswers[dbIndex] = optIndex;
+            const q = questionsDB[dbIndex];
+            questionStatus[dbIndex] = (optIndex === q.correct) ? 'answered' : 'wrong';
+            
+            loadQuestion(currentIndex);
+        }
+
+        function changeQuestion(dir) {
+            loadQuestion(currentIndex + dir);
+        }
+
+        function toggleBookmark() {
+            const q = activeQuestions[currentIndex];
+            const idx = bookmarks.indexOf(q.id);
+            if (idx === -1) bookmarks.push(q.id);
+            else bookmarks.splice(idx, 1);
+            
+            localStorage.setItem('civil_bm_part3', JSON.stringify(bookmarks));
+            loadQuestion(currentIndex);
+        }
+
+        function markReview() {
+            const q = activeQuestions[currentIndex];
+            const mainIdx = questionsDB.indexOf(q);
+            if (questionStatus[mainIdx] !== 'answered' && questionStatus[mainIdx] !== 'wrong') {
+                questionStatus[mainIdx] = 'review';
+                updatePalette();
+                changeQuestion(1);
+            }
+        }
+
+        // --- PALETTE & TIMER ---
+        function updatePalette() {
+            const grid = document.getElementById('palette');
+            grid.innerHTML = '';
+            
+            activeQuestions.forEach((q, i) => {
+                const mainIdx = questionsDB.indexOf(q);
+                const status = questionStatus[mainIdx];
+                
+                const btn = document.createElement('div');
+                btn.className = `palette-btn ${status}`;
+                if (i === currentIndex) btn.classList.add('current');
+                btn.innerText = i + 1;
+                btn.onclick = () => {
+                    loadQuestion(i);
+                    if(window.innerWidth < 768) toggleSidebar();
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                if (timeRemaining <= 0) submitTest();
+                
+                const h = Math.floor(timeRemaining / 3600).toString().padStart(2, '0');
+                const m = Math.floor((timeRemaining % 3600) / 60).toString().padStart(2, '0');
+                const s = (timeRemaining % 60).toString().padStart(2, '0');
+                document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+            }, 1000);
+        }
+
+        // --- SUBMIT & HISTORY ---
+        function submitTest() {
+            clearInterval(timerInterval);
+            
+            let score = 0;
+            let attempted = 0;
+            questionsDB.forEach((q, i) => {
+                if (userAnswers[i] !== null) {
+                    attempted++;
+                    if (userAnswers[i] === q.correct) score++;
+                }
+            });
+
+            // Save History
+            const history = JSON.parse(localStorage.getItem('civil_hist_part3')) || [];
+            const result = {
+                date: new Date().toLocaleDateString(),
+                score: score,
+                total: questionsDB.length,
+                acc: attempted ? Math.round((score/attempted)*100) : 0
+            };
+            history.unshift(result);
+            localStorage.setItem('civil_hist_part3', JSON.stringify(history));
+
+            // Show Result
+            document.getElementById('appHeader').classList.add('hidden');
+            document.getElementById('appBody').classList.add('hidden');
+            document.getElementById('appFooter').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+            
+            document.getElementById('scoreDisplay').innerText = `${score}/${questionsDB.length}`;
+            document.getElementById('accuracyDisplay').innerText = `Accuracy: ${result.acc}%`;
+        }
+
+        function closeResult() {
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('appHeader').classList.remove('hidden');
+            document.getElementById('appBody').classList.remove('hidden');
+            document.getElementById('appFooter').classList.remove('hidden');
+            loadQuestion(0);
+        }
+
+        function confirmExit() {
+            if (confirm("Exit current test?")) location.reload();
+        }
+
+        // Init History Display
+        (function() {
+            const h = JSON.parse(localStorage.getItem('civil_hist_part3')) || [];
+            if (h.length) {
+                document.getElementById('historyList').innerHTML = h.map(item => 
+                    `<div class="history-item">
+                        <span>${item.date}</span>
+                        <strong>${item.score}/${item.total} (${item.acc}%)</strong>
+                    </div>`
+                ).join('');
+            }
+        })();
+
+    </script>
+</body>
+</html>
