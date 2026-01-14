@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civil Engineering Mock Test</title>
+    <style>
+        :root {
+            --primary: #007bff;
+            --secondary: #6c757d;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --purple: #6f42c1;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { margin: 0; background-color: #f2f2f2; height: 100vh; display: flex; flex-direction: column; }
+
+        /* --- Header --- */
+        header {
+            background: #fff;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+        .timer-box { font-weight: bold; font-size: 1.1em; color: var(--dark); }
+        .exit-btn { background: none; border: 1px solid var(--danger); color: var(--danger); padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+
+        /* --- Main Layout --- */
+        .main-container { display: flex; flex: 1; overflow: hidden; position: relative; }
+        
+        /* Question Area */
+        .question-section {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            padding-bottom: 80px; /* Space for footer */
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            color: var(--secondary);
+        }
+        
+        .exam-tag {
+            background-color: #e2e6ea;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: var(--dark);
+        }
+
+        .question-text { font-size: 1.1em; font-weight: 500; margin-bottom: 15px; color: #000; }
+        
+        /* Options */
+        .options-list { list-style: none; padding: 0; }
+        .option-item {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        .option-item:hover { background-color: #f1f1f1; }
+        .option-circle {
+            height: 20px; width: 20px; border: 2px solid #ccc; border-radius: 50%; margin-right: 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        
+        /* Answer States */
+        .correct { border-color: var(--success); background-color: #d4edda; }
+        .correct .option-circle { border-color: var(--success); background: var(--success); color: white; }
+        .wrong { border-color: var(--danger); background-color: #f8d7da; }
+        .wrong .option-circle { border-color: var(--danger); background: var(--danger); color: white; }
+        .disabled { pointer-events: none; opacity: 0.8; }
+
+        /* Solution Box */
+        .solution-box {
+            margin-top: 20px;
+            background: #e7f3ff;
+            border: 1px solid #b8daff;
+            padding: 15px;
+            border-radius: 5px;
+            display: none; /* Hidden by default */
+        }
+        .solution-title { font-weight: bold; color: var(--primary); margin-bottom: 5px; }
+        .solution-text { font-size: 0.95em; line-height: 1.5; color: #333; white-space: pre-line; }
+
+        /* --- Sidebar / Palette --- */
+        .sidebar {
+            width: 280px;
+            background: #fff;
+            border-left: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%);
+            position: absolute;
+            right: 0; top: 0; bottom: 0;
+            transition: transform 0.3s ease;
+            z-index: 200;
+        }
+        .sidebar.open { transform: translateX(0); }
+        
+        .sidebar-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;}
+        .palette-legend { padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 0.8em; border-bottom: 1px solid #eee;}
+        .legend-item { display: flex; align-items: center; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
+        
+        .palette-grid {
+            padding: 10px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            overflow-y: auto;
+            align-content: start;
+        }
+        .palette-btn {
+            height: 35px; width: 35px;
+            border-radius: 50%;
+            border: 1px solid #ddd;
+            background: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+
+        /* Palette Colors */
+        .p-current { border: 2px solid var(--primary); }
+        .p-answered { background-color: var(--success); color: white; border-color: var(--success); }
+        .p-wrong { background-color: var(--danger); color: white; border-color: var(--danger); }
+        .p-review { background-color: var(--purple); color: white; border-color: var(--purple); }
+        .p-skipped { background-color: #ddd; }
+
+        /* --- Footer --- */
+        .footer-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: #fff; border-top: 1px solid #ddd;
+            padding: 10px; display: flex; justify-content: space-between;
+            z-index: 90;
+        }
+        .nav-btn {
+            padding: 8px 16px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;
+        }
+        .btn-prev { background: #e2e6ea; color: var(--dark); }
+        .btn-next { background: var(--primary); color: white; }
+        .btn-review { background: var(--purple); color: white; margin: 0 5px; }
+        .btn-palette-toggle { background: #fff; border: 1px solid #ccc; }
+
+        /* --- Screens (Start / Result) --- */
+        .overlay-screen {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #fff; z-index: 1000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; text-align: center;
+        }
+        .hidden { display: none !important; }
+        
+        .start-btn { padding: 15px 40px; font-size: 1.2em; background: var(--primary); color: white; border: none; border-radius: 50px; cursor: pointer; margin-top: 20px; }
+        .history-card { margin-top: 20px; text-align: left; width: 100%; max-width: 400px; background: #f8f9fa; padding: 15px; border-radius: 8px; }
+
+        .bookmark-icon { font-size: 1.5em; cursor: pointer; color: #ccc; }
+        .bookmark-icon.active { color: var(--warning); }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .sidebar { transform: translateX(0); position: static; width: 300px; display: flex; }
+            .btn-palette-toggle { display: none; }
+            .question-section { padding-bottom: 60px; }
+            .footer-nav { width: calc(100% - 300px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="startScreen" class="overlay-screen">
+        <h1>Civil Engineering Mock Test</h1>
+        <p>Topic: Building Materials (Cement)</p>
+        <p>Questions: 32 (Q.1203 - Q.1234)</p>
+        <p>Time: 2 Hours</p>
+        
+        <div style="margin: 10px 0;">
+            <button class="start-btn" onclick="startTest('normal')">Start Test</button>
+        </div>
+        <div style="margin: 10px 0;">
+            <button class="nav-btn" style="background:var(--warning); color: #000;" onclick="startTest('bookmarks')">Review Bookmarks</button>
+        </div>
+
+        <div class="history-card">
+            <h3>Previous Performance</h3>
+            <div id="historyList">No history available.</div>
+        </div>
+    </div>
+
+    <div id="resultScreen" class="overlay-screen hidden">
+        <h2>Test Summary</h2>
+        <h1 id="scoreDisplay">0 / 32</h1>
+        <p id="accuracyDisplay">Accuracy: 0%</p>
+        <div style="display: flex; gap: 10px;">
+            <button class="nav-btn btn-next" onclick="location.reload()">Back to Home</button>
+            <button class="nav-btn btn-prev" onclick="closeResult()">Review Questions</button>
+        </div>
+    </div>
+
+    <header id="appHeader" class="hidden">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <button class="exit-btn" onclick="confirmExit()">Exit</button>
+            <button class="nav-btn" style="background:var(--success); color:white; font-size:0.8em;" onclick="submitTest()">Submit</button>
+        </div>
+        <div class="timer-box" id="timer">02:00:00</div>
+    </header>
+
+    <div class="main-container hidden" id="appBody">
+        <div class="question-section" id="questionContainer">
+            <div class="question-header">
+                <span id="qNum">Question 1</span>
+                <div>
+                    <span id="examTag" class="exam-tag">SSC JE</span>
+                    <span id="bookmarkBtn" class="bookmark-icon" onclick="toggleBookmark()">&#9734;</span>
+                </div>
+            </div>
+            <div class="question-text" id="qText">Loading...</div>
+            
+            <ul class="options-list" id="optionsList">
+                </ul>
+
+            <div class="solution-box" id="solutionBox">
+                <div class="solution-title">Solution & Explanation:</div>
+                <div class="solution-text" id="solutionText"></div>
+            </div>
+        </div>
+
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <span>Question Palette</span>
+                <button onclick="toggleSidebar()" class="exit-btn" style="border:none; font-size:1.2em;">&times;</button>
+            </div>
+            <div class="palette-legend">
+                <div class="legend-item"><div class="dot" style="background:var(--success)"></div> Answered</div>
+                <div class="legend-item"><div class="dot" style="background:var(--danger)"></div> Wrong</div>
+                <div class="legend-item"><div class="dot" style="background:var(--purple)"></div> Review</div>
+                <div class="legend-item"><div class="dot" style="background:#ddd"></div> Skipped</div>
+            </div>
+            <div class="palette-grid" id="paletteGrid">
+                </div>
+        </div>
+    </div>
+
+    <footer class="footer-nav hidden" id="appFooter">
+        <button class="nav-btn btn-palette-toggle" onclick="toggleSidebar()">Grid</button>
+        <button class="nav-btn btn-prev" onclick="changeQuestion(-1)">Previous</button>
+        <button class="nav-btn btn-review" onclick="markForReview()">Review</button>
+        <button class="nav-btn btn-next" onclick="changeQuestion(1)">Next</button>
+    </footer>
+
+    <script>
+        // --- DATA: Transcribed Questions (1203 - 1234) ---
+        const questionsDB = [
+            {
+                id: 1203,
+                text: "Rapid hardening cement is used when :",
+                options: ["development of high early strength is required", "highly durable concrete is required", "highly workable concrete is required", "early setting is required"],
+                correct: 0,
+                examTag: "Gujarat Electric Board 2017",
+                solution: "<b>Ans. (a) : Rapid Hardening cement-</b>\n• Also called as high early strength Portland cement.\n• Contains high C₃S content and less C₂S content.\n• Used when development of high early strength is required, road repair works and structures where load is applied in short period of time.\n• Unsuitable for mass concreting because excessive heat evolution can result in serious cracking."
+            },
+            {
+                id: 1204,
+                text: "When air permeability method is used to determine fineness of cement, the fineness is expressed as :",
+                options: ["total surface area in square cm/gram of cement", "% cement residue", "% cement passage", "kg/m³"],
+                correct: 0,
+                examTag: "Gujarat Electric Board 2017",
+                solution: "<b>Ans. (a) :</b> When air permeability method is used to determine fineness of cement, the fineness of cement is measure of size of particles and it is expressed (cm²/gram) i.e., specific surface of cement i.e. area/mass."
+            },
+            {
+                id: 1205,
+                text: "The percentage of gypsum added to cement clinkers is:",
+                options: ["7%", "3%", "10%", "15%"],
+                correct: 1,
+                examTag: "KERLA PSC Code 196/2015",
+                solution: "<b>Ans. (b)</b> • Gypsum is added to cement to counteract C₃A to prevent flash set.\n• Excess gypsum makes cement unsound. So gypsum added to clinker should not be greater than 2 to 3%."
+            },
+            {
+                id: 1206,
+                text: "A cementing material is:",
+                options: ["Stone", "Brick", "Iron", "Lime"],
+                correct: 3,
+                examTag: "KERLA PSC Code 196/2015",
+                solution: "<b>Ans. (d) :</b> The cementing property of cement is mainly due to lime which consist about (60-65%) mass of cement."
+            },
+            {
+                id: 1207,
+                text: "The purpose of soundness test is to determine:",
+                options: ["the presence of free lime", "setting time", "sound proof quality of cement", "the fineness"],
+                correct: 0,
+                examTag: "KERLA PSC Code 197/2015",
+                solution: "\n<b>Ans. (a) : Soundness test :</b> To detect change in volume after setting.\n<b>Le-Chatelier's method:</b> Measure unsoundness (free lime only). Result given in 'mm'.\n<b>Auto clave test:</b> Sensitive to both lime and magnesia. Result given in %.\nThe test conducted to identify the excess amount of lime in cement is known as soundness test of cement."
+            },
+            {
+                id: 1208,
+                text: "The compound formed within about 24 hours after the addition of water to cement is:",
+                options: ["Tricalcium aluminate", "Dicalcium aluminate", "Dicalcium silicate", "Tricalcium silicate"],
+                correct: 0,
+                examTag: "Kerla PSC Code 67/2014",
+                solution: "<b>Ans. (a) : Tricalcium Aluminate-</b>\n• (C₃A or 3CaO.Al₂O₃)\n• (4-14%) by weight\n• Formed with 24 hour of addition of water in cement.\n• Responsible for maximum amount of heat of hydration."
+            },
+            {
+                id: 1209,
+                text: "The recommended curing period for Portland Pozzolana Cement concrete (PPC) to attain full strength for concrete exposed to dry and hot weather condition is",
+                options: ["7 days", "10 days", "14 days", "28 days"],
+                correct: 2,
+                examTag: "Mizoram PSC JE 2016",
+                solution: "<b>Ans. (b*) :</b> *Note: As per IS code, OPC exposed to hot/dry weather requires min 10 days (usually 7 days normal). Whereas PPC required minimum curing period not less than 14 days in case of exposed to dry and hot weather."
+            },
+            {
+                id: 1210,
+                text: "The expansion of Portland Cement is caused by",
+                options: ["voids", "iron oxide", "free silica", "free lime"],
+                correct: 3,
+                examTag: "WB AE 2020",
+                solution: "<b>Ans. (d) :</b> The expansion of Portland cement is caused by free lime. The Le-Chatelier Method is used to measure the unsoundness. The result is given in 'mm'."
+            },
+            {
+                id: 1211,
+                text: "What does rapid hardening cement contain?",
+                options: ["Tetra-calcium alumino-ferrite", "Tri-calcium aluminate", "Dicalcium silicate", "Tri-calcium silicate"],
+                correct: 3,
+                examTag: "UPPCL JE CE 2015",
+                solution: "<b>Ans. (d) : Rapid hardening cement–</b> RHC is similar to ordinary cement but with higher C₃S content and finer grinding. It is gain strength more quickly than OPC.\n• The one day strength of this cement is equal to the three day strength of OPC."
+            },
+            {
+                id: 1212,
+                text: "Match List-I with List-II and choose the correct answer:<br><b>List-I:</b><br>A. Water and cement<br>B. Tri Calcium Silicate<br>C. Di Calcium Silicate<br><br><b>List-II:</b><br>1. Fast in reaction<br>2. Slow in reaction<br>3. Slowest in reaction<br>4. Hydrates",
+                options: ["A-4, B-1, C-2", "A-4, B-2, C-3", "A-3, B-2, C-4", "A-1, B-3, C-4"],
+                correct: 0,
+                examTag: "UPPCL JE CE 2015",
+                solution: "<b>Ans. (b* modified for logic) : Water cement ratio–</b> It is properties like hydrates.\n<b>C3S (Tricalcium silicate)–</b> Develops on early hardness and strength. Generally high heat of evolution and faster rate of hydration.\n<b>C2S (Dicalcium silicate)–</b> It is give ultimate strength, Slow hardening.\nCorrect Match: Water+Cement -> Hydrates; C3S -> Fast; C2S -> Slow/Slowest."
+            },
+            {
+                id: 1213,
+                text: "Which of the following types of cement is used for canal linings?",
+                options: ["Rapid hardening cement", "Pozzolana cement", "Sulphate resisting cement", "Quick setting cement"],
+                correct: 2,
+                examTag: "UPPCL JE CE 2015",
+                solution: "<b>Ans. (c) : Sulphate resisting cement –</b>\n• It is modified from of O.P.C. and is specially manufactured to resist the sulphate.\n• This cement contains a low percentage of C₃A and C₃S and C₂S kept about 45% each.\n• Use : Canal linings, Concrete to be used in marine condition, Construction in sewer treatment."
+            },
+            {
+                id: 1214,
+                text: "Early attainment of strength in rapid hardening cement is mainly due to :",
+                options: ["Tricalcium silicate", "Tricalcium aluminate", "Finer grinder", "Gypsum"],
+                correct: 2,
+                examTag: "UPPCL JE CE 2015",
+                solution: "<b>Ans. (c) : Rapid hardening cement –</b> It is high heat of hydration it is similar to OPC but which higher C₃S and finer grinding. In RHC gain early strength due to finer grinding. The one day strength of this cement is equal to three day strength of OPC."
+            },
+            {
+                id: 1215,
+                text: "Gypsum added in manufacture of Portland cement is:",
+                options: ["to gain colour properties", "to promote flash set of cement", "to prolong the setting time of cement", "to increase heat of hydration"],
+                correct: 2,
+                examTag: "UPRVUNL JE 2019",
+                solution: "<b>Ans. (c) :</b> When cement is mixed with water, it becomes hard over a period of time. Gypsum is added after added to Portland cement to prevent early hardening or 'flash setting', allowing a longer working time. Gypsum slows down the setting of cement."
+            },
+            {
+                id: 1216,
+                text: "Quick setting cement is produced by adding :",
+                options: ["more amount of gypsum in very fine powdered from", "pozzolana in very fine powdered form", "less amount of gypsum in very fine powdered form", "aluminium sulphate in very fine powdered form"],
+                correct: 3,
+                examTag: "UPPCL JE CE 2015",
+                solution: "<b>Ans. (*) : Quick setting cement -</b> The early setting property is brought out by reducing the gypsum content at the time of clinker grinding and by adding small percentage of aluminium sulphate."
+            },
+            {
+                id: 1217,
+                text: "Which of the following is commonly used as retarder in cement?",
+                options: ["Calcium sulphate", "Gypsum", "Potassium carbide", "Sodium chloride"],
+                correct: 1,
+                examTag: "SSC JE 2018",
+                solution: "<b>Ans. (b) Retarders –</b> Retarding admixtures delay hydration of cement.\n• Gypsum, sugar, starches, cellulose product, acid or salt acid.\n• Gypsum is commonly used as retarder in cement. Added 2–3% at the time of grinding."
+            },
+            {
+                id: 1218,
+                text: "Quick setting cement is manufactured by :",
+                options: ["Increasing lime content", "Decreasing sand content", "Increasing Gypsum", "Reducing Gypsum"],
+                correct: 3,
+                examTag: "Gujarat BMC 2017",
+                solution: "<b>Ans. (d) :</b> Gypsum is used as retarder in cement, by reducing Gypsum quick setting cement is manufactured."
+            },
+            {
+                id: 1219,
+                text: "Initial and final setting time of cement respectively is :",
+                options: ["30 and 500 minutes", "30 and 600 minutes", "25 and 400 minutes", "45 and 600 minutes"],
+                correct: 1,
+                examTag: "Gujarat BMC 2017",
+                solution: "\n<b>Ans. (b) :</b> Initial setting time of cement = 30 minutes\nFinal setting time of cement = 600 minutes (10 hours)."
+            },
+            {
+                id: 1220,
+                text: "Addition of 1-2% sodium hydroxide in concrete:",
+                options: ["Reduces setting time", "Reduces voids", "Gives smooth surface finish", "Gives wear resistant surface"],
+                correct: 0,
+                examTag: "CRPF SI Overseer 2017",
+                solution: "<b>Ans. (a)</b>\n• Addition of sodium hydroxide in concrete reduce setting time.\n• An increase in concentration of sodium hydroxide increased the viscosity of the concrete."
+            },
+            {
+                id: 1221,
+                text: "To produce low heat cement it is necessary to reduce the compound :",
+                options: ["C₃S", "C₂S", "C₃A", "C₄AF"],
+                correct: 2,
+                examTag: "CRPF SI Overseer 2017",
+                solution: "<b>Ans. (c) :</b> • To limit the heat of hydration of low heat Portland cement, the tricalcium aluminate (C₃A) component in cement is reduced and a high percentage of dicalcium silicate is added.\n• The heat of hydration should not be more than 272 and 314 J/g at the end of 7 and 28 days respectively."
+            },
+            {
+                id: 1222,
+                text: "Among the properties of cement, to determine the compressive strength, what should be the face area of cement mortar cube?",
+                options: ["50 cm²", "15 cm²", "225 cm²", "176.63 cm²"],
+                correct: 0,
+                examTag: "KPSC Overseer 2017",
+                solution: "<b>Ans. (a) :</b> As per IS code (8112 – 2013). The digits 33, 43 and 53 grade of OPC represents 28 days compressive strength (N/mm²) of standard cube of face area <b>50 cm²</b>. Made up of cement mortar 1 : 3."
+            },
+            {
+                id: 1223,
+                text: "For practical purposes, Portland Cement is considered as composed of four principal compounds such as:",
+                options: ["Lime, Silica, Alumina and Magnesia", "Lime, Silica, Alumina and Iron Oxide", "Lime, Silica, Alumina and Soda", "Lime, Silica, Alumina and Sulphur Oxide"],
+                correct: 1,
+                examTag: "Mizoram PSC JE 2016",
+                solution: "<b>Ans. (b) : Chemical composition of Portland cement</b>\nLime (CaO): 60–65%\nSilica (SiO₂): 17–25%\nAlumina (Al₂O₃): 3–8%\nIron oxide (Fe₂O₃): 0.5–6%"
+            },
+            {
+                id: 1224,
+                text: "The minimum cement content (kg/m³) for a pre-specified strength of concrete (using standard notations) premised on 'free water-cement ratio' will be as",
+                options: ["1 - C/1000Sc", "Water Content / Water Cement ratio", "Water Content * Water Cement ratio", "100F / (C+F)"],
+                correct: 1,
+                examTag: "ESE 2018",
+                solution: "<b>Ans. (b)</b>\nFree-water-cement = Water Content / Water Cement ratio."
+            },
+            {
+                id: 1225,
+                text: "Statement (I): Expansive cement is used in repair work for opened up joints. \nStatement (II): Expansive cement expands while hardening.",
+                options: ["Both (I) and (II) are true and (II) explains (I)", "Both (I) and (II) are true but (II) does not explain (I)", "(I) is true but (II) is false", "(I) is false but (II) is true"],
+                correct: 0,
+                examTag: "ESE 2018",
+                solution: "<b>Ans. (a)</b> When expanding or expansive cement is used to fill concrete cracks or opened up joints, it expands while hardening and thus effectively packs the crack or joint. Both statements are correct."
+            },
+            {
+                id: 1226,
+                text: "Water Cement ratio in a concrete mix must be kept minimum for the following reasons:",
+                options: ["To help cement concrete to set early", "For easy compaction and workability", "To help chemical reaction and To impart workability", "Both (a) & (b)"],
+                correct: 3,
+                examTag: "Mizoram PSC JE 2016",
+                solution: "<b>Ans. (c - Corrected based on text) : Water cement ratio :</b>\n• Water cement ratio (w/c) is one of the major factor affecting strength.\n• It is responsible mainly for the porosity of the hardened cement paste.\n• In practice, 0.35 to 0.65."
+            },
+            {
+                id: 1227,
+                text: "The initial setting time of rapid hardening cement should not be less than",
+                options: ["30 min", "1 hour", "4 hours", "8 hours"],
+                correct: 0,
+                examTag: "GSSSB AAE 2021",
+                solution: "<b>Ans. (a) :</b> The initial setting time of rapid hardening cement should not be less than 30 min.\n• The final setting time of rapid hardening cement 10 hour."
+            },
+            {
+                id: 1228,
+                text: "The cement which is commonly used in all types of structures and require no special consideration, is called",
+                options: ["Rapid hardening cement", "Normal setting cement", "Quick setting cement", "White cement"],
+                correct: 1,
+                examTag: "HSSC JE 2015",
+                solution: "<b>Ans. (b) : Portland cement -</b>\n• Portland cement is the most common variety of artificial cement and it is also known as normal setting cement or ordinary cement.\n• Most commonly used in general concrete construction."
+            },
+            {
+                id: 1229,
+                text: "Cement becomes unsound in the presence of",
+                options: ["Sulphur", "Lime", "Magnesium", "All of these"],
+                correct: 3,
+                examTag: "KPCL JE 2012",
+                solution: "<b>Ans. (d) :</b> Cement becomes unsound in the presence of sulphur, lime and magnesium.\nSoundness due to lime – use Le-Chattlier apparatus\nSoundness due to magnesia – auto clave test\nSoundness due to sulphur – can't measure"
+            },
+            {
+                id: 1230,
+                text: "Addition of pozzolana to ordinary portland cement, causes",
+                options: ["Decrease in early strength and reduction in chemical action with sulphates", "Increase in bleeding", "Decrease in shrinkage", "None of these"],
+                correct: 0,
+                examTag: "KPCL JE 2012",
+                solution: "<b>Ans. (d/a inferred):</b> Pozzolana Portland cement (PPC):\n(i) Lower heat of hydration\n(ii) Slower early strength gain\n(iii) Setting time is normally longer\n(iv) Consumes calcium hydroxide.\nAddition decreases early strength."
+            },
+            {
+                id: 1231,
+                text: "Batching error means inaccuracy in the quantity of",
+                options: ["Aggregates", "Cement", "Water", "All of the above"],
+                correct: 3,
+                examTag: "KPCL JE 2012",
+                solution: "<b>Ans. (d) : Batching–</b> It is the process of measuring concrete mix ingredients by either mass or volume and introducing them into mixer. To produce concrete of uniform quality the ingredients must be measure accurately for each batch."
+            },
+            {
+                id: 1232,
+                text: "Which of the following types of cement would be used for lining canals?",
+                options: ["Sulphate resisting cement", "Rapid hardening cement", "Quick setting cement", "Pozzolana cement"],
+                correct: 0,
+                examTag: "KPCL JE 2012",
+                solution: "<b>Ans. (a) :</b> Canal lining is the process of reducing seepage loss. Sulphate Resisting cement is a type of Portland cement in which the amount of tricalcium aluminate (C₃A) is restricted to lower than 5%."
+            },
+            {
+                id: 1233,
+                text: "Which of the following is true with respect to Asbestos cement?",
+                options: ["It is brittle", "It warps on account of humidity", "Weakness when saturated by water", "All the above"],
+                correct: 3,
+                examTag: "KPCL JE 2012",
+                solution: "<b>Ans. (d) :</b> Asbestos cement products are manufactured using mechanized process with 10-20% fibre being mixed with Portland cement slurry. It is brittle and warp on account of humidity also weak in nature when saturated by water."
+            },
+            {
+                id: 1234,
+                text: "What is the cement generally used for road pavements?",
+                options: ["Ordinary Portland cement", "Rapid hardening cement", "Low heat cement", "Blast furnace slag cement"],
+                correct: 1,
+                examTag: "YCT Note",
+                solution: "<b>Ans. (b) :</b> Rapid hardening cement is often used for road repair and pavements where early opening to traffic is required."
+            }
+        ];
+
+        // --- STATE VARIABLES ---
+        let currentQuestionIndex = 0;
+        let userAnswers = new Array(questionsDB.length).fill(null); // null = not answered, index = option selected
+        let questionStatus = new Array(questionsDB.length).fill('unvisited'); // unvisited, visited, answered, review
+        let bookmarks = JSON.parse(localStorage.getItem('civilBookmarks')) || [];
+        let timerInterval;
+        let timeRemaining = 7200; // 2 hours in seconds
+        let isReviewMode = false;
+        let activeQuestions = []; // Points to questionsDB or bookmarked subset
+
+        // --- INITIALIZATION ---
+        function startTest(mode) {
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('appHeader').classList.remove('hidden');
+            document.getElementById('appBody').classList.remove('hidden');
+            document.getElementById('appFooter').classList.remove('hidden');
+
+            if (mode === 'bookmarks') {
+                isReviewMode = true;
+                const bookmarkedIds = bookmarks;
+                activeQuestions = questionsDB.filter(q => bookmarkedIds.includes(q.id));
+                if (activeQuestions.length === 0) {
+                    alert("No bookmarks found! Starting normal test.");
+                    activeQuestions = questionsDB;
+                    isReviewMode = false;
+                }
+            } else {
+                activeQuestions = questionsDB;
+                isReviewMode = false;
+                startTimer();
+            }
+            
+            // Re-init arrays based on active set size if we were doing a generic engine, 
+            // but here we map by ID or index. For simplicity, we stick to main DB indexing.
+            // If review mode, we just jump between indices of the active set.
+            
+            if(isReviewMode) {
+                // Map active questions back to main DB index
+                currentQuestionIndex = questionsDB.indexOf(activeQuestions[0]);
+            } else {
+                currentQuestionIndex = 0;
+            }
+
+            loadQuestion(currentQuestionIndex);
+            updatePalette();
+        }
+
+        // --- CORE LOGIC ---
+        function loadQuestion(index) {
+            // Update status to visited if not answered
+            if(questionStatus[index] === 'unvisited') {
+                questionStatus[index] = 'visited';
+            }
+            
+            const q = questionsDB[index];
+            document.getElementById('qNum').innerText = `Question ${index + 1} / ${questionsDB.length}`; // Always show absolute number
+            document.getElementById('examTag').innerText = q.examTag;
+            document.getElementById('qText').innerHTML = q.text;
+            
+            // Bookmarks
+            const bmBtn = document.getElementById('bookmarkBtn');
+            bmBtn.classList.toggle('active', bookmarks.includes(q.id));
+            bmBtn.innerHTML = bookmarks.includes(q.id) ? '&#9733;' : '&#9734;';
+
+            // Options
+            const list = document.getElementById('optionsList');
+            list.innerHTML = '';
+            
+            const savedAns = userAnswers[index];
+            const isAnswered = savedAns !== null;
+
+            q.options.forEach((opt, i) => {
+                const li = document.createElement('li');
+                li.className = 'option-item';
+                
+                // Determine classes based on state
+                if (isAnswered) {
+                    li.classList.add('disabled');
+                    if (i === q.correct) li.classList.add('correct');
+                    if (i === savedAns && i !== q.correct) li.classList.add('wrong');
+                }
+
+                li.innerHTML = `<div class="option-circle">${String.fromCharCode(65+i)}</div> ${opt}`;
+                li.onclick = () => selectOption(index, i);
+                list.appendChild(li);
+            });
+
+            // Solution Box
+            const solBox = document.getElementById('solutionBox');
+            const solText = document.getElementById('solutionText');
+            if (isAnswered) {
+                solBox.style.display = 'block';
+                solText.innerHTML = q.solution;
+            } else {
+                solBox.style.display = 'none';
+            }
+
+            updatePalette();
+        }
+
+        function selectOption(qIndex, optIndex) {
+            if (userAnswers[qIndex] !== null) return; // Already answered
+
+            userAnswers[qIndex] = optIndex;
+            const q = questionsDB[qIndex];
+            
+            // Update Status
+            if (optIndex === q.correct) {
+                questionStatus[qIndex] = 'answered'; // Logic: Answered Correctly
+            } else {
+                questionStatus[qIndex] = 'wrong'; // Logic: Answered Incorrectly (Custom status for palette)
+            }
+
+            // Refresh UI
+            loadQuestion(qIndex);
+        }
+
+        function changeQuestion(dir) {
+            let newIndex = currentQuestionIndex;
+            
+            if (isReviewMode) {
+                // Find current ID in active set
+                const currentId = questionsDB[currentQuestionIndex].id;
+                let activeIdx = activeQuestions.findIndex(q => q.id === currentId);
+                activeIdx += dir;
+                
+                if (activeIdx >= 0 && activeIdx < activeQuestions.length) {
+                    newIndex = questionsDB.indexOf(activeQuestions[activeIdx]);
+                }
+            } else {
+                newIndex += dir;
+            }
+
+            if (newIndex >= 0 && newIndex < questionsDB.length) {
+                currentQuestionIndex = newIndex;
+                loadQuestion(newIndex);
+            }
+        }
+
+        function jumpToQuestion(index) {
+            currentQuestionIndex = index;
+            loadQuestion(index);
+            if(window.innerWidth < 768) toggleSidebar(); // Close sidebar on mobile select
+        }
+
+        function toggleBookmark() {
+            const qId = questionsDB[currentQuestionIndex].id;
+            if (bookmarks.includes(qId)) {
+                bookmarks = bookmarks.filter(id => id !== qId);
+            } else {
+                bookmarks.push(qId);
+            }
+            localStorage.setItem('civilBookmarks', JSON.stringify(bookmarks));
+            loadQuestion(currentQuestionIndex); // Refresh icon
+        }
+
+        function markForReview() {
+            if (questionStatus[currentQuestionIndex] !== 'answered' && questionStatus[currentQuestionIndex] !== 'wrong') {
+                questionStatus[currentQuestionIndex] = 'review';
+                updatePalette();
+                changeQuestion(1);
+            }
+        }
+
+        // --- PALETTE & SIDEBAR ---
+        function updatePalette() {
+            const grid = document.getElementById('paletteGrid');
+            grid.innerHTML = '';
+            
+            questionsDB.forEach((q, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'palette-btn';
+                btn.innerText = i + 1;
+                
+                // Color Logic
+                if (i === currentQuestionIndex) btn.classList.add('p-current');
+                
+                const stat = questionStatus[i];
+                if (stat === 'answered') btn.classList.add('p-answered');
+                else if (stat === 'wrong') btn.classList.add('p-wrong');
+                else if (stat === 'review') btn.classList.add('p-review');
+                else if (stat === 'visited') btn.classList.add('p-skipped'); // Visited but not answered
+
+                btn.onclick = () => jumpToQuestion(i);
+                grid.appendChild(btn);
+            });
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // --- TIMER ---
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                const hours = Math.floor(timeRemaining / 3600);
+                const minutes = Math.floor((timeRemaining % 3600) / 60);
+                const seconds = timeRemaining % 60;
+                
+                document.getElementById('timer').innerText = 
+                    `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+
+                if (timeRemaining <= 0) submitTest();
+            }, 1000);
+        }
+
+        // --- SUBMISSION & HISTORY ---
+        function submitTest() {
+            clearInterval(timerInterval);
+            let score = 0;
+            let attempted = 0;
+            
+            questionsDB.forEach((q, i) => {
+                if (userAnswers[i] !== null) {
+                    attempted++;
+                    if (userAnswers[i] === q.correct) score++;
+                }
+            });
+
+            // Save History
+            const history = JSON.parse(localStorage.getItem('civilHistory')) || [];
+            const resultObj = {
+                date: new Date().toLocaleString(),
+                score: score,
+                total: questionsDB.length,
+                accuracy: attempted ? Math.round((score/attempted)*100) : 0
+            };
+            history.unshift(resultObj);
+            if(history.length > 5) history.pop(); // Keep last 5
+            localStorage.setItem('civilHistory', JSON.stringify(history));
+
+            // Show Result
+            document.getElementById('appHeader').classList.add('hidden');
+            document.getElementById('appBody').classList.add('hidden');
+            document.getElementById('appFooter').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+            
+            document.getElementById('scoreDisplay').innerText = `${score} / ${questionsDB.length}`;
+            document.getElementById('accuracyDisplay').innerText = `Accuracy: ${resultObj.accuracy}%`;
+        }
+
+        function closeResult() {
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('appHeader').classList.remove('hidden');
+            document.getElementById('appBody').classList.remove('hidden');
+            document.getElementById('appFooter').classList.remove('hidden');
+            // User can now review questions with solutions visible
+        }
+
+        function confirmExit() {
+            if(confirm("Are you sure you want to exit? Progress will be lost.")) {
+                location.reload();
+            }
+        }
+
+        // --- LOAD HISTORY ON START ---
+        (function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('civilHistory')) || [];
+            const container = document.getElementById('historyList');
+            if (history.length > 0) {
+                container.innerHTML = history.map(h => 
+                    `<div style="border-bottom:1px solid #ddd; padding:5px 0; font-size:0.9em;">
+                        <b>${h.score}/${h.total}</b> - ${h.date} (Acc: ${h.accuracy}%)
+                    </div>`
+                ).join('');
+            }
+        })();
+
+    </script>
+</body>
+</html>
