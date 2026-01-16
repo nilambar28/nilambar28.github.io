@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civil JE/AE App - Bookmark Mode</title>
+    <style>
+        :root {
+            --primary: #007bff;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --purple: #6f42c1;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray: #6c757d;
+            --border: #dee2e6;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+        body { background-color: #f0f2f5; height: 100vh; display: flex; flex-direction: column; }
+
+        /* --- LANDING PAGE --- */
+        #landing-page { padding: 20px; text-align: center; background: white; height: 100%; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+        .hero-title { font-size: 24px; color: var(--dark); margin-bottom: 20px; margin-top: 40px; font-weight: bold; }
+        .stat-card { background: var(--light); padding: 15px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%; max-width: 350px; }
+        .btn-main { background: var(--primary); color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 30px; width: 100%; max-width: 300px; cursor: pointer; margin: 10px 0; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: transform 0.1s; }
+        .btn-main:active { transform: scale(0.98); }
+        .btn-secondary { background: white; color: var(--primary); border: 2px solid var(--primary); display: flex; align-items: center; justify-content: center; gap: 10px;}
+
+        /* --- QUIZ CONTAINER --- */
+        #quiz-container { display: none; flex-direction: column; height: 100vh; background: white; }
+        
+        /* Header */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: white; border-bottom: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .timer { font-weight: bold; font-size: 16px; color: var(--dark); background: #e9ecef; padding: 5px 10px; border-radius: 5px; }
+        .submit-btn { background: var(--success); color: white; border: none; padding: 6px 15px; border-radius: 5px; font-size: 14px; font-weight: bold; cursor: pointer; }
+        .exit-icon { font-size: 20px; color: var(--danger); cursor: pointer; margin-right: 10px; padding: 5px; }
+
+        /* Main Content */
+        #question-area { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 80px; }
+        .exam-tag { display: inline-block; background: #e2e6ea; color: var(--gray); font-size: 11px; padding: 3px 8px; border-radius: 4px; margin-bottom: 10px; font-weight: bold; }
+        .q-text { font-size: 16px; color: var(--dark); margin-bottom: 20px; line-height: 1.5; font-weight: 500; }
+        
+        /* Options */
+        .option { display: flex; align-items: center; padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
+        .option.selected { border-color: var(--primary); background: #e7f1ff; }
+        .option.correct { border-color: var(--success); background: #d4edda; }
+        .option.wrong { border-color: var(--danger); background: #f8d7da; }
+        .opt-label { font-weight: bold; margin-right: 10px; width: 25px; }
+
+        /* Solution Box */
+        .solution-box { margin-top: 20px; padding: 15px; background: #f8f9fa; border-left: 4px solid var(--success); border-radius: 4px; display: none; }
+        .solution-title { font-weight: bold; color: var(--success); margin-bottom: 5px; font-size: 14px; }
+        .solution-text { font-size: 14px; color: var(--dark); white-space: pre-wrap; }
+
+        /* Footer Nav */
+        footer { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid var(--border); padding: 10px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+        .nav-btn { background: transparent; border: 1px solid var(--border); padding: 8px 15px; border-radius: 5px; font-size: 14px; color: var(--dark); cursor: pointer; }
+        .nav-btn:disabled { opacity: 0.5; }
+        .mark-review { color: var(--purple); border-color: var(--purple); }
+        .bookmark-icon { font-size: 22px; color: var(--gray); cursor: pointer; padding: 5px; }
+        .bookmark-icon.active { color: var(--primary); }
+
+        /* Palette Drawer */
+        #palette-drawer { position: fixed; top: 0; right: -80%; width: 80%; height: 100%; background: white; box-shadow: -2px 0 5px rgba(0,0,0,0.2); transition: 0.3s; z-index: 20; padding: 15px; overflow-y: auto; }
+        #palette-drawer.open { right: 0; }
+        .palette-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 20px; }
+        .p-item { width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: bold; border: 1px solid var(--border); cursor: pointer; }
+        
+        /* Palette Colors */
+        .p-item.current { border: 2px solid var(--primary); }
+        .p-item.answered { background: var(--success); color: white; border: none; }
+        .p-item.skipped { background: var(--gray); color: white; border: none; }
+        .p-item.review { background: var(--purple); color: white; border: none; }
+        
+        .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:15; display:none; }
+
+        /* Utilities */
+        .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: white; margin-left: 5px; }
+        .test-mode-label { position: absolute; top: 5px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--primary); background: #e7f1ff; padding: 2px 8px; border-radius: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="landing-page">
+        <h1 class="hero-title">Civil Engineering JE/AE<br>Mock Test</h1>
+        
+        <div class="stat-card">
+            <h3>Previous Accuracy</h3>
+            <p id="prev-accuracy" style="font-size: 24px; color: var(--success); font-weight: bold;">0%</p>
+            <p id="prev-score" style="font-size: 14px; color: var(--gray);">Last Score: 0/0</p>
+        </div>
+
+        <button class="btn-main" onclick="initTest('full')">Start Full Test</button>
+        
+        <button class="btn-main btn-secondary" onclick="initTest('bookmark')">
+            <span>&#9733;</span> Revise Bookmarks
+        </button>
+        
+        <div style="margin-top: 30px; text-align: left; width: 100%; max-width: 300px;">
+            <h4>Test Syllabus:</h4>
+            <ul style="margin-left: 20px; margin-top: 10px; color: var(--gray); font-size: 14px;">
+                <li>RCC & Concrete Tech</li>
+                <li>IS 456-2000 Codes</li>
+                <li>Questions 189 - 219</li>
+                <li>Instant Solutions</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="quiz-container">
+        <div class="overlay" id="drawer-overlay" onclick="togglePalette()"></div>
+        <div id="mode-badge" class="test-mode-label">BOOKMARK MODE</div>
+
+        <header>
+            <div style="display:flex; align-items:center;">
+                <span class="exit-icon" onclick="confirmExit()">&#10006;</span>
+                <div class="timer" id="timer-display">02:00:00</div>
+            </div>
+            <div style="display:flex; align-items:center;">
+                <button class="submit-btn" onclick="submitTest()">SUBMIT</button>
+                <button onclick="togglePalette()" style="background:none; border:none; margin-left:15px; font-size:24px;">&#9776;</button>
+            </div>
+        </header>
+
+        <div id="question-area">
+            </div>
+
+        <footer>
+            <div style="display:flex; gap:10px;">
+                <button class="nav-btn" id="btn-prev" onclick="changeQuestion(-1)">Previous</button>
+                <button class="nav-btn mark-review" onclick="markForReview()">Mark Review</button>
+            </div>
+            <span class="bookmark-icon" id="btn-bookmark" onclick="toggleBookmark()">&#9734;</span>
+            <button class="nav-btn" id="btn-next" style="background:var(--primary); color:white; border:none;" onclick="changeQuestion(1)">Next</button>
+        </footer>
+
+        <div id="palette-drawer">
+            <h3>Question Palette</h3>
+            <div class="palette-grid" id="palette-grid">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA (Extracted from Images) ---
+        const masterDB = [
+            { id: 189, q: "According to IS 456-2000, the slump value (in mm) of the concrete used in ordinary RCC work for beams and slabs etc, is in the range of:", opts: ["50 to 100", "25 to 50", "20 to 30", "75 to 150"], ans: 0, tag: "DFCCIL JE 2018", exp: "For beams and slabs, the degree of workability required is Medium. As per IS 456:2000, the slump value for medium workability (Reinforced beam & slabs) is 50-100 mm." },
+            { id: 190, q: "According to IS 456-2000 the exposure condition of concrete surface to coastal environment completely is classified as:", opts: ["Severe", "Very severe", "Extreme", "Moderate"], ans: 1, tag: "DFCCIL JE 2018", exp: "Table 3 of IS 456: Coastal environment = Very Severe. Tidal zone = Extreme." },
+            { id: 191, q: "According to IS 456-2000, the nominal cover provided for the concrete surfaces exposed to very severe environmental conditions shall NOT be less than:", opts: ["75 mm", "45 mm", "50 mm", "30 mm"], ans: 2, tag: "DFCCIL JE 2018", exp: "Mild: 20mm, Moderate: 30mm, Severe: 45mm, Very Severe: 50mm, Extreme: 75mm" },
+            { id: 192, q: "According to the classification of ordinary portland cement by Indian Standard Bureau. Which of the following is not a grade of cement?", opts: ["Grade 53", "Grade 33", "Grade 63", "Grade 43"], ans: 2, tag: "SSC JE 2019", exp: "OPC grades are 33, 43, and 53. Grade 63 does not exist for OPC." },
+            { id: 193, q: "What is the meaning of the designation 'M30' concrete suggested for a reinforced cement concrete work?", opts: ["Comp. strength at 365 days is 30 N/mm²", "Comp. strength at 28 days is 300 N/mm²", "Comp. strength at 28 days is 30 N/mm²", "None of above"], ans: 2, tag: "SSC JE 2019", exp: "M = Mix, 30 = Characteristic Compressive Strength (fck) at 28 days in N/mm²." },
+            { id: 194, q: "In reinforced concrete footing, the minimum value of nominal cover for the reinforcing bar, to meet the durability requirement is:", opts: ["45 mm", "50 mm", "40 mm", "30 mm"], ans: 1, tag: "SSC JE 2019", exp: "For footings, minimum cover is 50mm." },
+            { id: 195, q: "To prevent corrosion of steel reinforcement in RCC structures, the pH value of concrete should be –", opts: ["Acidic", "Neutral", "Just alkaline", "Highly alkaline"], ans: 3, tag: "RRB JE 2019", exp: "Concrete must be highly alkaline (pH > 11.5) to maintain the passivation layer on steel." },
+            { id: 196, q: "As per IS codes, the characteristic yield strength for hot rolled high yield deformed bars is", opts: ["250 N/mm²", "550 N/mm²", "500 N/mm²", "415 N/mm²"], ans: 3, tag: "RRB JE 2019", exp: "Hot rolled HYSD bars typically refer to Fe415." },
+            { id: 197, q: "The minimum grades for PCC and RCC structure as per IS code is:", opts: ["M 20 and M 30", "M 15 and M 20", "M 15 and M 25", "M 10 and M 20"], ans: 1, tag: "RRB JE 2019", exp: "PCC Min Grade: M15. RCC Min Grade: M20 (IS 456:2000)." },
+            { id: 198, q: "If there is any obstruction to the uniform settlement of hardened concrete, it forms a crack known as", opts: ["Random crack", "Shear crack", "Settlement crack", "Longitudinal crack"], ans: 2, tag: "RRB JE 2019", exp: "Settlement cracks occur due to obstruction (like reinforcement or subgrade) during settlement." },
+            { id: 199, q: "For the construction of thin R.C.C. structures, the type of cement to be avoided, is :", opts: ["OPC", "High alumina", "Blast furnace slag cement", "Low heat cement"], ans: 2, tag: "Gujarat BMC 2016", exp: "Blast furnace slag cement has low early strength, making it unsuitable for thin RCC where formwork needs quick removal." },
+            { id: 200, q: "The modulus of rupture of concrete is a measure of which one of the following property?", opts: ["Flexural tensile strength", "Direct tensile strength", "Compressive strength", "Split tensile strength"], ans: 0, tag: "Punjab JE 2018", exp: "Modulus of rupture = Flexural Tensile Strength (0.7 * sqrt(fck))." },
+            { id: 201, q: "Which grade is not used for R.C.C. work?", opts: ["M 10", "M 20", "M 30", "M 40"], ans: 0, tag: "MIZORAM PSC 2010", exp: "Minimum grade for RCC is M20. M10 is used for PCC." },
+            { id: 202, q: "Clear cover of foundation in slab and beams is", opts: ["15 mm", "50 mm", "30 mm", "10 mm"], ans: 1, tag: "HPSSC JE 2019", exp: "Refers to foundation cover: 50mm. (Slab=20mm, Beam=25mm)." },
+            { id: 203, q: "Total strain in Fe 415 grade steel corresponding to the stress of 0.87 fy?", opts: ["0.0035", "0.0038", "0.002", "0.004"], ans: 1, tag: "UPSSSC JE 2016", exp: "Strain = 0.002 + 0.87fy/Es = 0.002 + (0.87*415)/(2*10^5) = 0.0038." },
+            { id: 204, q: "Match: a. Radio activity, b. Magnetic, c. Neutron activation, d. Neutron scattering", opts: ["a-3, b-2, c-4, d-1", "a-2, b-1, c-3, d-4", "a-1, b-2, c-4, d-3", "a-3, b-4, c-2, d-1"], ans: 0, tag: "GPSC AM 2020", exp: "Radio activity=Density; Magnetic=Reinforcement Cover; Neutron activation=Cement content; Neutron scattering=Moisture." },
+            { id: 205, q: "Effective cover of RCC beam depends on", opts: ["Diameter of main bar", "Grade of steel", "Grade of concrete", "Width of beam"], ans: 0, tag: "GPSC AM 2020", exp: "Effective Cover = Clear Cover + (Dia/2)." },
+            { id: 206, q: "Concrete continuously under water classification:", opts: ["Severe", "Moderate", "Extreme", "Mild"], ans: 1, tag: "UPSSSC JE 2016", exp: "Continuously under water (fresh) is Moderate." },
+            { id: 207, q: "In RCC structures the steel reinforcement consists of-", opts: ["Deformed bars", "Cold twisted bars", "Mild steel", "All of the these"], ans: 3, tag: "UPSSSC JE 2016", exp: "All types (Mild steel, HYSD, TMT) are used in RCC." },
+            { id: 208, q: "Twisted bar has about ____ more yield stress than ordinary mild steel bar.", opts: ["10%", "20%", "35%", "50%"], ans: 3, tag: "UPSSSC JE 2016", exp: "CTD/HYSD yield (415) is approx 50% more than Mild Steel (250)." },
+            { id: 209, q: "Coefficient of thermal expansion of concrete is nearly equal to-", opts: ["Wood", "Steel", "Aluminium", "Copper"], ans: 1, tag: "UPSSSC JE 2016", exp: "Steel and concrete have similar thermal expansion coefficients." },
+            { id: 210, q: "IS : 456 recommends-", opts: ["WSM", "UFM", "LSM", "Both WSM & LSM"], ans: 3, tag: "UPSSSC JE 2016", exp: "IS 456 allows both Working Stress Method and Limit State Method." },
+            { id: 211, q: "The reinforcement in RCC takes-", opts: ["Tensile stress", "Compressive stress", "Shear stress", "Torsional stress"], ans: 0, tag: "UJVNL JE 2016", exp: "Steel is primarily provided to take Tensile Stress." },
+            { id: 212, q: "Stripping time for RC slab < 4.5 m using fly ash?", opts: ["7 days", "10 days", "14 days", "21 days"], ans: 2, tag: "Gujarat PSC AE", exp: "Standard is 7 days, but with Fly Ash, curing and stripping times increase. Answer is 14 days." },
+            { id: 213, q: "Horizontal distance between two parallel main bars shall not be less than:", opts: ["Dia of bar (equal)", "Dia of larger bar (unequal)", "Max agg size + 5mm", "All the above"], ans: 3, tag: "GPHC JE 2018", exp: "Clause 26.3.2 covers all these criteria." },
+            { id: 214, q: "Advantage of increasing cover thickness?", opts: ["Fire resistance", "Corrosion resistance", "Both A & B", "No effect"], ans: 2, tag: "NPCIL JE 2020", exp: "Higher cover protects against both fire (heat penetration) and corrosion (moisture/carbonation)." },
+            { id: 215, q: "Ordinary concrete may not be used for grade:", opts: ["M 10", "M 15", "M 20", "M 40"], ans: 3, tag: "Odisha JE 2014", exp: "M40 is Standard Concrete. Ordinary is M10-M20." },
+            { id: 216, q: "Avg strength of 150mm cube, fck=20, SD=4?", opts: ["26.58", "31.24", "18.67", "26.6"], ans: 0, tag: "TN PSC 2019", exp: "Mean Strength = fck + 1.65(SD) = 20 + 1.65(4) = 26.6 N/mm²." },
+            { id: 217, q: "Creep strain is due to", opts: ["Dead load", "Live load", "Cyclic load", "Impact"], ans: 0, tag: "WB AE 2020", exp: "Creep is caused by sustained (dead) loads over time." },
+            { id: 218, q: "Ratio of tensile strength to compressive strength of concrete", opts: ["increases with age", "decreases with age", "remains constant", "None"], ans: 1, tag: "PUDA JE 2018", exp: "Compressive strength grows faster than tensile strength, so the ratio decreases." },
+            { id: 219, q: "Grade M 30 is called as", opts: ["Ordinary", "Standard", "High strength", "Ultra"], ans: 1, tag: "YCT", exp: "M25 to M55 is Standard Concrete." }
+        ];
+
+        // --- STATE ---
+        let currentQuestions = []; // Filtered list based on mode
+        let currentState = {
+            index: 0,
+            answers: {}, 
+            status: {}, 
+            bookmarks: [],
+            startTime: null,
+            timeRemaining: 0,
+            mode: 'full' // 'full' or 'bookmark'
+        };
+        let timerInterval;
+
+        window.onload = function() {
+            loadHistory();
+            const savedBookmarks = localStorage.getItem('civil_bookmarks');
+            if(savedBookmarks) {
+                currentState.bookmarks = JSON.parse(savedBookmarks);
+            }
+        };
+
+        // --- INITIALIZATION MODES ---
+        function initTest(mode) {
+            if (mode === 'bookmark') {
+                if (currentState.bookmarks.length === 0) {
+                    alert("No bookmarks saved yet! Go start a Full Test and bookmark some questions.");
+                    return;
+                }
+                // Filter questions for Bookmark Mode
+                currentQuestions = masterDB.filter(q => currentState.bookmarks.includes(q.id));
+                document.getElementById('mode-badge').style.display = 'block';
+                document.getElementById('mode-badge').innerText = "BOOKMARK REVISION MODE";
+                currentState.timeRemaining = currentQuestions.length * 60 * 2; // 2 mins per question
+            } else {
+                // Full Mode
+                currentQuestions = [...masterDB];
+                document.getElementById('mode-badge').style.display = 'none';
+                currentState.timeRemaining = 2 * 60 * 60; // 2 hours
+            }
+
+            // Reset Test State
+            currentState.mode = mode;
+            currentState.index = 0;
+            currentState.answers = {};
+            currentState.status = {};
+            
+            // UI Switch
+            document.getElementById('landing-page').style.display = 'none';
+            document.getElementById('quiz-container').style.display = 'flex';
+            
+            renderQuestion();
+            startTimer();
+            renderPalette();
+        }
+
+        // --- CORE FUNCTIONS (Updated to use currentQuestions) ---
+        function renderQuestion() {
+            const q = currentQuestions[currentState.index];
+            const area = document.getElementById('question-area');
+            const isBookmarked = currentState.bookmarks.includes(q.id);
+            const userAns = currentState.answers[q.id];
+            
+            const bmIcon = document.getElementById('btn-bookmark');
+            bmIcon.innerHTML = isBookmarked ? '&#9733;' : '&#9734;';
+            bmIcon.classList.toggle('active', isBookmarked);
+
+            let html = `
+                <div style="display:flex; justify-content:space-between;">
+                    <span class="exam-tag">${q.tag}</span>
+                    <span style="color:var(--gray); font-size:12px;">Q.${currentState.index + 1} / ${currentQuestions.length}</span>
+                </div>
+                <div class="q-text">${q.q}</div>
+                <div class="options-list">
+            `;
+
+            q.opts.forEach((opt, idx) => {
+                let className = 'option';
+                if (userAns !== undefined) {
+                    if (idx === q.ans) className += ' correct'; 
+                    else if (idx === userAns) className += ' wrong';
+                }
+
+                html += `
+                    <div class="${className}" onclick="selectOption(${idx})">
+                        <span class="opt-label">${String.fromCharCode(65 + idx)}</span>
+                        <span>${opt}</span>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+
+            if (userAns !== undefined) {
+                html += `
+                    <div class="solution-box" style="display:block;">
+                        <div class="solution-title">Solution:</div>
+                        <div class="solution-text">${q.exp}</div>
+                    </div>
+                `;
+            }
+
+            area.innerHTML = html;
+            updateButtons();
+        }
+
+        function selectOption(optIndex) {
+            const q = currentQuestions[currentState.index];
+            if (currentState.answers[q.id] !== undefined) return;
+
+            currentState.answers[q.id] = optIndex;
+            currentState.status[q.id] = 'answered';
+            renderQuestion();
+            renderPalette();
+        }
+
+        function changeQuestion(dir) {
+            const qId = currentQuestions[currentState.index].id;
+            if (!currentState.status[qId]) currentState.status[qId] = 'skipped';
+
+            currentState.index += dir;
+            if (currentState.index < 0) currentState.index = 0;
+            if (currentState.index >= currentQuestions.length) currentState.index = currentQuestions.length - 1;
+            
+            renderQuestion();
+            renderPalette();
+        }
+
+        function updateButtons() {
+            document.getElementById('btn-prev').disabled = currentState.index === 0;
+            document.getElementById('btn-next').innerText = currentState.index === currentQuestions.length - 1 ? 'Finish' : 'Next';
+        }
+
+        function markForReview() {
+            const qId = currentQuestions[currentState.index].id;
+            currentState.status[qId] = 'review';
+            renderPalette();
+            changeQuestion(1);
+        }
+
+        function startTimer() {
+            if(timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                currentState.timeRemaining--;
+                const h = Math.floor(currentState.timeRemaining / 3600);
+                const m = Math.floor((currentState.timeRemaining % 3600) / 60);
+                const s = currentState.timeRemaining % 60;
+                document.getElementById('timer-display').innerText = 
+                    `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                
+                if (currentState.timeRemaining <= 0) submitTest();
+            }, 1000);
+        }
+
+        function togglePalette() {
+            const drawer = document.getElementById('palette-drawer');
+            const overlay = document.getElementById('drawer-overlay');
+            if (drawer.style.right === '0px') {
+                drawer.style.right = '-80%';
+                overlay.style.display = 'none';
+            } else {
+                drawer.style.right = '0px';
+                overlay.style.display = 'block';
+                renderPalette();
+            }
+        }
+
+        function renderPalette() {
+            const grid = document.getElementById('palette-grid');
+            grid.innerHTML = '';
+            currentQuestions.forEach((q, idx) => {
+                const status = currentState.status[q.id] || 'not-visited';
+                let cls = 'p-item';
+                if (idx === currentState.index) cls += ' current';
+                if (status === 'answered') cls += ' answered';
+                if (status === 'skipped') cls += ' skipped';
+                if (status === 'review') cls += ' review';
+
+                const div = document.createElement('div');
+                div.className = cls;
+                div.innerText = idx + 1;
+                div.onclick = () => {
+                    currentState.index = idx;
+                    renderQuestion();
+                    togglePalette();
+                };
+                grid.appendChild(div);
+            });
+        }
+
+        function toggleBookmark() {
+            const qId = currentQuestions[currentState.index].id;
+            const idx = currentState.bookmarks.indexOf(qId);
+            if (idx === -1) {
+                currentState.bookmarks.push(qId);
+            } else {
+                currentState.bookmarks.splice(idx, 1);
+            }
+            localStorage.setItem('civil_bookmarks', JSON.stringify(currentState.bookmarks));
+            
+            // Visual update only
+            const isBookmarked = currentState.bookmarks.includes(qId);
+            const bmIcon = document.getElementById('btn-bookmark');
+            bmIcon.innerHTML = isBookmarked ? '&#9733;' : '&#9734;';
+            bmIcon.classList.toggle('active', isBookmarked);
+        }
+
+        function confirmExit() {
+            if(confirm("Exit test? Progress will be lost.")) location.reload();
+        }
+
+        function submitTest() {
+            clearInterval(timerInterval);
+            let correctCount = 0;
+            let attempted = 0;
+            
+            currentQuestions.forEach(q => {
+                if (currentState.answers[q.id] !== undefined) {
+                    attempted++;
+                    if (currentState.answers[q.id] === q.ans) correctCount++;
+                }
+            });
+
+            const score = correctCount;
+            const total = currentQuestions.length;
+            const accuracy = attempted > 0 ? Math.round((correctCount / attempted) * 100) : 0;
+
+            if(currentState.mode === 'full') {
+                // Only save history for full tests
+                const history = JSON.parse(localStorage.getItem('civil_history') || '[]');
+                history.unshift({ date: new Date().toLocaleDateString(), score: score, total: total, accuracy: accuracy });
+                localStorage.setItem('civil_history', JSON.stringify(history));
+            }
+
+            alert(`Test Submitted (${currentState.mode === 'bookmark' ? 'Bookmark Mode' : 'Full Mode'})\nScore: ${score}/${total}\nAccuracy: ${accuracy}%`);
+            location.reload();
+        }
+
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('civil_history') || '[]');
+            if (history.length > 0) {
+                const latest = history[0];
+                document.getElementById('prev-accuracy').innerText = latest.accuracy + '%';
+                document.getElementById('prev-score').innerText = `Last Score: ${latest.score}/${latest.total}`;
+            }
+        }
+    </script>
+</body>
+</html>
