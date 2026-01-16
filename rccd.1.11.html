@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civil JE/AE Test (Q312-Q345)</title>
+    <style>
+        :root {
+            --primary: #007bff;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --purple: #6f42c1;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray: #6c757d;
+            --border: #dee2e6;
+            --bg: #f0f2f5;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+        body { background-color: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* --- LANDING PAGE --- */
+        #landing-page { padding: 20px; text-align: center; background: white; height: 100%; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; position: absolute; width: 100%; top: 0; }
+        .hero-title { font-size: 24px; color: var(--dark); margin-bottom: 10px; font-weight: 800; }
+        .hero-subtitle { font-size: 14px; color: var(--gray); margin-bottom: 30px; }
+        .stat-card { background: var(--light); padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); width: 100%; max-width: 350px; border: 1px solid var(--border); }
+        .btn-main { background: var(--primary); color: white; border: none; padding: 16px 32px; font-size: 18px; border-radius: 50px; width: 100%; max-width: 300px; cursor: pointer; margin: 10px 0; font-weight: bold; box-shadow: 0 4px 10px rgba(0,123,255,0.3); transition: transform 0.1s; }
+        .btn-main:active { transform: scale(0.98); }
+        .btn-secondary { background: white; color: var(--primary); border: 2px solid var(--primary); box-shadow: none; }
+        
+        /* --- QUIZ CONTAINER --- */
+        #quiz-container { display: none; flex-direction: column; height: 100vh; background: white; width: 100%; }
+        
+        /* Header */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: white; border-bottom: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); z-index: 10; }
+        .timer-badge { font-family: monospace; font-weight: bold; font-size: 16px; color: var(--dark); background: #e9ecef; padding: 6px 12px; border-radius: 6px; }
+        .submit-btn { background: var(--success); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; }
+        .exit-btn { font-size: 24px; color: var(--danger); cursor: pointer; margin-right: 15px; line-height: 1; }
+        .menu-btn { font-size: 24px; background: none; border: none; cursor: pointer; color: var(--dark); margin-left: 10px; }
+
+        /* Question Area */
+        #question-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; background: #fff; }
+        .q-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .exam-tag { background: #e2e6ea; color: var(--gray); font-size: 11px; padding: 4px 8px; border-radius: 4px; font-weight: 700; text-transform: uppercase; }
+        .q-number { color: var(--gray); font-size: 14px; font-weight: 600; }
+        .q-text { font-size: 17px; color: var(--dark); margin-bottom: 25px; line-height: 1.5; font-weight: 500; }
+        
+        /* Options */
+        .option { display: flex; align-items: flex-start; padding: 14px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 12px; cursor: pointer; transition: background 0.2s; position: relative; }
+        .option:hover { background: #f8f9fa; }
+        .option.selected { border-color: var(--primary); background: #e7f1ff; }
+        .option.correct { border-color: var(--success); background: #d4edda; }
+        .option.wrong { border-color: var(--danger); background: #f8d7da; }
+        .opt-label { font-weight: 700; margin-right: 12px; min-width: 25px; }
+        
+        /* Solution Box */
+        .solution-box { margin-top: 25px; padding: 15px; background: #f1f9f4; border: 1px solid #c3e6cb; border-radius: 8px; display: none; animation: slideDown 0.3s ease-out; }
+        .solution-header { font-weight: 700; color: var(--success); margin-bottom: 8px; font-size: 14px; display: flex; align-items: center; }
+        .solution-text { font-size: 14px; color: #155724; white-space: pre-wrap; line-height: 1.5; }
+        
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Footer */
+        footer { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid var(--border); padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; z-index: 20; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .nav-btn { background: transparent; border: 1px solid var(--border); padding: 10px 20px; border-radius: 6px; font-size: 14px; color: var(--dark); cursor: pointer; font-weight: 600; }
+        .nav-btn.primary { background: var(--primary); color: white; border: none; }
+        .nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .action-group { display: flex; gap: 15px; align-items: center; }
+        .bookmark-btn { font-size: 26px; color: var(--gray); cursor: pointer; padding: 5px; line-height: 1; }
+        .bookmark-btn.active { color: var(--warning); }
+        .review-btn { color: var(--purple); border-color: var(--purple); }
+
+        /* Palette Drawer */
+        .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 30; display:none; }
+        #palette-drawer { position: fixed; top: 0; right: -85%; width: 85%; height: 100%; background: white; box-shadow: -4px 0 15px rgba(0,0,0,0.1); transition: right 0.3s ease; z-index: 40; display: flex; flex-direction: column; }
+        #palette-drawer.open { right: 0; }
+        .palette-header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; }
+        .palette-grid { padding: 20px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; overflow-y: auto; align-content: start; }
+        .p-item { width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: 700; border: 1px solid var(--border); cursor: pointer; transition: all 0.2s; }
+        .p-item.current { border: 2px solid var(--primary); transform: scale(1.1); }
+        .p-item.answered { background: var(--success); color: white; border-color: var(--success); }
+        .p-item.skipped { background: var(--gray); color: white; border-color: var(--gray); }
+        .p-item.review { background: var(--purple); color: white; border-color: var(--purple); }
+        
+        .mode-badge { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); background: #e7f1ff; color: var(--primary); padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: bold; letter-spacing: 0.5px; }
+    </style>
+</head>
+<body>
+
+    <div id="landing-page">
+        <h1 class="hero-title">Civil Engineering</h1>
+        <p class="hero-subtitle">IS Codes & RCC (Q312 - Q345)</p>
+        
+        <div class="stat-card">
+            <h3 style="margin-bottom: 10px; color: var(--dark);">Your Progress</h3>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <span style="color:var(--gray);">Last Score:</span>
+                <span id="last-score" style="font-weight:bold;">-</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span style="color:var(--gray);">Accuracy:</span>
+                <span id="last-accuracy" style="font-weight:bold; color:var(--success);">-</span>
+            </div>
+        </div>
+
+        <button class="btn-main" onclick="initTest('full')">Start New Test</button>
+        <button class="btn-main btn-secondary" onclick="initTest('bookmark')">★ Revise Bookmarks</button>
+        
+        <div style="margin-top: 30px; font-size: 12px; color: var(--gray); max-width: 250px; line-height: 1.6;">
+            <strong>Features:</strong><br>
+            • Timer: 2 Hours<br>
+            • Instant Explanations<br>
+            • Bookmark & Review Mode
+        </div>
+    </div>
+
+    <div id="quiz-container">
+        <div class="overlay" id="drawer-overlay" onclick="togglePalette()"></div>
+        <div id="mode-badge" class="mode-badge" style="display:none;">BOOKMARK MODE</div>
+
+        <header>
+            <div style="display:flex; align-items:center;">
+                <div class="exit-btn" onclick="confirmExit()">&#10006;</div>
+                <div class="timer-badge" id="timer">02:00:00</div>
+            </div>
+            <div style="display:flex; align-items:center;">
+                <button class="submit-btn" onclick="submitTest()">SUBMIT</button>
+                <button class="menu-btn" onclick="togglePalette()">&#9776;</button>
+            </div>
+        </header>
+
+        <div id="question-area">
+            </div>
+
+        <footer>
+            <button class="nav-btn review-btn" onclick="markReview()">Review</button>
+            <div class="action-group">
+                <button class="nav-btn" id="btn-prev" onclick="nav(-1)">Prev</button>
+                <div class="bookmark-btn" id="btn-bookmark" onclick="toggleBookmark()">&#9734;</div>
+                <button class="nav-btn primary" id="btn-next" onclick="nav(1)">Next</button>
+            </div>
+        </footer>
+
+        <div id="palette-drawer">
+            <div class="palette-header">
+                <h3 style="margin:0;">Question Palette</h3>
+                <button onclick="togglePalette()" style="background:none; border:none; font-size:20px;">&#10006;</button>
+            </div>
+            <div class="palette-grid" id="palette-grid">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATASET: Questions 312 - 345 ---
+        const db = [
+            { id: 312, q: "The difference in 7 days compressive strength of cubes or cylinders prepared with impure and pure waters should not differ by more than:", opts: ["2%", "10%", "5%", "12%"], ans: 1, tag: "SSC JE 11.12.2020", exp: "As per IS 456, the difference in 7-day compressive strength between specimens made with doubtful water and distilled water should not be more than 10%." },
+            { id: 313, q: "The value of Poisson's ratio of concrete lies approximately in the range:", opts: ["0.4 to 0.47", "0.31 to 0.35", "0.15 to 0.2", "0.25 to 0.3"], ans: 2, tag: "SSC JE 11.12.2020", exp: "Poisson's ratio for concrete generally ranges between 0.15 and 0.20." },
+            { id: 314, q: "According to IS 456 : 2000, the minimum grade of concrete required for plain concrete and reinforced cement concrete works, under exposure condition 'very severe' are ___ and ___ respectively.", opts: ["M15, M40", "M10, M25", "M20, M35", "M25, M40"], ans: 2, tag: "SSC JE 11.12.2020", exp: "For 'Very Severe' exposure:\nPlain Concrete (PCC): M20\nReinforced Concrete (RCC): M35" },
+            { id: 315, q: "The partial safety factor for loads to be adopted for Dead load (DL) and Live load (LL) for the combination of load taken as (DL + LL), under limit state of collapse, as per IS 456:2000, are ___ and ___ respectively,", opts: ["1.2; 1.2", "1.5; 1.5", "1.5; 1.5", "1.2; 1.5"], ans: 1, tag: "SSC JE 30.10.2020", exp: "Load combination 1.5(DL + LL). Safety factor is 1.5 for both." },
+            { id: 316, q: "According to IS 456-2000, nominal cover for reinforcements in case of footings, under 'very severe' exposure:", opts: ["shall not be less than 30 mm", "shall not be less than 50 mm", "shall not be less than 25 mm", "shall not be less than 40 mm"], ans: 1, tag: "SSC JE 30.10.2020", exp: "For footings, minimum nominal cover is 50 mm. (Also, 'Very Severe' generally requires 50mm cover for durability)." },
+            { id: 317, q: "Calculate the target mean compressive strength at 28 days curing, for M20 grade concrete, as per IS 10262-2009 (take standard deviation as 4 N/mm²).", opts: ["20.0 N/mm²", "28.7 N/mm²", "22.4 N/mm²", "26.6 N/mm²"], ans: 3, tag: "SSC JE 30.10.2020", exp: "Target Mean Strength = fck + 1.65σ\n= 20 + 1.65(4) = 20 + 6.6 = 26.6 N/mm²." },
+            { id: 318, q: "Partial safety factor for material strength for concrete shall be", opts: ["1.5", "1.0", "2.0", "1.15"], ans: 0, tag: "ISRO TA 08.04.2018", exp: "Partial safety factor for Concrete = 1.5\nPartial safety factor for Steel = 1.15" },
+            { id: 319, q: "The strength of concrete with passage of time :", opts: ["Decreases", "Remain constant", "Increases", "Fluctuates"], ans: 2, tag: "UKSSSC JE 2017", exp: "Concrete continues to gain strength with time due to ongoing hydration." },
+            { id: 320, q: "As per IS 456-2000, the minimum grade of concrete used for severe exposure condition should be:", opts: ["M25", "M20", "M30", "M10"], ans: 2, tag: "DFCCIL JE 2018", exp: "For RCC in Severe exposure, minimum grade is M30." },
+            { id: 321, q: "The grade of concrete that has not been recommended by IS 456 is M 90.", opts: ["M 10, M 15, M 20", "M 25, M 30, M 35", "M 60, M 65, M 70", "M 85, M 90, M 95"], ans: 3, tag: "YCT", exp: "According to earlier IS 456, grades up to M80 were standard. M90, M95 etc. are high strength but not in the standard list of 15 grades initially (upto M80)." },
+            { id: 322, q: "Consider the following statement regarding characteristic strength of concrete: 'The test result of the sample shall be the average of the strength of x specimens, the individual variation should not be more than ± Y% of the average.'", opts: ["5, 15 respectively", "5, 5 respectively", "3, 5 respectively", "3, 15 respectively"], ans: 3, tag: "UPSSSC JE 31-07-2016", exp: "Average of 3 specimens. Individual variation should not be more than ±15% of the average." },
+            { id: 323, q: "As per IS 456, for severe environment conditions, the water to cement ratio for PCC (Plain cement concrete) is limited to ____.", opts: ["0.2", "0.4", "0.5", "0.35"], ans: 2, tag: "DSSSB JE 20.11.2019", exp: "Max w/c ratio for Severe Exposure:\nPCC: 0.50\nRCC: 0.45" },
+            { id: 324, q: "What is the relevant standard for mild steel plain bar type of reinforcement?", opts: ["IS 1786-1979", "IS 1566-1967", "IS 226-1975", "IS 432-1996"], ans: 3, tag: "MPPEB SE 2016", exp: "IS 432 (Part I) covers Mild Steel and Medium Tensile Steel bars. IS 1786 is for HYSD bars." },
+            { id: 325, q: "The characteristic strength of concrete is defined as that strength below which not more than........... of the test results are expected to fall:", opts: ["10%", "5%", "15%", "20%"], ans: 1, tag: "Haryana SSC JE 2018", exp: "Characteristic strength (fck) is the value below which not more than 5% of test results are expected to fall." },
+            { id: 326, q: "As per the provision of IS-456-2000, the short term modulus of elasticity of M25 grade concrete in N/mm² can be assumed to be", opts: ["25000", "28500", "30000", "36000"], ans: 0, tag: "PGVCL JE 14.10.2017", exp: "Ec = 5000√fck = 5000√25 = 5000 × 5 = 25000 N/mm²." },
+            { id: 327, q: "The quality of structured steel is normally identified by :", opts: ["Yield stress", "Ultimate stress", "Proof stress", "None of these"], ans: 0, tag: "NBCC JE 2017", exp: "Structural steel quality is identified by its Yield Stress (e.g., Fe250 implies yield stress of 250 MPa)." },
+            { id: 328, q: "The grade of concrete generally not used in RCC is :", opts: ["M 40", "M 15", "M 10", "M 20"], ans: 2, tag: "NBCC JE 2017", exp: "Minimum grade for RCC is M20. Hence M10 and M15 are generally not used (M15 allowed in very specific minor works, but M10 is definitely not)." },
+            { id: 329, q: "The neutral axis of a balanced section is called", opts: ["Balanced neutral axis", "Critical neutral axis", "Equivalent neutral axis", "All of the above"], ans: 1, tag: "GSSSB Municipal Engineer 2017", exp: "The neutral axis depth corresponding to the balanced failure condition is called the Critical Neutral Axis (or limiting neutral axis)." },
+            { id: 330, q: "The weight of one cubic metre of R.C.C. is :", opts: ["1400 kg", "1800 kg", "2100 kg", "2400 kg"], ans: 3, tag: "NBCC JE 2018", exp: "Standard density: PCC=2400 kg/m³, RCC=2500 kg/m³. Option (d) 2400 is the closest/accepted answer in this specific exam key, though 2500 is technically correct." },
+            { id: 331, q: "The grade of concrete not recommended by IS 456 : 2000, is", opts: ["M 20", "M 60", "M 80", "M 10"], ans: 3, tag: "DMRC JE 2014", exp: "M10 is not recommended for RCC. (Min M20)." },
+            { id: 332, q: "The range of concrete's failure strain in uniaxial tension is found to be :", opts: ["0.001 - 0.02", "0.0002 - 0.0005", "0.05 - 1.0", "0.0001 - 0.0002"], ans: 1, tag: "DSSSB JE 2019", exp: "Failure strain in tension is very low, typically 0.0002 to 0.0005." },
+            { id: 333, q: "As per IS-456:2000, maximum water cement ratio of concrete used in Reinforced concrete moderate exposure condition is ____", opts: ["0.55", "0.45", "0.5", "0.4"], ans: 2, tag: "DSSSB JE 20.11.2019", exp: "Moderate Exposure Max W/C: 0.50 (for RCC)." },
+            { id: 334, q: "A reinforced concrete beam is cast during a summer month (42°C). During winter (5°C), the stress in the concrete will be :", opts: ["Compressive", "Compressive as well as tensile", "Tensile", "Same as at casting"], ans: 2, tag: "DMRC JE 2014", exp: "Temperature drop causes contraction. If the beam is restrained, preventing contraction induces Tensile stress." },
+            { id: 335, q: "Which of the following statements is true?", opts: ["Stress level in limit state method is greater than working stress method", "Stress level in limit state is equal...", "Stress level in limit state is less...", "Stress level fluctuates"], ans: 0, tag: "UPRVUNL JE 2014", exp: "In LSM, design loads are factored (higher), so the calculated stresses at ultimate load are higher than working stresses." },
+            { id: 336, q: "Optimizing the time of concrete mixing depends on :", opts: ["The type of mixture", "Rotating velocity", "Quantity of mix", "All of above"], ans: 0, tag: "YCT", exp: "Primarily depends on the type of mixer (pan, drum, etc.)." },
+            { id: 337, q: "Beam sections designed in accordance with LSM as compared to WSM will have", opts: ["Larger depth", "Same depth", "Smaller depth and smaller amount of reinforcement", "Same depth as deep beam"], ans: 2, tag: "HPSSC JE 2018", exp: "LSM utilizes the material strength better (ultimate strength), resulting in smaller sections (depth) compared to WSM." },
+            { id: 338, q: "Fire resistance of RC structural member depends on", opts: ["Size of member", "Concrete cover", "Types of aggregate", "All of the above"], ans: 3, tag: "GSSSB Surveyor 2016", exp: "Fire resistance depends on member dimensions, cover thickness, and aggregate type." },
+            { id: 339, q: "As per IS 456-2000, the permissible limit for sulphates in water to be used for making concrete is :", opts: ["10 mg/lit", "200 mg/lit", "400 mg/lit", "500 mg/lit"], ans: 2, tag: "GPSC AE 2017", exp: "Permissible limit for Sulphates (as SO3) is 400 mg/l." },
+            { id: 340, q: "Grades of concrete for reinforced concrete shall not be lower than", opts: ["M 10", "M 15", "M 20", "M 7.5"], ans: 2, tag: "KPSC JE 2016", exp: "Min grade for RCC is M20." },
+            { id: 341, q: "Value of factor of safety for concrete is-", opts: ["2.0", "1.5", "3.00", "5.00"], ans: 2, tag: "UPSSSC JE 2016", exp: "In Working Stress Method (WSM), Factor of Safety for concrete is 3.0. (In LSM, partial safety factor is 1.5)." },
+            { id: 342, q: "M-50 is considered as _____ type of concrete.", opts: ["Ordinary", "Standard", "High strength", "All of the above"], ans: 1, tag: "HPSSC JE 2015", exp: "M25 to M55 is Standard Concrete." },
+            { id: 343, q: "The IS code used for the design of RC elements is", opts: ["IS 875", "IS 800", "IS 456", "IS 8112"], ans: 2, tag: "KPSC JE 2017", exp: "IS 456 is the code for Plain and Reinforced Concrete." },
+            { id: 344, q: "The recommended curing period for Portland Pozzolana Cement concrete (PPC) to attain full strength for concrete exposed to dry and hot weather condition is", opts: ["7 days", "10 days", "14 days", "28 days"], ans: 2, tag: "Mizoram PSC JE 2016", exp: "For PPC or concrete with mineral admixtures, curing period is 10 days in normal conditions, but extended to 14 days in hot/dry weather." },
+            { id: 345, q: "The recommended IS code for earthquake resistance design of structures is :", opts: ["IS : 1041", "IS : 1566", "IS : 1893", "IS : 1904"], ans: 2, tag: "Rajasthan JE 2016", exp: "IS 1893 is the Criteria for Earthquake Resistant Design of Structures." }
+        ];
+
+        // --- STATE MANAGEMENT ---
+        let state = {
+            questions: [],
+            idx: 0,
+            answers: {},
+            bookmarks: [],
+            mode: 'full', 
+            timer: 7200, 
+            interval: null
+        };
+
+        // --- INIT ---
+        window.onload = function() {
+            const hist = JSON.parse(localStorage.getItem('civil_test_hist') || '[]');
+            if(hist.length) {
+                document.getElementById('last-score').innerText = `${hist[0].score}/${hist[0].total}`;
+                document.getElementById('last-accuracy').innerText = `${hist[0].acc}%`;
+            }
+            state.bookmarks = JSON.parse(localStorage.getItem('civil_test_bm') || '[]');
+        };
+
+        function initTest(mode) {
+            state.mode = mode;
+            state.idx = 0;
+            state.answers = {};
+            state.timer = 7200;
+            
+            if (mode === 'bookmark') {
+                if (state.bookmarks.length === 0) {
+                    alert("No bookmarks found! Please bookmark questions in Full Test first.");
+                    return;
+                }
+                state.questions = db.filter(q => state.bookmarks.includes(q.id));
+                document.getElementById('mode-badge').style.display = 'block';
+            } else {
+                state.questions = [...db];
+                document.getElementById('mode-badge').style.display = 'none';
+            }
+
+            document.getElementById('landing-page').style.display = 'none';
+            document.getElementById('quiz-container').style.display = 'flex';
+            
+            renderPalette();
+            loadQuestion();
+            startTimer();
+        }
+
+        // --- CORE LOGIC ---
+        function loadQuestion() {
+            const q = state.questions[state.idx];
+            const area = document.getElementById('question-area');
+            const isBm = state.bookmarks.includes(q.id);
+            const bmBtn = document.getElementById('btn-bookmark');
+            bmBtn.innerHTML = isBm ? '&#9733;' : '&#9734;';
+            bmBtn.classList.toggle('active', isBm);
+
+            let html = `
+                <div class="q-meta">
+                    <span class="exam-tag">${q.tag}</span>
+                    <span class="q-number">Q.${state.idx + 1} / ${state.questions.length}</span>
+                </div>
+                <div class="q-text">${q.q}</div>
+                <div class="options-group">
+            `;
+
+            const userAns = state.answers[q.id];
+
+            q.opts.forEach((opt, i) => {
+                let cls = 'option';
+                if (userAns !== undefined) {
+                    if (i === q.ans) cls += ' correct';
+                    else if (i === userAns) cls += ' wrong';
+                }
+                html += `<div class="${cls}" onclick="selectOption(${i})"><div class="opt-label">${String.fromCharCode(65+i)}</div><div>${opt}</div></div>`;
+            });
+
+            html += `</div>`;
+            
+            if (userAns !== undefined) {
+                html += `<div class="solution-box" style="display:block"><div class="solution-header"><span style="margin-right:5px">💡</span> Detailed Solution</div><div class="solution-text">${q.exp}</div></div>`;
+            }
+
+            area.innerHTML = html;
+            updateNav();
+        }
+
+        function selectOption(i) {
+            const q = state.questions[state.idx];
+            if (state.answers[q.id] !== undefined) return; 
+
+            state.answers[q.id] = i;
+            const pItem = document.getElementById(`p-${state.idx}`);
+            pItem.classList.remove('skipped', 'review');
+            pItem.classList.add('answered');
+            loadQuestion();
+        }
+
+        function nav(dir) {
+            const currentQ = state.questions[state.idx];
+            if (dir === 1 && state.idx === state.questions.length - 1) {
+                submitTest();
+                return;
+            }
+
+            if (state.answers[currentQ.id] === undefined && dir === 1) {
+                const pItem = document.getElementById(`p-${state.idx}`);
+                if (!pItem.classList.contains('review')) pItem.classList.add('skipped');
+            }
+
+            state.idx += dir;
+            loadQuestion();
+        }
+
+        function updateNav() {
+            document.getElementById('btn-prev').disabled = state.idx === 0;
+            document.getElementById('btn-next').innerText = state.idx === state.questions.length - 1 ? 'Finish' : 'Next';
+        }
+
+        function markReview() {
+            const pItem = document.getElementById(`p-${state.idx}`);
+            pItem.classList.add('review');
+            pItem.classList.remove('skipped');
+            nav(1);
+        }
+
+        function renderPalette() {
+            const grid = document.getElementById('palette-grid');
+            grid.innerHTML = '';
+            state.questions.forEach((q, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'p-item';
+                btn.id = `p-${i}`;
+                btn.innerText = i + 1;
+                btn.onclick = () => { state.idx = i; togglePalette(); loadQuestion(); };
+                grid.appendChild(btn);
+            });
+            updatePaletteActive();
+        }
+
+        function updatePaletteActive() {
+            document.querySelectorAll('.p-item').forEach(el => el.classList.remove('current'));
+            const curr = document.getElementById(`p-${state.idx}`);
+            if(curr) curr.classList.add('current');
+        }
+
+        function togglePalette() {
+            const drawer = document.getElementById('palette-drawer');
+            const overlay = document.getElementById('drawer-overlay');
+            if (drawer.classList.contains('open')) {
+                drawer.classList.remove('open');
+                overlay.style.display = 'none';
+            } else {
+                drawer.classList.add('open');
+                overlay.style.display = 'block';
+                updatePaletteActive();
+            }
+        }
+
+        function toggleBookmark() {
+            const qId = state.questions[state.idx].id;
+            const index = state.bookmarks.indexOf(qId);
+            if (index === -1) state.bookmarks.push(qId);
+            else state.bookmarks.splice(index, 1);
+            localStorage.setItem('civil_test_bm', JSON.stringify(state.bookmarks));
+            loadQuestion();
+        }
+
+        function startTimer() {
+            clearInterval(state.interval);
+            state.interval = setInterval(() => {
+                state.timer--;
+                const h = Math.floor(state.timer / 3600);
+                const m = Math.floor((state.timer % 3600) / 60);
+                const s = state.timer % 60;
+                document.getElementById('timer').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                if (state.timer <= 0) submitTest();
+            }, 1000);
+        }
+
+        function confirmExit() {
+            if(confirm("Exit test? Your progress will not be saved.")) location.reload();
+        }
+
+        function submitTest() {
+            clearInterval(state.interval);
+            let score = 0;
+            let attempted = 0;
+            state.questions.forEach(q => {
+                if (state.answers[q.id] !== undefined) {
+                    attempted++;
+                    if (state.answers[q.id] === q.ans) score++;
+                }
+            });
+            const acc = attempted ? Math.round((score/attempted)*100) : 0;
+            const hist = JSON.parse(localStorage.getItem('civil_test_hist') || '[]');
+            hist.unshift({ date: new Date().toLocaleDateString(), score: score, total: state.questions.length, acc: acc });
+            localStorage.setItem('civil_test_hist', JSON.stringify(hist));
+            alert(`Test Submitted!\nScore: ${score}/${state.questions.length}\nAccuracy: ${acc}%`);
+            location.reload();
+        }
+    </script>
+</body>
+</html>
