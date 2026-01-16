@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civil JE/AE Test (Q220-249)</title>
+    <style>
+        :root {
+            --primary: #007bff;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --purple: #6f42c1;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray: #6c757d;
+            --border: #dee2e6;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+        body { background-color: #f0f2f5; height: 100vh; display: flex; flex-direction: column; }
+
+        /* --- LANDING PAGE --- */
+        #landing-page { padding: 20px; text-align: center; background: white; height: 100%; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+        .hero-title { font-size: 22px; color: var(--dark); margin-bottom: 20px; margin-top: 40px; font-weight: bold; }
+        .stat-card { background: var(--light); padding: 15px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%; max-width: 350px; }
+        .btn-main { background: var(--primary); color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 30px; width: 100%; max-width: 300px; cursor: pointer; margin: 10px 0; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: transform 0.1s; }
+        .btn-main:active { transform: scale(0.98); }
+        .btn-secondary { background: white; color: var(--primary); border: 2px solid var(--primary); display: flex; align-items: center; justify-content: center; gap: 10px;}
+
+        /* --- QUIZ CONTAINER --- */
+        #quiz-container { display: none; flex-direction: column; height: 100vh; background: white; }
+        
+        /* Header */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: white; border-bottom: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .timer { font-weight: bold; font-size: 16px; color: var(--dark); background: #e9ecef; padding: 5px 10px; border-radius: 5px; }
+        .submit-btn { background: var(--success); color: white; border: none; padding: 6px 15px; border-radius: 5px; font-size: 14px; font-weight: bold; cursor: pointer; }
+        .exit-icon { font-size: 20px; color: var(--danger); cursor: pointer; margin-right: 10px; padding: 5px; }
+
+        /* Main Content */
+        #question-area { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 80px; }
+        .exam-tag { display: inline-block; background: #e2e6ea; color: var(--gray); font-size: 11px; padding: 3px 8px; border-radius: 4px; margin-bottom: 10px; font-weight: bold; }
+        .q-text { font-size: 16px; color: var(--dark); margin-bottom: 20px; line-height: 1.5; font-weight: 500; }
+        
+        /* Options */
+        .option { display: flex; align-items: center; padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
+        .option.selected { border-color: var(--primary); background: #e7f1ff; }
+        .option.correct { border-color: var(--success); background: #d4edda; }
+        .option.wrong { border-color: var(--danger); background: #f8d7da; }
+        .opt-label { font-weight: bold; margin-right: 10px; width: 25px; }
+
+        /* Solution Box */
+        .solution-box { margin-top: 20px; padding: 15px; background: #f8f9fa; border-left: 4px solid var(--success); border-radius: 4px; display: none; }
+        .solution-title { font-weight: bold; color: var(--success); margin-bottom: 5px; font-size: 14px; }
+        .solution-text { font-size: 14px; color: var(--dark); white-space: pre-wrap; }
+
+        /* Footer Nav */
+        footer { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid var(--border); padding: 10px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+        .nav-btn { background: transparent; border: 1px solid var(--border); padding: 8px 15px; border-radius: 5px; font-size: 14px; color: var(--dark); cursor: pointer; }
+        .nav-btn:disabled { opacity: 0.5; }
+        .mark-review { color: var(--purple); border-color: var(--purple); }
+        .bookmark-icon { font-size: 22px; color: var(--gray); cursor: pointer; padding: 5px; }
+        .bookmark-icon.active { color: var(--primary); }
+
+        /* Palette Drawer */
+        #palette-drawer { position: fixed; top: 0; right: -80%; width: 80%; height: 100%; background: white; box-shadow: -2px 0 5px rgba(0,0,0,0.2); transition: 0.3s; z-index: 20; padding: 15px; overflow-y: auto; }
+        #palette-drawer.open { right: 0; }
+        .palette-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 20px; }
+        .p-item { width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: bold; border: 1px solid var(--border); cursor: pointer; }
+        
+        /* Palette Colors */
+        .p-item.current { border: 2px solid var(--primary); }
+        .p-item.answered { background: var(--success); color: white; border: none; }
+        .p-item.skipped { background: var(--gray); color: white; border: none; }
+        .p-item.review { background: var(--purple); color: white; border: none; }
+        
+        .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:15; display:none; }
+        .test-mode-label { position: absolute; top: 5px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--primary); background: #e7f1ff; padding: 2px 8px; border-radius: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="landing-page">
+        <h1 class="hero-title">Civil Engineering JE/AE<br>Set: Q220 - Q249</h1>
+        
+        <div class="stat-card">
+            <h3>Previous Accuracy</h3>
+            <p id="prev-accuracy" style="font-size: 24px; color: var(--success); font-weight: bold;">0%</p>
+            <p id="prev-score" style="font-size: 14px; color: var(--gray);">Last Score: 0/0</p>
+        </div>
+
+        <button class="btn-main" onclick="initTest('full')">Start Full Test</button>
+        <button class="btn-main btn-secondary" onclick="initTest('bookmark')">
+            <span>&#9733;</span> Revise Bookmarks
+        </button>
+        
+        <div style="margin-top: 30px; text-align: left; width: 100%; max-width: 300px;">
+            <h4>Syllabus Covered:</h4>
+            <ul style="margin-left: 20px; margin-top: 10px; color: var(--gray); font-size: 14px;">
+                <li>RCC: Props, Covers, Creep</li>
+                <li>IS 456:2000 Codes</li>
+                <li>Concrete Technology Properties</li>
+                <li>Detailed Explanations Included</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="quiz-container">
+        <div class="overlay" id="drawer-overlay" onclick="togglePalette()"></div>
+        <div id="mode-badge" class="test-mode-label">BOOKMARK MODE</div>
+
+        <header>
+            <div style="display:flex; align-items:center;">
+                <span class="exit-icon" onclick="confirmExit()">&#10006;</span>
+                <div class="timer" id="timer-display">02:00:00</div>
+            </div>
+            <div style="display:flex; align-items:center;">
+                <button class="submit-btn" onclick="submitTest()">SUBMIT</button>
+                <button onclick="togglePalette()" style="background:none; border:none; margin-left:15px; font-size:24px;">&#9776;</button>
+            </div>
+        </header>
+
+        <div id="question-area"></div>
+
+        <footer>
+            <div style="display:flex; gap:10px;">
+                <button class="nav-btn" id="btn-prev" onclick="changeQuestion(-1)">Previous</button>
+                <button class="nav-btn mark-review" onclick="markForReview()">Mark Review</button>
+            </div>
+            <span class="bookmark-icon" id="btn-bookmark" onclick="toggleBookmark()">&#9734;</span>
+            <button class="nav-btn" id="btn-next" style="background:var(--primary); color:white; border:none;" onclick="changeQuestion(1)">Next</button>
+        </footer>
+
+        <div id="palette-drawer">
+            <h3>Question Palette</h3>
+            <div class="palette-grid" id="palette-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA (Q220 - Q249) ---
+        const masterDB = [
+            {
+                id: 220,
+                q: "Nominal cover to meet durability requirement as per IS:456-2000 for moderate exposure area is",
+                opts: ["15mm", "20mm", "30mm", "40mm"],
+                ans: 2, // C
+                tag: "Mizoram PSC JE 2016",
+                exp: "As per IS 456-2000 (Table 16):\nMild: 20mm\nModerate: 30mm\nSevere: 45mm\nVery Severe: 50mm\nExtreme: 75mm"
+            },
+            {
+                id: 221,
+                q: "The estimated value of elastic modulus (GPa) of concrete of M65 grade as per IS 456 would be approximately:",
+                opts: ["40", "30", "35", "25"],
+                ans: 0, // A
+                tag: "DDA 23.04.2018",
+                exp: "Ec = 5000√fck\nEc = 5000√65 = 5000 × 8.06 = 40311 MPa ≈ 40 GPa."
+            },
+            {
+                id: 222,
+                q: "According to the recommendations of IS : 456-1978, the expansion joints",
+                opts: ["are provided where plane changes abruptly", "are provided to ensure minimum resistance", "are supported on separate columns", "All option are correct"],
+                ans: 3, // D
+                tag: "SSC JE 2018",
+                exp: "Expansion joints are provided if there is considerable difference in loading, or if there is an abrupt change in shape. As per IS 456, expansion joints should be designed so that necessary movement occurs with minimum resistance. Structures adjacent to joint should be on separate columns."
+            },
+            {
+                id: 223,
+                q: "The thermal expansion coefficient (α) of steel is:",
+                opts: ["13 × 10⁻⁶/°C and closely resembles to α of concrete", "11 × 10⁻⁶/°C and differs widely from α of concrete", "12 × 10⁻⁶/°C and close to α of concrete", "14 × 10⁻⁶/°C but nearly equal to α of concrete"],
+                ans: 2, // C
+                tag: "SSC JE 2011",
+                exp: "Thermal expansion coefficient (α) of steel is 12 × 10⁻⁶/°C. This is very close to concrete, which is why they work well together in RCC."
+            },
+            {
+                id: 224,
+                q: "For mild and moderate exposure, if 20 mm down coarse aggregate are used, minimum cement content per cubic meter of concrete must not be less than:",
+                opts: ["280 kg", "300 kg", "320 kg", "340 kg"],
+                ans: 1, // B
+                tag: "SSC JE 2011",
+                exp: "As per IS 456 Table 5 for 20mm aggregate:\nMild: 300 kg/m³\nModerate: 300 kg/m³\nSevere: 320 kg/m³"
+            },
+            {
+                id: 225,
+                q: "The modulus of rupture of concrete gives:",
+                opts: ["The direct tensile strength of the concrete", "The direct compressive strength of the concrete", "The tensile strength of the concrete under bending", "The characteristic strength of the concrete"],
+                ans: 2, // C
+                tag: "SSC JE 2011",
+                exp: "The modulus of rupture of concrete gives the tensile strength of the concrete under bending (Flexural strength). fcr = 0.7√fck."
+            },
+            {
+                id: 226,
+                q: "Permissible compressive strength of M20 concrete grade is",
+                opts: ["100 kg/cm²", "150 kg/cm²", "200 kg/cm²", "250 kg/cm²"],
+                ans: 2, // C
+                tag: "SSC JE 2008",
+                exp: "M20 means characteristic compressive strength is 20 N/mm² (MPa). In older units, 1 N/mm² ≈ 10 kg/cm². So 20 N/mm² ≈ 200 kg/cm²."
+            },
+            {
+                id: 227,
+                q: "Forms of freshly laid RCC work should not be struck for a period called _____ until the concrete has reached a strength at least twice the stress to which the concrete may be subjected...",
+                opts: ["Bleeding time", "Stripping time", "Setting time", "None of the above"],
+                ans: 1, // B
+                tag: "ISRO TA 2016",
+                exp: "Formwork removal time is technically called Stripping time. It ensures concrete has gained sufficient strength."
+            },
+            {
+                id: 228,
+                q: "Time-dependent strain is termed as :",
+                opts: ["elastic strain", "ultimate creep strain", "creep", "shrinkage"],
+                ans: 2, // C
+                tag: "CGPSC AE 2018",
+                exp: "Creep is the property by virtue of which material undergoes additional deformation (time-dependent) under sustained loading."
+            },
+            {
+                id: 229,
+                q: "As per IS 456:2000, the minimum grade of cement specified for mild exposure condition is——",
+                opts: ["M20", "M25", "M30", "M35"],
+                ans: 0, // A
+                tag: "MH PWD 2019",
+                exp: "Minimum grade of concrete for Mild exposure is M20. For Moderate it is M25."
+            },
+            {
+                id: 230,
+                q: "The value of creep coefficient assumed at an age loading of 7 days is——-",
+                opts: ["2.2", "1.6", "1.1", "0.5"],
+                ans: 0, // A
+                tag: "MH PWD 2019",
+                exp: "Creep Coefficient values:\n7 days: 2.2\n28 days: 1.6\n1 year: 1.1"
+            },
+            {
+                id: 231,
+                q: "As per IS 456:2000, concretes falling in the range of M10 to M20 are classified as :",
+                opts: ["Ordinary grade concrete", "Standard grade", "High strength concrete", "None of the above"],
+                ans: 0, // A
+                tag: "MH PWD 2019",
+                exp: "M10 - M20: Ordinary Concrete\nM25 - M55 (now M60): Standard Concrete\nM65 - M100: High Strength Concrete"
+            },
+            {
+                id: 232,
+                q: "As per IS 456:2000, what shall be the value of direct compressive stress for M30 grade of concrete?",
+                opts: ["5", "6", "8", "9"],
+                ans: 2, // C
+                tag: "MH PWD 2019",
+                exp: "Permissible Direct Compressive Stress (σcc) for M30 is 8 N/mm². For M20 it is 5 N/mm²."
+            },
+            {
+                id: 233,
+                q: "As per IS 456:2000, which one of the following formula is used to calculate the target mean strength of concrete mix?",
+                opts: ["Target mean strength = 1.65 × σ + fck", "Target mean strength = f - 1.65σ", "Target mean strength = f + 2.65σ", "Target mean strength = f - 2.65σ"],
+                ans: 0, // A
+                tag: "PGCIL DET 2018",
+                exp: "Target Mean Strength (fm) = fck + 1.65σ. Where σ is the standard deviation."
+            },
+            {
+                id: 234,
+                q: "Resonant frequency test is conducted to evaluate which one of the following property of concrete?",
+                opts: ["Tensile strength", "Dynamic modulus of elasticity", "Workability", "Compressive strength"],
+                ans: 1, // B
+                tag: "MH PWD 2019",
+                exp: "Resonant frequency test is a non-destructive test used to determine the Dynamic Modulus of Elasticity."
+            },
+            {
+                id: 235,
+                q: "Split cylinder test is conducted to evaluate which one of the following property of concrete?",
+                opts: ["Tensile strength", "Dynamic modules of elasticity", "Workability", "Compressive strength"],
+                ans: 0, // A
+                tag: "MH PWD 2019",
+                exp: "Split cylinder test determines the Split Tensile Strength of concrete. Formula = 2P / (πDL)."
+            },
+            {
+                id: 236,
+                q: "If the compressive strength of concrete increases, then what will be the effect on modulus of elasticity of concrete?",
+                opts: ["Increase", "Decrease", "Remain same", "First decrease then increase"],
+                ans: 0, // A
+                tag: "MH PWD 2019",
+                exp: "Ec = 5000√fck. Since Ec is directly proportional to √fck, as compressive strength increases, modulus of elasticity increases."
+            },
+            {
+                id: 237,
+                q: "As per IS 456:2000, the water-cement ratio shall not exceed.............in case of under-water concreting",
+                opts: ["0.3", "0.4", "0.5", "0.6"],
+                ans: 3, // D (Based on text 'shall not exceed 0.6')
+                tag: "MH PWD 2019",
+                exp: "As per IS 456:2000 clause 14.2.2, for under-water concreting, the water-cement ratio shall not exceed 0.6."
+            },
+            {
+                id: 238,
+                q: "As per IS 456:2000, concretes falling in the range of M60 to M90 are classified as :",
+                opts: ["Ordinary grade concrete", "Standard grade", "High strength concrete", "None of the above"],
+                ans: 2, // C
+                tag: "MH PWD 2019",
+                exp: "M60 and above are classified as High Strength Concrete."
+            },
+            {
+                id: 239,
+                q: "The value of creep coefficient assumed at an age loading of 1 year is——",
+                opts: ["2.2", "1.6", "1.1", "0.5"],
+                ans: 2, // C
+                tag: "MH PWD 2019",
+                exp: "Creep coefficient decreases with time of loading: 7 days=2.2, 28 days=1.6, 1 year=1.1."
+            },
+            {
+                id: 240,
+                q: "The expected ultimate tensile strength of Fe-415 steel is expected to be at least:",
+                opts: ["485 N/mm²", "455 N/mm²", "425 N/mm²", "435 N/mm²"],
+                ans: 0, // A
+                tag: "MH PWD 2018",
+                exp: "Ultimate tensile strength is about 10-15% more than yield strength. For Fe415, UTS is specified as min 485 N/mm²."
+            },
+            {
+                id: 241,
+                q: "As per IS 456:2000, concretes falling in the range of M25 to M55 are classified as :",
+                opts: ["Ordinary grade concrete", "Standard grade", "High strength concrete", "None of the above"],
+                ans: 1, // B
+                tag: "MH PWD 2019",
+                exp: "M25 to M55 (now up to M60 in newer amendments) is classified as Standard Concrete."
+            },
+            {
+                id: 242,
+                q: "As per IS 456:2000, what shall be the value of direct compressive stress for M20 grade of concrete?",
+                opts: ["5", "6", "8", "9"],
+                ans: 0, // A
+                tag: "MH PWD 2019",
+                exp: "Permissible direct compressive stress for M20 is 5 N/mm²."
+            },
+            {
+                id: 243,
+                q: "The value of creep coefficient assumed at an age loading of 28 days is——",
+                opts: ["2.2", "1.6", "1.1", "0.5"],
+                ans: 1, // B
+                tag: "MH PWD 2019",
+                exp: "At 28 days loading, the creep coefficient is 1.6."
+            },
+            {
+                id: 244,
+                q: "If the estimated modulus of elasticity is 30 Gpa, then the probable variation (according to IS 456) of the actual values (in Gpa) could be between:",
+                opts: ["27-33", "24-36", "25.5-34.5", "25-35"],
+                ans: 1, // B
+                tag: "CGPSC SES 2014",
+                exp: "Actual measured values may differ by ± 20 percent from the estimated value.\n20% of 30 = 6.\nRange = 30 ± 6 = 24 to 36 GPa."
+            },
+            {
+                id: 245,
+                q: "The minimum period before striking the props to a beam spanning 7.5 m is",
+                opts: ["3 days", "16 to 24 hours", "21 days", "14 days"],
+                ans: 2, // C
+                tag: "CGPSC SES 2014",
+                exp: "Props to beams and arches:\nSpanning up to 6m: 14 days\nSpanning over 6m: 21 days.\nSince 7.5m > 6m, answer is 21 days."
+            },
+            {
+                id: 246,
+                q: "As per IS 456, the minimum cement content for the respective durability classes can be reduced by R kg/cum while changing the maximum size of aggregate from 20 m to 40 mm, where in R is",
+                opts: ["10", "15", "20", "30"],
+                ans: 3, // D (Represents 30)
+                tag: "CGPSC SES 2014",
+                exp: "Adjustments to min cement content: For 40mm aggregate (larger size), cement content can be reduced by 30 kg/m³."
+            },
+            {
+                id: 247,
+                q: "On the compression side of a doubly reinforced beam the full available strength of the steel cannot be utilized what is the reason for it:",
+                opts: ["Concrete is strong in compression", "Increase in area of steel reduces area", "Steel bars buckle", "If the steel has very high stress the concrete around it will crack"],
+                ans: 3, // D
+                tag: "Sub engg 2012",
+                exp: "The strain in compression steel is limited by the strain in the surrounding concrete. If steel is stressed too high, the concrete (which reaches failure strain earlier) will crack/crush."
+            },
+            {
+                id: 248,
+                q: "Which of the following statement is not correct? Clear cover to reinforcement for mild exposure shall neither be less than the diameter of the bar nor less than the following",
+                opts: ["For reinforcement in columns - 40 mm", "For reinforcement in beams - 50 mm", "For reinforcement in Slab - 15 mm", "For reinforcement in footing - 50 mm"],
+                ans: 1, // B
+                tag: "MH Aurangabad 2019",
+                exp: "Incorrect statement is B. Clear cover for beams is typically 25mm, not 50mm. Columns are 40mm, Footings 50mm."
+            },
+            {
+                id: 249,
+                q: "Removal of props under the slab for a span over 4.5 m is usually done after the expiry of:",
+                opts: ["20 days", "10 days", "7 days", "14 days"],
+                ans: 3, // D
+                tag: "DSSSB JE 2019",
+                exp: "Props to slabs:\nSpanning up to 4.5m: 7 days\nSpanning over 4.5m: 14 days."
+            }
+        ];
+
+        // --- STATE & LOGIC ---
+        let currentQuestions = [];
+        let currentState = { index: 0, answers: {}, status: {}, bookmarks: [], startTime: null, timeRemaining: 0, mode: 'full' };
+        let timerInterval;
+
+        window.onload = function() {
+            loadHistory();
+            const savedBookmarks = localStorage.getItem('civil_bookmarks_220_249');
+            if(savedBookmarks) currentState.bookmarks = JSON.parse(savedBookmarks);
+        };
+
+        function initTest(mode) {
+            if (mode === 'bookmark') {
+                if (currentState.bookmarks.length === 0) {
+                    alert("No bookmarks saved yet! Start a Full Test first.");
+                    return;
+                }
+                currentQuestions = masterDB.filter(q => currentState.bookmarks.includes(q.id));
+                document.getElementById('mode-badge').style.display = 'block';
+                currentState.timeRemaining = currentQuestions.length * 60 * 2; 
+            } else {
+                currentQuestions = [...masterDB];
+                document.getElementById('mode-badge').style.display = 'none';
+                currentState.timeRemaining = 2 * 60 * 60;
+            }
+
+            currentState.mode = mode;
+            currentState.index = 0;
+            currentState.answers = {};
+            currentState.status = {};
+            
+            document.getElementById('landing-page').style.display = 'none';
+            document.getElementById('quiz-container').style.display = 'flex';
+            
+            renderQuestion();
+            startTimer();
+            renderPalette();
+        }
+
+        function renderQuestion() {
+            const q = currentQuestions[currentState.index];
+            const area = document.getElementById('question-area');
+            const isBookmarked = currentState.bookmarks.includes(q.id);
+            const userAns = currentState.answers[q.id];
+            
+            const bmIcon = document.getElementById('btn-bookmark');
+            bmIcon.innerHTML = isBookmarked ? '&#9733;' : '&#9734;';
+            bmIcon.classList.toggle('active', isBookmarked);
+
+            let html = `
+                <div style="display:flex; justify-content:space-between;">
+                    <span class="exam-tag">${q.tag}</span>
+                    <span style="color:var(--gray); font-size:12px;">Q.${q.id}</span>
+                </div>
+                <div class="q-text">${q.q}</div>
+                <div class="options-list">
+            `;
+
+            q.opts.forEach((opt, idx) => {
+                let className = 'option';
+                if (userAns !== undefined) {
+                    if (idx === q.ans) className += ' correct'; 
+                    else if (idx === userAns) className += ' wrong';
+                }
+
+                html += `
+                    <div class="${className}" onclick="selectOption(${idx})">
+                        <span class="opt-label">${String.fromCharCode(65 + idx)}</span>
+                        <span>${opt}</span>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+
+            if (userAns !== undefined) {
+                html += `
+                    <div class="solution-box" style="display:block;">
+                        <div class="solution-title">Solution:</div>
+                        <div class="solution-text">${q.exp}</div>
+                    </div>
+                `;
+            }
+
+            area.innerHTML = html;
+            updateButtons();
+        }
+
+        function selectOption(optIndex) {
+            const q = currentQuestions[currentState.index];
+            if (currentState.answers[q.id] !== undefined) return;
+            currentState.answers[q.id] = optIndex;
+            currentState.status[q.id] = 'answered';
+            renderQuestion();
+            renderPalette();
+        }
+
+        function changeQuestion(dir) {
+            const qId = currentQuestions[currentState.index].id;
+            if (!currentState.status[qId]) currentState.status[qId] = 'skipped';
+            currentState.index += dir;
+            if (currentState.index < 0) currentState.index = 0;
+            if (currentState.index >= currentQuestions.length) currentState.index = currentQuestions.length - 1;
+            renderQuestion();
+            renderPalette();
+        }
+
+        function updateButtons() {
+            document.getElementById('btn-prev').disabled = currentState.index === 0;
+            document.getElementById('btn-next').innerText = currentState.index === currentQuestions.length - 1 ? 'Finish' : 'Next';
+        }
+
+        function markForReview() {
+            const qId = currentQuestions[currentState.index].id;
+            currentState.status[qId] = 'review';
+            renderPalette();
+            changeQuestion(1);
+        }
+
+        function startTimer() {
+            if(timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                currentState.timeRemaining--;
+                const h = Math.floor(currentState.timeRemaining / 3600);
+                const m = Math.floor((currentState.timeRemaining % 3600) / 60);
+                const s = currentState.timeRemaining % 60;
+                document.getElementById('timer-display').innerText = 
+                    `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                if (currentState.timeRemaining <= 0) submitTest();
+            }, 1000);
+        }
+
+        function togglePalette() {
+            const drawer = document.getElementById('palette-drawer');
+            const overlay = document.getElementById('drawer-overlay');
+            if (drawer.style.right === '0px') {
+                drawer.style.right = '-80%';
+                overlay.style.display = 'none';
+            } else {
+                drawer.style.right = '0px';
+                overlay.style.display = 'block';
+                renderPalette();
+            }
+        }
+
+        function renderPalette() {
+            const grid = document.getElementById('palette-grid');
+            grid.innerHTML = '';
+            currentQuestions.forEach((q, idx) => {
+                const status = currentState.status[q.id] || 'not-visited';
+                let cls = 'p-item';
+                if (idx === currentState.index) cls += ' current';
+                if (status === 'answered') cls += ' answered';
+                if (status === 'skipped') cls += ' skipped';
+                if (status === 'review') cls += ' review';
+
+                const div = document.createElement('div');
+                div.className = cls;
+                div.innerText = idx + 1;
+                div.onclick = () => {
+                    currentState.index = idx;
+                    renderQuestion();
+                    togglePalette();
+                };
+                grid.appendChild(div);
+            });
+        }
+
+        function toggleBookmark() {
+            const qId = currentQuestions[currentState.index].id;
+            const idx = currentState.bookmarks.indexOf(qId);
+            if (idx === -1) {
+                currentState.bookmarks.push(qId);
+            } else {
+                currentState.bookmarks.splice(idx, 1);
+            }
+            localStorage.setItem('civil_bookmarks_220_249', JSON.stringify(currentState.bookmarks));
+            const isBookmarked = currentState.bookmarks.includes(qId);
+            document.getElementById('btn-bookmark').classList.toggle('active', isBookmarked);
+            document.getElementById('btn-bookmark').innerHTML = isBookmarked ? '&#9733;' : '&#9734;';
+        }
+
+        function confirmExit() {
+            if(confirm("Exit test? Progress will be lost.")) location.reload();
+        }
+
+        function submitTest() {
+            clearInterval(timerInterval);
+            let correctCount = 0;
+            let attempted = 0;
+            currentQuestions.forEach(q => {
+                if (currentState.answers[q.id] !== undefined) {
+                    attempted++;
+                    if (currentState.answers[q.id] === q.ans) correctCount++;
+                }
+            });
+            const score = correctCount;
+            const accuracy = attempted > 0 ? Math.round((correctCount / attempted) * 100) : 0;
+            
+            if(currentState.mode === 'full') {
+                const history = JSON.parse(localStorage.getItem('civil_history_220_249') || '[]');
+                history.unshift({ date: new Date().toLocaleDateString(), score: score, total: currentQuestions.length, accuracy: accuracy });
+                localStorage.setItem('civil_history_220_249', JSON.stringify(history));
+            }
+            alert(`Test Submitted!\nScore: ${score}/${currentQuestions.length}\nAccuracy: ${accuracy}%`);
+            location.reload();
+        }
+
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('civil_history_220_249') || '[]');
+            if (history.length > 0) {
+                const latest = history[0];
+                document.getElementById('prev-accuracy').innerText = latest.accuracy + '%';
+                document.getElementById('prev-score').innerText = `Last Score: ${latest.score}/${latest.total}`;
+            }
+        }
+    </script>
+</body>
+</html>
