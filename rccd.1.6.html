@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RCC Test (Q156-188)</title>
+    <style>
+        :root {
+            --primary: #e91e63;
+            --primary-dark: #c2185b;
+            --text-color: #333;
+            --bg-color: #f5f5f5;
+            --card-bg: #ffffff;
+            --correct: #4caf50;
+            --wrong: #f44336;
+            --review: #9c27b0;
+            --blue-current: #2196f3;
+            --skipped: #9e9e9e;
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { margin: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg-color); color: var(--text-color); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* --- SCREENS --- */
+        .screen { display: none; height: 100%; flex-direction: column; }
+        .screen.active { display: flex; }
+
+        /* --- HOME SCREEN --- */
+        #home-screen { align-items: center; justify-content: center; padding: 20px; text-align: center; }
+        .app-logo { font-size: 50px; margin-bottom: 20px; }
+        .stats-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 100%; max-width: 350px; margin-bottom: 20px; text-align: left; }
+        .stats-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .btn-large { background: var(--primary); color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; width: 100%; max-width: 300px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); margin-top: 15px; transition: transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-large:active { transform: scale(0.98); }
+        .btn-secondary { background: white; color: var(--primary); border: 2px solid var(--primary); margin-top: 15px; }
+
+        /* --- HEADER --- */
+        header { background: var(--primary); color: white; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; height: 60px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 10; flex-shrink: 0; }
+        .timer { font-weight: bold; font-size: 18px; font-family: monospace; background: rgba(0,0,0,0.1); padding: 5px 10px; border-radius: 4px; }
+        .header-icons { display: flex; gap: 20px; align-items: center; }
+        .header-icon { cursor: pointer; font-size: 20px; font-weight: bold; display: flex; align-items: center; justify-content: center; width: 35px; height: 35px; border-radius: 50%; transition: background 0.2s; }
+        .header-icon:active { background: rgba(255,255,255,0.2); }
+        
+        /* --- MAIN TEST AREA --- */
+        #quiz-container { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 80px; position: relative; background: #f0f2f5; }
+        .question-card { background: var(--card-bg); border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .q-meta { display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+        .q-tag { background: #e3f2fd; color: #1565c0; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .q-text { font-size: 16px; font-weight: 500; margin-bottom: 20px; line-height: 1.5; color: #000; }
+        
+        .options { list-style: none; padding: 0; }
+        .option { padding: 14px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; transition: all 0.2s; background: #fff; }
+        .option-circle { height: 22px; width: 22px; border: 2px solid #ccc; border-radius: 50%; margin-right: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; font-weight: bold; color: white; }
+        
+        /* Interaction States */
+        .option.selected { border-color: var(--blue-current); background: #e3f2fd; }
+        .option.correct { border-color: var(--correct); background: #e8f5e9; }
+        .option.wrong { border-color: var(--wrong); background: #ffebee; }
+        
+        .option.correct .option-circle { border-color: var(--correct); background: var(--correct); content: "✓"; }
+        .option.wrong .option-circle { border-color: var(--wrong); background: var(--wrong); content: "✕"; }
+
+        /* --- SOLUTION BOX --- */
+        .solution-box { display: none; margin-top: 20px; background: #f8f9fa; padding: 15px; border-left: 4px solid var(--primary); border-radius: 4px; font-size: 14px; color: #444; line-height: 1.5; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .solution-header { font-weight: bold; color: var(--primary); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+
+        /* --- FOOTER --- */
+        footer { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #ddd; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; height: 60px; z-index: 10; box-shadow: 0 -2px 5px rgba(0,0,0,0.05); }
+        .nav-btn { background: white; border: 1px solid #ccc; padding: 8px 18px; border-radius: 20px; font-weight: bold; color: #555; cursor: pointer; font-size: 14px; }
+        .nav-btn.primary { background: var(--primary); color: white; border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .center-actions { display: flex; gap: 20px; }
+        .icon-btn { font-size: 24px; padding: 0; border: none; background: none; color: #757575; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; }
+        .icon-btn:active { background: #eee; }
+        .icon-btn.active-review { color: var(--review); }
+        .icon-btn.active-bookmark { color: #ff9800; }
+
+        /* --- PALETTE (Sidebar) --- */
+        #palette-overlay { position: fixed; top: 0; right: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 20; display: none; justify-content: flex-end; }
+        #palette { width: 85%; max-width: 320px; background: white; height: 100%; padding: 20px; display: flex; flex-direction: column; overflow-y: auto; box-shadow: -2px 0 5px rgba(0,0,0,0.1); }
+        .palette-header { display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; font-size: 18px; border-bottom: 1px solid #eee; padding-bottom: 10px; align-items: center; }
+        .palette-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+        .p-item { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; border: 1px solid #ddd; background: #fff; color: #555; transition: transform 0.1s; }
+        .p-item:active { transform: scale(0.9); }
+        
+        /* Palette Colors */
+        .p-item.answered { background: var(--correct); color: white; border-color: var(--correct); }
+        .p-item.review { background: var(--review); color: white; border-color: var(--review); }
+        .p-item.current { border: 2px solid var(--blue-current); transform: scale(1.1); box-shadow: 0 0 5px rgba(33, 150, 243, 0.4); }
+        .p-item.skipped { background: var(--skipped); color: white; border-color: var(--skipped); } 
+
+        /* Legend */
+        .legend { margin-top: auto; padding-top: 20px; font-size: 12px; border-top: 1px solid #eee; }
+        .legend-item { display: flex; align-items: center; margin-bottom: 8px; color: #555; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 10px; }
+
+        /* --- RESULT SCREEN --- */
+        #result-screen { padding: 20px; overflow-y: auto; text-align: center; }
+        .score-circle { width: 140px; height: 140px; border-radius: 50%; border: 10px solid var(--primary); display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 30px auto; font-size: 36px; font-weight: bold; color: var(--primary); background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        /* Toast Notification */
+        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 16px; position: fixed; z-index: 30; left: 50%; bottom: 80px; transform: translateX(-50%); font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 80px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 80px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+
+    </style>
+</head>
+<body>
+
+    <div id="home-screen" class="screen active">
+        <div class="app-logo">🏗️</div>
+        <h1 style="color: var(--primary); margin-top:0;">RCC Test (Q156-188)</h1>
+        
+        <div class="stats-card">
+            <h3 style="margin-top:0; color: var(--primary);">Your Progress</h3>
+            <div class="stats-row"><span>Last Score:</span> <span id="last-score" style="font-weight:bold;">-</span></div>
+            <div class="stats-row"><span>Accuracy:</span> <span id="last-accuracy" style="font-weight:bold;">-</span></div>
+            <div class="stats-row" style="border:none;"><span>Tests Taken:</span> <span id="test-count">0</span></div>
+        </div>
+
+        <button class="btn-large" onclick="initTest('all')">
+            <span>▶</span> START TEST
+        </button>
+        <button class="btn-large btn-secondary" onclick="initTest('bookmark')">
+            <span>🔖</span> REVISE BOOKMARKS
+        </button>
+        <div style="margin-top:30px; font-size:11px; color:#999;">Ver 6.0 (Q156-188 Only)</div>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <header>
+            <div id="timer" class="timer">02:00:00</div>
+            <div class="header-icons">
+                <div class="header-icon" onclick="submitTest()" title="Submit Test">✓</div>
+                <div class="header-icon" onclick="exitTest()" title="Exit Test">✕</div>
+            </div>
+        </header>
+
+        <div id="quiz-container">
+            </div>
+
+        <footer>
+            <button class="nav-btn" onclick="navStep(-1)">Prev</button>
+            <div class="center-actions">
+                <button class="icon-btn" id="btn-bookmark" onclick="toggleBookmark()">🔖</button>
+                <button class="icon-btn" id="btn-review" onclick="toggleReview()">🟣</button>
+                <button class="icon-btn" onclick="togglePalette()">▦</button>
+            </div>
+            <button class="nav-btn primary" onclick="navStep(1)">Next</button>
+        </footer>
+
+        <div id="palette-overlay" onclick="togglePalette()">
+            <div id="palette" onclick="event.stopPropagation()">
+                <div class="palette-header">
+                    <span>Question Grid</span>
+                    <span onclick="togglePalette()" style="cursor:pointer; font-size:24px;">&times;</span>
+                </div>
+                <div class="palette-grid" id="palette-grid"></div>
+                <div class="legend">
+                    <div class="legend-item"><div class="dot" style="background:var(--correct)"></div> Answered</div>
+                    <div class="legend-item"><div class="dot" style="background:var(--review)"></div> Review</div>
+                    <div class="legend-item"><div class="dot" style="background:var(--skipped)"></div> Skipped</div>
+                    <div class="legend-item"><div class="dot" style="border:2px solid var(--blue-current); background:transparent"></div> Current</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-screen" class="screen">
+        <h2>Test Result</h2>
+        <div class="score-circle">
+            <span id="score-text">0</span>
+            <span style="font-size:14px; color:#666; font-weight:normal; margin-top:5px;">Score</span>
+        </div>
+        <div class="stats-card" style="margin: 0 auto 20px;">
+            <div class="stats-row"><span>Total Questions:</span> <span id="res-total">0</span></div>
+            <div class="stats-row"><span>Attempted:</span> <span id="res-attempted">0</span></div>
+            <div class="stats-row"><span>Correct:</span> <span id="res-correct" style="color:var(--correct); font-weight:bold;">0</span></div>
+            <div class="stats-row"><span>Wrong:</span> <span id="res-wrong" style="color:var(--wrong); font-weight:bold;">0</span></div>
+            <div class="stats-row" style="border:none;"><span>Accuracy:</span> <span id="res-accuracy" style="font-weight:bold;">0%</span></div>
+        </div>
+        <button class="btn-large" onclick="goHome()">Back to Home</button>
+    </div>
+
+    <div id="toast">Message</div>
+
+<script>
+/* --- DATA DATABASE (Questions 156-188) --- */
+const allQuestionsDB = [
+    { id: 156, text: "For concrete of grade M50, short-term modulus of elasticity will be nearly", options: ["20000 N/mm²", "35000 N/mm²", "50000 N/mm²", "75000 N/mm²"], ans: 1, tag: "HPSSC JE Code 386/2018", explanation: "Ec = 5000√fck = 5000√50 = 35355 N/mm² ≈ 35000 N/mm²." },
+    { id: 157, text: "Minimum cover to reinforcement in slabs should be", options: ["15 mm", "25 mm", "20 mm", "12 mm"], ans: 2, tag: "KMC 2009", explanation: "Nominal cover for slab: 20 mm. (Can be reduced to 15mm for bars dia <= 12mm, but general answer is 20mm)." },
+    { id: 158, text: "The 28 days characteristic compressive strength of M35 grade concrete is", options: ["40 N/mm²", "45 N/mm²", "35 N/mm²", "60 N/mm²"], ans: 2, tag: "UKSSSC JE 20.12.2020", explanation: "The characteristic strength of M35 grade concrete is 35 N/mm²." },
+    { id: 159, text: "_____ days strength is considered to be the criterion for design and is called characteristic strength.", options: ["3", "7", "28", "56"], ans: 2, tag: "UKSSSC JE 20.12.2020", explanation: "28 days strength is considered to be the criterion for design." },
+    { id: 160, text: "The cylinder strength of concrete is usually taken as X times that of the cube strength in compression, where X is:", options: ["1.00", "0.85", "0.95", "0.80"], ans: 3, tag: "DDA 24.04.2018", explanation: "Cylinder strength = 0.8 × Cube Strength." },
+    { id: 161, text: "The Indian standard code of practice for plain and reinforced concrete is", options: ["IS 456", "IS 875", "IS 800", "None of the above"], ans: 0, tag: "ISRO TA 2016", explanation: "IS 456 : 2000 is the code for plain and reinforced concrete." },
+    { id: 162, text: "In a material fe-415 HYSD bars, the HYSD refers :", options: ["High yield strength deformed bars", "Heavy yield strength deformed bars", "High yield strongly deformed bars", "None of the above"], ans: 0, tag: "MGVCL JE 2017", explanation: "HYSD = High Yield Strength Deformed bars." },
+    { id: 163, text: "The shuttering of a hall measuring 4 m × 5 m, can be removed after", options: ["5 Days", "7 Days", "10 Days", "14 Days"], ans: 1, tag: "SSC JE 23.01.2018", explanation: "For slabs spanning upto 4.5m: 7 days. For spans > 4.5m: 14 days. Since 4m < 4.5m, answer is 7 days." },
+    { id: 164, text: "For the construction of cement concrete dams, the maximum permissible size of the aggregates is", options: ["40 mm", "50 mm", "60 mm", "70 mm"], ans: 0, tag: "SSC JE 23.01.2018", explanation: "40mm for massive works like dams, retaining wall etc. 20mm for reinforced member." },
+    { id: 165, text: "The characteristic strength of concrete is measured at :", options: ["14 days", "28 days", "91 days", "7 days"], ans: 1, tag: "SSC JE 2010", explanation: "Characteristic strength is measured at 28 days." },
+    { id: 166, text: "The value of ultimate creep coefficient for concrete:", options: ["Increases with age of loading", "Decreases with age of loading", "Remains constant", "Is taken as 0.0003"], ans: 1, tag: "SSC JE 2010", explanation: "Ultimate creep coefficient decreases with age of loading (7d: 2.2, 28d: 1.6, 1yr: 1.1)." },
+    { id: 167, text: "For RC braced frames maximum redistribution of moment allowed is", options: ["30%", "40%", "20%", "10%"], ans: 0, tag: "CGPSC SES 2018", explanation: "Moment redistribution shall not be reduced by more than 30%." },
+    { id: 168, text: "The characteristic strength of concrete in the actual structure is taken as:", options: ["fck", "0.85 fck", "0.67 fck", "0.447 fck"], ans: 2, tag: "SSC JE 2010", explanation: "Strength in actual structure is taken as 0.67 fck. (Design strength is 0.45fck after partial safety factor)." },
+    { id: 169, text: "In RCC structure, which of the following are independent of the applied load?\n1. Elastic strain\n2. Creep strain\n3. Drying shrinkage strain\n4. Carbonation shrinkage", options: ["1 and 2", "2 and 3", "3 and 4", "1 and 4"], ans: 2, tag: "GETCO 2017", explanation: "Drying shrinkage and Carbonation shrinkage are independent of applied load. Elastic and Creep strains depend on load." },
+    { id: 170, text: "Concrete without reinforcement is called:", options: ["P.C.C", "R.B.C", "R.C.C", "R.M.C"], ans: 0, tag: "Kerala PSC 2019", explanation: "Concrete without reinforcement is called P.C.C. (Plain Cement Concrete)." },
+    { id: 171, text: "The characteristic mean strength of M30 grade concrete in N/mm² is -", options: ["5", "20", "30", "25"], ans: 2, tag: "BMRCL JE 2018", explanation: "Characteristic mean strength (fck) for M30 is 30 N/mm²." },
+    { id: 172, text: "What is the maximum water to cement ratio for M15 grade of concrete used in plain cement concrete work, when the exposure condition is moderate?", options: ["0.40", "0.50", "0.45", "0.60"], ans: 3, tag: "UPRVUNL JE 2019", explanation: "Wait, IS 456 Table 5 says for Moderate Exposure: Min Grade M15, Max W/C 0.60 for PCC." },
+    { id: 173, text: "A rare kind of failure considered in the reinforced concrete design, that is the fracture of the reinforcing steel, can happen with extremely low amounts of reinforcements and under", options: ["Static loading", "Points loading only", "Uniformly distributed loading", "Dynamic loading"], ans: 3, tag: "BSPHCL JE 2019", explanation: "Fracture of reinforcing steel... can happen with extremely low reinforcements and under dynamic loading." },
+    { id: 174, text: "Cubes cast for M25 mix in field were tested after 7 days of curing. The minimum compressive strength is likely to", options: ["8 MPa", "17 MPa", "22 MPa", "25 MPa"], ans: 1, tag: "ISRO TA 21.04.2018", explanation: "7 day strength ≈ 2/3 of 28 day strength. 2/3 * 25 = 16.75 ≈ 17 MPa." },
+    { id: 175, text: "The concrete may be accepted if the average equivalent cube strength of the cores, is at least 85% of the cube strength of the concrete grade at the specified age and no individual core possesses strength less than", options: ["0.35", "0.75", "0.5", "0.25"], ans: 1, tag: "HESCOM AE 2017", explanation: "Avg equivalent cube strength >= 85%. No individual core < 75%." },
+    { id: 176, text: "In adverse circumstances, the reinforced concrete member immersed in sea water or subjected to sea spray, the maximum permissible cover for the reinforcing bars, should not exceed", options: ["40 mm", "50 mm", "60 mm", "75 mm"], ans: 3, tag: "Gujarat PSC AE 2020", explanation: "Maximum permissible cover should not exceed 75 mm." },
+    { id: 177, text: "The minimum number of samples of concrete cube required as per IS 456-2000, for 5m³ concrete is:", options: ["1", "2", "3", "4"], ans: 0, tag: "KMC 2007", explanation: "For 1-5 m³ quantity, number of samples required is 1." },
+    { id: 178, text: "If the reinforced concrete is exposed directly along the sea coast, then which one of the following is the minimum grade of concrete to be used?", options: ["M20", "M35", "M40", "M30"], ans: 3, tag: "Nagar Parishad Mains 2018", explanation: "Exposure directly along sea coast is 'Severe' or 'Very Severe'. Minimum grade for RCC in sea water is M30. (Note: Question says 'exposed directly along sea coast', usually M30 is the answer for sea water)." },
+    { id: 179, text: "The upper limit of suspended particles in water for preparation of concrete is:", options: ["200 ppm", "2000 ppm", "5000 ppm", "1000 ppm"], ans: 1, tag: "KMC 2007", explanation: "Permissible limit for suspended matter is 2000 mg/l." },
+    { id: 180, text: "For load test, load applied on the structure is :", options: ["DL + 1.25LL", "1.5(DL + LL)", "0.9DL + 1.5LL", "1.2(DL + LL)"], ans: 0, tag: "Gujarat Electric Board 2017", explanation: "Load for load test = Full dead load + 1.25 times imposed load (DL + 1.25LL) for 24 hours." },
+    { id: 181, text: "When effective depth of member is more than 200 mm, the reinforcement shall be placed within tolerance of :", options: ["± 15 mm", "± 10 mm", "± 20 mm", "± 25 mm"], ans: 1, tag: "Gujarat Electric Board 2017", explanation: "For d > 200mm, tolerance is ± 10 mm. (For d <= 200mm, it is also ± 10mm. Note: Table says ± 10mm for d<=200 and ± 15mm for d>200 in some books, but IS 456:2000 Cl 12.3.1 says +/- 10mm for d<=200 and +/- 10mm for d>200. Wait, actually Cl 12.3 says +/- 10 for <=200 and +/- 15 for >200. The book answer here (b) is 10mm. Let's check image... Image answer is (b) +/- 10mm. Wait, explanation in image says 'For effective depth > 200mm... tolerance +/- 10mm'. This contradicts code which says +/- 15. But I will follow the BOOK's answer: +/- 10mm)." },
+    { id: 182, text: "The maximum strain in concrete due to flexure at the outermost compression fiber of beam is :", options: ["0.0035", "0.03", "0.0003", "0.035"], ans: 0, tag: "MH PWD 2019", explanation: "Max compressive strain in concrete in bending is 0.0035." },
+    { id: 183, text: "Moist curing of the exposed surfaces of concrete is done for at least", options: ["7 days", "10 days", "12 days", "14 days"], ans: 0, tag: "Mizoram PSC Paper I 2010", explanation: "Curing should be done for at least 7 days for OPC." },
+    { id: 184, text: "M 20 grade concrete means its compressive strength of 15 cm cube is 20 N/mm² after", options: ["7 days", "14 days", "21 days", "28 days"], ans: 3, tag: "SSC JE 2018", explanation: "Characteristic strength is measured after 28 days." },
+    { id: 185, text: "The minimum thickness of the cover at the end of reinforcing bar should not be less than twice the diameter of the bar subject to a minimum of", options: ["10 mm", "15 mm", "20 mm", "25 mm"], ans: 3, tag: "Mizoram PSC 2016", explanation: "Cover at end of bar not less than 2*dia or 25 mm, whichever is greater." },
+    { id: 186, text: "In a singly reinforced beam, effective depth is measured from its compression edge to", options: ["neutral axis of the beam", "longitudinal central axis", "centre of tensile reinforcement", "tensile edge"], ans: 2, tag: "Mizoram PSC 2010", explanation: "Effective depth = Distance from compression edge to centre of tensile reinforcement." },
+    { id: 187, text: "According to I S : 456 speculations, the safe diagonal tensile stress for M 150 grade concrete, is", options: ["50 N/cm²", "100 N/cm²", "150 N/cm²", "200 N/cm²"], ans: 1, tag: "Mizoram PSC Paper I 2010", explanation: "Safe diagonal tensile stress for M 150 grade (Old notation ~M15) is approx 100 N/cm²? Wait, image says 'Ans (b) 100 N/cm²? No, the image actually says Ans (a)? No, let me look at the tick. The tick is on (b) in the image? No, wait. Question 187. Answer key says (a) in the box? No, text says 'Ans (a)'. Okay, Ans is (a) 50 N/cm². Let me double check. Yes, old M150 implies M15. Allowable shear/diagonal tension is low. 50 N/cm² = 0.5 N/mm². This is plausible." },
+    { id: 188, text: "The test strength of the sample of concrete is taken as average of the strength of", options: ["2 specimens", "3 specimens", "4 specimens", "5 specimens"], ans: 1, tag: "SSC JE 2011", explanation: "Test strength is average of 3 specimens." }
+];
+
+/* --- STATE VARIABLES --- */
+let activeQuestions = [];
+let currentIndex = 0;
+let userAnswers = {}; // { qId: optionIndex }
+let reviewList = new Set();
+let timerInterval;
+let timeLeft;
+let bookmarks = JSON.parse(localStorage.getItem('civilAppBookmarks_v6')) || [];
+let history = JSON.parse(localStorage.getItem('civilAppHistory_v6')) || {score:0, total:0, accuracy:0, count:0};
+
+/* --- INITIALIZATION --- */
+window.onload = function() {
+    updateHomeStats();
+};
+
+function updateHomeStats() {
+    if(history.count > 0) {
+        document.getElementById('last-score').innerText = `${history.score}/${history.total}`;
+        document.getElementById('last-accuracy').innerText = `${history.accuracy}%`;
+        document.getElementById('test-count').innerText = history.count;
+    }
+}
+
+function showToast(msg) {
+    const x = document.getElementById("toast");
+    x.innerText = msg;
+    x.className = "show";
+    setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+}
+
+/* --- CORE TEST FUNCTIONS --- */
+function initTest(mode) {
+    // 1. Determine Questions based on Mode
+    if(mode === 'bookmark') {
+        if(bookmarks.length === 0) {
+            alert("No bookmarks saved yet! Go to Full Test and bookmark some questions.");
+            return;
+        }
+        activeQuestions = allQuestionsDB.filter(q => bookmarks.includes(q.id));
+    } else {
+        activeQuestions = [...allQuestionsDB]; // Copy all
+    }
+
+    // 2. Reset State
+    currentIndex = 0;
+    userAnswers = {};
+    reviewList.clear();
+    timeLeft = (mode === 'bookmark') ? (activeQuestions.length * 90) : 7200; 
+
+    // 3. Switch Screens
+    document.querySelector('.active').classList.remove('active');
+    document.getElementById('quiz-screen').classList.add('active');
+
+    // 4. GENERATE PALETTE
+    generatePalette();
+
+    // 5. Render First Question & Start Timer
+    renderQuestion();
+    startTimer();
+}
+
+function generatePalette() {
+    const grid = document.getElementById('palette-grid');
+    grid.innerHTML = "";
+    activeQuestions.forEach((q, idx) => {
+        const item = document.createElement('div');
+        item.className = 'p-item';
+        item.innerText = idx + 1;
+        item.id = `p-idx-${idx}`;
+        item.onclick = () => {
+            currentIndex = idx;
+            renderQuestion();
+            togglePalette();
+        };
+        grid.appendChild(item);
+    });
+}
+
+function renderQuestion() {
+    const q = activeQuestions[currentIndex];
+    const container = document.getElementById('quiz-container');
+    const isAnswered = userAnswers.hasOwnProperty(q.id);
+    const selectedOpt = userAnswers[q.id];
+
+    // Update Header Icons
+    const isBookmarked = bookmarks.includes(q.id);
+    const btnBook = document.getElementById('btn-bookmark');
+    btnBook.innerText = isBookmarked ? "🏷️" : "🔖";
+    btnBook.classList.toggle('active-bookmark', isBookmarked);
+    
+    const isReview = reviewList.has(q.id);
+    document.getElementById('btn-review').classList.toggle('active-review', isReview);
+
+    let html = `
+        <div class="question-card">
+            <div class="q-meta">
+                <span class="q-tag">${q.tag}</span>
+                <span>Q.${currentIndex + 1} / ${activeQuestions.length}</span>
+            </div>
+            <div class="q-text">${q.text}</div>
+            <ul class="options">
+    `;
+
+    q.options.forEach((opt, idx) => {
+        let className = "option";
+        
+        if (isAnswered) {
+            if (idx === q.ans) { className += " correct"; }
+            else if (idx === selectedOpt) { className += " wrong"; }
+            
+            html += `<li class="${className}">
+                <div class="option-circle">${idx===q.ans ? "✓" : (idx===selectedOpt ? "✕" : "")}</div>
+                ${opt}
+            </li>`;
+        } else {
+            html += `<li class="${className}" onclick="handleAnswer(${idx})">
+                <div class="option-circle"></div>
+                ${opt}
+            </li>`;
+        }
+    });
+
+    html += `</ul>`;
+
+    if (isAnswered) {
+        html += `
+            <div class="solution-box" style="display:block">
+                <div class="solution-header">📋 Solution Report</div>
+                ${q.explanation}
+            </div>
+        `;
+    }
+
+    html += `</div>`;
+    container.innerHTML = html;
+    
+    updatePaletteUI();
+}
+
+function updatePaletteUI() {
+    activeQuestions.forEach((q, idx) => {
+        const el = document.getElementById(`p-idx-${idx}`);
+        if(!el) return;
+
+        el.className = 'p-item'; // Reset
+        if (currentIndex === idx) el.classList.add('current');
+        
+        if (userAnswers.hasOwnProperty(q.id)) {
+            el.classList.add('answered');
+        } else if (reviewList.has(q.id)) {
+            el.classList.add('review');
+        } else if (idx < currentIndex && !userAnswers.hasOwnProperty(q.id)) {
+             el.classList.add('skipped');
+        }
+    });
+}
+
+function handleAnswer(optIdx) {
+    const q = activeQuestions[currentIndex];
+    userAnswers[q.id] = optIdx;
+    renderQuestion(); 
+}
+
+function navStep(step) {
+    const newIndex = currentIndex + step;
+    if (newIndex >= 0 && newIndex < activeQuestions.length) {
+        currentIndex = newIndex;
+        renderQuestion();
+    }
+}
+
+/* --- FEATURES --- */
+function toggleBookmark() {
+    const qId = activeQuestions[currentIndex].id;
+    if(bookmarks.includes(qId)) {
+        bookmarks = bookmarks.filter(id => id !== qId);
+        showToast("Removed from Bookmarks");
+    } else {
+        bookmarks.push(qId);
+        showToast("Added to Bookmarks");
+    }
+    localStorage.setItem('civilAppBookmarks_v6', JSON.stringify(bookmarks));
+    renderQuestion();
+}
+
+function toggleReview() {
+    const qId = activeQuestions[currentIndex].id;
+    if (reviewList.has(qId)) {
+        reviewList.delete(qId);
+        showToast("Unmarked from Review");
+    } else {
+        reviewList.add(qId);
+        showToast("Marked for Review");
+    }
+    renderQuestion();
+    updatePaletteUI();
+}
+
+function togglePalette() {
+    const overlay = document.getElementById('palette-overlay');
+    const isVisible = overlay.style.display === 'flex';
+    overlay.style.display = isVisible ? 'none' : 'flex';
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        const hours = Math.floor(timeLeft / 3600).toString().padStart(2, '0');
+        const mins = Math.floor((timeLeft % 3600) / 60).toString().padStart(2, '0');
+        const secs = (timeLeft % 60).toString().padStart(2, '0');
+        document.getElementById('timer').innerText = `${hours}:${mins}:${secs}`;
+        if (timeLeft <= 0) submitTest();
+    }, 1000);
+}
+
+function exitTest() {
+    if(confirm("Exit Test? Progress will be lost.")) {
+        goHome();
+    }
+}
+
+function goHome() {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('home-screen').classList.add('active');
+    clearInterval(timerInterval);
+    updateHomeStats();
+}
+
+function submitTest() {
+    if(!confirm("Are you sure you want to submit?")) return;
+    
+    clearInterval(timerInterval);
+    document.querySelector('.active').classList.remove('active');
+    document.getElementById('result-screen').classList.add('active');
+
+    let correct = 0;
+    let wrong = 0;
+    
+    activeQuestions.forEach(q => {
+        if(userAnswers.hasOwnProperty(q.id)) {
+            if(userAnswers[q.id] === q.ans) correct++;
+            else wrong++;
+        }
+    });
+
+    const attempted = Object.keys(userAnswers).length;
+    const accuracy = attempted > 0 ? Math.round((correct / attempted) * 100) : 0;
+    const total = activeQuestions.length;
+
+    document.getElementById('score-text').innerText = correct;
+    document.getElementById('res-total').innerText = total;
+    document.getElementById('res-attempted').innerText = attempted;
+    document.getElementById('res-correct').innerText = correct;
+    document.getElementById('res-wrong').innerText = wrong;
+    document.getElementById('res-accuracy').innerText = accuracy + "%";
+
+    // Update Global History 
+    history = { 
+        score: correct, 
+        total: total, 
+        accuracy: accuracy, 
+        count: (history.count || 0) + 1 
+    };
+    localStorage.setItem('civilAppHistory_v6', JSON.stringify(history));
+}
+</script>
+</body>
+</html>
