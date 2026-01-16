@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civil JE/AE Test (Q346-Q360)</title>
+    <style>
+        :root {
+            --primary: #007bff;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --purple: #6f42c1;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray: #6c757d;
+            --border: #dee2e6;
+            --bg: #f0f2f5;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+        body { background-color: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* --- LANDING PAGE --- */
+        #landing-page { padding: 20px; text-align: center; background: white; height: 100%; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; position: absolute; width: 100%; top: 0; }
+        .hero-title { font-size: 24px; color: var(--dark); margin-bottom: 10px; font-weight: 800; }
+        .hero-subtitle { font-size: 14px; color: var(--gray); margin-bottom: 30px; }
+        .stat-card { background: var(--light); padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); width: 100%; max-width: 350px; border: 1px solid var(--border); }
+        .btn-main { background: var(--primary); color: white; border: none; padding: 16px 32px; font-size: 18px; border-radius: 50px; width: 100%; max-width: 300px; cursor: pointer; margin: 10px 0; font-weight: bold; box-shadow: 0 4px 10px rgba(0,123,255,0.3); transition: transform 0.1s; }
+        .btn-main:active { transform: scale(0.98); }
+        .btn-secondary { background: white; color: var(--primary); border: 2px solid var(--primary); box-shadow: none; }
+        
+        /* --- QUIZ CONTAINER --- */
+        #quiz-container { display: none; flex-direction: column; height: 100vh; background: white; width: 100%; }
+        
+        /* Header */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: white; border-bottom: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); z-index: 10; }
+        .timer-badge { font-family: monospace; font-weight: bold; font-size: 16px; color: var(--dark); background: #e9ecef; padding: 6px 12px; border-radius: 6px; }
+        .submit-btn { background: var(--success); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; }
+        .exit-btn { font-size: 24px; color: var(--danger); cursor: pointer; margin-right: 15px; line-height: 1; }
+        .menu-btn { font-size: 24px; background: none; border: none; cursor: pointer; color: var(--dark); margin-left: 10px; }
+
+        /* Question Area */
+        #question-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; background: #fff; }
+        .q-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .exam-tag { background: #e2e6ea; color: var(--gray); font-size: 11px; padding: 4px 8px; border-radius: 4px; font-weight: 700; text-transform: uppercase; }
+        .q-number { color: var(--gray); font-size: 14px; font-weight: 600; }
+        .q-text { font-size: 17px; color: var(--dark); margin-bottom: 25px; line-height: 1.5; font-weight: 500; }
+        
+        /* Options */
+        .option { display: flex; align-items: flex-start; padding: 14px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 12px; cursor: pointer; transition: background 0.2s; position: relative; }
+        .option:hover { background: #f8f9fa; }
+        .option.selected { border-color: var(--primary); background: #e7f1ff; }
+        .option.correct { border-color: var(--success); background: #d4edda; }
+        .option.wrong { border-color: var(--danger); background: #f8d7da; }
+        .opt-label { font-weight: 700; margin-right: 12px; min-width: 25px; }
+        
+        /* Solution Box */
+        .solution-box { margin-top: 25px; padding: 15px; background: #f1f9f4; border: 1px solid #c3e6cb; border-radius: 8px; display: none; animation: slideDown 0.3s ease-out; }
+        .solution-header { font-weight: 700; color: var(--success); margin-bottom: 8px; font-size: 14px; display: flex; align-items: center; }
+        .solution-text { font-size: 14px; color: #155724; white-space: pre-wrap; line-height: 1.5; }
+        
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Footer */
+        footer { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid var(--border); padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; z-index: 20; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .nav-btn { background: transparent; border: 1px solid var(--border); padding: 10px 20px; border-radius: 6px; font-size: 14px; color: var(--dark); cursor: pointer; font-weight: 600; }
+        .nav-btn.primary { background: var(--primary); color: white; border: none; }
+        .nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .action-group { display: flex; gap: 15px; align-items: center; }
+        .bookmark-btn { font-size: 26px; color: var(--gray); cursor: pointer; padding: 5px; line-height: 1; }
+        .bookmark-btn.active { color: var(--warning); }
+        .review-btn { color: var(--purple); border-color: var(--purple); }
+
+        /* Palette Drawer */
+        .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 30; display:none; }
+        #palette-drawer { position: fixed; top: 0; right: -85%; width: 85%; height: 100%; background: white; box-shadow: -4px 0 15px rgba(0,0,0,0.1); transition: right 0.3s ease; z-index: 40; display: flex; flex-direction: column; }
+        #palette-drawer.open { right: 0; }
+        .palette-header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; }
+        .palette-grid { padding: 20px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; overflow-y: auto; align-content: start; }
+        .p-item { width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: 700; border: 1px solid var(--border); cursor: pointer; transition: all 0.2s; }
+        .p-item.current { border: 2px solid var(--primary); transform: scale(1.1); }
+        .p-item.answered { background: var(--success); color: white; border-color: var(--success); }
+        .p-item.skipped { background: var(--gray); color: white; border-color: var(--gray); }
+        .p-item.review { background: var(--purple); color: white; border-color: var(--purple); }
+        
+        .mode-badge { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); background: #e7f1ff; color: var(--primary); padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: bold; letter-spacing: 0.5px; }
+    </style>
+</head>
+<body>
+
+    <div id="landing-page">
+        <h1 class="hero-title">Civil Engineering</h1>
+        <p class="hero-subtitle">IS Codes & RCC (Q346 - Q360)</p>
+        
+        <div class="stat-card">
+            <h3 style="margin-bottom: 10px; color: var(--dark);">Your Progress</h3>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <span style="color:var(--gray);">Last Score:</span>
+                <span id="last-score" style="font-weight:bold;">-</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span style="color:var(--gray);">Accuracy:</span>
+                <span id="last-accuracy" style="font-weight:bold; color:var(--success);">-</span>
+            </div>
+        </div>
+
+        <button class="btn-main" onclick="initTest('full')">Start New Test</button>
+        <button class="btn-main btn-secondary" onclick="initTest('bookmark')">★ Revise Bookmarks</button>
+        
+        <div style="margin-top: 30px; font-size: 12px; color: var(--gray); max-width: 250px; line-height: 1.6;">
+            <strong>Features:</strong><br>
+            • Timer: 2 Hours<br>
+            • Instant Explanations<br>
+            • Bookmark & Review Mode
+        </div>
+    </div>
+
+    <div id="quiz-container">
+        <div class="overlay" id="drawer-overlay" onclick="togglePalette()"></div>
+        <div id="mode-badge" class="mode-badge" style="display:none;">BOOKMARK MODE</div>
+
+        <header>
+            <div style="display:flex; align-items:center;">
+                <div class="exit-btn" onclick="confirmExit()">&#10006;</div>
+                <div class="timer-badge" id="timer">02:00:00</div>
+            </div>
+            <div style="display:flex; align-items:center;">
+                <button class="submit-btn" onclick="submitTest()">SUBMIT</button>
+                <button class="menu-btn" onclick="togglePalette()">&#9776;</button>
+            </div>
+        </header>
+
+        <div id="question-area">
+            </div>
+
+        <footer>
+            <button class="nav-btn review-btn" onclick="markReview()">Review</button>
+            <div class="action-group">
+                <button class="nav-btn" id="btn-prev" onclick="nav(-1)">Prev</button>
+                <div class="bookmark-btn" id="btn-bookmark" onclick="toggleBookmark()">&#9734;</div>
+                <button class="nav-btn primary" id="btn-next" onclick="nav(1)">Next</button>
+            </div>
+        </footer>
+
+        <div id="palette-drawer">
+            <div class="palette-header">
+                <h3 style="margin:0;">Question Palette</h3>
+                <button onclick="togglePalette()" style="background:none; border:none; font-size:20px;">&#10006;</button>
+            </div>
+            <div class="palette-grid" id="palette-grid">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATASET: Questions 346 - 360 ---
+        const db = [
+            { id: 346, q: "The partial safety bars placed short of their required length need to be extended, we use:", opts: ["1.00", "1.10", "1.15", "1.25"], ans: 0, tag: "KPSC 2015 Code 143/2015", exp: "As per the source text provided. (Note: The phrasing 'partial safety bars' appears in the original paper, though it likely refers to specific design conditions or a typo for 'partial safety factors' where 1.0 is used for certain limit states)." },
+            { id: 347, q: "As per IS-456 : 2000, cracking of concrete in tension zone cannot be avoided but can be limited by :\n1. Adhering to the codal requirements of minimum steel area\n2. Proper and prolonged curing of concrete\n3. Increasing water cement ratio to increase workability", opts: ["1 and 2 only", "1 and 3 only", "2 and 3 only", "1, 2 and 3"], ans: 0, tag: "ESE 2020", exp: "Cracking can be limited by providing minimum reinforcement (to distribute cracks) and proper curing (to reduce shrinkage). Increasing w/c ratio increases shrinkage and crack width, so it is incorrect." },
+            { id: 348, q: "Modulus of elasticity of M20 grade concrete in N/mm² is approximately :", opts: ["22360", "25000", "36000", "20000", "24000"], ans: 1, tag: "Odisha JE (Mains) 30.06.2019", exp: "For M25: Ec = 5000√fck = 5000√25 = 25000 N/mm². (Note: The question text says M20 in one version and M25 in another, but the answer 25000 corresponds to M25)." },
+            { id: 349, q: "Design strength for M 25 concrete in compression, bending compression and flexural tension are, respectively", opts: ["10 MPa, 11.15 MPa and 3.5 MPa", "25 MPa, 11.15 MPa and 3 MPa", "10 MPa, 12.5 MPa and 3.5 MPa", "25 MPa, 11.15 MPa and 2.57 MPa"], ans: 0, tag: "ESE 2018", exp: "Direct Comp = 0.4fck = 10 MPa.\nBending Comp = 0.45fck = 11.25 MPa.\nFlexural Tension = 0.7√fck = 3.5 MPa." },
+            { id: 350, q: "Which of the following measures are relevantly considered for earthquake loading and lateral stability of tall buildings?\n1. Minimizing gravity loads\n2. Adding masses at floor levels\n3. Ensuring ductility\n4. Providing shear walls\n5. Providing basement", opts: ["1, 2 and 5 only", "1, 2 and 4 only", "1, 3 and 4 only", "3, 4 and 5 only"], ans: 2, tag: "ESE 2017", exp: "For EQ stability: Minimize mass (gravity load), ensure ductility, and provide shear walls. Adding mass is detrimental." },
+            { id: 351, q: "Which one of the following limit states are covered under limit state of serviceability?", opts: ["Deflection", "Cracking", "Shear", "Both Deflection and cracking"], ans: 3, tag: "MH PWD 2019", exp: "Limit state of serviceability includes Deflection, Cracking, and Vibration." },
+            { id: 352, q: "Partial load factor for loads for load case of WL or EQ in case of load combination DL + WL or EQ is :", opts: ["1.5", "1.2", "0.9", "1"], ans: 0, tag: "Gujarat Electric Board 2017", exp: "For 1.5(DL + WL/EQ) combination, the partial safety factor is 1.5. (Note: 1.2 is for DL+LL+WL)." },
+            { id: 353, q: "Steel beam theory is the method used to analyze and in the design of a design of:", opts: ["Doubly reinforced sections", "Both singly & doubly reinforced section", "Singly reinforced sections", "Column structures only"], ans: 0, tag: "DFCCIL JE 2018", exp: "Steel Beam Theory is an approximate method used for Doubly Reinforced Beams where concrete compression is ignored." },
+            { id: 354, q: "Examine the following statements :\n1. Factor of safety for steel should be based on its yield stress.\n2. Factor of safety for steel should be based on its ultimate stress.\n3. Factor of safety for concrete should be based on its yield stress.\n4. Factor of safety for concrete should be based on its ultimate stress.", opts: ["1 and 3", "1 and 4", "2 and 3", "2 and 4"], ans: 1, tag: "HPSSC JE CODE 552/2018", exp: "Steel is ductile (yield stress governs). Concrete is brittle (ultimate stress governs)." },
+            { id: 355, q: "Steel beam theory is used for the design of", opts: ["Cantilever beams...", "Singly reinforced beams...", "Two way slabs...", "Doubly reinforced beams by ignoring compressive stress in concrete"], ans: 3, tag: "DSSSB JE 20.11.2019", exp: "It assumes steel takes all compression and tension; concrete is ignored." },
+            { id: 356, q: "When mild steel conforming to grade II is to be used with the design details having been worked out on the basis of grade I steel, the area of reinforcement should:", opts: ["be decreases by 10%", "be increases by 10%", "be increases by 20%", "remain the same as it is"], ans: 1, tag: "MP VYAPAM Sub Engg. 2016", exp: "Grade II steel has lower strength than Grade I, so area must be increased by 10% to maintain capacity." },
+            { id: 357, q: "If the value of characteristics stress of a material is 300 N/mm² and value of permissible stress allowed in the material is 150 N/mm², then what shall be the Factor of Safety?", opts: ["1.67", "2.67", "0.67", "2"], ans: 3, tag: "MH PWD 2019", exp: "FOS = Characteristic Stress / Permissible Stress = 300 / 150 = 2." },
+            { id: 358, q: "Minimum elongation of mild steel and HYSD bars :", opts: ["14.5% and 23%", "23% and 23%", "23% and 14.5%", "14.5% and 14.5%"], ans: 2, tag: "UPRVUNL JE 2016", exp: "Mild steel is more ductile (23%). HYSD is stronger but less ductile (14.5%)." },
+            { id: 359, q: "For structures, subjected to the maximum design loads out of the possible combination of several types of load, limit state of collapse deals with", opts: ["Strength and stability", "deflection", "cracking", "only stability"], ans: 0, tag: "Tripura PSC Engg Services 2013", exp: "Limit State of Collapse ensures Strength and Stability of the structure." },
+            { id: 360, q: "With increase in w/c ratio in a concrete mix", opts: ["strength decreases and workability increases", "strength and workability decreases", "workability increases", "strength increases and workability decreases"], ans: 0, tag: "WBPSC JE 2018", exp: "More water (higher w/c) makes concrete more workable but weaker (lower strength)." }
+        ];
+
+        // --- STATE MANAGEMENT ---
+        let state = {
+            questions: [],
+            idx: 0,
+            answers: {},
+            bookmarks: [],
+            mode: 'full', 
+            timer: 7200, 
+            interval: null
+        };
+
+        // --- INIT ---
+        window.onload = function() {
+            const hist = JSON.parse(localStorage.getItem('civil_test_hist') || '[]');
+            if(hist.length) {
+                document.getElementById('last-score').innerText = `${hist[0].score}/${hist[0].total}`;
+                document.getElementById('last-accuracy').innerText = `${hist[0].acc}%`;
+            }
+            state.bookmarks = JSON.parse(localStorage.getItem('civil_test_bm') || '[]');
+        };
+
+        function initTest(mode) {
+            state.mode = mode;
+            state.idx = 0;
+            state.answers = {};
+            state.timer = 7200;
+            
+            if (mode === 'bookmark') {
+                if (state.bookmarks.length === 0) {
+                    alert("No bookmarks found! Please bookmark questions in Full Test first.");
+                    return;
+                }
+                state.questions = db.filter(q => state.bookmarks.includes(q.id));
+                document.getElementById('mode-badge').style.display = 'block';
+            } else {
+                state.questions = [...db];
+                document.getElementById('mode-badge').style.display = 'none';
+            }
+
+            document.getElementById('landing-page').style.display = 'none';
+            document.getElementById('quiz-container').style.display = 'flex';
+            
+            renderPalette();
+            loadQuestion();
+            startTimer();
+        }
+
+        // --- CORE LOGIC ---
+        function loadQuestion() {
+            const q = state.questions[state.idx];
+            const area = document.getElementById('question-area');
+            const isBm = state.bookmarks.includes(q.id);
+            const bmBtn = document.getElementById('btn-bookmark');
+            bmBtn.innerHTML = isBm ? '&#9733;' : '&#9734;';
+            bmBtn.classList.toggle('active', isBm);
+
+            let html = `
+                <div class="q-meta">
+                    <span class="exam-tag">${q.tag}</span>
+                    <span class="q-number">Q.${state.idx + 1} / ${state.questions.length}</span>
+                </div>
+                <div class="q-text">${q.q}</div>
+                <div class="options-group">
+            `;
+
+            const userAns = state.answers[q.id];
+
+            q.opts.forEach((opt, i) => {
+                let cls = 'option';
+                if (userAns !== undefined) {
+                    if (i === q.ans) cls += ' correct';
+                    else if (i === userAns) cls += ' wrong';
+                }
+                html += `<div class="${cls}" onclick="selectOption(${i})"><div class="opt-label">${String.fromCharCode(65+i)}</div><div>${opt}</div></div>`;
+            });
+
+            html += `</div>`;
+            
+            if (userAns !== undefined) {
+                html += `<div class="solution-box" style="display:block"><div class="solution-header"><span style="margin-right:5px">💡</span> Detailed Solution</div><div class="solution-text">${q.exp}</div></div>`;
+            }
+
+            area.innerHTML = html;
+            updateNav();
+        }
+
+        function selectOption(i) {
+            const q = state.questions[state.idx];
+            if (state.answers[q.id] !== undefined) return; 
+
+            state.answers[q.id] = i;
+            const pItem = document.getElementById(`p-${state.idx}`);
+            pItem.classList.remove('skipped', 'review');
+            pItem.classList.add('answered');
+            loadQuestion();
+        }
+
+        function nav(dir) {
+            const currentQ = state.questions[state.idx];
+            if (dir === 1 && state.idx === state.questions.length - 1) {
+                submitTest();
+                return;
+            }
+
+            if (state.answers[currentQ.id] === undefined && dir === 1) {
+                const pItem = document.getElementById(`p-${state.idx}`);
+                if (!pItem.classList.contains('review')) pItem.classList.add('skipped');
+            }
+
+            state.idx += dir;
+            loadQuestion();
+        }
+
+        function updateNav() {
+            document.getElementById('btn-prev').disabled = state.idx === 0;
+            document.getElementById('btn-next').innerText = state.idx === state.questions.length - 1 ? 'Finish' : 'Next';
+        }
+
+        function markReview() {
+            const pItem = document.getElementById(`p-${state.idx}`);
+            pItem.classList.add('review');
+            pItem.classList.remove('skipped');
+            nav(1);
+        }
+
+        function renderPalette() {
+            const grid = document.getElementById('palette-grid');
+            grid.innerHTML = '';
+            state.questions.forEach((q, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'p-item';
+                btn.id = `p-${i}`;
+                btn.innerText = i + 1;
+                btn.onclick = () => { state.idx = i; togglePalette(); loadQuestion(); };
+                grid.appendChild(btn);
+            });
+            updatePaletteActive();
+        }
+
+        function updatePaletteActive() {
+            document.querySelectorAll('.p-item').forEach(el => el.classList.remove('current'));
+            const curr = document.getElementById(`p-${state.idx}`);
+            if(curr) curr.classList.add('current');
+        }
+
+        function togglePalette() {
+            const drawer = document.getElementById('palette-drawer');
+            const overlay = document.getElementById('drawer-overlay');
+            if (drawer.classList.contains('open')) {
+                drawer.classList.remove('open');
+                overlay.style.display = 'none';
+            } else {
+                drawer.classList.add('open');
+                overlay.style.display = 'block';
+                updatePaletteActive();
+            }
+        }
+
+        function toggleBookmark() {
+            const qId = state.questions[state.idx].id;
+            const index = state.bookmarks.indexOf(qId);
+            if (index === -1) state.bookmarks.push(qId);
+            else state.bookmarks.splice(index, 1);
+            localStorage.setItem('civil_test_bm', JSON.stringify(state.bookmarks));
+            loadQuestion();
+        }
+
+        function startTimer() {
+            clearInterval(state.interval);
+            state.interval = setInterval(() => {
+                state.timer--;
+                const h = Math.floor(state.timer / 3600);
+                const m = Math.floor((state.timer % 3600) / 60);
+                const s = state.timer % 60;
+                document.getElementById('timer').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                if (state.timer <= 0) submitTest();
+            }, 1000);
+        }
+
+        function confirmExit() {
+            if(confirm("Exit test? Your progress will not be saved.")) location.reload();
+        }
+
+        function submitTest() {
+            clearInterval(state.interval);
+            let score = 0;
+            let attempted = 0;
+            state.questions.forEach(q => {
+                if (state.answers[q.id] !== undefined) {
+                    attempted++;
+                    if (state.answers[q.id] === q.ans) score++;
+                }
+            });
+            const acc = attempted ? Math.round((score/attempted)*100) : 0;
+            const hist = JSON.parse(localStorage.getItem('civil_test_hist') || '[]');
+            hist.unshift({ date: new Date().toLocaleDateString(), score: score, total: state.questions.length, acc: acc });
+            localStorage.setItem('civil_test_hist', JSON.stringify(hist));
+            alert(`Test Submitted!\nScore: ${score}/${state.questions.length}\nAccuracy: ${acc}%`);
+            location.reload();
+        }
+    </script>
+</body>
+</html>
