@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RCC Test Series (Q425-Q462)</title>
+    <style>
+        :root {
+            /* 1) PINK HEADER THEME */
+            --primary: #e91e63; 
+            --primary-dark: #c2185b;
+            --primary-light: #f8bbd0;
+            --header-text: #ffffff;
+            --success: #00c853;
+            --danger: #d50000;
+            --warning: #ffab00;
+            --light: #f5f5f5;
+            --dark: #212121;
+            --gray: #757575;
+            --text-body: #333;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            background-color: #f2f4f8;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            color: var(--text-body);
+        }
+
+        /* --- Header --- */
+        .header {
+            background: var(--primary);
+            color: var(--header-text);
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 50;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        
+        /* 13) Start/Menu Icon */
+        .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        /* 9) Direct Exit Button */
+        .exit-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.4);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+        }
+
+        /* 2) Timer */
+        .timer-badge {
+            background: white;
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1rem;
+            font-variant-numeric: tabular-nums;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* 14) Submit Icon */
+        .submit-btn {
+            background: #fff;
+            color: var(--success);
+            border: none;
+            padding: 6px 16px;
+            border-radius: 4px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* --- Main Content --- */
+        .main-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .question-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            padding-bottom: 80px; /* Space for footer */
+        }
+
+        /* 7) Exam Tags */
+        .exam-tag {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 10px;
+            border: 1px solid rgba(233, 30, 99, 0.2);
+        }
+
+        .q-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .q-number {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .q-text {
+            font-size: 1.15rem;
+            font-weight: 500;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            color: #212121;
+        }
+
+        /* Options */
+        .options-list { list-style: none; padding: 0; margin: 0; }
+
+        .option-item {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: flex-start;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .option-item:hover { background-color: #fafafa; border-color: #bdbdbd; }
+
+        /* 4) Color Coding logic applies here for feedback */
+        .option-item.correct {
+            background-color: #e8f5e9;
+            border-color: var(--success);
+        }
+        .option-item.wrong {
+            background-color: #ffebee;
+            border-color: var(--danger);
+        }
+        
+        .circle-icon {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #bdbdbd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #757575;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .option-item.correct .circle-icon {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+            content: "✓";
+        }
+
+        .option-item.wrong .circle-icon {
+            background: var(--danger);
+            border-color: var(--danger);
+            color: white;
+        }
+
+        /* 6) Solutions & Report Card (Instant) */
+        .solution-box {
+            margin-top: 20px;
+            background: #fff8e1;
+            border: 1px solid #ffecb3;
+            border-radius: 8px;
+            padding: 15px;
+            display: none; /* Hidden by default */
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .sol-title {
+            font-weight: 700;
+            color: #ff6f00;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* 3) Question Palette (Right Side) */
+        .palette-drawer {
+            position: fixed;
+            top: 0;
+            right: 0; /* Right side */
+            bottom: 0;
+            width: 280px;
+            background: white;
+            z-index: 1000;
+            transform: translateX(100%); /* Hidden */
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: -2px 0 8px rgba(0,0,0,0.15);
+        }
+
+        .palette-drawer.open { transform: translateX(0); }
+
+        .palette-header {
+            padding: 15px;
+            background: var(--primary);
+            color: white;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-palette { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+
+        .grid-container {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .grid-item {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%; /* Circular for modern look */
+            background: #e0e0e0; /* Gray (Skipped) */
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: #424242;
+            border: 2px solid transparent;
+        }
+
+        /* 4) Palette Color Coding */
+        .grid-item.answered { background: var(--success); color: white; border-color: var(--success); }
+        .grid-item.review { background: #7b1fa2; color: white; border-color: #7b1fa2; } /* Purple */
+        .grid-item.current { border-color: var(--primary); background: white; color: var(--primary); }
+        .grid-item.wrong { background: var(--danger); color: white; } /* Optional visual aid */
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 900;
+            display: none;
+            backdrop-filter: blur(2px);
+        }
+        .overlay.active { display: block; }
+
+        /* Footer */
+        .footer {
+            position: fixed;
+            bottom: 0; left: 0; width: 100%;
+            height: 60px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            z-index: 40;
+        }
+
+        .btn-nav {
+            padding: 8px 20px;
+            border-radius: 4px;
+            border: 1px solid #bdbdbd;
+            background: white;
+            color: #424242;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .btn-primary-nav {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        /* 11) Bookmark Button Style */
+        .btn-bookmark {
+            font-size: 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #bdbdbd;
+            transition: color 0.2s;
+        }
+        .btn-bookmark.active { color: #ffab00; } /* Gold */
+
+        /* --- Start Screen & History --- */
+        #start-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #f5f7fa;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 50px;
+            overflow-y: auto;
+        }
+
+        .start-card {
+            background: white;
+            width: 90%;
+            max-width: 400px;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .start-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(233, 30, 99, 0.3);
+            transition: transform 0.1s;
+        }
+        .start-btn:active { transform: scale(0.98); }
+
+        /* 11) Bookmark Test Icon below start */
+        .bm-test-btn {
+            margin-top: 15px;
+            background: white;
+            border: 2px solid #ffab00;
+            color: #ff8f00;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        /* 8) History List (Series Wise) */
+        .history-section {
+            width: 90%;
+            max-width: 400px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 40px;
+        }
+        
+        .history-header {
+            background: #eeeeee;
+            padding: 12px 20px;
+            font-weight: 700;
+            color: #424242;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .history-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f5f5f5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .history-item:last-child { border-bottom: none; }
+
+        .score-badge {
+            background: var(--success);
+            color: white;
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="start-screen">
+        <div class="start-card">
+            <h1 style="color:var(--primary); margin:0 0 10px 0;">RCC Test Series</h1>
+            <p style="color:#757575; margin-bottom:20px;">Questions 425 - 462</p>
+            
+            <button class="start-btn" onclick="startTest()">Start Test</button>
+            
+            <button class="bm-test-btn" onclick="startBookmarkTest()">
+                <span>★</span> Practice Bookmarks (<span id="bm-count">0</span>)
+            </button>
+        </div>
+
+        <div class="history-section">
+            <div class="history-header">Attempt History</div>
+            <div id="history-list">
+                <div style="padding:20px; text-align:center; color:#999;">No attempts yet</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="closePalette()"></div>
+
+    <div class="header">
+        <div class="header-left">
+            <button class="menu-btn" onclick="openPalette()">☰</button>
+            <button class="exit-btn" onclick="exitTest()">✕ Exit</button>
+        </div>
+        
+        <div class="timer-badge" id="timer">02:00:00</div>
+        
+        <button class="submit-btn" onclick="submitTest()">Submit</button>
+    </div>
+
+    <div class="main-container">
+        <div class="question-area" id="question-area">
+            </div>
+
+        <div class="palette-drawer" id="palette-drawer">
+            <div class="palette-header">
+                <span>Question Palette</span>
+                <button class="close-palette" onclick="closePalette()">×</button>
+            </div>
+            <div class="grid-container" id="grid-container">
+                </div>
+            <div style="padding:15px; background:#f5f5f5; font-size:0.75rem; border-top:1px solid #ddd;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <span><span style="color:var(--success)">●</span> Answered</span>
+                    <span><span style="color:var(--primary)">●</span> Current</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span><span style="color:#7b1fa2">●</span> Review</span>
+                    <span><span style="color:#bdbdbd">●</span> Skipped</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div style="display:flex; gap:15px; align-items:center;">
+            <button class="btn-nav" onclick="markReview()">Review</button>
+            <button class="btn-bookmark" id="btn-bookmark" onclick="toggleBookmark()">★</button>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-nav" onclick="prevQ()">Prev</button>
+            <button class="btn-nav btn-primary-nav" onclick="nextQ()">Next</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 16) DATA: Questions 425 to 462 ---
+        const questionsDB = [
+            { id: 425, text: "In the case of working stress method of design, the design load is :", options: ["The characteristic load", "The characteristic load with appropriate partial safety factors", "The characteristic load with appropriate factor of safety", "The greatest of (b) and (c) above"], correct: 2, tags: "Haryana PSC AE 2020", solution: "In WSM, the design load is the characteristic load (working load) considered with appropriate factor of safety (often implied as 1 for load, but material FOS is higher)." },
+            { id: 426, text: "In singly reinforced beams, steel Main reinforcement are provided in :", options: ["Tensile zone", "Compression zone", "Neutral zone", "Shear zone"], correct: 0, tags: "Karnataka PSC JE", solution: "Concrete is weak in tension, so steel main reinforcement is provided in the tensile zone." },
+            { id: 427, text: "If residual strength is 40 kg/cm² and edge load stress is 20 kg/cm², what would be the factor of safety?", options: ["2", "1", "0.5", "0.05"], correct: 0, tags: "HPSSC JE 2018", solution: "Factor of Safety = Ultimate Load / Working Load (or Strength/Stress) = 40 / 20 = 2." },
+            { id: 428, text: "If in a concrete beam the modular ratio is m, ratio of stress in steel to concrete is r, overall depth of beam is d, then the depth of critical N.A. of beam is", options: ["m/(m+r) * d", "m/(m-r) * d", "(m+r)/m * d", "None of these"], correct: 0, tags: "SSC JE 2018", solution: "Critical NA depth xc = (m * sigma_cbc / (m * sigma_cbc + sigma_st)) * d. Since r = sigma_st/sigma_cbc, xc = (m / (m + r)) * d." },
+            { id: 429, text: "In a doubly reinforced rectangular beam the stress in compression steel is", options: ["same as that in tension steel", "less than stress in tension steel", "more than stress in tension steel", "same as stress in concrete"], correct: 1, tags: "KMC 2009", solution: "Stress in compression steel is 1.5 * m * c. It is generally less than the high permissible tensile stress in tension steel." },
+            { id: 430, text: "The yield stress divided by the factor of safety is called _______ .", options: ["Limit stress", "Elastic stress", "Permissible stress", "Ultimate stress"], correct: 2, tags: "UKSSSC JE 2020", solution: "Permissible (Working) Stress = Yield Stress / Factor of Safety." },
+            { id: 431, text: "For which of the following deformations are RCC deep beams primarily designed?", options: ["Bearing", "Shear and bending", "Bending", "Shear"], correct: 1, tags: "DDA 2018", solution: "Deep beams are primarily designed for shear and bending moment." },
+            { id: 432, text: "What is the objective of providing minimum tension steel in reinforced cement concrete beam?", options: ["Preventing surface hair cracking", "Restrict deflections", "Arrest excessive deflection", "Preventing brittle failure"], correct: 3, tags: "DDA 2018", solution: "Minimum tension steel is provided to prevent sudden brittle failure by ensuring the concrete cracks before the steel yields." },
+            { id: 433, text: "In an unsymmetrical beam under bending, the maximum compressive stress at top is 1200 MPa and the maximum tensile stress at bottom is 300 MPa. If the beam is 80 mm deep, the neutral axis from the top surface will be", options: ["60mm", "64mm", "40mm", "32mm"], correct: 1, tags: "ISRO TA 2016", solution: "Using similar triangles: x / (80-x) = 1200 / 300 = 4. x = 4(80-x) => 5x = 320 => x = 64 mm." },
+            { id: 434, text: "A singly reinforced concrete beam of 25 cm width and 70 cm effective depth is provided with 18.75 cm² steel. If the modular ratio (m) is 15, the depth of the neutral axis is", options: ["20 cm", "25 cm", "30 cm", "35 cm"], correct: 2, tags: "SSC JE 2018", solution: "b*x²/2 = m*Ast*(d-x) => 25*x²/2 = 15*18.75*(70-x). Solving this quadratic equation gives x = 30 cm." },
+            { id: 435, text: "If the neutral axis of a T-beam is below the slab, the relationship between the flange width B, depth of neutral axis n, thickness of the slab ds, effective depth d, gross area of tensile steel Ast and modular ratio m may be stated as", options: ["Bd(n-ds/2) = mAst(d+n)", "Bds(n+ds/2) = mAst(d-n)", "Bds(n-ds/2) = mAst(d-n)", "None of these"], correct: 2, tags: "SSC JE 2018", solution: "Moment of area of compression zone about NA = Moment of area of tension zone. Compression area approx B*ds acting at (n - ds/2). Equation: B*ds*(n - ds/2) = m*Ast*(d-n)." },
+            { id: 436, text: "The moment of resistance of an over-reinforced section is determined on the basis of", options: ["Tensile force developed in steel", "Compressive force developed in concrete", "Shear developed in steel", "Tension and compression developed in steel"], correct: 1, tags: "BMRCL JE 2018", solution: "In over-reinforced sections, concrete fails first. MOR is calculated based on the compressive strength of concrete." },
+            { id: 437, text: "The stress at neutral axis is", options: ["Zero", "Maximum tensile", "Minimum compressive", "Minimum tensile"], correct: 0, tags: "PUDA 2013", solution: "At the neutral axis, bending stress is zero." },
+            { id: 438, text: "For the design of one way slab, main steel reinforcement Ast is obtained by:", options: ["M / (sigma_st * j * d)", "M*j*d / sigma_st", "M / (sigma_st * j * d)", "sigma_st * j * d / M"], correct: 0, tags: "KERALA PSC", solution: "Ast = M / (sigma_st * j * d)." },
+            { id: 439, text: "If 'K' is the neutral axis constant for a singly reinforced member, the lever arm constant is given by", options: ["1 - K/3", "1 + K/3", "1 - K/6", "1 + K/6"], correct: 0, tags: "APPSC AEE 2011", solution: "Lever arm = d - x/3 = d - (k*d)/3 = d(1 - k/3). Constant j = 1 - k/3." },
+            { id: 440, text: "In working stress method the value of k for balanced section shall depends on", options: ["Value of sigma_st only", "Value of sigma_st and sigma_cbc both", "Value of sigma_cbc only", "Ratio of sigma_st/sigma_cbc only"], correct: 1, tags: "Nagaland PSC 2017", solution: "k = m*sigma_cbc / (m*sigma_cbc + sigma_st). It depends on permissible stresses in both materials." },
+            { id: 441, text: "If the depth of neutral axis is same as depth of critical neutral axis, then the beam is called", options: ["Over reinforced beam", "Under reinforced beam", "Balanced beam", "Short beam"], correct: 2, tags: "Nagaland PSC 2017", solution: "When Actual NA = Critical NA, it is a Balanced Section." },
+            { id: 442, text: "In an under reinforced section", options: ["Concrete is fully stressed", "Steel is fully stressed", "Both concrete & Steel are fully stressed", "None of these"], correct: 1, tags: "UPSSSC JE 2016", solution: "In under reinforced sections, steel reaches its permissible stress (fully stressed) before concrete." },
+            { id: 443, text: "Effective moment of inertia for short term deflection of a reinforced concrete section does not depend on", options: ["the maximum moment under service load", "depth of neutral axis", "breadth of compression face", "ultimate shrinkage strain of concrete"], correct: 3, tags: "Gujarat PSC AE 2020", solution: "Short term deflection depends on loads and geometry. Shrinkage strain affects long term deflection." },
+            { id: 444, text: "Compression failure of simply supported beam occurs in:", options: ["Balanced section", "Over reinforced section", "Under reinforced section", "None of above"], correct: 1, tags: "KPSC JTO", solution: "Compression failure (brittle failure of concrete) occurs in Over Reinforced sections." },
+            { id: 445, text: "The permissible stress to which a structural member can be subjected to is known as", options: ["Bearing stress", "Tensile stress", "Working stress", "Compressive stress"], correct: 2, tags: "Mizoram PSC JE 2016", solution: "Permissible stress is also known as Working stress." },
+            { id: 446, text: "In uncracked reinforced concrete columns, the actual bending compressive stress is obtained as", options: ["M/bjd²", "P/A", "M/Z", "M/P"], correct: 2, tags: "Standard", solution: "Bending stress = M/Z (Moment / Section Modulus)." },
+            { id: 447, text: "The moment of resistance of a RCC balanced section is given by :", options: ["1/3 * sigma_cbc * b * n * (d - n/2)", "1/2 * sigma_cbc * b * n * (d - n/3)", "1/3 * sigma_cbc * b * n * (d - n/3)", "1/2 * sigma_cbc * b * n * (d - n/2)"], correct: 1, tags: "GPHC JE 2018", solution: "MOR = Compressive Force * Lever Arm = (0.5 * sigma_cbc * b * n) * (d - n/3)." },
+            { id: 448, text: "Partial safety for concrete and steel are 1.5 and 1.15 respectively, because", options: ["concrete is heterogeneous while steel is homogeneous", "the control on the quality of concrete is not as good as that of steel", "concrete is weak in tension", "voids in concrete are 0.5%"], correct: 1, tags: "Odisha SSC JE 2014", solution: "Higher safety factor for concrete (1.5) is due to higher variability in quality control compared to factory-made steel (1.15)." },
+            { id: 449, text: "The yield strength of HYSD and CTD bars", options: ["250 MPa", "415 MPa", "450 MPa", "500 MPa"], correct: 1, tags: "Karnataka PSC JE 2016", solution: "HYSD (Fe415) yield strength is 415 N/mm². (Note: Fe500 is also HYSD/TMT, but 415 is the standard answer for HYSD in older contexts)." },
+            { id: 450, text: "The maximum stress to which any member is designed is much less than the ultimate stress. This stress is called as:", options: ["Limit stress", "Working stress", "Nominal stress", "True stress"], correct: 1, tags: "LMRC AM 2018", solution: "Working stress is derived by dividing ultimate stress by factor of safety." },
+            { id: 451, text: "In a singly reinforced beam, if stress in concrete reaches its permissible value later than the steel reaches its permissible value, the beam section is said to be", options: ["under reinforced", "balanced", "over reinforced", "critically balanced"], correct: 0, tags: "HPSSSC JE", solution: "Steel yields first = Under reinforced." },
+            { id: 452, text: "The section of reinforced beam where most distance concrete fibre in compression and tension in steel attains permissible stresses simultaneously, is called", options: ["Balanced section", "Critical section", "Economical section", "All of these"], correct: 3, tags: "Mizoram PSC JE 2016", solution: "When both reach permissible limit simultaneously, it is a Balanced/Critical/Economical section." },
+            { id: 453, text: "For M 15 grade concrete (1 : 2 : 4) the moment of resistance factor is ...........", options: ["0.87", "8.5", "7.5", "5.8"], correct: 0, tags: "SSC JE 2017", solution: "For M15 in WSM, Q factor is approx 0.87 (Q = 0.5 * sigma_cbc * k * j)." },
+            { id: 454, text: "The bar carrying positive bending moment is bent up to resist negative bending moment is shown in which of the following figures?", options: ["Figure 1", "Figure 2 (Cranked)", "Figure 3", "None"], correct: 1, tags: "SSC JE 2018", solution: "Cranked bars (Figure 2 in standard diagrams) are bent up near supports to resist negative moment and shear." },
+            { id: 455, text: "According to the steel beam theory of doubly reinforced beams", options: ["tension is resisted by tension steel", "compression is resisted by compression steel", "stress in tension steel equals stress in compression steel", "All option are correct (Concrete neglected)"], correct: 3, tags: "SSC JE 2018", solution: "Steel beam theory assumes concrete takes no stress; tension steel takes tension and compression steel takes compression." },
+            { id: 456, text: "If the maximum bending moment of a simply supported slab is M Kg.cm the effective depth of the slab is : (it is given that Q is M.R. factor)", options: ["M / (100Q)", "sqrt(M / (100Q))", "sqrt(M / Q)", "None of these"], correct: 1, tags: "SSC JE 2018", solution: "M = Q * b * d². For slab, take b = 100 cm (1 meter width). d = sqrt(M / (100*Q))." },
+            { id: 457, text: "The stresses developed in concrete and steel in reinforced concrete beam 25 cm width and 70 cm effective depth are 62.5 kg/cm² and 250 kg/cm² respectively. If m = 15, the depth of its neutral axis is", options: ["20 cm", "25 cm", "30 cm", "55.26 cm (Note: Options in paper incorrect)"], correct: 3, tags: "SSC JE 2018", solution: "x = [m*c / (m*c + t)] * d = [15*62.5 / (15*62.5 + 250)] * 70 = 55.26 cm. The options (20,25,30,35) were incorrect in original paper." },
+            { id: 458, text: "In a singly reinforced beam", options: ["compression is borne entirely by concrete", "steel possesses initial stresses when embeded in concrete", "plane sections transverse to the center line... remain plane", "None of these"], correct: 0, tags: "SSC JE 2018", solution: "In WSM/LSM for singly reinforced, compression is borne entirely by concrete (tension by steel). Also plane sections remain plane is an assumption." },
+            { id: 459, text: "If the depth of actual neutral axis of a reinforced beam is greater than the depth of critical neutral axis, the concrete attains its maximum stress earlier", options: ["Over reinforced", "Under reinforced", "Balanced", "None"], correct: 0, tags: "SSC JE 2018", solution: "Xa > Xc implies Over Reinforced Section." },
+            { id: 460, text: "The moment of the couple set up in a section of a beam by the longitudinal compressive and tensile force is known as", options: ["bending moment", "moment of resistance", "flexural stress moment", "None of these"], correct: 1, tags: "SSC JE 2018", solution: "The internal couple resisting the external bending moment is the Moment of Resistance." },
+            { id: 461, text: "As per IS 456:2000 assumptions, the standard deviation (N/mm) value for M20 grade of concrete is", options: ["3.5", "4", "5", "5"], correct: 1, tags: "MH PWD 2019", solution: "For M20 and M25, Standard Deviation is 4.0 N/mm²." },
+            { id: 462, text: "In the working stress method, the modular ratio, m has a value of 280/(3 × Permissible compressive stress). This expression for m", options: ["partially takes into accounts of long term effects such as creep", "fully takes into accounts of long term effects such as creep", "Does not takes into accounts of long term effects such as creep", "None"], correct: 0, tags: "CGPSC SES 2014", solution: "The code formula 280/3cbc partially accounts for long term effects like creep." }
+        ];
+
+        // --- STATE ---
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let answers = []; // null or index
+        let markedReview = []; // booleans
+        let bookmarks = new Set();
+        let timer = 2 * 3600; // 2 hours
+        let timerInterval;
+
+        // --- INIT ---
+        window.onload = function() {
+            renderHistory();
+            updateBookmarkCount();
+        };
+
+        function startTest() {
+            currentQuestions = [...questionsDB];
+            initSession();
+        }
+
+        function startBookmarkTest() {
+            const saved = JSON.parse(localStorage.getItem('rcc_bookmarks_425') || '[]');
+            if(saved.length === 0) {
+                alert("No bookmarks found!");
+                return;
+            }
+            // Filter DB
+            currentQuestions = questionsDB.filter(q => saved.includes(q.id));
+            initSession();
+        }
+
+        function initSession() {
+            document.getElementById('start-screen').style.display = 'none';
+            answers = new Array(currentQuestions.length).fill(null);
+            markedReview = new Array(currentQuestions.length).fill(false);
+            currentIndex = 0;
+            
+            // Timer
+            clearInterval(timerInterval);
+            timer = 2 * 3600;
+            timerInterval = setInterval(updateTimer, 1000);
+            
+            renderGrid();
+            loadQuestion(0);
+        }
+
+        // --- RENDER ---
+        function loadQuestion(index) {
+            currentIndex = index;
+            const q = currentQuestions[index];
+            const area = document.getElementById('question-area');
+            
+            const isAnswered = answers[index] !== null;
+            const selectedOpt = answers[index];
+            
+            // Highlight Bookmark
+            const isBm = isBookmarked(q.id);
+            const bmBtn = document.getElementById('btn-bookmark');
+            bmBtn.classList.toggle('active', isBm);
+
+            // Options HTML
+            let optionsHTML = '';
+            q.options.forEach((opt, i) => {
+                let classes = 'option-item';
+                if(isAnswered) {
+                    if(i === q.correct) classes += ' correct';
+                    else if(i === selectedOpt) classes += ' wrong';
+                }
+                
+                optionsHTML += `
+                    <li class="${classes}" onclick="selectAnswer(${i})">
+                        <div class="circle-icon">${['A','B','C','D'][i]}</div>
+                        <div>${opt}</div>
+                    </li>
+                `;
+            });
+
+            area.innerHTML = `
+                <div class="q-header">
+                    <span class="q-number">Q${index+1}.</span>
+                    <span class="exam-tag">${q.tags}</span>
+                </div>
+                <div class="q-text">${q.text}</div>
+                <ul class="options-list">${optionsHTML}</ul>
+                
+                <div class="solution-box" style="display:${isAnswered ? 'block' : 'none'}">
+                    <div class="sol-title">💡 Detailed Solution</div>
+                    <div>${q.solution}</div>
+                </div>
+            `;
+
+            updateGridStatus();
+        }
+
+        // --- LOGIC ---
+        function selectAnswer(optIndex) {
+            if(answers[currentIndex] !== null) return; // Locked
+            
+            answers[currentIndex] = optIndex;
+            
+            // Re-render for immediate feedback
+            loadQuestion(currentIndex);
+            
+            // Auto-close palette if open
+            if(document.getElementById('palette-drawer').classList.contains('open')) {
+                closePalette();
+            }
+        }
+
+        function prevQ() {
+            if(currentIndex > 0) loadQuestion(currentIndex - 1);
+        }
+
+        function nextQ() {
+            if(currentIndex < currentQuestions.length - 1) loadQuestion(currentIndex + 1);
+        }
+
+        function markReview() {
+            markedReview[currentIndex] = !markedReview[currentIndex];
+            updateGridStatus();
+        }
+
+        // --- PALETTE ---
+        function openPalette() {
+            document.getElementById('palette-drawer').classList.add('open');
+            document.getElementById('overlay').classList.add('active');
+        }
+
+        function closePalette() {
+            document.getElementById('palette-drawer').classList.remove('open');
+            document.getElementById('overlay').classList.remove('active');
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('grid-container');
+            grid.innerHTML = currentQuestions.map((_, i) => 
+                `<div class="grid-item" id="grid-${i}" onclick="jumpTo(${i})">${i+1}</div>`
+            ).join('');
+        }
+
+        function updateGridStatus() {
+            currentQuestions.forEach((_, i) => {
+                const item = document.getElementById(`grid-${i}`);
+                item.className = 'grid-item'; // reset
+                
+                if(i === currentIndex) item.classList.add('current');
+                else if(answers[i] !== null) item.classList.add('answered');
+                else if(markedReview[i]) item.classList.add('review');
+            });
+        }
+
+        function jumpTo(i) {
+            loadQuestion(i);
+            closePalette();
+        }
+
+        // --- BOOKMARKS ---
+        function isBookmarked(id) {
+            const saved = JSON.parse(localStorage.getItem('rcc_bookmarks_425') || '[]');
+            return saved.includes(id);
+        }
+
+        function toggleBookmark() {
+            const qId = currentQuestions[currentIndex].id;
+            let saved = JSON.parse(localStorage.getItem('rcc_bookmarks_425') || '[]');
+            
+            if(saved.includes(qId)) {
+                saved = saved.filter(id => id !== qId);
+            } else {
+                saved.push(qId);
+            }
+            
+            localStorage.setItem('rcc_bookmarks_425', JSON.stringify(saved));
+            loadQuestion(currentIndex);
+            updateBookmarkCount();
+        }
+
+        function updateBookmarkCount() {
+            const saved = JSON.parse(localStorage.getItem('rcc_bookmarks_425') || '[]');
+            document.getElementById('bm-count').innerText = saved.length;
+        }
+
+        // --- SUBMIT & HISTORY ---
+        function submitTest() {
+            clearInterval(timerInterval);
+            
+            let score = 0;
+            let answered = 0;
+            answers.forEach((ans, i) => {
+                if(ans !== null) {
+                    answered++;
+                    if(ans === currentQuestions[i].correct) score++;
+                }
+            });
+
+            const accuracy = answered === 0 ? 0 : Math.round((score / answered) * 100);
+            const total = currentQuestions.length;
+            
+            // Save History
+            const history = JSON.parse(localStorage.getItem('rcc_history_425') || '[]');
+            const attempt = {
+                date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                score: score,
+                total: total,
+                accuracy: accuracy
+            };
+            history.push(attempt);
+            localStorage.setItem('rcc_history_425', JSON.stringify(history));
+            
+            alert(`Test Submitted!\nScore: ${score}/${total}\nAccuracy: ${accuracy}%`);
+            location.reload();
+        }
+
+        function renderHistory() {
+            const history = JSON.parse(localStorage.getItem('rcc_history_425') || '[]');
+            const container = document.getElementById('history-list');
+            
+            if(history.length === 0) {
+                container.innerHTML = '<div style="padding:20px; text-align:center; color:#999;">No attempts yet</div>';
+                return;
+            }
+
+            container.innerHTML = history.slice().reverse().map((h, i) => `
+                <div class="history-item">
+                    <div>
+                        <div style="font-weight:600;">Attempt ${history.length - i}</div>
+                        <div style="font-size:0.75rem; color:#999;">${h.date}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="score-badge">Score: ${h.score}/${h.total}</div>
+                        <div style="font-size:0.75rem; margin-top:3px;">Acc: ${h.accuracy}%</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function exitTest() {
+            if(confirm("Exit test? Progress will be lost.")) location.reload();
+        }
+
+        function updateTimer() {
+            timer--;
+            const h = Math.floor(timer / 3600).toString().padStart(2, '0');
+            const m = Math.floor((timer % 3600) / 60).toString().padStart(2, '0');
+            const s = (timer % 60).toString().padStart(2, '0');
+            document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+            
+            if(timer <= 0) submitTest();
+        }
+
+    </script>
+</body>
+</html>
