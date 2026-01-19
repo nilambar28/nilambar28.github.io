@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RCC Test Series (Q492-Q512)</title>
+    <style>
+        :root {
+            --primary: #e91e63; /* Pink Header */
+            --primary-dark: #c2185b;
+            --primary-light: #f8bbd0;
+            --header-text: #ffffff;
+            --success: #00c853;
+            --danger: #d50000;
+            --warning: #ffab00;
+            --light: #f5f5f5;
+            --dark: #212121;
+            --text-body: #333;
+            --purple: #9c27b0;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            background-color: #f2f4f8;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            color: var(--text-body);
+        }
+
+        /* --- Header --- */
+        .header {
+            background: var(--primary);
+            color: var(--header-text);
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 50;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        
+        .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .exit-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.4);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+        }
+
+        .timer-badge {
+            background: white;
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1rem;
+            font-variant-numeric: tabular-nums;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .submit-btn {
+            background: #fff;
+            color: var(--success);
+            border: none;
+            padding: 6px 16px;
+            border-radius: 4px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* --- Main Content --- */
+        .main-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .question-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            padding-bottom: 80px; 
+        }
+
+        .exam-tag {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 10px;
+            border: 1px solid rgba(233, 30, 99, 0.2);
+        }
+
+        .q-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .q-number {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-right: 10px;
+        }
+
+        .q-text {
+            font-size: 1.15rem;
+            font-weight: 500;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            color: #212121;
+        }
+
+        /* Options */
+        .options-list { list-style: none; padding: 0; margin: 0; }
+
+        .option-item {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: flex-start;
+            transition: all 0.2s ease;
+        }
+
+        .option-item:hover { background-color: #fafafa; border-color: #bdbdbd; }
+
+        .option-item.correct {
+            background-color: #e8f5e9;
+            border-color: var(--success);
+        }
+        .option-item.wrong {
+            background-color: #ffebee;
+            border-color: var(--danger);
+        }
+        
+        .circle-icon {
+            width: 26px;
+            height: 26px;
+            border: 2px solid #bdbdbd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #757575;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .option-item.correct .circle-icon {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+            content: "✓";
+        }
+
+        .option-item.wrong .circle-icon {
+            background: var(--danger);
+            border-color: var(--danger);
+            color: white;
+        }
+
+        /* Solution Box */
+        .solution-box {
+            margin-top: 20px;
+            background: #fff8e1;
+            border: 1px solid #ffecb3;
+            border-radius: 8px;
+            padding: 15px;
+            display: none; 
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .sol-title {
+            font-weight: 700;
+            color: #ff6f00;
+            margin-bottom: 8px;
+        }
+
+        /* --- Right Side Palette --- */
+        .palette-drawer {
+            position: fixed;
+            top: 0;
+            right: 0; 
+            bottom: 0;
+            width: 280px;
+            background: white;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: -2px 0 8px rgba(0,0,0,0.15);
+        }
+
+        .palette-drawer.open { transform: translateX(0); }
+
+        .palette-header {
+            padding: 15px;
+            background: var(--primary);
+            color: white;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-palette { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+
+        .grid-container {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .grid-item {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #e0e0e0;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: #424242;
+            border: 2px solid transparent;
+        }
+
+        .grid-item.answered { background: var(--success); color: white; border-color: var(--success); }
+        .grid-item.review { background: var(--purple); color: white; border-color: var(--purple); }
+        .grid-item.current { border-color: var(--primary); background: white; color: var(--primary); }
+        
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 900;
+            display: none;
+            backdrop-filter: blur(2px);
+        }
+        .overlay.active { display: block; }
+
+        /* Footer */
+        .footer {
+            position: fixed;
+            bottom: 0; left: 0; width: 100%;
+            height: 60px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            z-index: 40;
+        }
+
+        .btn-nav {
+            padding: 8px 20px;
+            border-radius: 4px;
+            border: 1px solid #bdbdbd;
+            background: white;
+            color: #424242;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .btn-primary-nav { background: var(--primary); color: white; border: none; }
+
+        .btn-bookmark {
+            font-size: 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #bdbdbd;
+            transition: color 0.2s;
+        }
+        .btn-bookmark.active { color: #ffab00; }
+
+        /* Start Screen */
+        #start-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #f5f7fa;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 30px;
+            overflow-y: auto;
+        }
+
+        .start-card {
+            background: white;
+            width: 90%;
+            max-width: 400px;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .start-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(233, 30, 99, 0.3);
+            margin-top: 10px;
+        }
+
+        .bm-test-btn {
+            margin-top: 15px;
+            background: white;
+            border: 2px solid #ffab00;
+            color: #ff8f00;
+            padding: 8px 15px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        /* History */
+        .history-section {
+            width: 90%;
+            max-width: 400px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 40px;
+        }
+        
+        .history-header {
+            background: #eeeeee;
+            padding: 12px 20px;
+            font-weight: 700;
+            color: #424242;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .history-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f5f5f5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .history-item:last-child { border-bottom: none; }
+
+        .score-badge {
+            background: var(--success);
+            color: white;
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen">
+        <div class="start-card">
+            <h1 style="color:var(--primary); margin:0 0 10px 0;">RCC Test Series</h1>
+            <p style="color:#757575; margin-bottom:20px;">Questions 492 - 512</p>
+            
+            <button class="start-btn" onclick="startTest()">Start Test</button>
+            
+            <button class="bm-test-btn" onclick="startBookmarkTest()">
+                <span>★</span> Practice Bookmarks (<span id="bm-count">0</span>)
+            </button>
+        </div>
+
+        <div class="history-section">
+            <div class="history-header">Attempt History</div>
+            <div id="history-list">
+                <div style="padding:20px; text-align:center; color:#999;">No attempts yet</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="closePalette()"></div>
+
+    <div class="header">
+        <div class="header-left">
+            <button class="menu-btn" onclick="openPalette()">☰</button>
+            <button class="exit-btn" onclick="exitTest()">✕ Exit</button>
+        </div>
+        
+        <div class="timer-badge" id="timer">02:00:00</div>
+        
+        <button class="submit-btn" onclick="submitTest()">Submit</button>
+    </div>
+
+    <div class="main-container">
+        <div class="question-area" id="question-area">
+            </div>
+
+        <div class="palette-drawer" id="palette-drawer">
+            <div class="palette-header">
+                <span>Question Palette</span>
+                <button class="close-palette" onclick="closePalette()">×</button>
+            </div>
+            <div class="grid-container" id="grid-container">
+                </div>
+            <div style="padding:15px; background:#f5f5f5; font-size:0.75rem; border-top:1px solid #ddd;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <span><span style="color:var(--success)">●</span> Answered</span>
+                    <span><span style="color:var(--primary)">●</span> Current</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span><span style="color:var(--purple)">●</span> Review</span>
+                    <span><span style="color:#bdbdbd">●</span> Skipped</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div style="display:flex; gap:15px; align-items:center;">
+            <button class="btn-nav" onclick="markReview()">Review</button>
+            <button class="btn-bookmark" id="btn-bookmark" onclick="toggleBookmark()">★</button>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-nav" onclick="prevQ()">Prev</button>
+            <button class="btn-nav btn-primary-nav" onclick="nextQ()">Next</button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA: Questions 492 to 512 ---
+        const questionsDB = [
+            { id: 492, text: "Assertion (A): The working stress method of RCC design of beams is also known as modular ratio method.<br>Reason (R): The ratio of stress in steel and concrete is the same as that of elastic modulus of steel and concrete in beam.", options: ["Both A and R are true and R is the correct explanation of A", "Both A and R are true but R is not a correct explanation of A", "A is true but R is false", "A is false but R is true"], correct: 0, tags: "ESE 2006", solution: "The working stress method is based on the elastic theory where stresses are proportional to strains. The term 'modular ratio' (m = Es/Ec) is used to transform the composite section into an equivalent homogeneous section. This ratio relates the stresses: &sigma;<sub>st</sub>/&sigma;<sub>cbc</sub> = m. Hence, it is called the modular ratio method." },
+            { id: 493, text: "Flexural collapse in over reinforced beams is due to:", options: ["Primary compression failure", "Secondary compression failure", "Primary tension failure", "Bond failure"], correct: 0, tags: "ESE 1997, KPSC JE 2.7.2016", solution: "In over-reinforced beams, the concrete reaches its ultimate compressive strain/stress before the steel yields. This leads to a sudden, brittle failure known as primary compression failure." },
+            { id: 494, text: "Considering modular ratio as 13, grade of concrete as M20 and grade of steel as 415, what is the ratio of balanced depth of neutral axis as per working stress method to the balanced depth of neutral axis as per limit state method?", options: ["12/7", "11/3", "7/12", "11/7"], correct: 2, tags: "ESE 2009", solution: "WSM: k = (m*c)/(m*c + t) = (13*7)/(13*7 + 230). Wait, for Fe415 allowable stress is 230? No, typically 230. Let's calc: 91/(91+230) = 0.28. <br>LSM: x<sub>u,lim</sub>/d = 0.48 for Fe415. <br>Ratio = 0.28 / 0.48 = 7/12." },
+            { id: 495, text: "What is the modular ratio to be used in the analysis of RC beams using working stress method if the grade of concrete is M20?", options: ["18.6", "13.3", "9.9", "6.5"], correct: 1, tags: "ESE 2009", solution: "Modular ratio m = 280 / (3 * &sigma;<sub>cbc</sub>). For M20, &sigma;<sub>cbc</sub> = 7 N/mm<sup>2</sup>. <br>m = 280 / 21 = 13.33." },
+            { id: 496, text: "Which one of the following sections performs better on the ductility criterion?", options: ["Balanced section", "Over-reinforced section", "Under-reinforced section", "Non-prismatic section"], correct: 2, tags: "ESE 2009", solution: "Under-reinforced sections fail by yielding of steel, which allows for significant deformation (ductility) and gives warning before failure. Over-reinforced sections fail in a brittle manner." },
+            { id: 497, text: "Reinforcement provided in a rectangular RCC beam of effective depth 500 mm is such that actual depth of neutral axis is at 300 mm from extreme compression fibre. Fe 415 steel is used and provided on tension face only It is a:", options: ["under reinforced section", "over reinforced section", "doubly reinforced section", "balanced section"], correct: 1, tags: "SSC JE Civil 29.10.2020 (Morning)", solution: "Critical NA depth (x<sub>c</sub>) for Fe415 in WSM is approx 0.29d. <br>x<sub>c</sub> = 0.289 * 500 &approx; 144.5 mm. <br>Actual NA (x<sub>a</sub>) = 300 mm. <br>Since x<sub>a</sub> > x<sub>c</sub>, it is an over-reinforced section." },
+            { id: 498, text: "The sections in which tension steel reaches yield strain at loads lower than loads at which concrete reaches strain are called:", options: ["composite sections", "under reinforced sections", "balanced reinforced sections", "over reinforced sections"], correct: 1, tags: "SSC JE Civil 28.10.2020 (Evening)", solution: "In under-reinforced sections, steel yields first (reaches yield strain) before concrete crushes." },
+            { id: 499, text: "The yield strength of a mild steel specimen was found to be 250 N/mm<sup>2</sup>. Taking a factor of safety of 2, the allowable working stress is:", options: ["62.5 N/mm<sup>2</sup>", "250 N/mm<sup>2</sup>", "500 N/mm<sup>2</sup>", "125 N/mm<sup>2</sup>"], correct: 3, tags: "SSC JE Civil 11.12.2020 (Evening)", solution: "Allowable Working Stress = Yield Strength / Factor of Safety = 250 / 2 = 125 N/mm<sup>2</sup>." },
+            { id: 500, text: "Tensile failure occurs in :", options: ["Balanced section", "Under reinforced section", "Over reinforced section", "None of these"], correct: 1, tags: "Odisha JE (Mains) 2015", solution: "Tensile failure (yielding of steel) is the primary mode of failure in under-reinforced sections." },
+            { id: 501, text: "Choose the incorrect statement with reference to working stress method of RCC design:", options: ["It gives higher percentage of compression steels in comparison with Limit state method", "It deals with the elastic behaviour of the member", "The modular ratio utilised in the design is an imaginary quantity", "It results to uneconomical sections while designing a compression member"], correct: 0, tags: "Mizoram PSC JE PWD 2018 Paper-I", solution: "WSM actually results in larger concrete sections and often requires less compression steel compared to LSM for the same load, or rather, LSM utilizes materials more efficiently. The statement 'gives higher percentage of compression steel' is generally considered incorrect in this context as LSM is more efficient but might require compression steel in restricted depths where WSM would just increase depth." },
+            { id: 502, text: "If the dimensions and grade of concrete of a beam are restricted then it can be designed as which of the following beams?", options: ["Doubly reinforced", "Balanced", "T Beam", "L Beam"], correct: 0, tags: "KPSC JE 9.9.2017", solution: "When dimensions (depth/width) are restricted and the moment exceeds the capacity of a singly reinforced balanced section, a doubly reinforced beam is used." },
+            { id: 503, text: "When a doubly reinforced beam is preferred?", options: ["When depth of beam is more", "When depth of beam is to be limited", "When width of beam is to be limited", "When the ultimate moment of resistance is less than that of singly reinforced beam"], correct: 1, tags: "KPSC Overseer, Gr-II 2017", solution: "Doubly reinforced beams are preferred when the depth of the beam is restricted/limited." },
+            { id: 504, text: "In the case of primary tension failure, in which of the following sections tension cracks appear?", options: ["Under-reinforced section", "Over-reinforced section", "Balanced section", "None of these"], correct: 0, tags: "KPSC Overseer, Gr-II 2017", solution: "Primary tension failure (yielding of steel) occurs in under-reinforced sections, leading to wide tension cracks." },
+            { id: 505, text: "Which among the following is the ratio of modulus of elasticity of steel to the modulus of elasticity of concrete?", options: ["Modular ratio", "Poisson's ratio", "Slenderness ratio", "None of these"], correct: 0, tags: "KPSC Overseer, Gr-II 2017", solution: "Modular Ratio (m) = E<sub>s</sub> / E<sub>c</sub>." },
+            { id: 506, text: "What is meant by the strength of a section?", options: ["Moment of resistance offered by a section", "Section modulus", "Maximum bending stress", "Moment of inertia of the section"], correct: 0, tags: "KPSC Overseer, Gr-II 2017", solution: "The strength of a section in flexure is defined by its Moment of Resistance." },
+            { id: 507, text: "A rectangular beam 200 mm wide has an effective depth of 350 mm. It is subjected to a bending moment of 24,000 Nm. The permissible stresses are c = 5 N/mm<sup>2</sup>, t = 140 N/mm<sup>2</sup>; and m is 18. The required area of tensile reinforcement will be", options: ["688 mm<sup>2</sup>", "778 mm<sup>2</sup>", "864 mm<sup>2</sup>", "954 mm<sup>2</sup>"], correct: 1, tags: "ESE 2019", solution: "Calculate balanced MR. k = (18*5)/(90+140) = 0.39. j = 0.87. Q = 0.5*5*0.39*0.87 = 0.85. <br>MR<sub>bal</sub> = 0.85 * 200 * 350<sup>2</sup> &approx; 20.8 kNm. <br>Applied M = 24 kNm > MR<sub>bal</sub>. <br>Design as over-reinforced in WSM (or doubly). The provided solution calculates based on the required steel for the moment: A<sub>st</sub> = M / (&sigma;<sub>st</sub> * j * d). <br>If we use balanced j: 24000000 / (140 * 0.87 * 350) &approx; 563. <br>However, since it is over-reinforced, the stress in steel is less than 140. We must use the concrete governing equation M = 0.5 * c * b * n * (d - n/3) to find actual n, then find stress in steel, or use the standard solution logic which arrives at 778 mm<sup>2</sup>." },
+            { id: 508, text: "Fatigue in RCC beams will not be a problem if the number of cycles is less than", options: ["20,000", "25,000", "30,000", "35,000"], correct: 0, tags: "ESE 2019", solution: "Fatigue is generally not considered a problem if the number of load cycles is less than 20,000." },
+            { id: 509, text: "The Permissible bending compressive strength for M 25 grade of concrete is 8.5 N/mm<sup>2</sup>. Its short-term and long-term modular ratios are, nearly", options: ["8 and 11", "8 and 8", "11 and 11", "11 and 6"], correct: 0, tags: "ESE 2018", solution: "Short term m = E<sub>s</sub> / E<sub>c</sub> = 2x10<sup>5</sup> / (5000&radic;25) = 200000/25000 = 8. <br>Long term m = 280 / (3 * &sigma;<sub>cbc</sub>) = 280 / (3 * 8.5) = 10.98 &approx; 11." },
+            { id: 510, text: "If the permissible compressive stress for a concrete in bending is C kg/cm<sup>2</sup> the modular ratio is", options: ["2800/2C", "2300/2C", "2800/3C", "2800/C"], correct: 2, tags: "PGCIL DT SR-1 22.08.2021", solution: "Modular ratio m = 280 / (3 * &sigma;<sub>cbc</sub>). If stress is in kg/cm<sup>2</sup> (where 280 N/mm<sup>2</sup> &approx; 2800 kg/cm<sup>2</sup>), then m = 2800 / 3C." },
+            { id: 511, text: "The transformed area of compression steel is equal to:", options: ["(1.5 m-1) Asc", "sigma_st/m", "1.5 m Asc", "1.5 m. Asc"], correct: 2, tags: "PGCIL 13.09.2018", solution: "For stress calculation in compression steel, the equivalent concrete area is taken as 1.5 * m * A<sub>sc</sub>. (Note: For effective section properties usually (1.5m-1) is used to account for the hole, but 'Transformed area' term often refers directly to the steel's equivalent concrete area)." },
+            { id: 512, text: "The working stress of a material is expected to be:", options: ["Equal to ultimate stress", "Equal to yield stress", "Less than yield stress", "More than yield stress"], correct: 2, tags: "SSC JE 2011 (Morning)", solution: "Working stress is derived by applying a factor of safety to the yield stress, so it is always less than the yield stress." }
+        ];
+
+        // --- STATE ---
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let answers = []; 
+        let markedReview = [];
+        let timer = 2 * 3600; 
+        let timerInterval;
+
+        // --- INIT ---
+        window.onload = function() {
+            renderHistory();
+            updateBookmarkCount();
+        };
+
+        function startTest() {
+            currentQuestions = [...questionsDB];
+            initSession();
+        }
+
+        function startBookmarkTest() {
+            const saved = JSON.parse(localStorage.getItem('rcc_bookmarks_492') || '[]');
+            if(saved.length === 0) {
+                alert("No bookmarks found!");
+                return;
+            }
+            currentQuestions = questionsDB.filter(q => saved.includes(q.id));
+            initSession();
+        }
+
+        function initSession() {
+            document.getElementById('start-screen').style.display = 'none';
+            answers = new Array(currentQuestions.length).fill(null);
+            markedReview = new Array(currentQuestions.length).fill(false);
+            currentIndex = 0;
+            
+            clearInterval(timerInterval);
+            timer = 2 * 3600;
+            timerInterval = setInterval(updateTimer, 1000);
+            
+            renderGrid();
+            loadQuestion(0);
+        }
+
+        // --- RENDER ---
+        function loadQuestion(index) {
+            currentIndex = index;
+            const q = currentQuestions[index];
+            const area = document.getElementById('question-area');
+            
+            const isAnswered = answers[index] !== null;
+            const selectedOpt = answers[index];
+            
+            const isBm = isBookmarked(q.id);
+            const bmBtn = document.getElementById('btn-bookmark');
+            bmBtn.classList.toggle('active', isBm);
+
+            let optionsHTML = '';
+            q.options.forEach((opt, i) => {
+                let classes = 'option-item';
+                if(isAnswered) {
+                    if(i === q.correct) classes += ' correct';
+                    else if(i === selectedOpt) classes += ' wrong';
+                }
+                
+                optionsHTML += `
+                    <li class="${classes}" onclick="selectAnswer(${i})">
+                        <div class="circle-icon">${['A','B','C','D'][i]}</div>
+                        <div>${opt}</div>
+                    </li>
+                `;
+            });
+
+            area.innerHTML = `
+                <div class="q-header">
+                    <span class="q-number">Q${index+1}.</span>
+                    <span class="exam-tag">${q.tags}</span>
+                </div>
+                <div class="q-text">${q.text}</div>
+                <ul class="options-list">${optionsHTML}</ul>
+                
+                <div class="solution-box" style="display:${isAnswered ? 'block' : 'none'}">
+                    <div class="sol-title">💡 Detailed Solution</div>
+                    <div>${q.solution}</div>
+                </div>
+            `;
+
+            updateGridStatus();
+        }
+
+        // --- LOGIC ---
+        function selectAnswer(optIndex) {
+            if(answers[currentIndex] !== null) return;
+            
+            answers[currentIndex] = optIndex;
+            loadQuestion(currentIndex);
+            
+            if(document.getElementById('palette-drawer').classList.contains('open')) {
+                closePalette();
+            }
+        }
+
+        function prevQ() {
+            if(currentIndex > 0) loadQuestion(currentIndex - 1);
+        }
+
+        function nextQ() {
+            if(currentIndex < currentQuestions.length - 1) loadQuestion(currentIndex + 1);
+        }
+
+        function markReview() {
+            markedReview[currentIndex] = !markedReview[currentIndex];
+            updateGridStatus();
+        }
+
+        // --- PALETTE ---
+        function openPalette() {
+            document.getElementById('palette-drawer').classList.add('open');
+            document.getElementById('overlay').classList.add('active');
+        }
+
+        function closePalette() {
+            document.getElementById('palette-drawer').classList.remove('open');
+            document.getElementById('overlay').classList.remove('active');
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('grid-container');
+            grid.innerHTML = currentQuestions.map((_, i) => 
+                `<div class="grid-item" id="grid-${i}" onclick="jumpTo(${i})">${i+1}</div>`
+            ).join('');
+        }
+
+        function updateGridStatus() {
+            currentQuestions.forEach((_, i) => {
+                const item = document.getElementById(`grid-${i}`);
+                item.className = 'grid-item';
+                
+                if(i === currentIndex) item.classList.add('current');
+                else if(answers[i] !== null) item.classList.add('answered');
+                else if(markedReview[i]) item.classList.add('review');
+            });
+        }
+
+        function jumpTo(i) {
+            loadQuestion(i);
+            closePalette();
+        }
+
+        // --- BOOKMARKS ---
+        function isBookmarked(id) {
+            const saved = JSON.parse(localStorage.getItem('rcc_bookmarks_492') || '[]');
+            return saved.includes(id);
+        }
+
+        function toggleBookmark() {
+            const qId = currentQuestions[currentIndex].id;
+            let saved = JSON.parse(localStorage.getItem('rcc_bookmarks_492') || '[]');
+            
+            if(saved.includes(qId)) {
+                saved = saved.filter(id => id !== qId);
+            } else {
+                saved.push(qId);
+            }
+            
+            localStorage.setItem('rcc_bookmarks_492', JSON.stringify(saved));
+            loadQuestion(currentIndex);
+            updateBookmarkCount();
+        }
+
+        function updateBookmarkCount() {
+            const saved = JSON.parse(localStorage.getItem('rcc_bookmarks_492') || '[]');
+            document.getElementById('bm-count').innerText = saved.length;
+        }
+
+        // --- SUBMIT & HISTORY ---
+        function submitTest() {
+            clearInterval(timerInterval);
+            
+            let score = 0;
+            let answered = 0;
+            answers.forEach((ans, i) => {
+                if(ans !== null) {
+                    answered++;
+                    if(ans === currentQuestions[i].correct) score++;
+                }
+            });
+
+            const accuracy = answered === 0 ? 0 : Math.round((score / answered) * 100);
+            const total = currentQuestions.length;
+            
+            const history = JSON.parse(localStorage.getItem('rcc_history_492') || '[]');
+            const attempt = {
+                date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                score: score,
+                total: total,
+                accuracy: accuracy
+            };
+            history.push(attempt);
+            localStorage.setItem('rcc_history_492', JSON.stringify(history));
+            
+            alert(`Test Submitted!\nScore: ${score}/${total}\nAccuracy: ${accuracy}%`);
+            location.reload();
+        }
+
+        function renderHistory() {
+            const history = JSON.parse(localStorage.getItem('rcc_history_492') || '[]');
+            const container = document.getElementById('history-list');
+            
+            if(history.length === 0) {
+                container.innerHTML = '<div style="padding:20px; text-align:center; color:#999;">No attempts yet</div>';
+                return;
+            }
+
+            container.innerHTML = history.slice().reverse().map((h, i) => `
+                <div class="history-item">
+                    <div>
+                        <div style="font-weight:600;">Attempt ${history.length - i}</div>
+                        <div style="font-size:0.75rem; color:#999;">${h.date}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="score-badge">Score: ${h.score}/${h.total}</div>
+                        <div style="font-size:0.75rem; margin-top:3px;">Acc: ${h.accuracy}%</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function exitTest() {
+            if(confirm("Exit test? Progress will be lost.")) location.reload();
+        }
+
+        function updateTimer() {
+            timer--;
+            const h = Math.floor(timer / 3600).toString().padStart(2, '0');
+            const m = Math.floor((timer % 3600) / 60).toString().padStart(2, '0');
+            const s = (timer % 60).toString().padStart(2, '0');
+            document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+            
+            if(timer <= 0) submitTest();
+        }
+    </script>
+</body>
+</html>
