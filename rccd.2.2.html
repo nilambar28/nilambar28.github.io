@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RCC Test Series (Q390-Q424)</title>
+    <style>
+        :root {
+            --primary: #007bff;
+            --header-bg: #e91e63; /* Pink Header */
+            --header-text: #ffffff;
+            --success: #28a745;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray: #6c757d;
+            --purple: #6f42c1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            background-color: #f5f7fb;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        .header {
+            background: var(--header-bg);
+            color: var(--header-text);
+            padding: 10px 15px;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr; /* Left, Center, Right */
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 10;
+            height: 60px;
+            box-sizing: border-box;
+        }
+        
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .header-center { text-align: center; }
+        .header-right { text-align: right; }
+
+        .timer-box {
+            font-weight: bold;
+            font-size: 1.2rem;
+            font-variant-numeric: tabular-nums;
+            background: rgba(0,0,0,0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        /* BUTTONS */
+        .exit-btn {
+            background: #fff;
+            color: var(--danger);
+            border: 1px solid #fff;
+            padding: 6px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .submit-btn {
+            background: #fff;
+            color: var(--success);
+            border: none;
+            padding: 8px 18px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* --- Layout --- */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- Question Area --- */
+        .question-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            padding-bottom: 80px;
+        }
+
+        .exam-tag {
+            background: #fce4ec;
+            color: #c2185b;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+            border: 1px solid #f8bbd0;
+        }
+
+        .q-text {
+            font-size: 1.15rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            color: #212529;
+        }
+
+        .options-list { list-style: none; padding: 0; }
+
+        .option-item {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: flex-start;
+            transition: all 0.2s;
+        }
+
+        .option-item:hover { background: #f8f9fa; }
+        
+        .option-item.selected { border-color: var(--header-bg); background: #fce4ec; }
+        .option-item.correct { border-color: var(--success); background: #d4edda; }
+        .option-item.wrong { border-color: var(--danger); background: #f8d7da; }
+
+        .circle-icon {
+            min-width: 26px;
+            height: 26px;
+            border: 2px solid #adb5bd;
+            border-radius: 50%;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #495057;
+            font-weight: bold;
+            margin-top: 0;
+        }
+
+        .option-item.selected .circle-icon { border-color: var(--header-bg); background: var(--header-bg); color: white; }
+        .option-item.correct .circle-icon { border-color: var(--success); background: var(--success); color: white; }
+        .option-item.wrong .circle-icon { border-color: var(--danger); background: var(--danger); color: white; }
+        
+        /* Solution Box */
+        .solution-box {
+            margin-top: 25px;
+            padding: 15px;
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            border-radius: 8px;
+            display: none; 
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Sidebar (Palette) - RIGHT SIDE --- */
+        .sidebar {
+            width: 280px;
+            background: #fff;
+            border-left: 1px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            z-index: 2000;
+            position: fixed;
+            right: 0; /* Align to Right */
+            top: 0;
+            bottom: 0;
+            transform: translateX(100%); /* Hide to the Right */
+            box-shadow: -4px 0 15px rgba(0,0,0,0.2);
+        }
+
+        .sidebar.open { transform: translateX(0); }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1500;
+            display: none;
+            backdrop-filter: blur(2px);
+        }
+        .overlay.active { display: block; }
+
+        .palette-header {
+            padding: 15px;
+            background: var(--header-bg);
+            color: white;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-sidebar-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .grid-container {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .grid-item {
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            background: #e9ecef;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .grid-item.active { border: 2px solid var(--header-bg); }
+        .grid-item.answered { background: var(--success); color: white; }
+        .grid-item.review { background: var(--purple); color: white; }
+        .grid-item.current { background: var(--header-bg); color: white; }
+
+        /* --- Footer --- */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #fff;
+            padding: 12px 20px;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            z-index: 20;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            background: #fff;
+            cursor: pointer;
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .btn-primary { background: var(--header-bg); color: white; border: none; }
+        .btn-bookmark-active { color: #ffc107; border-color: #ffc107; background-color: #fff9e6; }
+
+        /* --- Start Screen Styling --- */
+        #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 5000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .bookmark-test-btn {
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: #fff;
+            border: 2px solid #ffc107;
+            color: #d39e00;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .history-container {
+            width: 90%;
+            max-width: 400px;
+            margin: 15px auto;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+            max-height: 200px;
+            overflow-y: auto;
+            background: #fff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            text-align: left;
+        }
+
+        .history-header {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            font-weight: bold;
+            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
+        }
+
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .history-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #f1f1f1;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .history-item:last-child { border-bottom: none; }
+        
+        .badge-score {
+            background: var(--success);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        
+        .palette-toggle {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            color: white;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="start-screen">
+        <h1 style="color: var(--header-bg); margin-bottom: 5px;">RCC Test Series</h1>
+        <p style="color: var(--gray); margin-top: 0;">Questions 390 - 424</p>
+        
+        <div class="history-container">
+            <div class="history-header">Attempt History (Series Wise)</div>
+            <ul class="history-list" id="history-list">
+                <li style="padding:15px; text-align:center; color:#999;">No attempts yet.</li>
+            </ul>
+        </div>
+
+        <button class="btn btn-primary" onclick="startFullTest()" style="padding: 15px 50px; font-size: 1.2rem; margin-top: 10px; border-radius: 30px; box-shadow: 0 4px 10px rgba(233,30,99,0.4);">
+            Start New Test
+        </button>
+
+        <button class="bookmark-test-btn" onclick="startBookmarkTest()">
+            <span style="font-size: 1.2rem;">★</span> 
+            Practice Bookmarks 
+            <span id="bm-count" style="background:#ffc107; color:white; padding:2px 8px; border-radius:12px; font-size:0.8rem; margin-left:5px;">0</span>
+        </button>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+    <div class="header">
+        <div class="header-left">
+            <button class="palette-toggle" onclick="openSidebar()">☰</button>
+            <button class="exit-btn" onclick="exitTest()">
+                <span>✕</span> Exit
+            </button>
+        </div>
+        
+        <div class="header-center">
+            <div class="timer-box" id="timer">02:00:00</div>
+        </div>
+
+        <div class="header-right">
+            <button class="submit-btn" onclick="submitTest()">Submit ✓</button>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="question-area" id="question-area">
+            </div>
+
+        <div class="sidebar" id="sidebar">
+            <div class="palette-header">
+                <span>Question Palette</span>
+                <button class="close-sidebar-btn" onclick="closeSidebar()">×</button>
+            </div>
+            
+            <div class="grid-container" id="grid-container">
+                </div>
+            
+            <div style="padding: 15px; font-size: 0.75rem; background: #f8f9fa; border-top: 1px solid #ddd;">
+                <div style="display:flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span><span style="color:var(--success)">●</span> Answered</span>
+                    <span><span style="color:var(--danger)">●</span> Wrong</span>
+                </div>
+                <div style="display:flex; justify-content: space-between;">
+                    <span><span style="color:var(--purple)">●</span> Review</span>
+                    <span><span style="color:#6c757d">●</span> Skipped</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div style="display: flex; gap: 10px;">
+            <button class="btn" onclick="markForReview()">Review</button>
+            <button class="btn" id="btn-bookmark" onclick="toggleBookmark()">★</button>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn" onclick="prevQuestion()" style="color: var(--header-bg); border-color: var(--header-bg);">Previous</button>
+            <button class="btn btn-primary" onclick="nextQuestion()">Next</button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        const allQuestions = [
+            { id: 390, text: "Plain cement concrete is strong in taking—", options: ["Shear", "compression", "Tension", "None of these"], correct: 1, tags: "MH PWD 2016", solution: "Plain cement concrete is strong in taking compression. Plain cement concrete weak in tension." },
+            { id: 391, text: "In RCC beam steel takes—", options: ["Tension", "Compression", "Live load", "Dead load"], correct: 0, tags: "MH PWD 2016", solution: "In RCC beam steel takes tension zone. Concrete takes compression." },
+            { id: 392, text: "When RCC beam is subjected to bending and the topmost layer elongates and the bottom on shortens, then that beam is called", options: ["Fixed beam", "Simply supported beam", "Doubly reinforced beam", "Cantilever beam"], correct: 3, tags: "MIZORAM PSC JE 2015", solution: "A cantilever beam bends downwards creating tension in upper fibers (elongation) and compression in lower fibers (shortening)." },
+            { id: 393, text: "The RCC structure design philosophy which is based on elastic theory is", options: ["Classical elastically method", "Working stress method", "Ultimate load method", "Limit state method"], correct: 1, tags: "MIZORAM PSC JE 2015", solution: "Working stress Method design is based on elastic theory, assuming linear stress distribution." },
+            { id: 394, text: "The failure due to over-reinforced beam is called..........", options: ["Collapse failure", "Shear failure", "Tension failure", "Compression failure"], correct: 3, tags: "GSECL AE 2018", solution: "Failure due to over-reinforced beam is Compression failure (Brittle)." },
+            { id: 395, text: "Modular ratio in WSM is:", options: ["Modulus of elasticity of concrete to that of modulus of elasticity of steel", "Strain in steel to that of strain in concrete", "Modulus of elasticity of steel to that of modulus of elasticity of concrete", "Stress in concrete to that of stress in steel"], correct: 2, tags: "MP Sub Engineer 2020", solution: "Modular ratio m = Es / Ec." },
+            { id: 396, text: "In a doubly-reinforced beam if c and t are stresses in concrete and tension reinforcement... relationship holds good.", options: ["mc/t = n/(d-n)", "(m+c)/t = n/(d+n)", "(t+c)/m = (d+n)/n", "mc/t = (d-n)/t"], correct: 0, tags: "SSC JE 2018", solution: "mc/t = n/(d-n) derived from linear strain diagram." },
+            { id: 397, text: "The stress condition at the state of impending failure... non linear stress-strain curves... method is known as :", options: ["Ultimate load method", "Stress method", "Limit state method", "Working stress method"], correct: 0, tags: "UPPCL JE 2020", solution: "Ultimate load method uses non-linear stress-strain curves at failure." },
+            { id: 398, text: "A doubly reinforced section is used when", options: ["additional safety is needed", "beam has to resist high bending moment", "beam has to resist tension at top and bottom face", "size of beam is restricted"], correct: 3, tags: "ISRO TA 2018", solution: "Doubly reinforced beams are used when beam depth/size is restricted." },
+            { id: 399, text: "For M-20 Grade of concrete, modular ratio would be :", options: ["13.23", "15.54", "12.89", "11.56"], correct: 0, tags: "MH PWD 2019", solution: "m = 280/3σcbc. For M20, σcbc=7. m = 280/21 = 13.33." },
+            { id: 400, text: "Strain in steel reaches its ultimate value earlier than strain in concrete is called as _______ .", options: ["over reinforced section only", "under reinforced section only", "all of the above", "balanced section only"], correct: 1, tags: "MP VYAPAM 2017", solution: "Under reinforced section: Steel yields first (ductile failure)." },
+            { id: 401, text: "According to the working stress method, the modular ratio between steel and concrete is:", options: ["280 / 3σcbc", "280 / 0.45σcbc", "280 / 5σcbc", "250 / 0.45σcbc"], correct: 0, tags: "Mizoram PSC 2020", solution: "m = 280 / 3σcbc (IS 456)." },
+            { id: 402, text: "In an under reinforced section", options: ["Beam fails due to overstress in steel", "Concrete area is less than area of steel", "Concrete is stressed above permissible stress", "Steel is stressed much below maximum permissible stress"], correct: 0, tags: "Nagaland PSC 2015", solution: "Steel reaches yield stress/permissible stress first." },
+            { id: 403, text: "Working stress design of R.C. members assumes", options: ["isotropic material", "parabolic stress strain curve", "linear elastic material", "homogeneous and isotopic material"], correct: 2, tags: "APPSC AE 2004", solution: "WSM assumes materials behave as linear elastic." },
+            { id: 404, text: "Max compressive stress 1600, tensile 400, depth 10cm. Neutral axis distance from top?", options: ["2 cm", "4 cm", "6 cm", "8 cm"], correct: 3, tags: "MH Jalgaon ZP 2015", solution: "Using stress diagram similarity, Xa calculates to 8cm." },
+            { id: 405, text: "The steel bars in a concrete beam are embedded", options: ["near top section", "in the centre", "near bottom section", "None of these"], correct: 2, tags: "HPSSC JE 2019", solution: "Steel is placed in tension zone (bottom for simply supported)." },
+            { id: 406, text: "The moment of resistance of a balanced reinforced section is obtained by multiplying the lever arm with:", options: ["Compressive force", "Tensile force", "Either compressive or tensile force", "Compressive and tensile force both"], correct: 2, tags: "UPPCL JE 2016", solution: "MR = C × LA or T × LA." },
+            { id: 407, text: "Max bending moment for simply supported beam with load W and length l?", options: ["Wl/64", "Wl/8l²", "Wl²/8", "W²/32"], correct: 2, tags: "UPPCL JE 2016", solution: "For UDL, Max BM = wl²/8." },
+            { id: 408, text: "Neutral axis factor k is equal to", options: ["σcbc / (σcbc + mσst)", "σcbc / (mσcbc + σst)", "mσcbc / (mσcbc + σst)", "mσst / (1 + σcbc + mσst)"], correct: 2, tags: "WBPSC JE 2005", solution: "k = mσcbc / (mσcbc + σst)." },
+            { id: 409, text: "The net factor of safety for concrete and steel in WSM are:", options: ["3, 1.78", "2, 1.85", "2.5, 1.2", "1.5, 1.15"], correct: 0, tags: "WBPSC JE 2018", solution: "Concrete FOS ~ 3, Steel FOS = 1.78." },
+            { id: 410, text: "IS: 456-1978 modulus of elasticity of concrete?", options: ["Ec = 5700√Fck", "Ec = 570√Fck", "Ec = 5700Fck", "Ec = 700√Fck"], correct: 0, tags: "HSSC JE 2015", solution: "IS 456:1978 used 5700√Fck. (2000 uses 5000√Fck)." },
+            { id: 411, text: "Lever arm of singly reinforced beam?", options: ["d", "d + n/3", "d - n/3", "d - n/2"], correct: 2, tags: "SSC JE 2018", solution: "Lever arm = d - n/3." },
+            { id: 412, text: "The neutral axis of a balanced section is called", options: ["balanced neutral axis", "critical neutral axis", "equivalent neutral axis", "all of these"], correct: 1, tags: "MH PWD 2016", solution: "Balanced section NA is Critical Neutral Axis (Xc)." },
+            { id: 413, text: "In an over-reinforced section", options: ["steel reinforcement is not fully stressed to its permissible value", "concrete is not fully stressed to its permissible value", "either (a) or (b)", "both (a) and (b)"], correct: 0, tags: "MH PWD 2016", solution: "Steel does not reach permissible stress; Concrete fails first." },
+            { id: 414, text: "A section with more steel reinforcement than balanced section is called—", options: ["Under reinforced", "Over reinforced", "Balanced", "None of these"], correct: 1, tags: "MH PWD 2016", solution: "More steel than balanced = Over reinforced." },
+            { id: 415, text: "In a simply supported RC beam, reinforcement is placed", options: ["below the neutral axis", "above the neutral axis", "at the neutral axis", "anyone of these"], correct: 0, tags: "MH PWD 2016", solution: "Placed below NA (Tension zone)." },
+            { id: 416, text: "By over-reinforcing... MR can be increased by not more than", options: ["0.1", "0.15", "0.18", "0.25"], correct: 3, tags: "Asst. Town Planning 2018", solution: "Max increase limited to 25%." },
+            { id: 417, text: "IS 456:2000 maximum strain in concrete in bending?", options: ["0.0035 in bending", "0.035 in bending", "0.035 in shear", "0.0035 in shear"], correct: 0, tags: "SSC JE 2019", solution: "0.0035 is the max strain." },
+            { id: 418, text: "For under reinforced beam section, neutral axis lies ____", options: ["At same level", "Below critical NA", "At mid depth", "Above critical NA"], correct: 3, tags: "LMRC AM 2019", solution: "Actual NA (Xa) < Critical NA (Xc), so it lies above." },
+            { id: 419, text: "Modular ratio for reinforced brick work?", options: ["40", "10", "15", "18"], correct: 0, tags: "Rajasthan JEn 2020", solution: "Taken as 40." },
+            { id: 420, text: "In double reinforced sections, total reinforcement percentage should not exceed :", options: ["4", "6", "8", "10"], correct: 2, tags: "SSC JE 2005", solution: "4% tension + 4% compression = 8%." },
+            { id: 421, text: "Deflections can be controlled by using:", options: ["w/c ratio", "aspect ratio", "modular ratio", "span/depth ratio"], correct: 3, tags: "Rajasthan JEn 2020", solution: "Span to depth ratio controls deflection." },
+            { id: 422, text: "Cantilever beam span to effective depth ratio?", options: ["26", "7", "10", "20"], correct: 1, tags: "Rajasthan JEn 2020", solution: "Cantilever = 7." },
+            { id: 423, text: "Distance between centroids of compression and tension reinforcements?", options: ["Lever Arm", "Neutral axis depth", "Neutral Arm", "Critical axis depth"], correct: 0, tags: "BSPHCL 2019", solution: "Called Lever Arm." },
+            { id: 424, text: "Steel reinforcement is used in concrete beams to:", options: ["carry tensile/compressive", "carry compressive", "carry tensile load"], correct: 2, tags: "Standard", solution: "Mainly to carry tensile load." }
+        ];
+
+        // --- STATE ---
+        let currentQuestions = [];
+        let currentQIndex = 0;
+        let userAnswers = []; 
+        let questionStatus = []; 
+        let bookmarks = new Set();
+        let secondsLeft = 2 * 60 * 60; 
+        let timerInterval;
+
+        document.addEventListener('DOMContentLoaded', loadSavedData);
+
+        function startFullTest() {
+            currentQuestions = [...allQuestions];
+            initializeTest();
+        }
+
+        function startBookmarkTest() {
+            if (bookmarks.size === 0) {
+                alert("No bookmarks found! Mark some questions first.");
+                return;
+            }
+            currentQuestions = allQuestions.filter(q => bookmarks.has(q.id));
+            initializeTest();
+        }
+
+        function initializeTest() {
+            userAnswers = new Array(currentQuestions.length).fill(null);
+            questionStatus = new Array(currentQuestions.length).fill('not-visited');
+            document.getElementById('start-screen').style.display = 'none';
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                secondsLeft--;
+                updateTimerDisplay();
+                if (secondsLeft <= 0) submitTest();
+            }, 1000);
+            renderPalette();
+            loadQuestion(0);
+        }
+
+        function loadQuestion(index) {
+            currentQIndex = index;
+            const q = currentQuestions[index];
+            if (questionStatus[index] === 'not-visited') {
+                questionStatus[index] = 'visited';
+                updatePaletteItem(index);
+            }
+            updatePaletteActive(index);
+            
+            // Render
+            const container = document.getElementById('question-area');
+            const savedAns = userAnswers[index];
+            const isAnswered = savedAns !== null;
+            let optionsHtml = '';
+            
+            q.options.forEach((opt, i) => {
+                let className = 'option-item';
+                let icon = ['A', 'B', 'C', 'D'][i];
+                if (isAnswered) {
+                    if (i === q.correct) className += ' correct';
+                    else if (i === savedAns) className += ' wrong';
+                }
+                optionsHtml += `
+                    <li class="${className}" onclick="selectOption(${i})">
+                        <div class="circle-icon">${icon}</div>
+                        <div>${opt}</div>
+                    </li>
+                `;
+            });
+
+            container.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <span style="font-size: 1.1rem; font-weight:bold; color:var(--header-bg);">Question ${index + 1}</span>
+                    <span class="exam-tag">${q.tags}</span>
+                </div>
+                <div class="q-text">${q.text}</div>
+                <ul class="options-list">${optionsHtml}</ul>
+                <div class="solution-box" style="display: ${isAnswered ? 'block' : 'none'}">
+                    <div class="solution-title">✅ Detailed Solution:</div>
+                    <div style="font-size:0.95rem; line-height:1.5;">${q.solution}</div>
+                </div>
+            `;
+            updateBookmarkButtonVisual(bookmarks.has(q.id));
+        }
+
+        function selectOption(optIndex) {
+            if (userAnswers[currentQIndex] !== null) return; 
+            userAnswers[currentQIndex] = optIndex;
+            questionStatus[currentQIndex] = 'answered';
+            loadQuestion(currentQIndex);
+            updatePaletteItem(currentQIndex);
+        }
+
+        function nextQuestion() {
+            if (currentQIndex < currentQuestions.length - 1) loadQuestion(currentQIndex + 1);
+        }
+        function prevQuestion() {
+            if (currentQIndex > 0) loadQuestion(currentQIndex - 1);
+        }
+        function markForReview() {
+            if (questionStatus[currentQIndex] !== 'answered') {
+                questionStatus[currentQIndex] = 'review';
+                updatePaletteItem(currentQIndex);
+            }
+        }
+
+        function toggleBookmark() {
+            const qId = currentQuestions[currentQIndex].id;
+            if (bookmarks.has(qId)) bookmarks.delete(qId);
+            else bookmarks.add(qId);
+            localStorage.setItem('rcc_bookmarks_v3', JSON.stringify([...bookmarks]));
+            updateBookmarkButtonVisual(bookmarks.has(qId));
+            updateBookmarkCount();
+        }
+
+        function updateBookmarkButtonVisual(isActive) {
+            const btn = document.getElementById('btn-bookmark');
+            if (isActive) {
+                btn.classList.add('btn-bookmark-active');
+                btn.innerHTML = '★ Saved';
+            } else {
+                btn.classList.remove('btn-bookmark-active');
+                btn.innerHTML = '★';
+            }
+        }
+
+        // --- SIDEBAR & CLICK LOGIC ---
+        function openSidebar() {
+            document.getElementById('sidebar').classList.add('open');
+            document.getElementById('overlay').classList.add('active');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('overlay').classList.remove('active');
+        }
+
+        function renderPalette() {
+            const grid = document.getElementById('grid-container');
+            grid.innerHTML = '';
+            currentQuestions.forEach((q, i) => {
+                const item = document.createElement('div');
+                item.className = 'grid-item';
+                item.id = `palette-${i}`;
+                item.innerText = i + 1;
+                item.onclick = () => {
+                    loadQuestion(i);
+                    closeSidebar();
+                };
+                grid.appendChild(item);
+            });
+        }
+
+        function updatePaletteItem(index) {
+            const item = document.getElementById(`palette-${index}`);
+            if(!item) return;
+            item.className = 'grid-item';
+            const status = questionStatus[index];
+            if (status === 'answered') item.classList.add('answered');
+            else if (status === 'review') item.classList.add('review');
+            if (index === currentQIndex) item.classList.add('active');
+        }
+
+        function updatePaletteActive(index) {
+            document.querySelectorAll('.grid-item').forEach(el => el.classList.remove('active'));
+            const item = document.getElementById(`palette-${index}`);
+            if(item) {
+                item.classList.add('active');
+                const status = questionStatus[index];
+                if (status === 'answered') item.classList.add('answered');
+                else if (status === 'review') item.classList.add('review');
+            }
+        }
+
+        // --- DATA SAVING & HISTORY ---
+        function loadSavedData() {
+            // Load History
+            const history = JSON.parse(localStorage.getItem('rcc_history_v3') || '[]');
+            const historyList = document.getElementById('history-list');
+            
+            if (history.length > 0) {
+                // Populate List
+                historyList.innerHTML = history.slice().reverse().map((h, index) => {
+                    const attemptNum = history.length - index;
+                    return `
+                        <li class="history-item">
+                            <div>
+                                <strong>Attempt ${attemptNum}</strong> <br>
+                                <span style="font-size:0.8rem; color:#666;">${h.date}</span>
+                            </div>
+                            <span class="badge-score">${h.accuracy}% (${h.score}/${h.total})</span>
+                        </li>
+                    `;
+                }).join('');
+            } else {
+                historyList.innerHTML = '<li style="padding:15px; text-align:center; color:#999;">No attempts yet.</li>';
+            }
+
+            // Load Bookmarks
+            const savedBookmarks = JSON.parse(localStorage.getItem('rcc_bookmarks_v3') || '[]');
+            bookmarks = new Set(savedBookmarks);
+            updateBookmarkCount();
+        }
+
+        function updateBookmarkCount() {
+            document.getElementById('bm-count').innerText = bookmarks.size;
+        }
+
+        function updateTimerDisplay() {
+            const h = Math.floor(secondsLeft / 3600).toString().padStart(2, '0');
+            const m = Math.floor((secondsLeft % 3600) / 60).toString().padStart(2, '0');
+            const s = (secondsLeft % 60).toString().padStart(2, '0');
+            document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+        }
+
+        function submitTest() {
+            clearInterval(timerInterval);
+            let score = 0;
+            userAnswers.forEach((ans, i) => {
+                if (ans === currentQuestions[i].correct) score++;
+            });
+            
+            // Calculate Accuracy
+            const accuracy = Math.round((score / currentQuestions.length) * 100);
+            
+            // Save to History
+            const history = JSON.parse(localStorage.getItem('rcc_history_v3') || '[]');
+            const now = new Date();
+            const dateStr = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            history.push({ 
+                date: dateStr, 
+                score: score, 
+                total: currentQuestions.length,
+                accuracy: accuracy
+            });
+            
+            localStorage.setItem('rcc_history_v3', JSON.stringify(history));
+            
+            alert(`Test Finished!\nYour Score: ${score}/${currentQuestions.length}\nAccuracy: ${accuracy}%`);
+            location.reload();
+        }
+
+        function exitTest() {
+            if(confirm("Are you sure you want to exit?")) location.reload();
+        }
+    </script>
+</body>
+</html>
