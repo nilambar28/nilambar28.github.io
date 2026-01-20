@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RCC Test (Q578-605)</title>
+    <style>
+        :root {
+            --primary: #e91e63; /* Testbook Pink */
+            --header-bg: #e91e63;
+            --bg: #f2f3f5;
+            --white: #ffffff;
+            --text: #333;
+            --green: #0acf83;
+            --blue: #1a73e8;
+            --yellow: #fbbc04;
+            --gray: #e0e0e0;
+            --dark-gray: #666;
+        }
+
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { margin: 0; background-color: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* --- HEADER --- */
+        header {
+            background-color: var(--header-bg);
+            color: var(--white);
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 100;
+            flex-shrink: 0;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .menu-icon { font-size: 24px; cursor: pointer; }
+        .app-title { font-weight: 600; font-size: 1.1rem; }
+        
+        .timer-badge { 
+            background: rgba(0,0,0,0.15); 
+            padding: 4px 10px; 
+            border-radius: 4px; 
+            font-family: monospace; 
+            font-size: 1rem; 
+            font-weight: bold;
+        }
+
+        .header-right { display: flex; align-items: center; gap: 10px; }
+        
+        .btn-header {
+            border: 1px solid rgba(255,255,255,0.5);
+            background: transparent;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .btn-submit { background: #fff; color: var(--primary); border: none; font-weight: bold; }
+
+        /* --- SCREENS --- */
+        .screen { display: none; flex: 1; height: 100%; position: relative; }
+        .screen.active { display: flex; flex-direction: column; }
+
+        /* --- HOME SCREEN --- */
+        #home-screen { align-items: center; overflow-y: auto; padding: 20px; flex-direction: column; }
+        
+        .card { 
+            background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+            width: 100%; max-width: 450px; text-align: center; margin-bottom: 20px;
+        }
+        .btn-lg { width: 100%; padding: 14px; margin: 8px 0; border: none; border-radius: 4px; font-size: 1rem; font-weight: 600; color: white; cursor: pointer; transition: 0.2s; }
+        .btn-start { background: var(--primary); }
+        .btn-review { background: #555; }
+        .btn-lg:active { opacity: 0.9; transform: scale(0.98); }
+
+        /* History Table */
+        .history-section {
+            width: 100%; max-width: 450px; background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .hist-header { font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; color: #555; display: flex; justify-content: space-between; }
+        .hist-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f5f5f5; font-size: 0.9rem; }
+        .hist-row:last-child { border-bottom: none; }
+        .acc-high { color: var(--green); font-weight: bold; }
+        .acc-med { color: var(--yellow); font-weight: bold; }
+        .acc-low { color: var(--primary); font-weight: bold; }
+
+        /* --- TEST INTERFACE --- */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            padding-bottom: 80px; 
+            position: relative;
+        }
+
+        .q-panel { background: white; border-radius: 4px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); min-height: 100%; }
+        
+        .q-header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; color: #666; font-size: 0.9rem; }
+        .q-marks { color: var(--green); font-weight: bold; }
+        .q-neg { color: var(--primary); font-weight: bold; margin-left: 5px; }
+
+        .exam-tag { background: #e3f2fd; color: #1976d2; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; display: inline-block; margin-bottom: 10px; }
+
+        .q-text { font-size: 1.1rem; line-height: 1.5; color: #222; margin-bottom: 20px; font-weight: 500; }
+        .q-text img { max-width: 100%; margin-top: 10px; }
+        
+        /* Options */
+        .option-row {
+            display: flex; align-items: flex-start; padding: 12px; border: 1px solid #e0e0e0; 
+            border-radius: 4px; margin-bottom: 10px; cursor: pointer; transition: background 0.1s;
+        }
+        .option-radio {
+            width: 20px; height: 20px; border: 2px solid #bbb; border-radius: 50%; margin-right: 12px; margin-top: 2px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .option-row:hover { background: #f9f9f9; }
+        
+        /* States */
+        .option-row.selected { border-color: var(--blue); background: #eef5ff; }
+        .option-row.selected .option-radio { border-color: var(--blue); }
+        .option-row.selected .option-radio::after { content:''; width: 10px; height: 10px; background: var(--blue); border-radius: 50%; }
+
+        .option-row.correct { border-color: var(--green); background: #e8f5e9; }
+        .option-row.correct .option-radio { border-color: var(--green); }
+        .option-row.correct .option-radio::after { content:''; width: 10px; height: 10px; background: var(--green); border-radius: 50%; }
+
+        .option-row.wrong { border-color: var(--primary); background: #ffebee; }
+        .option-row.wrong .option-radio { border-color: var(--primary); }
+        .option-row.wrong .option-radio::after { content:''; width: 10px; height: 10px; background: var(--primary); border-radius: 50%; }
+
+        /* Solution */
+        .solution-section {
+            margin-top: 20px; background: #fff8e1; border: 1px solid #ffecb3; border-radius: 4px; padding: 15px; display: none;
+        }
+        .solution-section.show { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- FOOTER --- */
+        .test-footer {
+            height: 60px; background: white; border-top: 1px solid #ddd; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 10px; position: fixed; bottom: 0; left: 0; width: 100%; z-index: 50;
+        }
+        .footer-btn { padding: 10px 15px; border-radius: 4px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: 1px solid #ddd; background: white; color: #333; }
+        .btn-mark { border-color: var(--yellow); color: #b08d00; }
+        .btn-next { background: var(--green); color: white; border: none; padding-left: 20px; padding-right: 20px;}
+        .btn-prev { background: #f0f0f0; }
+
+        /* --- SIDEBAR --- */
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 199; display: none; }
+        .sidebar-overlay.open { display: block; }
+        .sidebar {
+            position: fixed; top: 0; right: 0; width: 85%; max-width: 320px; height: 100%;
+            background: white; z-index: 200; transform: translateX(100%); transition: transform 0.3s;
+            display: flex; flex-direction: column;
+        }
+        .sidebar.open { transform: translateX(0); }
+        .palette-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 15px; overflow-y: auto; flex:1; align-content: start; }
+        .p-item { 
+            height: 40px; border: 1px solid #ddd; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; background: white; font-weight: bold; color: #555;
+        }
+        .p-item.answered { background: var(--green); color: white; border-color: var(--green); border-radius: 50%; }
+        .p-item.review { background: var(--yellow); border-radius: 50%; color: black; border-color: var(--yellow); }
+        .p-item.current { border: 2px solid var(--blue); color: var(--blue); }
+        .p-item.not-visited { background: #f0f0f0; }
+
+        /* Latex/Formula styles */
+        sub, sup { font-size: 0.75em; }
+    </style>
+</head>
+<body>
+
+    <div id="home-screen" class="screen active">
+        <div class="card">
+            <h2 style="color:var(--primary); margin-top:0;">RCC Mock Test</h2>
+            <div style="text-align:left; font-size:0.95rem; color:#555; margin-bottom:20px;">
+                <p>• <strong>Topic:</strong> Questions 578 - 605</p>
+                <p>• <strong>Mode:</strong> Practice (Instant Solutions)</p>
+                <p>• <strong>Time:</strong> 120 Minutes</p>
+            </div>
+            <button class="btn-lg btn-start" onclick="initTest('full')">Start New Test</button>
+            <button class="btn-lg btn-review" onclick="initTest('bookmark')">Review Bookmarks</button>
+            <div style="margin-top:15px; font-size:0.85rem; color:#888;">
+                Bookmarks Available: <span id="bm-count">0</span>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <div class="hist-header">
+                <span>Past Performance</span>
+                <span style="font-size:0.8rem; cursor:pointer; color:var(--blue);" onclick="clearHistory()">Clear History</span>
+            </div>
+            <div id="history-list">
+                <div style="text-align:center; color:#999; padding:15px;">No tests taken yet.</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="test-interface" class="screen">
+        <header>
+            <div class="header-left">
+                <div class="menu-icon" onclick="toggleSidebar()">☰</div>
+                <div class="app-title">RCC Test</div>
+            </div>
+            <div class="timer-badge" id="timer">02:00:00</div>
+            <div class="header-right">
+                <button class="btn-header" onclick="exitTest()">Exit</button>
+                <button class="btn-header btn-submit" onclick="submitTest()">Submit</button>
+            </div>
+        </header>
+
+        <div class="content-area" id="content-area" onclick="closeSidebar()">
+            <div class="q-panel">
+                <div class="q-header">
+                    <span>Question <span id="q-num">1</span></span>
+                    <div>
+                        <span class="q-marks">+1</span> <span class="q-neg">-0.25</span>
+                        <span style="margin-left:15px; cursor:pointer; font-size:1.5rem;" id="bookmark-icon" onclick="toggleBookmark(event)">☆</span>
+                    </div>
+                </div>
+                
+                <div id="tag-container"></div>
+
+                <div class="q-text" id="q-text"></div>
+                <div id="options-box"></div>
+                
+                <div class="solution-section" id="solution-section">
+                    <strong style="color:var(--green)">Detailed Solution:</strong>
+                    <div id="solution-text" style="margin-top:8px; font-size:0.95rem; color:#444; line-height:1.6;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-footer">
+            <button class="footer-btn btn-prev" onclick="prevQ()">Previous</button>
+            <button class="footer-btn btn-mark" onclick="markReview()">Mark Review</button>
+            <button class="footer-btn btn-next" onclick="nextQ()">Save & Next</button>
+        </div>
+
+        <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+        <div class="sidebar" id="sidebar">
+            <div style="padding:15px; background:#f8f9fa; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center;">
+                <strong>Question Palette</strong>
+                <span style="cursor:pointer; font-size:1.2rem; padding:5px;" onclick="closeSidebar()">✕</span>
+            </div>
+            <div style="padding:10px; font-size:0.75rem; display:flex; gap:10px; flex-wrap:wrap; border-bottom:1px solid #eee; background:white;">
+                <span style="color:var(--green)">● Ans</span> <span style="color:var(--yellow)">● Rev</span> <span style="color:var(--blue)">● Curr</span> <span style="color:#ccc">● Skip</span>
+            </div>
+            <div class="palette-grid" id="palette-grid"></div>
+            <div style="padding:15px; border-top:1px solid #ddd;">
+                <button class="btn-lg btn-start" onclick="submitTest()">Submit Test</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA: QUESTIONS 578 - 605 ---
+        // Transcribed from provided images
+        const rawQuestions = [
+            {
+                id: 578,
+                text: "According to the concept of Limit State Design as per IS 456:2000, the probability of failure of a structure is",
+                options: ["0.097", "0.079", "0.067", "0.078"],
+                correct: 0,
+                tag: "RRB JE CBT-II 28-08-2019 | HESCOM AE 2017",
+                sol: "<b>Ans. (a):</b> As per According to clause 6.1.1, the characteristic strength is defined as the strength below which not more than 5 percent of test result as expected to fall.<br>Chances of no failure = 0.95 × 0.95 = 0.9025.<br>Probability of failure = [1 - (0.95)<sup>2</sup>] = 0.0975 ≈ 0.097."
+            },
+            {
+                id: 579,
+                text: "Any limiting condition beyond which the structure ceases to fulfill its intended function:",
+                options: ["limit state", "ultimate state", "life safety state", "working state"],
+                correct: 0,
+                tag: "Gujarat Electric Board 2017 | GSECL AE 2018",
+                sol: "<b>Ans. (a):</b> Limit state- A limit state is any limiting condition beyond which the structure ceases to fulfill its intended function."
+            },
+            {
+                id: 580,
+                text: "The distance to the neutral axis from the top compression fibre of a singly reinforced rectangular beam is:",
+                options: [
+                    "x<sub>u</sub> = (0.36 f<sub>ck</sub> b) / (0.87 f<sub>y</sub> A<sub>st</sub>)",
+                    "x<sub>u</sub> = (0.3 f<sub>y</sub> b) / (0.87 f<sub>ck</sub> A<sub>st</sub>)",
+                    "x<sub>u</sub> = (0.87 f<sub>y</sub> A<sub>st</sub>) / (0.36 f<sub>ck</sub> b)",
+                    "x<sub>u</sub> = (0.87 f<sub>ck</sub> b) / (0.36 f<sub>y</sub> A<sub>st</sub>)"
+                ],
+                correct: 2,
+                tag: "KERLA PSC Code 197/2015",
+                sol: "<b>Ans. (c):</b> For equilibrium, Total Compression (C) = Total Tension (T).<br>0.36 f<sub>ck</sub> b x<sub>u</sub> = 0.87 f<sub>y</sub> A<sub>st</sub>.<br>Thus, x<sub>u</sub> = (0.87 f<sub>y</sub> A<sub>st</sub>) / (0.36 f<sub>ck</sub> b)."
+            },
+            {
+                id: 581,
+                text: "In limit state method of design, the over reinforced sections:",
+                options: ["are not permitted", "are permitted", "are permitted only in extreme fibres", "permitted in any case"],
+                correct: 0,
+                tag: "KERLA PSC Code 197/2015",
+                sol: "<b>Ans. (a):</b> In over reinforced section concrete will fail first and concrete is brittle, so that's why it is not fully enable because of safety. Because no time get for precaution that's time we, got in under reinforced section failure."
+            },
+            {
+                id: 582,
+                text: "The relation between the effective modulus E<sub>ce</sub>, short term static modulus E<sub>c</sub> and creep coefficient θ of concrete is given by:",
+                options: [
+                    "E<sub>ce</sub> = E<sub>c</sub> / (1 + 2θ)",
+                    "E<sub>ce</sub> = θ / (1 + E<sub>c</sub>)",
+                    "E<sub>ce</sub> = θ / (1 + 2E<sub>c</sub>)",
+                    "E<sub>ce</sub> = E<sub>c</sub> / (1 + θ)"
+                ],
+                correct: 3,
+                tag: "DFCCIL JE 2018",
+                sol: "<b>Ans. (d):</b> Short term static modulus of concrete E<sub>c</sub> = 5000√f<sub>ck</sub>.<br>Long term elastic modulus or effective modulus E<sub>ce</sub> = E<sub>c</sub> / (1 + θ)."
+            },
+            {
+                id: 583,
+                text: "As per IS 456: 2000, the minimum beam width required for a reinforced concrete beam, for 2 hours of fire exposure is:",
+                options: ["250 mm", "200 mm", "150 mm", "300 mm"],
+                correct: 1,
+                tag: "SSC JE 25.09.2019",
+                sol: "<b>Ans. (b):</b> IS 456:2000 the minimum beam width required for a reinforced concrete beam:<br>For 2 hours of fire exposure - 200mm<br>For 3 hours - 240mm<br>For 4 hours - 280mm."
+            },
+            {
+                id: 584,
+                text: "The limiting depth of neutral axis for a reinforced concrete beam of size 250 mm in width and 550 mm in depth, with effective cover of 50 mm for reinforcement, using Fe 500 steel is:",
+                options: ["230 mm", "240 mm", "265 mm", "210 mm"],
+                correct: 0,
+                tag: "SSC JE 25.09.2019",
+                sol: "<b>Ans. (a):</b> Effective depth d = 550 - 50 = 500 mm.<br>For Fe 500, x<sub>u,lim</sub>/d = 0.46.<br>x<sub>u,lim</sub> = 0.46 × 500 = 230 mm."
+            },
+            {
+                id: 585,
+                text: "The approximate allowable axial compressive stress under earthquake load condition in reinforced concrete is",
+                options: ["0.25 fck", "0.33 fck", "0.44 fck", "0.3 fck"],
+                correct: 2,
+                tag: "BCCL JE 30.04.2017 | APPSC AEE 2011",
+                sol: "<b>Ans. (c):</b> As per IS code 456:2000 Clause B-2.3: Increase in permissible stress - When stresses due to wind (or earthquake) temperature & shrinkage effect are combined with those due to dead live & impact load, the stress specified in table no 21, 22 & 23 may be exceeded up a limit of 33 1/3 percent."
+            },
+            {
+                id: 586,
+                text: "Partial factor of safety in limit state method for dead load in the load combination of dead load live load and crane load is",
+                options: ["1.25", "1.5", "1.5", "1.4"],
+                correct: 1,
+                tag: "Nagaland PSC 2017 Paper-II",
+                sol: "<b>Ans. (b):</b> As per IS code 800:2007. For limit state of strength, Load Combination (DL+LL+CL) -> Factor for DL is 1.5."
+            },
+            {
+                id: 587,
+                text: "Calculated dead load of a structure is 500 N/RM. The design load of the structure as per limit state method (after applying the factor of safety in load combination of Dead load + live load + earthquake load or wind load) shall be",
+                options: ["600 N/RM", "750 N/RM", "550 N/RM", "625 N/RM"],
+                correct: 0,
+                tag: "Nagaland PSC 2017 Paper-II",
+                sol: "<b>Ans. (a):</b> Load = [DL+LL+EQL or WL]. Factor is 1.2.<br>Design Load = 1.2 × 500 = 600 N/RM."
+            },
+            {
+                id: 588,
+                text: "According to IS 456 which of the following is correct for the stress strain curve for concrete in limit state method of design?",
+                options: [
+                    "The code permits the use of any appropriate curve",
+                    "The curve must be parabolic upto the strain of 0.0035",
+                    "The curve is a straight line upto the strain of 0.002",
+                    "None of these"
+                ],
+                correct: 0,
+                tag: "UPSSSC JE 31-07-2016",
+                sol: "<b>Ans. (a):</b> The code permits the use of any appropriate curve (parabolic, rectangular, trapezoidal etc.) provided the area of stress block matches the experimental results."
+            },
+            {
+                id: 589,
+                text: "Which of the following criteria is not considered under Limit State of Serviceability?",
+                options: ["Fatigue", "Vibration Limit", "Durability consideration", "Fire Resistance"],
+                correct: 0,
+                tag: "Gujarat PSC AE 2020",
+                sol: "<b>Ans. (a):</b> Limit state of strength or collapse include: load carrying capacity, stability, fatigue, brittle fracture etc.<br>Limit state of serviceability include: deflection, cracking, vibration, deterioration, corrosion, fire."
+            },
+            {
+                id: 590,
+                text: "Limit state of serviceability for deflection including the effects due to creep, shrinkage and temperature... is restricted to:",
+                options: ["Span/150", "Span/200", "Span/250", "Span/350"],
+                correct: 3,
+                tag: "KPSC JTO Code 10/2020",
+                sol: "<b>Ans. (d):</b> Permissible limit of deflection: The deflection including the effects of temperature, creep and shrinkage occurring after erection of partitions and the application of finishes should not normally exceed Span/350 or 20 mm whichever is less."
+            },
+            {
+                id: 591,
+                text: "Consider the following statements...<br>1. The limit state of collapse is defined as the acceptable limit for the stresses...<br>2. Limit state method is one that ensures adequate safety of structure against collapse.<br>3. In the limit state design method, actual stresses developed... differ considerably from theoretical values.<br>Which are correct?",
+                options: ["1 and 2", "1 and 3", "2 and 3", "None"],
+                correct: 2,
+                tag: "Odisha SSC JE 2014",
+                sol: "<b>Ans. (c):</b> Limit state is the condition of a structure once achieved, the structure cannot perform its intended function... Limit state can be achieved due to either collapse or serviceability failure."
+            },
+            {
+                id: 592,
+                text: "The maximum permissible width of crack in concrete structures exposed to moisture or in contact with soil as per IS:456-2000 is about",
+                options: ["0.2 mm", "0.4 mm", "0.6 mm", "0.8 mm"],
+                correct: 0,
+                tag: "BIS JE 2020, CGPSC SES 2014",
+                sol: "<b>Ans. (a):</b> As per IS 456-2000 (35.3.2):<br>General: 0.3 mm.<br>Exposed to moisture/soil: 0.2 mm.<br>Aggressive environment: 0.1 mm."
+            },
+            {
+                id: 593,
+                text: "Match List-I with List-II:<br>A. Serviceability -> 2. Deflection<br>B. Shear key -> 1. Sliding<br>C. Shrinkage -> 3. Cracking<br>D. Concrete spalling -> 4. Corrosion",
+                options: ["A-1, B-3, C-4, D-2", "A-2, B-1, C-3, D-4", "A-1, B-3, C-2, D-4", "A-2, B-1, C-4, D-3"],
+                correct: 1,
+                tag: "Mizoram PSC (PWD) 2020",
+                sol: "<b>Ans. (b):</b> Serviceability -> Deflection. Shear key -> Sliding. Shrinkage -> Cracking. Concrete spalling -> Corrosion."
+            },
+            {
+                id: 594,
+                text: "Which of the following concepts is the basis principle of structural design based?",
+                options: ["Weak column and strong beam", "Equally strong column-beam", "Strong column and weak beam", "None of these"],
+                correct: 2,
+                tag: "RRB JE CBT-II 2019",
+                sol: "<b>Ans. (c):</b> Strong column and weak beam concept ensures that beams fail before columns, preventing total collapse of the building."
+            },
+            {
+                id: 595,
+                text: "In the limit state method, the resultant compressive force in the stress block acts at a distance of",
+                options: ["4/7 from top", "1/2 from top", "1/7 from top", "3/7 from top"],
+                correct: 3,
+                tag: "Tamil Nadu PSC 2019",
+                sol: "<b>Ans. (d):</b> From stress block diagram, the centroid of the stress block acts at 0.42 x<sub>u</sub> from the top. 3/7 is approx 0.428. So 3/7 x<sub>u</sub> is the correct answer."
+            },
+            {
+                id: 596,
+                text: "The limit state of durability of RCC structure is achieved by:",
+                options: [
+                    "designing a member to allow over loading",
+                    "strictly following the empirical bar detailing",
+                    "providing cover for steel, following the limits of cement content and water-cement ratio",
+                    "limiting the span-depth ratio"
+                ],
+                correct: 2,
+                tag: "Mizoram PSC JE PWD 2018",
+                sol: "<b>Ans. (c):</b> The limit state of durability is achieved by providing cover for steel, following the limits of cement content and water-cement ratio as provided in the code."
+            },
+            {
+                id: 597,
+                text: "The design load to be used in the designing with limit state method for RCC members is :",
+                options: ["Elastic load", "Working load", "Mean ultimate load", "Factored load"],
+                correct: 3,
+                tag: "Mizoram PSC JE PWD 2018",
+                sol: "<b>Ans. (d):</b> The design load used in LSM is the Factored Load (Characteristic Load × Partial Safety Factor)."
+            },
+            {
+                id: 598,
+                text: "Choose one of the Sub-Classifications of serviceability limit state in a limit state design method of RCC members from the followings -",
+                options: ["Cracking", "Flexure", "Shear", "Torsion"],
+                correct: 0,
+                tag: "Mizoram PSC JE PWD 2018",
+                sol: "<b>Ans. (a):</b> Limit state of serviceability refers to the performance of the structure under service loads and includes deflection, cracking, vibration, etc."
+            },
+            {
+                id: 599,
+                text: "In limit state method of design, which is not a correct load combination as per IS 456-2000?",
+                options: [
+                    "1.5 DL + 1.5 LL",
+                    "1.5 DL + 1.5 (WL or EL)",
+                    "0.9 DL + 1.5 LL",
+                    "1.2 DL + 1.2 LL + 1.2 (WL or EL)"
+                ],
+                correct: 2,
+                tag: "WB AE 2020",
+                sol: "<b>Ans. (c):</b> 0.9 DL + 1.5 LL is NOT a correct combination. The combination is 1.5 DL + 1.5 LL. The 0.9 factor is used for DL when stability against overturning/sliding is critical, usually with Wind/Seismic (e.g. 0.9 DL + 1.5 WL)."
+            },
+            {
+                id: 600,
+                text: "The shape of the stress-strain curve of concrete upto a strain 0.002 is",
+                options: ["exponential", "linear", "parabolic", "hyperbolic"],
+                correct: 2,
+                tag: "TSPSC HMWSSB Manager 2020",
+                sol: "<b>Ans. (c):</b> The stress-strain curve for concrete is parabola upto 0.002 strain and constant till failure (0.0035)."
+            },
+            {
+                id: 601,
+                text: "According to Whitney's theory, the maximum depth of concrete stress block in a balanced RCC beam section of depth 'd' is...",
+                options: ["0.3 d", "0.43 d", "0.5 d", "0.53 d"],
+                correct: 3,
+                tag: "SSC JE 1.03.2017",
+                sol: "<b>Ans. (d):</b> According to Whitney's theory - The maximum depth of concrete stress block in a balanced RCC beam section of depth 'd' is 0.53d."
+            },
+            {
+                id: 602,
+                text: "The factored loads at the limit state of collapse for DL + LL, DL + WL and DL + LL + WL combinations, according to IS : 456 - 2000 are respectively",
+                options: [
+                    "1.5 DL + 1.5 LL, 1.2 DL + 1.2WL, 1.5 DL + 1.5 LL + WL",
+                    "(0.9 or 1.5) DL + 1.5 LL, 1.5 DL + 1.5 WL, 1.2 DL + 1.2 LL + 1.2 WL",
+                    "1.2 DL + 1.2 LL, 1.5 DL + 1.5 WL, 1.5 DL + 1.5 LL + 1.5 WL",
+                    "1.5 DL + 1.5 LL, (0.9 or 1.5) DL + 1.5 WL, 1.2 DL + 1.2 LL + 1.2 WL"
+                ],
+                correct: 3,
+                tag: "SSC JE 2012",
+                sol: "<b>Ans. (d):</b> Correct factors:<br>DL+LL -> 1.5<br>DL+WL -> 1.5 (or 0.9 if stability concerns)<br>DL+LL+WL -> 1.2"
+            },
+            {
+                id: 603,
+                text: "The IS code used for the design of RC elements is:",
+                options: ["IS 875", "IS 800", "IS 456", "IS 8112"],
+                correct: 2,
+                tag: "Karnataka PSC JE 2017",
+                sol: "<b>Ans. (c):</b> IS 456 : 2000 is the code for RCC design.<br>IS 800 is for steel.<br>IS 875 is for loads."
+            },
+            {
+                id: 604,
+                text: "If the dimensions and grade of concrete of a beam are restricted then it can be designed as which of the following beams?",
+                options: ["Doubly reinforced", "Balanced", "T Beam", "L Beam"],
+                correct: 0,
+                tag: "Karnataka PSC JE 2017",
+                sol: "<b>Ans. (a):</b> If dimensions are restricted and moment > Mu,lim, we provide compression reinforcement, making it a Doubly Reinforced Beam."
+            },
+            {
+                id: 605,
+                text: "The neutral axis of the cross-section of a beam is that axis at which the bending stress is :",
+                options: ["Zero", "Minimum", "Maximum", "Infinity"],
+                correct: 0,
+                tag: "Karnataka PSC JE 2017",
+                sol: "<b>Ans. (a):</b> At the neutral axis of a cross-section of a beam bending stress is zero."
+            }
+        ];
+
+        // --- APP STATE ---
+        let questions = [];
+        let curIdx = 0;
+        let responses = {}; // { qId: { opt: number, status: string, correct: boolean } }
+        let bookmarks = JSON.parse(localStorage.getItem('bookmarks_rcc_set3')) || [];
+        let historyLog = JSON.parse(localStorage.getItem('history_rcc_set3')) || [];
+        let timerInt;
+        let timeLeft = 7200; // 2 hrs
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            updateHomeStats();
+        };
+
+        function updateHomeStats() {
+            document.getElementById('bm-count').innerText = bookmarks.length;
+            
+            const list = document.getElementById('history-list');
+            list.innerHTML = '';
+            if (historyLog.length === 0) {
+                list.innerHTML = '<div style="text-align:center; color:#999; padding:15px;">No tests taken yet.</div>';
+            } else {
+                historyLog.slice().reverse().forEach(h => {
+                    const row = document.createElement('div');
+                    row.className = 'hist-row';
+                    
+                    let accClass = 'acc-low';
+                    if(h.acc >= 80) accClass = 'acc-high';
+                    else if(h.acc >= 50) accClass = 'acc-med';
+
+                    row.innerHTML = `
+                        <div style="text-align:left;">
+                            <div style="font-weight:bold; font-size:0.85rem;">${h.date}</div>
+                            <div style="font-size:0.75rem; color:#888;">Score: ${h.score}/${h.total}</div>
+                        </div>
+                        <div class="${accClass}" style="font-size:1.1rem; align-self:center;">${h.acc}%</div>
+                    `;
+                    list.appendChild(row);
+                });
+            }
+        }
+
+        function clearHistory() {
+            if(confirm("Are you sure you want to clear history?")) {
+                localStorage.removeItem('history_rcc_set3');
+                historyLog = [];
+                updateHomeStats();
+            }
+        }
+
+        function initTest(mode) {
+            if (mode === 'bookmark') {
+                if (bookmarks.length === 0) { alert("No bookmarks found."); return; }
+                questions = rawQuestions.filter(q => bookmarks.includes(q.id));
+            } else {
+                questions = [...rawQuestions];
+            }
+
+            curIdx = 0;
+            responses = {};
+            timeLeft = 7200;
+
+            document.getElementById('home-screen').classList.remove('active');
+            document.getElementById('test-interface').classList.add('active');
+
+            renderQ(0);
+            updatePalette();
+            startTimer();
+        }
+
+        // --- RENDER LOGIC ---
+        function renderQ(idx) {
+            curIdx = idx;
+            const q = questions[idx];
+            const resp = responses[q.id];
+
+            document.getElementById('q-num').innerText = idx + 1 + " / " + questions.length;
+            
+            // Render Tag
+            const tagContainer = document.getElementById('tag-container');
+            if(q.tag) {
+                tagContainer.innerHTML = `<span class="exam-tag">${q.tag}</span>`;
+            } else {
+                tagContainer.innerHTML = '';
+            }
+
+            // Bookmark State
+            const bmIcon = document.getElementById('bookmark-icon');
+            if(bookmarks.includes(q.id)) {
+                bmIcon.innerText = "★";
+                bmIcon.style.color = "#fbbc04"; // Yellow
+            } else {
+                bmIcon.innerText = "☆";
+                bmIcon.style.color = "#ccc";
+            }
+
+            document.getElementById('q-text').innerHTML = q.text;
+
+            // Options
+            const box = document.getElementById('options-box');
+            box.innerHTML = '';
+            q.options.forEach((opt, i) => {
+                const row = document.createElement('div');
+                row.className = 'option-row';
+                
+                // If answered, show styles
+                if(resp && resp.status === 'ans') {
+                    row.style.pointerEvents = 'none'; // Lock
+                    if (i === q.correct) row.classList.add('correct');
+                    else if (i === resp.opt && i !== q.correct) row.classList.add('wrong');
+                }
+
+                row.innerHTML = `<div class="option-radio"></div><span>${opt}</span>`;
+                row.onclick = () => handleAnswer(q.id, i);
+                box.appendChild(row);
+            });
+
+            // Solution Box
+            const solBox = document.getElementById('solution-section');
+            if(resp && resp.status === 'ans') {
+                solBox.classList.add('show');
+                document.getElementById('solution-text').innerHTML = q.sol;
+            } else {
+                solBox.classList.remove('show');
+            }
+
+            // Update Palette UI (Current Highlight)
+            updatePalette();
+        }
+
+        function handleAnswer(qId, optIdx) {
+            const q = questions.find(x => x.id === qId);
+            // Instant feedback mode: save and reveal immediately
+            responses[qId] = {
+                opt: optIdx,
+                correct: (optIdx === q.correct),
+                status: 'ans'
+            };
+            renderQ(curIdx);
+        }
+
+        function markReview() {
+            const qId = questions[curIdx].id;
+            // Only mark if not already answered
+            if(!responses[qId]) {
+                responses[qId] = { status: 'rev', opt: null };
+            } else if (responses[qId].status !== 'ans') {
+                responses[qId].status = 'rev';
+            }
+            renderQ(curIdx); // Re-render to update palette color if visible
+            nextQ(); // Move next generally expected
+        }
+
+        function toggleBookmark(e) {
+            e.stopPropagation();
+            const qId = questions[curIdx].id;
+            const idx = bookmarks.indexOf(qId);
+            if(idx > -1) bookmarks.splice(idx, 1);
+            else bookmarks.push(qId);
+            
+            localStorage.setItem('bookmarks_rcc_set3', JSON.stringify(bookmarks));
+            renderQ(curIdx); // Refresh icon
+        }
+
+        // --- NAVIGATION ---
+        function nextQ() { if(curIdx < questions.length - 1) renderQ(curIdx + 1); }
+        function prevQ() { if(curIdx > 0) renderQ(curIdx - 1); }
+
+        // --- PALETTE ---
+        function updatePalette() {
+            const grid = document.getElementById('palette-grid');
+            grid.innerHTML = '';
+            questions.forEach((q, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'p-item';
+                btn.innerText = i + 1;
+                
+                const r = responses[q.id];
+                if (i === curIdx) btn.classList.add('current');
+                
+                if (r) {
+                    if (r.status === 'ans') btn.classList.add('answered');
+                    else if (r.status === 'rev') btn.classList.add('review');
+                } else {
+                    btn.classList.add('not-visited');
+                }
+                
+                btn.onclick = () => {
+                    renderQ(i);
+                    if(window.innerWidth < 768) closeSidebar();
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.add('open');
+            document.getElementById('overlay').classList.add('open');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('overlay').classList.remove('open');
+        }
+
+        // --- TIMER & SUBMISSION ---
+        function startTimer() {
+            clearInterval(timerInt);
+            timerInt = setInterval(() => {
+                timeLeft--;
+                const h = Math.floor(timeLeft / 3600).toString().padStart(2,'0');
+                const m = Math.floor((timeLeft % 3600) / 60).toString().padStart(2,'0');
+                const s = (timeLeft % 60).toString().padStart(2,'0');
+                document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+                if (timeLeft <= 0) submitTest();
+            }, 1000);
+        }
+
+        function exitTest() {
+            if(confirm("Exit Test? Progress will not be saved in history unless submitted.")) {
+                clearInterval(timerInt);
+                location.reload();
+            }
+        }
+
+        function submitTest() {
+            clearInterval(timerInt);
+            let score = 0;
+            questions.forEach(q => {
+                const r = responses[q.id];
+                if(r && r.status === 'ans' && r.correct) score++;
+            });
+
+            // Save History
+            const acc = Math.round((score / questions.length) * 100);
+            const now = new Date();
+            const dateStr = now.toLocaleDateString() + " " + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            historyLog.push({
+                date: dateStr,
+                score: score,
+                total: questions.length,
+                acc: acc
+            });
+            localStorage.setItem('history_rcc_set3', JSON.stringify(historyLog));
+
+            alert(`Test Submitted!\nScore: ${score} / ${questions.length}\nAccuracy: ${acc}%`);
+            location.reload();
+        }
+    </script>
+</body>
+</html>
