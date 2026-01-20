@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RCC Test (Q829-837)</title>
+    <style>
+        :root {
+            --primary: #e91e63; /* Testbook Pink */
+            --header-bg: #e91e63;
+            --bg: #f2f3f5;
+            --white: #ffffff;
+            --text: #333;
+            --green: #0acf83;
+            --blue: #1a73e8;
+            --yellow: #fbbc04;
+            --gray: #e0e0e0;
+            --dark-gray: #666;
+        }
+
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { margin: 0; background-color: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* --- HEADER --- */
+        header {
+            background-color: var(--header-bg);
+            color: var(--white);
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 100;
+            flex-shrink: 0;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .menu-icon { font-size: 24px; cursor: pointer; }
+        .app-title { font-weight: 600; font-size: 1.1rem; }
+        
+        .timer-badge { 
+            background: rgba(0,0,0,0.15); 
+            padding: 4px 10px; 
+            border-radius: 4px; 
+            font-family: monospace; 
+            font-size: 1rem; 
+            font-weight: bold;
+        }
+
+        .header-right { display: flex; align-items: center; gap: 10px; }
+        
+        .btn-header {
+            border: 1px solid rgba(255,255,255,0.5);
+            background: transparent;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .btn-submit { background: #fff; color: var(--primary); border: none; font-weight: bold; }
+
+        /* --- SCREENS --- */
+        .screen { display: none; flex: 1; height: 100%; position: relative; }
+        .screen.active { display: flex; flex-direction: column; }
+
+        /* --- HOME SCREEN --- */
+        #home-screen { align-items: center; overflow-y: auto; padding: 20px; flex-direction: column; }
+        
+        .card { 
+            background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+            width: 100%; max-width: 450px; text-align: center; margin-bottom: 20px;
+        }
+        .btn-lg { width: 100%; padding: 14px; margin: 8px 0; border: none; border-radius: 4px; font-size: 1rem; font-weight: 600; color: white; cursor: pointer; transition: 0.2s; }
+        .btn-start { background: var(--primary); }
+        .btn-review { background: #555; }
+        .btn-lg:active { opacity: 0.9; transform: scale(0.98); }
+
+        /* History Table */
+        .history-section {
+            width: 100%; max-width: 450px; background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .hist-header { font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; color: #555; display: flex; justify-content: space-between; }
+        .hist-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f5f5f5; font-size: 0.9rem; }
+        .hist-row:last-child { border-bottom: none; }
+        .acc-high { color: var(--green); font-weight: bold; }
+        .acc-med { color: var(--yellow); font-weight: bold; }
+        .acc-low { color: var(--primary); font-weight: bold; }
+
+        /* --- TEST INTERFACE --- */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            padding-bottom: 80px; 
+            position: relative;
+        }
+
+        .q-panel { background: white; border-radius: 4px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); min-height: 100%; }
+        
+        .q-header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; color: #666; font-size: 0.9rem; }
+        .q-marks { color: var(--green); font-weight: bold; }
+        .q-neg { color: var(--primary); font-weight: bold; margin-left: 5px; }
+
+        .exam-tag { background: #e3f2fd; color: #1976d2; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; display: inline-block; margin-bottom: 10px; }
+
+        .q-text { font-size: 1.1rem; line-height: 1.5; color: #222; margin-bottom: 20px; font-weight: 500; }
+        .q-text img { max-width: 100%; margin-top: 10px; }
+        
+        /* Options */
+        .option-row {
+            display: flex; align-items: flex-start; padding: 12px; border: 1px solid #e0e0e0; 
+            border-radius: 4px; margin-bottom: 10px; cursor: pointer; transition: background 0.1s;
+        }
+        .option-radio {
+            width: 20px; height: 20px; border: 2px solid #bbb; border-radius: 50%; margin-right: 12px; margin-top: 2px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .option-row:hover { background: #f9f9f9; }
+        
+        /* States */
+        .option-row.selected { border-color: var(--blue); background: #eef5ff; }
+        .option-row.selected .option-radio { border-color: var(--blue); }
+        .option-row.selected .option-radio::after { content:''; width: 10px; height: 10px; background: var(--blue); border-radius: 50%; }
+
+        .option-row.correct { border-color: var(--green); background: #e8f5e9; }
+        .option-row.correct .option-radio { border-color: var(--green); }
+        .option-row.correct .option-radio::after { content:''; width: 10px; height: 10px; background: var(--green); border-radius: 50%; }
+
+        .option-row.wrong { border-color: var(--primary); background: #ffebee; }
+        .option-row.wrong .option-radio { border-color: var(--primary); }
+        .option-row.wrong .option-radio::after { content:''; width: 10px; height: 10px; background: var(--primary); border-radius: 50%; }
+
+        /* Solution */
+        .solution-section {
+            margin-top: 20px; background: #fff8e1; border: 1px solid #ffecb3; border-radius: 4px; padding: 15px; display: none;
+        }
+        .solution-section.show { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- FOOTER --- */
+        .test-footer {
+            height: 60px; background: white; border-top: 1px solid #ddd; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 10px; position: fixed; bottom: 0; left: 0; width: 100%; z-index: 50;
+        }
+        .footer-btn { padding: 10px 15px; border-radius: 4px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: 1px solid #ddd; background: white; color: #333; }
+        .btn-mark { border-color: var(--yellow); color: #b08d00; }
+        .btn-next { background: var(--green); color: white; border: none; padding-left: 20px; padding-right: 20px;}
+        .btn-prev { background: #f0f0f0; }
+
+        /* --- SIDEBAR --- */
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 199; display: none; }
+        .sidebar-overlay.open { display: block; }
+        .sidebar {
+            position: fixed; top: 0; right: 0; width: 85%; max-width: 320px; height: 100%;
+            background: white; z-index: 200; transform: translateX(100%); transition: transform 0.3s;
+            display: flex; flex-direction: column;
+        }
+        .sidebar.open { transform: translateX(0); }
+        .palette-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 15px; overflow-y: auto; flex:1; align-content: start; }
+        .p-item { 
+            height: 40px; border: 1px solid #ddd; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; background: white; font-weight: bold; color: #555;
+        }
+        .p-item.answered { background: var(--green); color: white; border-color: var(--green); border-radius: 50%; }
+        .p-item.review { background: var(--yellow); border-radius: 50%; color: black; border-color: var(--yellow); }
+        .p-item.current { border: 2px solid var(--blue); color: var(--blue); }
+        .p-item.not-visited { background: #f0f0f0; }
+
+        /* Latex/Formula styles */
+        sub, sup { font-size: 0.75em; }
+    </style>
+</head>
+<body>
+
+    <div id="home-screen" class="screen active">
+        <div class="card">
+            <h2 style="color:var(--primary); margin-top:0;">RCC Mock Test</h2>
+            <div style="text-align:left; font-size:0.95rem; color:#555; margin-bottom:20px;">
+                <p>• <strong>Topic:</strong> Questions 829 - 837 (Torsion)</p>
+                <p>• <strong>Mode:</strong> Practice (Instant Solutions)</p>
+                <p>• <strong>Time:</strong> 120 Minutes</p>
+            </div>
+            <button class="btn-lg btn-start" onclick="initTest('full')">Start New Test</button>
+            <button class="btn-lg btn-review" onclick="initTest('bookmark')">Review Bookmarks</button>
+            <div style="margin-top:15px; font-size:0.85rem; color:#888;">
+                Bookmarks Available: <span id="bm-count">0</span>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <div class="hist-header">
+                <span>Past Performance</span>
+                <span style="font-size:0.8rem; cursor:pointer; color:var(--blue);" onclick="clearHistory()">Clear History</span>
+            </div>
+            <div id="history-list">
+                <div style="text-align:center; color:#999; padding:15px;">No tests taken yet.</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="test-interface" class="screen">
+        <header>
+            <div class="header-left">
+                <div class="menu-icon" onclick="toggleSidebar()">☰</div>
+                <div class="app-title">RCC Test</div>
+            </div>
+            <div class="timer-badge" id="timer">02:00:00</div>
+            <div class="header-right">
+                <button class="btn-header" onclick="exitTest()">Exit</button>
+                <button class="btn-header btn-submit" onclick="submitTest()">Submit</button>
+            </div>
+        </header>
+
+        <div class="content-area" id="content-area" onclick="closeSidebar()">
+            <div class="q-panel">
+                <div class="q-header">
+                    <span>Question <span id="q-num">1</span></span>
+                    <div>
+                        <span class="q-marks">+1</span> <span class="q-neg">-0.25</span>
+                        <span style="margin-left:15px; cursor:pointer; font-size:1.5rem;" id="bookmark-icon" onclick="toggleBookmark(event)">☆</span>
+                    </div>
+                </div>
+                
+                <div id="tag-container"></div>
+
+                <div class="q-text" id="q-text"></div>
+                <div id="options-box"></div>
+                
+                <div class="solution-section" id="solution-section">
+                    <strong style="color:var(--green)">Detailed Solution:</strong>
+                    <div id="solution-text" style="margin-top:8px; font-size:0.95rem; color:#444; line-height:1.6;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-footer">
+            <button class="footer-btn btn-prev" onclick="prevQ()">Previous</button>
+            <button class="footer-btn btn-mark" onclick="markReview()">Mark Review</button>
+            <button class="footer-btn btn-next" onclick="nextQ()">Save & Next</button>
+        </div>
+
+        <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+        <div class="sidebar" id="sidebar">
+            <div style="padding:15px; background:#f8f9fa; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center;">
+                <strong>Question Palette</strong>
+                <span style="cursor:pointer; font-size:1.2rem; padding:5px;" onclick="closeSidebar()">✕</span>
+            </div>
+            <div style="padding:10px; font-size:0.75rem; display:flex; gap:10px; flex-wrap:wrap; border-bottom:1px solid #eee; background:white;">
+                <span style="color:var(--green)">● Ans</span> <span style="color:var(--yellow)">● Rev</span> <span style="color:var(--blue)">● Curr</span> <span style="color:#ccc">● Skip</span>
+            </div>
+            <div class="palette-grid" id="palette-grid"></div>
+            <div style="padding:15px; border-top:1px solid #ddd;">
+                <button class="btn-lg btn-start" onclick="submitTest()">Submit Test</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA: QUESTIONS 829 - 837 ---
+        const rawQuestions = [
+            {
+                id: 829,
+                text: "For torsional reinforcement, side face reinforcement with torsion shall be provided along the two sides if the depth of web of beam exceeds..........",
+                options: ["300 mm", "750 mm", "250 mm", "450 mm"],
+                correct: 3,
+                tag: "UPRVUNL AE 04.07.2021 | GSECL AE 2018",
+                sol: "<b>Ans. (d):</b> When a beam is subjected to torsion, side face reinforcement is provided if the depth of the web exceeds 450 mm (compared to 750 mm for normal shear). The area shall be at least 0.1% of the web area."
+            },
+            {
+                id: 830,
+                text: "The member subjected to torsion shall be designed for fictitious shear which is function of the actual shear and torsion",
+                options: ["Critical shear", "Equivalent shear", "Theoretical shear", "Design shear"],
+                correct: 1,
+                tag: "KPSC Overseer/Draftsman 2020",
+                sol: "<b>Ans. (b):</b> As per IS 456, the longitudinal and transverse reinforcement are determined taking into account the combined effects of bending moment and shear force and torsional moment. The equivalent shear V<sub>e</sub> = V<sub>u</sub> + 1.6(T<sub>u</sub>/b)."
+            },
+            {
+                id: 831,
+                text: "In the design of beam for torsion, the spacing of the stirrups placed perpendicular to the axis of the member shall not exceed.........mm.<br>(i) x<sub>1</sub><br>(ii) (x<sub>1</sub> + y<sub>1</sub>)/4<br>(iii) 300",
+                options: ["Minimum of (i) & (ii)", "Minimum of (ii) & (iii)", "Minimum of (i) & (iii)", "Minimum of (i), (ii) & (iii)"],
+                correct: 3,
+                tag: "MH WCD 2019",
+                sol: "<b>Ans. (d):</b> The spacing of stirrups for torsion shall not exceed the least of: <br>1. x<sub>1</sub><br>2. (x<sub>1</sub> + y<sub>1</sub>)/4<br>3. 300 mm."
+            },
+            {
+                id: 832,
+                text: "When a RCC beam is subjected to twisting moment, torsion reinforcement is provided as :",
+                options: ["tension reinforcement", "shear reinforcement only", "shear and flexural reinforcement", "flexural reinforcement only"],
+                correct: 2,
+                tag: "Kolhapur MNC 2017",
+                sol: "<b>Ans. (c):</b> Torsion reinforcement is provided in the form of both longitudinal (flexural) reinforcement and transverse (shear) reinforcement (closed stirrups)."
+            },
+            {
+                id: 833,
+                text: "In section, shear centre is a point through which, resultant load passes the section will not be subjected to any",
+                options: ["Bending", "Tension", "Compression", "Torsion"],
+                correct: 3,
+                tag: "PGVCL JE 14.10.2017",
+                sol: "<b>Ans. (d):</b> Shear centre is a point through which if the external load passes, the section will be subjected to bending only and no torsion (twisting)."
+            },
+            {
+                id: 834,
+                text: "Torsion resisting capacity of a given reinforced concrete section.................",
+                options: [
+                    "Decreases with decrease in stirrup spacing",
+                    "Decreases with increase in longitudinal bars",
+                    "Does not depend upon stirrup and longitudinal steels",
+                    "Increases with the increases in stirrups and longitudinal steels"
+                ],
+                correct: 3,
+                tag: "SSC JE 3.3.2017, Afternoon Shift",
+                sol: "<b>Ans. (d):</b> The amount of torsion a member depends upon the magnitude of the torsional stiffness of the member. The presence of reinforcement (both stirrups and longitudinal) increases the torsional moment carrying capacity."
+            },
+            {
+                id: 835,
+                text: "In a two way slab with corners held down, the torsion steel is provided at the",
+                options: ["top", "bottom", "both top & bottom", "middle"],
+                correct: 2,
+                tag: "HPSSC JE 2015",
+                sol: "<b>Ans. (c):</b> If the corners of the slab are held down, torsion reinforcement is provided in both directions parallel to sides at top and bottom up to a distance of 1/5th of the span."
+            },
+            {
+                id: 836,
+                text: "A rectangular beam with b = 200 mm and effective depth d = 300 mm is subjected to limit shear of 80 kN and torsional moment of 6 kNm. The equivalent value of shear will be :",
+                options: ["128 kN", "116 kN", "104 kN", "92 kN"],
+                correct: 0,
+                tag: "ESE 2020",
+                sol: "<b>Ans. (a):</b> Equivalent Shear V<sub>e</sub> = V<sub>u</sub> + 1.6(T<sub>u</sub>/b).<br>V<sub>u</sub> = 80 kN, T<sub>u</sub> = 6 kNm, b = 0.2 m.<br>V<sub>e</sub> = 80 + 1.6(6/0.2) = 80 + 1.6(30) = 80 + 48 = 128 kN."
+            },
+            {
+                id: 837,
+                text: "Statement (I): Torsion reinforcement is provided at (and near) corners in a two-way slab which is simply supported on both edges meeting at the corner.<br>Statement (II): The area of reinforcement in each of the layers shall be three-quarters of the area required for maximum mid-span moment in the slab.",
+                options: [
+                    "Both Statement (I) and Statement (II) are individually true and Statement (II) is the correct explanation of Statement (I)",
+                    "Both Statement (I) and Statement (II) are individually true but Statement (II) is NOT the correct explanation of Statement (I)",
+                    "Statement (I) is true but Statement (II) is false",
+                    "Statement (I) is false but Statement (II) is true"
+                ],
+                correct: 1,
+                tag: "ESE 2019",
+                sol: "<b>Ans. (b):</b> Torsion reinforcement is provided at corners where edges are discontinuous (simply supported). The magnitude is 3/4th of max mid-span moment steel. Both statements are true facts, but II doesn't explain *why* it is provided (which is to prevent corner lifting/cracking)."
+            }
+        ];
+
+        // --- APP STATE ---
+        let questions = [];
+        let curIdx = 0;
+        let responses = {}; 
+        let bookmarks = JSON.parse(localStorage.getItem('bookmarks_rcc_set13')) || [];
+        let historyLog = JSON.parse(localStorage.getItem('history_rcc_set13')) || [];
+        let timerInt;
+        let timeLeft = 7200; // 2 hrs
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            updateHomeStats();
+        };
+
+        function updateHomeStats() {
+            document.getElementById('bm-count').innerText = bookmarks.length;
+            
+            const list = document.getElementById('history-list');
+            list.innerHTML = '';
+            if (historyLog.length === 0) {
+                list.innerHTML = '<div style="text-align:center; color:#999; padding:15px;">No tests taken yet.</div>';
+            } else {
+                historyLog.slice().reverse().forEach(h => {
+                    const row = document.createElement('div');
+                    row.className = 'hist-row';
+                    
+                    let accClass = 'acc-low';
+                    if(h.acc >= 80) accClass = 'acc-high';
+                    else if(h.acc >= 50) accClass = 'acc-med';
+
+                    row.innerHTML = `
+                        <div style="text-align:left;">
+                            <div style="font-weight:bold; font-size:0.85rem;">${h.date}</div>
+                            <div style="font-size:0.75rem; color:#888;">Score: ${h.score}/${h.total}</div>
+                        </div>
+                        <div class="${accClass}" style="font-size:1.1rem; align-self:center;">${h.acc}%</div>
+                    `;
+                    list.appendChild(row);
+                });
+            }
+        }
+
+        function clearHistory() {
+            if(confirm("Are you sure you want to clear history?")) {
+                localStorage.removeItem('history_rcc_set13');
+                historyLog = [];
+                updateHomeStats();
+            }
+        }
+
+        function initTest(mode) {
+            if (mode === 'bookmark') {
+                if (bookmarks.length === 0) { alert("No bookmarks found."); return; }
+                questions = rawQuestions.filter(q => bookmarks.includes(q.id));
+            } else {
+                questions = [...rawQuestions];
+            }
+
+            curIdx = 0;
+            responses = {};
+            timeLeft = 7200;
+
+            document.getElementById('home-screen').classList.remove('active');
+            document.getElementById('test-interface').classList.add('active');
+
+            renderQ(0);
+            updatePalette();
+            startTimer();
+        }
+
+        // --- RENDER LOGIC ---
+        function renderQ(idx) {
+            curIdx = idx;
+            const q = questions[idx];
+            const resp = responses[q.id];
+
+            document.getElementById('q-num').innerText = idx + 1 + " / " + questions.length;
+            
+            // Render Tag
+            const tagContainer = document.getElementById('tag-container');
+            if(q.tag) {
+                tagContainer.innerHTML = `<span class="exam-tag">${q.tag}</span>`;
+            } else {
+                tagContainer.innerHTML = '';
+            }
+
+            // Bookmark State
+            const bmIcon = document.getElementById('bookmark-icon');
+            if(bookmarks.includes(q.id)) {
+                bmIcon.innerText = "★";
+                bmIcon.style.color = "#fbbc04"; // Yellow
+            } else {
+                bmIcon.innerText = "☆";
+                bmIcon.style.color = "#ccc";
+            }
+
+            document.getElementById('q-text').innerHTML = q.text;
+
+            // Options
+            const box = document.getElementById('options-box');
+            box.innerHTML = '';
+            q.options.forEach((opt, i) => {
+                const row = document.createElement('div');
+                row.className = 'option-row';
+                
+                // If answered, show styles
+                if(resp && resp.status === 'ans') {
+                    row.style.pointerEvents = 'none'; // Lock
+                    if (i === q.correct) row.classList.add('correct');
+                    else if (i === resp.opt && i !== q.correct) row.classList.add('wrong');
+                }
+
+                row.innerHTML = `<div class="option-radio"></div><span>${opt}</span>`;
+                row.onclick = () => handleAnswer(q.id, i);
+                box.appendChild(row);
+            });
+
+            // Solution Box
+            const solBox = document.getElementById('solution-section');
+            if(resp && resp.status === 'ans') {
+                solBox.classList.add('show');
+                document.getElementById('solution-text').innerHTML = q.sol;
+            } else {
+                solBox.classList.remove('show');
+            }
+
+            // Update Palette UI (Current Highlight)
+            updatePalette();
+        }
+
+        function handleAnswer(qId, optIdx) {
+            const q = questions.find(x => x.id === qId);
+            // Instant feedback mode: save and reveal immediately
+            responses[qId] = {
+                opt: optIdx,
+                correct: (optIdx === q.correct),
+                status: 'ans'
+            };
+            renderQ(curIdx);
+        }
+
+        function markReview() {
+            const qId = questions[curIdx].id;
+            // Only mark if not already answered
+            if(!responses[qId]) {
+                responses[qId] = { status: 'rev', opt: null };
+            } else if (responses[qId].status !== 'ans') {
+                responses[qId].status = 'rev';
+            }
+            renderQ(curIdx); // Re-render to update palette color if visible
+            nextQ(); // Move next generally expected
+        }
+
+        function toggleBookmark(e) {
+            e.stopPropagation();
+            const qId = questions[curIdx].id;
+            const idx = bookmarks.indexOf(qId);
+            if(idx > -1) bookmarks.splice(idx, 1);
+            else bookmarks.push(qId);
+            
+            localStorage.setItem('bookmarks_rcc_set13', JSON.stringify(bookmarks));
+            renderQ(curIdx); // Refresh icon
+        }
+
+        // --- NAVIGATION ---
+        function nextQ() { if(curIdx < questions.length - 1) renderQ(curIdx + 1); }
+        function prevQ() { if(curIdx > 0) renderQ(curIdx - 1); }
+
+        // --- PALETTE ---
+        function updatePalette() {
+            const grid = document.getElementById('palette-grid');
+            grid.innerHTML = '';
+            questions.forEach((q, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'p-item';
+                btn.innerText = i + 1;
+                
+                const r = responses[q.id];
+                if (i === curIdx) btn.classList.add('current');
+                
+                if (r) {
+                    if (r.status === 'ans') btn.classList.add('answered');
+                    else if (r.status === 'rev') btn.classList.add('review');
+                } else {
+                    btn.classList.add('not-visited');
+                }
+                
+                btn.onclick = () => {
+                    renderQ(i);
+                    if(window.innerWidth < 768) closeSidebar();
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.add('open');
+            document.getElementById('overlay').classList.add('open');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('overlay').classList.remove('open');
+        }
+
+        // --- TIMER & SUBMISSION ---
+        function startTimer() {
+            clearInterval(timerInt);
+            timerInt = setInterval(() => {
+                timeLeft--;
+                const h = Math.floor(timeLeft / 3600).toString().padStart(2,'0');
+                const m = Math.floor((timeLeft % 3600) / 60).toString().padStart(2,'0');
+                const s = (timeLeft % 60).toString().padStart(2,'0');
+                document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+                if (timeLeft <= 0) submitTest();
+            }, 1000);
+        }
+
+        function exitTest() {
+            if(confirm("Exit Test? Progress will not be saved in history unless submitted.")) {
+                clearInterval(timerInt);
+                location.reload();
+            }
+        }
+
+        function submitTest() {
+            clearInterval(timerInt);
+            let score = 0;
+            questions.forEach(q => {
+                const r = responses[q.id];
+                if(r && r.status === 'ans' && r.correct) score++;
+            });
+
+            // Save History
+            const acc = Math.round((score / questions.length) * 100);
+            const now = new Date();
+            const dateStr = now.toLocaleDateString() + " " + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            historyLog.push({
+                date: dateStr,
+                score: score,
+                total: questions.length,
+                acc: acc
+            });
+            localStorage.setItem('history_rcc_set13', JSON.stringify(historyLog));
+
+            alert(`Test Submitted!\nScore: ${score} / ${questions.length}\nAccuracy: ${acc}%`);
+            location.reload();
+        }
+    </script>
+</body>
+</html>
