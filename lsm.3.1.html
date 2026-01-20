@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RCC Test (Testbook Style)</title>
+    <style>
+        :root {
+            --primary: #e91e63; /* Pink Header (Testbook Style) */
+            --header-bg: #e91e63;
+            --bg: #f2f3f5;
+            --white: #ffffff;
+            --text: #333;
+            --green: #0acf83; /* Testbook Green */
+            --blue: #1a73e8;
+            --yellow: #fbbc04;
+            --sidebar-width: 280px;
+        }
+
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            margin: 0; 
+            background-color: var(--bg); 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+        }
+
+        /* --- HEADER --- */
+        header {
+            background-color: var(--header-bg);
+            color: var(--white);
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 100;
+            flex-shrink: 0;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .menu-icon { font-size: 24px; cursor: pointer; }
+        .app-title { font-weight: 600; font-size: 1.1rem; }
+        
+        .timer-badge { 
+            background: rgba(0,0,0,0.15); 
+            padding: 4px 10px; 
+            border-radius: 4px; 
+            font-family: monospace; 
+            font-size: 1rem; 
+            font-weight: bold;
+        }
+
+        .header-right { display: flex; align-items: center; gap: 10px; }
+        
+        .btn-header {
+            border: 1px solid rgba(255,255,255,0.5);
+            background: transparent;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .btn-submit { background: #fff; color: var(--primary); border: none; font-weight: bold; }
+
+        /* --- SCREENS --- */
+        .screen { display: none; flex: 1; height: 100%; position: relative; }
+        .screen.active { display: flex; flex-direction: column; }
+
+        /* --- HOME SCREEN --- */
+        #home-screen { align-items: center; overflow-y: auto; padding: 20px; flex-direction: column; }
+        
+        .card { 
+            background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+            width: 100%; max-width: 450px; text-align: center; margin-bottom: 20px;
+        }
+        .btn-lg { width: 100%; padding: 14px; margin: 8px 0; border: none; border-radius: 4px; font-size: 1rem; font-weight: 600; color: white; cursor: pointer; }
+        .btn-start { background: var(--primary); }
+        .btn-review { background: #555; }
+        
+        /* History Table */
+        .history-section {
+            width: 100%; max-width: 450px; background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .hist-header { font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; color: #555; display: flex; justify-content: space-between; }
+        .hist-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f5f5f5; font-size: 0.9rem; }
+        .hist-row:last-child { border-bottom: none; }
+        .acc-high { color: var(--green); font-weight: bold; }
+        .acc-low { color: var(--primary); font-weight: bold; }
+
+        /* --- TEST INTERFACE --- */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            padding-bottom: 80px; 
+            position: relative;
+        }
+
+        .q-panel { background: white; border-radius: 4px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); min-height: 100%; }
+        
+        .q-header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; color: #666; font-size: 0.9rem; }
+        .q-marks { color: var(--green); font-weight: bold; }
+        .q-neg { color: var(--primary); font-weight: bold; margin-left: 5px; }
+
+        .q-text { font-size: 1.05rem; line-height: 1.5; color: #222; margin-bottom: 20px; font-weight: 500; }
+        
+        /* Options */
+        .option-row {
+            display: flex; align-items: flex-start; padding: 12px; border: 1px solid #e0e0e0; 
+            border-radius: 4px; margin-bottom: 10px; cursor: pointer; transition: background 0.1s;
+        }
+        .option-radio {
+            width: 18px; height: 18px; border: 2px solid #bbb; border-radius: 50%; margin-right: 12px; margin-top: 2px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .option-row.selected { border-color: var(--blue); background: #eef5ff; }
+        .option-row.selected .option-radio { border-color: var(--blue); }
+        .option-row.selected .option-radio::after { content:''; width: 8px; height: 8px; background: var(--blue); border-radius: 50%; }
+
+        .option-row.correct { border-color: var(--green); background: #e8f5e9; }
+        .option-row.wrong { border-color: var(--primary); background: #ffebee; }
+
+        /* Solution */
+        .solution-section {
+            margin-top: 20px; background: #f8f9fa; border: 1px solid #eee; border-radius: 4px; padding: 15px; display: none;
+        }
+        .solution-section.show { display: block; }
+
+        /* --- FOOTER --- */
+        .test-footer {
+            height: 60px; background: white; border-top: 1px solid #ddd; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 10px; position: fixed; bottom: 0; left: 0; width: 100%; z-index: 50;
+        }
+        .footer-btn { padding: 8px 16px; border-radius: 4px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: 1px solid #ddd; background: white; color: #333; }
+        .btn-mark { border-color: var(--yellow); color: #856404; }
+        .btn-next { background: var(--green); color: white; border: none; padding-left: 24px; padding-right: 24px;}
+        .btn-prev { background: #f0f0f0; }
+
+        /* --- SIDEBAR --- */
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 199; display: none; }
+        .sidebar-overlay.open { display: block; }
+        .sidebar {
+            position: fixed; top: 0; right: 0; width: 80%; max-width: 300px; height: 100%;
+            background: white; z-index: 200; transform: translateX(100%); transition: transform 0.3s;
+            display: flex; flex-direction: column;
+        }
+        .sidebar.open { transform: translateX(0); }
+        .palette-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 10px; overflow-y: auto; flex:1; }
+        .p-item { 
+            height: 35px; border: 1px solid #ddd; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; background: white;
+        }
+        .p-item.answered { background: var(--green); color: white; border-color: var(--green); border-radius: 50%; }
+        .p-item.review { background: var(--yellow); border-radius: 50%; color: black; }
+        .p-item.current { border: 2px solid var(--blue); }
+        .p-item.not-visited { background: #f0f0f0; }
+
+    </style>
+</head>
+<body>
+
+    <div id="home-screen" class="screen active">
+        <div class="card">
+            <h2 style="color:var(--primary); margin-top:0;">RCC Mock Test</h2>
+            <div style="text-align:left; font-size:0.9rem; color:#555; margin-bottom:20px;">
+                <p>• <strong>Subject:</strong> RCC (Limit State Method)</p>
+                <p>• <strong>Questions:</strong> 513 - 544</p>
+                <p>• <strong>Time:</strong> 120 Minutes</p>
+            </div>
+            <button class="btn-lg btn-start" onclick="initTest('full')">Start New Test</button>
+            <button class="btn-lg btn-review" onclick="initTest('bookmark')">Review Bookmarks</button>
+            <div style="margin-top:10px; font-size:0.85rem; color:#888;">
+                Total Bookmarks: <span id="bm-count">0</span>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <div class="hist-header">
+                <span>Past Performance</span>
+                <span style="font-size:0.8rem; cursor:pointer; color:var(--blue);" onclick="clearHistory()">Clear History</span>
+            </div>
+            <div id="history-list">
+                <div style="text-align:center; color:#999; padding:10px;">No tests taken yet.</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="test-interface" class="screen">
+        <header>
+            <div class="header-left">
+                <div class="menu-icon" onclick="toggleSidebar()">☰</div>
+                <div class="app-title">RCC Test</div>
+            </div>
+            <div class="timer-badge" id="timer">02:00:00</div>
+            <div class="header-right">
+                <button class="btn-header" onclick="exitTest()">Exit</button>
+                <button class="btn-header btn-submit" onclick="submitTest()">Submit</button>
+            </div>
+        </header>
+
+        <div class="content-area" id="content-area" onclick="closeSidebar()">
+            <div class="q-panel">
+                <div class="q-header">
+                    <span>Question <span id="q-num">1</span></span>
+                    <div>
+                        <span class="q-marks">+1</span> <span class="q-neg">-0.25</span>
+                        <span style="margin-left:15px; cursor:pointer; font-size:1.2rem;" id="bookmark-icon" onclick="toggleBookmark(event)">☆</span>
+                    </div>
+                </div>
+                <div style="margin-bottom:10px;">
+                    <span style="background:#e3f2fd; color:#1976d2; padding:2px 6px; border-radius:4px; font-size:0.75rem; font-weight:bold;" id="exam-tag">TAG</span>
+                </div>
+                <div class="q-text" id="q-text"></div>
+                <div id="options-box"></div>
+                <div class="solution-section" id="solution-section">
+                    <strong style="color:var(--green)">Detailed Solution:</strong>
+                    <div id="solution-text" style="margin-top:5px; font-size:0.95rem; color:#444;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-footer">
+            <button class="footer-btn btn-prev" onclick="prevQ()">Previous</button>
+            <button class="footer-btn btn-mark" onclick="markReview()">Mark for Review</button>
+            <button class="footer-btn btn-next" onclick="nextQ()">Save & Next</button>
+        </div>
+
+        <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+        <div class="sidebar" id="sidebar">
+            <div style="padding:15px; background:#f0f0f0; border-bottom:1px solid #ddd; display:flex; justify-content:space-between;">
+                <strong>Question Palette</strong>
+                <span style="cursor:pointer;" onclick="closeSidebar()">✕</span>
+            </div>
+            <div style="padding:10px; font-size:0.75rem; display:flex; gap:10px; flex-wrap:wrap; border-bottom:1px solid #eee;">
+                <span style="color:var(--green)">● Ans</span> <span style="color:var(--yellow)">● Rev</span> <span style="color:#ccc">● Skip</span>
+            </div>
+            <div class="palette-grid" id="palette-grid"></div>
+            <div style="padding:15px; border-top:1px solid #ddd;">
+                <button class="btn-lg btn-start" onclick="submitTest()">Submit Test</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        const rawData = [
+            { id: 513, text: "The maximum strain in the tension reinforcement in the section at failure shall not be less than:", options: ["fy/1.115Es + 0.02", "fy/1.002Es + 1.115", "fy/1.10Es + 0.002", "fy/1.15Es + 0.002"], correct: 3, tag: "HPPSC Lecturer 2021", sol: "<b>Ans. (d):</b> Strain = 0.87fy/Es + 0.002." },
+            { id: 514, text: "What is the Neutral axis depth for a singly reinforced beam from the top extreme fibre as per IS 456 : 2000?", options: ["1.5 Xu", "0.002 Xu", "0.36 fck", "0.42 Xu"], correct: 3, tag: "GSSSB AAE 2021", sol: "<b>Ans. (d):</b> Depth is 0.42 Xu." },
+            { id: 515, text: "Which load combination is NOT considered for collapse?", options: ["0.9 DL + 1.5 WL", "1.5 DL + 1.5 WL", "1.5 DL + 1.5 LL + 1.5 WL", "1.2 DL + 1.2 IL + 1.2 WL"], correct: 2, tag: "RPSC Lect. 2021", sol: "<b>Ans. (c):</b> 1.5(DL+LL+WL) is wrong. Correct is 1.2(DL+LL+WL)." },
+            { id: 516, text: "Spacing of main reinforcement primarily controls:", options: ["Collapse", "Cracking", "Deflection", "Durability"], correct: 1, tag: "JPSC AE 2021", sol: "<b>Ans. (b):</b> Spacing controls cracking width." },
+            { id: 517, text: "Max compressive strain in concrete in axial compression:", options: ["0.02", "0.2", "0.002", "2.00"], correct: 2, tag: "DGVCL 2021", sol: "<b>Ans. (c):</b> 0.002 for axial compression." },
+            { id: 518, text: "For I section, max bending stress occurs at:", options: ["Extreme outermost fibre", "Junction", "1/3 from top", "Centre line"], correct: 0, tag: "UPRVUNL AE 2021", sol: "<b>Ans. (a):</b> At extreme outermost fibre." },
+            { id: 519, text: "Limiting depth of NA for beam 300x550mm, fy=500:", options: ["265 mm", "240 mm", "285 mm", "230 mm"], correct: 3, tag: "UPRVUNL AE 2021", sol: "<b>Ans. (d):</b> d=500. k=0.46. Xu,max=230mm." },
+            { id: 520, text: "Xu,max depends on:", options: ["fy only", "Es only", "Both fy and Es", "Neither"], correct: 2, tag: "GPSC 2021", sol: "<b>Ans. (c):</b> Depends on both." },
+            { id: 521, text: "Value of (Xu,max/d) depends on:", options: ["fy only", "fck only", "Both", "Es only"], correct: 0, tag: "RPSC 2021", sol: "<b>Ans. (a):</b> Depends on grade of steel." },
+            { id: 522, text: "Design stress vs Characteristic curve stress for concrete:", options: ["0.45fck vs 0.67fck", "0.67fck vs 0.45fck", "Equal", "None"], correct: 0, tag: "RPSC 2021", sol: "<b>Ans. (a):</b> Design=0.45fck, Curve=0.67fck." },
+            { id: 523, text: "DL=20kN, LL=12kN. Design Load?", options: ["48 kN", "8 kN", "32 kN", "20 kN"], correct: 0, tag: "SSC JE 2021", sol: "<b>Ans. (a):</b> 1.5(20+12) = 48kN." },
+            { id: 524, text: "Limit state of collapse deals with:", options: ["Deflection", "Fire", "Strength & Stability", "Durability"], correct: 2, tag: "SSC JE 2021", sol: "<b>Ans. (c):</b> Strength and stability." },
+            { id: 525, text: "Design bond stress deformed bars M20:", options: ["1.2", "1.8", "1.68", "1.92"], correct: 3, tag: "SSC JE 2021", sol: "<b>Ans. (d):</b> 1.2 * 1.6 = 1.92." },
+            { id: 526, text: "Design BM: DL=50, LL=50, Seismic=20:", options: ["120", "180", "144", "150"], correct: 3, tag: "SSC JE 2021", sol: "<b>Ans. (d):</b> Max of 1.5(DL+LL)=150." },
+            { id: 527, text: "LSM is based on:", options: ["Economic", "Statistical Probability", "Worst loading", "None"], correct: 1, tag: "Assam PSC 2021", sol: "<b>Ans. (b):</b> Statistical probability of failure." },
+            { id: 528, text: "Under reinforced section, Xu is:", options: ["= Xu,max", "< Xu,max", "> Xu,max", "0.5d"], correct: 1, tag: "TN PSC 2019", sol: "<b>Ans. (b):</b> Less than Xu,max." },
+            { id: 529, text: "Pt < Pt,lim. Section is:", options: ["Over reinforced", "None", "Under reinforced", "Balanced"], correct: 2, tag: "NWRD 2016", sol: "<b>Ans. (c):</b> Under reinforced." },
+            { id: 530, text: "Balanced section condition:", options: ["Xu < Xu,lim", "Xu > Xu,lim", "Xu = Xu,lim", "None"], correct: 2, tag: "MH PWD 2019", sol: "<b>Ans. (c):</b> Xu = Xu,lim." },
+            { id: 531, text: "Mu,lim for b=300, d=300, Fe500:", options: ["90.2", "56.7", "78.3", "120.5"], correct: 2, tag: "ISRO 2018", sol: "<b>Ans. (c):</b> 78.3 kNm." },
+            { id: 532, text: "Partial safety factor concrete:", options: ["1.5", "1.15", "0.87", "0.466"], correct: 0, tag: "PGVCL 2017", sol: "<b>Ans. (a):</b> 1.5." },
+            { id: 533, text: "Safety factor Concrete & Steel:", options: ["1.5 & 1.115", "1.5 & 1.15", "1.115 & 1.5", "1.15 & 1.5"], correct: 1, tag: "Mizoram 2020", sol: "<b>Ans. (b):</b> 1.5 and 1.15." },
+            { id: 534, text: "Design yield stress steel:", options: ["0.37fy", "0.57fy", "0.67fy", "0.87fy"], correct: 3, tag: "UKSSSC 2020", sol: "<b>Ans. (d):</b> 0.87fy." },
+            { id: 535, text: "Concrete stress level in LSM vs WSM:", options: ["Higher", "Lower", "Same", "Unknown"], correct: 0, tag: "MP Vyapam 2016", sol: "<b>Ans. (a):</b> Higher (ultimate)." },
+            { id: 536, text: "Max tensile stress concrete in LSM:", options: ["0.7fck", "0.5fck", "0.15fck", "None (Zero)"], correct: 3, tag: "MP Vyapam 2015", sol: "<b>Ans. (d):</b> Assumed zero." },
+            { id: 537, text: "Max strain Concrete & Steel (Fe415):", options: ["0.0035 & 0.0038", "0.002 & 0.0018", "0.0035 & 0.0041", "0.002 & 0.0031"], correct: 0, tag: "BMRC 2018", sol: "<b>Ans. (a):</b> 0.0035 & 0.0038." },
+            { id: 538, text: "Limit state for overturning:", options: ["Strain", "Stress", "Ultimate", "Serviceability"], correct: 2, tag: "UPPCL 2020", sol: "<b>Ans. (c):</b> Ultimate." },
+            { id: 539, text: "Conc reaches failure, Steel not yielded:", options: ["Ultra", "Over reinforced", "Balanced", "Under"], correct: 1, tag: "UPPCL 2018", sol: "<b>Ans. (b):</b> Over reinforced." },
+            { id: 540, text: "Bending failure strain concrete:", options: ["0.508", "0.0035", "0.002", "0.1"], correct: 1, tag: "Mizoram 2020", sol: "<b>Ans. (b):</b> 0.0035." },
+            { id: 541, text: "Xu,max/d for Fe500:", options: ["0.47", "0.53", "0.46", "0.58"], correct: 2, tag: "BSPHCL 2019", sol: "<b>Ans. (c):</b> 0.46." },
+            { id: 542, text: "Critical NA means:", options: ["Conc fail", "Steel fail", "Simultaneous", "None"], correct: 2, tag: "MP Vyapam 2017", sol: "<b>Ans. (c):</b> Simultaneous." },
+            { id: 543, text: "Partial safety factor Steel:", options: ["1.5", "1.15", "0.87", "0.446"], correct: 1, tag: "PGCIL 2021", sol: "<b>Ans. (b):</b> 1.15." },
+            { id: 544, text: "Mu,lim for Fe415:", options: ["0.149", "0.138", "0.133", "0.153"], correct: 1, tag: "MP Vyapam 2017", sol: "<b>Ans. (b):</b> 0.138." }
+        ];
+
+        // --- STATE ---
+        let questions = [];
+        let curIdx = 0;
+        let responses = {};
+        let bookmarks = JSON.parse(localStorage.getItem('bookmarks_rcc')) || [];
+        let historyLog = JSON.parse(localStorage.getItem('history_rcc')) || [];
+        let timerInt;
+        let timeLeft = 7200;
+
+        // --- INIT ---
+        window.onload = () => {
+            updateHomeStats();
+        };
+
+        function updateHomeStats() {
+            document.getElementById('bm-count').innerText = bookmarks.length;
+            
+            // Render History List
+            const list = document.getElementById('history-list');
+            list.innerHTML = '';
+            if (historyLog.length === 0) {
+                list.innerHTML = '<div style="text-align:center; color:#999; padding:10px;">No tests taken yet.</div>';
+            } else {
+                // Show last 5 attempts in reverse order
+                historyLog.slice().reverse().forEach((attempt, i) => {
+                    const row = document.createElement('div');
+                    row.className = 'hist-row';
+                    const accClass = attempt.acc >= 80 ? 'acc-high' : (attempt.acc < 50 ? 'acc-low' : '');
+                    row.innerHTML = `
+                        <span>${attempt.date}</span>
+                        <span>${attempt.score}/${attempt.total}</span>
+                        <span class="${accClass}">${attempt.acc}%</span>
+                    `;
+                    list.appendChild(row);
+                });
+            }
+        }
+
+        function clearHistory() {
+            if(confirm("Clear all past test history?")) {
+                localStorage.removeItem('history_rcc');
+                historyLog = [];
+                updateHomeStats();
+            }
+        }
+
+        function initTest(mode) {
+            if(mode === 'bookmark') {
+                if(bookmarks.length === 0) { alert("No bookmarks!"); return; }
+                questions = rawData.filter(q => bookmarks.includes(q.id));
+            } else {
+                questions = [...rawData];
+            }
+            
+            curIdx = 0;
+            responses = {};
+            timeLeft = 7200;
+            
+            document.getElementById('home-screen').classList.remove('active');
+            document.getElementById('test-interface').classList.add('active');
+            
+            renderQ(0);
+            updatePalette();
+            startTimer();
+        }
+
+        function renderQ(idx) {
+            curIdx = idx;
+            const q = questions[idx];
+            const resp = responses[q.id];
+
+            document.getElementById('q-num').innerText = idx + 1;
+            document.getElementById('exam-tag').innerText = q.tag;
+            document.getElementById('q-text').innerHTML = q.text;
+
+            const bmIcon = document.getElementById('bookmark-icon');
+            bmIcon.innerText = bookmarks.includes(q.id) ? "★" : "☆";
+            bmIcon.style.color = bookmarks.includes(q.id) ? "#ffc107" : "#ccc";
+
+            const box = document.getElementById('options-box');
+            box.innerHTML = '';
+            
+            q.options.forEach((opt, i) => {
+                const div = document.createElement('div');
+                div.className = 'option-row';
+                if(resp) {
+                    if(i === q.correct) div.classList.add('correct');
+                    else if(i === resp.opt && i !== q.correct) div.classList.add('wrong');
+                    div.style.pointerEvents = 'none'; 
+                }
+                div.innerHTML = `<div class="option-radio"></div><span>${opt}</span>`;
+                div.onclick = () => handleAnswer(q.id, i);
+                box.appendChild(div);
+            });
+
+            const solSec = document.getElementById('solution-section');
+            if(resp) {
+                solSec.classList.add('show');
+                document.getElementById('solution-text').innerHTML = q.sol;
+            } else {
+                solSec.classList.remove('show');
+            }
+            updatePalette();
+        }
+
+        function handleAnswer(qId, optIdx) {
+            const q = questions.find(x => x.id === qId);
+            responses[qId] = { opt: optIdx, correct: (optIdx === q.correct), status: 'ans' };
+            renderQ(curIdx);
+        }
+
+        function nextQ() { if(curIdx < questions.length - 1) renderQ(curIdx + 1); }
+        function prevQ() { if(curIdx > 0) renderQ(curIdx - 1); }
+        function markReview() {
+            const qId = questions[curIdx].id;
+            if(!responses[qId]) responses[qId] = { status: 'rev' };
+            else responses[qId].status = 'rev';
+            renderQ(curIdx);
+        }
+
+        function updatePalette() {
+            const grid = document.getElementById('palette-grid');
+            grid.innerHTML = '';
+            questions.forEach((q, i) => {
+                const div = document.createElement('div');
+                div.className = 'p-item';
+                div.innerText = i + 1;
+                const r = responses[q.id];
+                if(i === curIdx) div.classList.add('current');
+                if(r) {
+                    if(r.status === 'rev') div.classList.add('review');
+                    else if(r.status === 'ans') div.classList.add('answered');
+                } else div.classList.add('not-visited');
+                div.onclick = () => { renderQ(i); closeSidebar(); };
+                grid.appendChild(div);
+            });
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.add('open');
+            document.getElementById('overlay').classList.add('open');
+        }
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('overlay').classList.remove('open');
+        }
+
+        function toggleBookmark(e) {
+            e.stopPropagation();
+            const qId = questions[curIdx].id;
+            const idx = bookmarks.indexOf(qId);
+            if(idx > -1) bookmarks.splice(idx, 1);
+            else bookmarks.push(qId);
+            localStorage.setItem('bookmarks_rcc', JSON.stringify(bookmarks));
+            renderQ(curIdx);
+        }
+
+        function startTimer() {
+            clearInterval(timerInt);
+            timerInt = setInterval(() => {
+                timeLeft--;
+                const h = Math.floor(timeLeft/3600).toString().padStart(2,'0');
+                const m = Math.floor((timeLeft%3600)/60).toString().padStart(2,'0');
+                const s = (timeLeft%60).toString().padStart(2,'0');
+                document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+                if(timeLeft <= 0) submitTest();
+            }, 1000);
+        }
+
+        function exitTest() {
+            if(confirm("Exit without submitting?")) {
+                clearInterval(timerInt);
+                location.reload();
+            }
+        }
+
+        function submitTest() {
+            clearInterval(timerInt);
+            let score = 0;
+            questions.forEach(q => {
+                const r = responses[q.id];
+                if(r && r.status === 'ans' && r.correct) score++;
+            });
+            
+            // SAVE HISTORY SERIES
+            const acc = Math.round((score / questions.length) * 100);
+            const date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+            
+            const newRecord = {
+                date: date,
+                score: score,
+                total: questions.length,
+                acc: acc
+            };
+            
+            historyLog.push(newRecord);
+            localStorage.setItem('history_rcc', JSON.stringify(historyLog));
+
+            alert(`Test Submitted!\nScore: ${score} / ${questions.length}\nAccuracy: ${acc}%`);
+            location.reload();
+        }
+    </script>
+</body>
+</html>
