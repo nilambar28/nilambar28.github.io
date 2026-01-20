@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RCC Test (Q812-828)</title>
+    <style>
+        :root {
+            --primary: #e91e63; /* Testbook Pink */
+            --header-bg: #e91e63;
+            --bg: #f2f3f5;
+            --white: #ffffff;
+            --text: #333;
+            --green: #0acf83;
+            --blue: #1a73e8;
+            --yellow: #fbbc04;
+            --gray: #e0e0e0;
+            --dark-gray: #666;
+        }
+
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { margin: 0; background-color: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* --- HEADER --- */
+        header {
+            background-color: var(--header-bg);
+            color: var(--white);
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 100;
+            flex-shrink: 0;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .menu-icon { font-size: 24px; cursor: pointer; }
+        .app-title { font-weight: 600; font-size: 1.1rem; }
+        
+        .timer-badge { 
+            background: rgba(0,0,0,0.15); 
+            padding: 4px 10px; 
+            border-radius: 4px; 
+            font-family: monospace; 
+            font-size: 1rem; 
+            font-weight: bold;
+        }
+
+        .header-right { display: flex; align-items: center; gap: 10px; }
+        
+        .btn-header {
+            border: 1px solid rgba(255,255,255,0.5);
+            background: transparent;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .btn-submit { background: #fff; color: var(--primary); border: none; font-weight: bold; }
+
+        /* --- SCREENS --- */
+        .screen { display: none; flex: 1; height: 100%; position: relative; }
+        .screen.active { display: flex; flex-direction: column; }
+
+        /* --- HOME SCREEN --- */
+        #home-screen { align-items: center; overflow-y: auto; padding: 20px; flex-direction: column; }
+        
+        .card { 
+            background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+            width: 100%; max-width: 450px; text-align: center; margin-bottom: 20px;
+        }
+        .btn-lg { width: 100%; padding: 14px; margin: 8px 0; border: none; border-radius: 4px; font-size: 1rem; font-weight: 600; color: white; cursor: pointer; transition: 0.2s; }
+        .btn-start { background: var(--primary); }
+        .btn-review { background: #555; }
+        .btn-lg:active { opacity: 0.9; transform: scale(0.98); }
+
+        /* History Table */
+        .history-section {
+            width: 100%; max-width: 450px; background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .hist-header { font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; color: #555; display: flex; justify-content: space-between; }
+        .hist-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f5f5f5; font-size: 0.9rem; }
+        .hist-row:last-child { border-bottom: none; }
+        .acc-high { color: var(--green); font-weight: bold; }
+        .acc-med { color: var(--yellow); font-weight: bold; }
+        .acc-low { color: var(--primary); font-weight: bold; }
+
+        /* --- TEST INTERFACE --- */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            padding-bottom: 80px; 
+            position: relative;
+        }
+
+        .q-panel { background: white; border-radius: 4px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); min-height: 100%; }
+        
+        .q-header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; color: #666; font-size: 0.9rem; }
+        .q-marks { color: var(--green); font-weight: bold; }
+        .q-neg { color: var(--primary); font-weight: bold; margin-left: 5px; }
+
+        .exam-tag { background: #e3f2fd; color: #1976d2; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; display: inline-block; margin-bottom: 10px; }
+
+        .q-text { font-size: 1.1rem; line-height: 1.5; color: #222; margin-bottom: 20px; font-weight: 500; }
+        .q-text img { max-width: 100%; margin-top: 10px; }
+        
+        /* Options */
+        .option-row {
+            display: flex; align-items: flex-start; padding: 12px; border: 1px solid #e0e0e0; 
+            border-radius: 4px; margin-bottom: 10px; cursor: pointer; transition: background 0.1s;
+        }
+        .option-radio {
+            width: 20px; height: 20px; border: 2px solid #bbb; border-radius: 50%; margin-right: 12px; margin-top: 2px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .option-row:hover { background: #f9f9f9; }
+        
+        /* States */
+        .option-row.selected { border-color: var(--blue); background: #eef5ff; }
+        .option-row.selected .option-radio { border-color: var(--blue); }
+        .option-row.selected .option-radio::after { content:''; width: 10px; height: 10px; background: var(--blue); border-radius: 50%; }
+
+        .option-row.correct { border-color: var(--green); background: #e8f5e9; }
+        .option-row.correct .option-radio { border-color: var(--green); }
+        .option-row.correct .option-radio::after { content:''; width: 10px; height: 10px; background: var(--green); border-radius: 50%; }
+
+        .option-row.wrong { border-color: var(--primary); background: #ffebee; }
+        .option-row.wrong .option-radio { border-color: var(--primary); }
+        .option-row.wrong .option-radio::after { content:''; width: 10px; height: 10px; background: var(--primary); border-radius: 50%; }
+
+        /* Solution */
+        .solution-section {
+            margin-top: 20px; background: #fff8e1; border: 1px solid #ffecb3; border-radius: 4px; padding: 15px; display: none;
+        }
+        .solution-section.show { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- FOOTER --- */
+        .test-footer {
+            height: 60px; background: white; border-top: 1px solid #ddd; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 10px; position: fixed; bottom: 0; left: 0; width: 100%; z-index: 50;
+        }
+        .footer-btn { padding: 10px 15px; border-radius: 4px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: 1px solid #ddd; background: white; color: #333; }
+        .btn-mark { border-color: var(--yellow); color: #b08d00; }
+        .btn-next { background: var(--green); color: white; border: none; padding-left: 20px; padding-right: 20px;}
+        .btn-prev { background: #f0f0f0; }
+
+        /* --- SIDEBAR --- */
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 199; display: none; }
+        .sidebar-overlay.open { display: block; }
+        .sidebar {
+            position: fixed; top: 0; right: 0; width: 85%; max-width: 320px; height: 100%;
+            background: white; z-index: 200; transform: translateX(100%); transition: transform 0.3s;
+            display: flex; flex-direction: column;
+        }
+        .sidebar.open { transform: translateX(0); }
+        .palette-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 15px; overflow-y: auto; flex:1; align-content: start; }
+        .p-item { 
+            height: 40px; border: 1px solid #ddd; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; background: white; font-weight: bold; color: #555;
+        }
+        .p-item.answered { background: var(--green); color: white; border-color: var(--green); border-radius: 50%; }
+        .p-item.review { background: var(--yellow); border-radius: 50%; color: black; border-color: var(--yellow); }
+        .p-item.current { border: 2px solid var(--blue); color: var(--blue); }
+        .p-item.not-visited { background: #f0f0f0; }
+
+        /* Latex/Formula styles */
+        sub, sup { font-size: 0.75em; }
+    </style>
+</head>
+<body>
+
+    <div id="home-screen" class="screen active">
+        <div class="card">
+            <h2 style="color:var(--primary); margin-top:0;">RCC Mock Test</h2>
+            <div style="text-align:left; font-size:0.95rem; color:#555; margin-bottom:20px;">
+                <p>• <strong>Topic:</strong> Questions 812 - 828</p>
+                <p>• <strong>Mode:</strong> Practice (Instant Solutions)</p>
+                <p>• <strong>Time:</strong> 120 Minutes</p>
+            </div>
+            <button class="btn-lg btn-start" onclick="initTest('full')">Start New Test</button>
+            <button class="btn-lg btn-review" onclick="initTest('bookmark')">Review Bookmarks</button>
+            <div style="margin-top:15px; font-size:0.85rem; color:#888;">
+                Bookmarks Available: <span id="bm-count">0</span>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <div class="hist-header">
+                <span>Past Performance</span>
+                <span style="font-size:0.8rem; cursor:pointer; color:var(--blue);" onclick="clearHistory()">Clear History</span>
+            </div>
+            <div id="history-list">
+                <div style="text-align:center; color:#999; padding:15px;">No tests taken yet.</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="test-interface" class="screen">
+        <header>
+            <div class="header-left">
+                <div class="menu-icon" onclick="toggleSidebar()">☰</div>
+                <div class="app-title">RCC Test</div>
+            </div>
+            <div class="timer-badge" id="timer">02:00:00</div>
+            <div class="header-right">
+                <button class="btn-header" onclick="exitTest()">Exit</button>
+                <button class="btn-header btn-submit" onclick="submitTest()">Submit</button>
+            </div>
+        </header>
+
+        <div class="content-area" id="content-area" onclick="closeSidebar()">
+            <div class="q-panel">
+                <div class="q-header">
+                    <span>Question <span id="q-num">1</span></span>
+                    <div>
+                        <span class="q-marks">+1</span> <span class="q-neg">-0.25</span>
+                        <span style="margin-left:15px; cursor:pointer; font-size:1.5rem;" id="bookmark-icon" onclick="toggleBookmark(event)">☆</span>
+                    </div>
+                </div>
+                
+                <div id="tag-container"></div>
+
+                <div class="q-text" id="q-text"></div>
+                <div id="options-box"></div>
+                
+                <div class="solution-section" id="solution-section">
+                    <strong style="color:var(--green)">Detailed Solution:</strong>
+                    <div id="solution-text" style="margin-top:8px; font-size:0.95rem; color:#444; line-height:1.6;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-footer">
+            <button class="footer-btn btn-prev" onclick="prevQ()">Previous</button>
+            <button class="footer-btn btn-mark" onclick="markReview()">Mark Review</button>
+            <button class="footer-btn btn-next" onclick="nextQ()">Save & Next</button>
+        </div>
+
+        <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+        <div class="sidebar" id="sidebar">
+            <div style="padding:15px; background:#f8f9fa; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center;">
+                <strong>Question Palette</strong>
+                <span style="cursor:pointer; font-size:1.2rem; padding:5px;" onclick="closeSidebar()">✕</span>
+            </div>
+            <div style="padding:10px; font-size:0.75rem; display:flex; gap:10px; flex-wrap:wrap; border-bottom:1px solid #eee; background:white;">
+                <span style="color:var(--green)">● Ans</span> <span style="color:var(--yellow)">● Rev</span> <span style="color:var(--blue)">● Curr</span> <span style="color:#ccc">● Skip</span>
+            </div>
+            <div class="palette-grid" id="palette-grid"></div>
+            <div style="padding:15px; border-top:1px solid #ddd;">
+                <button class="btn-lg btn-start" onclick="submitTest()">Submit Test</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA: QUESTIONS 812 - 828 ---
+        // Transcribed from provided images
+        const rawQuestions = [
+            {
+                id: 812,
+                text: "What is the adoptable maximum spacing between vertical stirrups in an RCC beam of rectangular cross-section having and effective depth of 300mm?",
+                options: ["300 mm", "275 mm", "250 mm", "225 mm"],
+                correct: 3,
+                tag: "ESE 2009",
+                sol: "<b>Ans. (d):</b> Maximum spacing of shear reinforcement = 0.75d or 300mm whichever is less. <br>0.75 × 300 = 225 mm.<br>Comparing 225 mm and 300 mm, the adoptable maximum spacing is 225 mm."
+            },
+            {
+                id: 813,
+                text: "How can shear strength be ensured in a beam?",
+                options: ["By providing binding wire on main bars", "By providing HYSD bars instead of mild steel bars", "By providing rounded aggregate", "By providing stirrups"],
+                correct: 3,
+                tag: "ESE 2008",
+                sol: "<b>Ans. (d):</b> Shear strength is ensured in a beam by providing shear reinforcement, which is typically in the form of stirrups (vertical or inclined) or bent-up bars."
+            },
+            {
+                id: 814,
+                text: "If design bond stress = 1.5 N/mm² is assumed, then the development length of an Fe 500 HYSD bar of nominal diameter 12 mm - which is fully stressed in tension - will be:",
+                options: ["798 mm", "544 mm", "634 mm", "246 mm"],
+                correct: 1,
+                tag: "SSC JE Civil 30.10.2020 (Morning)",
+                sol: "<b>Ans. (b):</b> L<sub>d</sub> = (0.87 f<sub>y</sub> φ) / (4 τ<sub>bd</sub>).<br>For deformed bars (HYSD), τ<sub>bd</sub> is increased by 60%.<br>τ<sub>bd</sub> = 1.5 × 1.6 = 2.4 N/mm².<br>L<sub>d</sub> = (0.87 × 500 × 12) / (4 × 2.4) = 5220 / 9.6 = 543.75 mm ≈ 544 mm."
+            },
+            {
+                id: 815,
+                text: "What is the adoptable maximum spacing between vertical stirrups in an RCC Beam of rectangular cross-section having an effective depth of 320 mm?",
+                options: ["320 mm", "240 mm", "160 mm", "225 mm"],
+                correct: 1,
+                tag: "Odisha JE (Mains) 2015",
+                sol: "<b>Ans. (b):</b> Max spacing = 0.75d or 300mm.<br>0.75 × 320 = 240 mm.<br>Comparing 240 mm and 300 mm, maximum spacing is 240 mm."
+            },
+            {
+                id: 816,
+                text: "The minimum anchorage length of 12.0 mm diameter bars of Fe 415 grade steel in M grade concrete with a design bond strength 2.40 MPa and a 90° standard bend at the end is",
+                options: ["355.3 mm", "451.3 mm", "282.1 mm", "186.1 mm"],
+                correct: 2,
+                tag: "APPSC AE 2004 Paper-II",
+                sol: "<b>Ans. (c):</b> The question implies deformed bars (Fe 415) and gives a design bond strength value. The solution assumes the given value (2.40 MPa) is basic and applies a 60% increase for deformed bars.<br>L<sub>d</sub> = (0.87 f<sub>y</sub> φ) / (4 τ<sub>bd</sub>)<br>L<sub>d</sub> = (0.87 × 415 × 12) / (4 × 2.4 × 1.6) = 4332.6 / 15.36 = 282.07 mm.<br>Note: In some contexts, 'minimum anchorage length' might refer to Ld minus bend anchorage, but here the formula result matches option (c) directly."
+            },
+            {
+                id: 817,
+                text: "The spacing between two successive stirrups (hooks) in reinforced cement concrete beam shall not be less than:",
+                options: ["100 mm", "125 mm", "150 mm", "175 mm"],
+                correct: 0,
+                tag: "UPSSSC JE 2015 Paper-I",
+                sol: "<b>Ans. (a):</b> The spacing of stirrups should generally not be less than 100 mm to allow proper concrete placement and compaction."
+            },
+            {
+                id: 818,
+                text: "The length of hook provided in a beam or column ring shall be ................ times the diameter of ring bar.",
+                options: ["5 φ", "6 φ", "10 φ", "3 φ"],
+                correct: 2,
+                tag: "GPHC JE 2018",
+                sol: "<b>Ans. (c):</b> The length of hook (extension beyond bend) for 135-degree seismic hooks (typically used in rings/ties) is often specified as 10 times the diameter (or min 75mm) in practice, or based on the standard hook length calculation."
+            },
+            {
+                id: 819,
+                text: "In the design of doubly reinforced section, the shear stress τ<sub>v</sub> is calculated using",
+                options: ["A<sub>sc</sub>", "A<sub>sf</sub>", "(A<sub>sc</sub> + A<sub>sf</sub>)", "(d - d')"],
+                correct: 1,
+                tag: "Tamil Nadu PSC 2019",
+                sol: "<b>Ans. (b):</b> The provided solution indicates 'A<sub>sf</sub>' (likely referring to Ast or area of tension steel). Note: Design shear strength τ<sub>c</sub> depends on the percentage of tensile reinforcement. Compression steel is generally ignored for shear stress calculation."
+            },
+            {
+                id: 820,
+                text: "Following figure represents which type of shear reinforcement",
+                options: ["Inclined stirrups", "Bent up bars alongwith stirrups", "Vertical stirrups", "Horizontal stirrups"],
+                correct: 1,
+                tag: "MPPEB SE/Draftsman 4.4.2016",
+                sol: "<b>Ans. (b):</b> The figure illustrates a combination of vertical stirrups and bent-up bars used as shear reinforcement."
+            },
+            {
+                id: 821,
+                text: "Shear reinforcement in R.C.C is provided to resist :",
+                options: ["Vertical shear", "Horizontal shear", "Oblique shear", "Diagonal tension"],
+                correct: 3,
+                tag: "KPSC Overseer, Gr-II 2017",
+                sol: "<b>Ans. (d):</b> Shear reinforcement is primarily provided to resist diagonal tension caused by the combination of shear and bending stresses."
+            },
+            {
+                id: 822,
+                text: "A simply supported beam having 200 mm width and 450 mm effective depth supports a total uniformly distributed load of 2,00,000 N. The nominal shear stress will be nearly.",
+                options: ["0.8 N/mm²", "1.1 N/mm²", "1.8 N/mm²", "2.2 N/mm²"],
+                correct: 1,
+                tag: "ESE 2020",
+                sol: "<b>Ans. (b):</b> Total load W = 2,00,000 N.<br>Max Shear Force V = W/2 = 100,000 N.<br>Nominal Shear Stress τ<sub>v</sub> = V / (bd) = 100000 / (200 × 450) = 1000/900 = 1.11 N/mm²."
+            },
+            {
+                id: 823,
+                text: "Consider the following statements in the light of IS:456-2000:<br>1. There is an upper limit on the nominal shear stress...<br>2. A rectangular concrete slab whose length is equal to its width may not be a two-way slab...<br>Which are correct?",
+                options: ["1 only", "2 only", "Both 1 and 2", "Neither 1 nor 2"],
+                correct: 2,
+                tag: "ESE 2017",
+                sol: "<b>Ans. (c):</b> 1. Correct (τ<sub>cmax</sub> limit). 2. Correct (a square slab supported only on two opposite edges acts as a one-way slab)."
+            },
+            {
+                id: 824,
+                text: "Additional length required for two bent-ups in beam or slab reinforcement may be calculated as 0.9d, where 'd' equals to :-",
+                options: ["Angle made by the bent-ups...", "Total depth of beam or slab minus bottom and top covers", "Diameter of bent-up bars", "Spacing of bent-up bars"],
+                correct: 1,
+                tag: "Mizoram PSC JE 2018",
+                sol: "<b>Ans. (b):</b> In the formula for crank length, 'd' represents the vertical distance between the top and bottom bars, which is the total depth minus top and bottom covers."
+            },
+            {
+                id: 825,
+                text: "When we use HYSD bars instead of mild steel bars, the value of bond strength",
+                options: ["Doesn't change", "Become zero", "Increases", "Cannot be determined"],
+                correct: 2,
+                tag: "MH PWD 2019",
+                sol: "<b>Ans. (c):</b> HYSD bars have ribs/corrugations that provide better mechanical anchorage, thus increasing bond strength (by 60% compared to plain bars)."
+            },
+            {
+                id: 826,
+                text: "The shape of the shear stress diagram for a square beam is",
+                options: ["Parabola", "Hyperbola", "Rectangle", "Triangular"],
+                correct: 0,
+                tag: "MP Nanded Zila Parishad 2014",
+                sol: "<b>Ans. (a):</b> The shear stress distribution across a rectangular or square section is parabolic, with maximum stress at the neutral axis."
+            },
+            {
+                id: 827,
+                text: "While designing the structural member for limit state of collapse in shear, characteristics strength of stirrup shall not be greater than",
+                options: ["250 N/mm²", "415 N/mm²", "500 N/mm²", "300 N/mm²"],
+                correct: 1,
+                tag: "MH PWD 2019",
+                sol: "<b>Ans. (b):</b> According to IS 456, the characteristic strength of shear reinforcement (stirrups) shall not exceed 415 N/mm²."
+            },
+            {
+                id: 828,
+                text: "The maximum shear stress for M30 concrete grade-",
+                options: ["2.5", "2.8", "3.5", "4"],
+                correct: 2,
+                tag: "Haryana SSC JE 2018",
+                sol: "<b>Ans. (c):</b> As per Table 20 of IS 456, τ<sub>cmax</sub> for M30 is 3.5 N/mm²."
+            }
+        ];
+
+        // --- APP STATE ---
+        let questions = [];
+        let curIdx = 0;
+        let responses = {}; // { qId: { opt: number, status: string, correct: boolean } }
+        let bookmarks = JSON.parse(localStorage.getItem('bookmarks_rcc_set12')) || [];
+        let historyLog = JSON.parse(localStorage.getItem('history_rcc_set12')) || [];
+        let timerInt;
+        let timeLeft = 7200; // 2 hrs
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            updateHomeStats();
+        };
+
+        function updateHomeStats() {
+            document.getElementById('bm-count').innerText = bookmarks.length;
+            
+            const list = document.getElementById('history-list');
+            list.innerHTML = '';
+            if (historyLog.length === 0) {
+                list.innerHTML = '<div style="text-align:center; color:#999; padding:15px;">No tests taken yet.</div>';
+            } else {
+                historyLog.slice().reverse().forEach(h => {
+                    const row = document.createElement('div');
+                    row.className = 'hist-row';
+                    
+                    let accClass = 'acc-low';
+                    if(h.acc >= 80) accClass = 'acc-high';
+                    else if(h.acc >= 50) accClass = 'acc-med';
+
+                    row.innerHTML = `
+                        <div style="text-align:left;">
+                            <div style="font-weight:bold; font-size:0.85rem;">${h.date}</div>
+                            <div style="font-size:0.75rem; color:#888;">Score: ${h.score}/${h.total}</div>
+                        </div>
+                        <div class="${accClass}" style="font-size:1.1rem; align-self:center;">${h.acc}%</div>
+                    `;
+                    list.appendChild(row);
+                });
+            }
+        }
+
+        function clearHistory() {
+            if(confirm("Are you sure you want to clear history?")) {
+                localStorage.removeItem('history_rcc_set12');
+                historyLog = [];
+                updateHomeStats();
+            }
+        }
+
+        function initTest(mode) {
+            if (mode === 'bookmark') {
+                if (bookmarks.length === 0) { alert("No bookmarks found."); return; }
+                questions = rawQuestions.filter(q => bookmarks.includes(q.id));
+            } else {
+                questions = [...rawQuestions];
+            }
+
+            curIdx = 0;
+            responses = {};
+            timeLeft = 7200;
+
+            document.getElementById('home-screen').classList.remove('active');
+            document.getElementById('test-interface').classList.add('active');
+
+            renderQ(0);
+            updatePalette();
+            startTimer();
+        }
+
+        // --- RENDER LOGIC ---
+        function renderQ(idx) {
+            curIdx = idx;
+            const q = questions[idx];
+            const resp = responses[q.id];
+
+            document.getElementById('q-num').innerText = idx + 1 + " / " + questions.length;
+            
+            // Render Tag
+            const tagContainer = document.getElementById('tag-container');
+            if(q.tag) {
+                tagContainer.innerHTML = `<span class="exam-tag">${q.tag}</span>`;
+            } else {
+                tagContainer.innerHTML = '';
+            }
+
+            // Bookmark State
+            const bmIcon = document.getElementById('bookmark-icon');
+            if(bookmarks.includes(q.id)) {
+                bmIcon.innerText = "★";
+                bmIcon.style.color = "#fbbc04"; // Yellow
+            } else {
+                bmIcon.innerText = "☆";
+                bmIcon.style.color = "#ccc";
+            }
+
+            document.getElementById('q-text').innerHTML = q.text;
+
+            // Options
+            const box = document.getElementById('options-box');
+            box.innerHTML = '';
+            q.options.forEach((opt, i) => {
+                const row = document.createElement('div');
+                row.className = 'option-row';
+                
+                // If answered, show styles
+                if(resp && resp.status === 'ans') {
+                    row.style.pointerEvents = 'none'; // Lock
+                    if (i === q.correct) row.classList.add('correct');
+                    else if (i === resp.opt && i !== q.correct) row.classList.add('wrong');
+                }
+
+                row.innerHTML = `<div class="option-radio"></div><span>${opt}</span>`;
+                row.onclick = () => handleAnswer(q.id, i);
+                box.appendChild(row);
+            });
+
+            // Solution Box
+            const solBox = document.getElementById('solution-section');
+            if(resp && resp.status === 'ans') {
+                solBox.classList.add('show');
+                document.getElementById('solution-text').innerHTML = q.sol;
+            } else {
+                solBox.classList.remove('show');
+            }
+
+            // Update Palette UI (Current Highlight)
+            updatePalette();
+        }
+
+        function handleAnswer(qId, optIdx) {
+            const q = questions.find(x => x.id === qId);
+            // Instant feedback mode: save and reveal immediately
+            responses[qId] = {
+                opt: optIdx,
+                correct: (optIdx === q.correct),
+                status: 'ans'
+            };
+            renderQ(curIdx);
+        }
+
+        function markReview() {
+            const qId = questions[curIdx].id;
+            // Only mark if not already answered
+            if(!responses[qId]) {
+                responses[qId] = { status: 'rev', opt: null };
+            } else if (responses[qId].status !== 'ans') {
+                responses[qId].status = 'rev';
+            }
+            renderQ(curIdx); // Re-render to update palette color if visible
+            nextQ(); // Move next generally expected
+        }
+
+        function toggleBookmark(e) {
+            e.stopPropagation();
+            const qId = questions[curIdx].id;
+            const idx = bookmarks.indexOf(qId);
+            if(idx > -1) bookmarks.splice(idx, 1);
+            else bookmarks.push(qId);
+            
+            localStorage.setItem('bookmarks_rcc_set12', JSON.stringify(bookmarks));
+            renderQ(curIdx); // Refresh icon
+        }
+
+        // --- NAVIGATION ---
+        function nextQ() { if(curIdx < questions.length - 1) renderQ(curIdx + 1); }
+        function prevQ() { if(curIdx > 0) renderQ(curIdx - 1); }
+
+        // --- PALETTE ---
+        function updatePalette() {
+            const grid = document.getElementById('palette-grid');
+            grid.innerHTML = '';
+            questions.forEach((q, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'p-item';
+                btn.innerText = i + 1;
+                
+                const r = responses[q.id];
+                if (i === curIdx) btn.classList.add('current');
+                
+                if (r) {
+                    if (r.status === 'ans') btn.classList.add('answered');
+                    else if (r.status === 'rev') btn.classList.add('review');
+                } else {
+                    btn.classList.add('not-visited');
+                }
+                
+                btn.onclick = () => {
+                    renderQ(i);
+                    if(window.innerWidth < 768) closeSidebar();
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.add('open');
+            document.getElementById('overlay').classList.add('open');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('overlay').classList.remove('open');
+        }
+
+        // --- TIMER & SUBMISSION ---
+        function startTimer() {
+            clearInterval(timerInt);
+            timerInt = setInterval(() => {
+                timeLeft--;
+                const h = Math.floor(timeLeft / 3600).toString().padStart(2,'0');
+                const m = Math.floor((timeLeft % 3600) / 60).toString().padStart(2,'0');
+                const s = (timeLeft % 60).toString().padStart(2,'0');
+                document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+                if (timeLeft <= 0) submitTest();
+            }, 1000);
+        }
+
+        function exitTest() {
+            if(confirm("Exit Test? Progress will not be saved in history unless submitted.")) {
+                clearInterval(timerInt);
+                location.reload();
+            }
+        }
+
+        function submitTest() {
+            clearInterval(timerInt);
+            let score = 0;
+            questions.forEach(q => {
+                const r = responses[q.id];
+                if(r && r.status === 'ans' && r.correct) score++;
+            });
+
+            // Save History
+            const acc = Math.round((score / questions.length) * 100);
+            const now = new Date();
+            const dateStr = now.toLocaleDateString() + " " + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            historyLog.push({
+                date: dateStr,
+                score: score,
+                total: questions.length,
+                acc: acc
+            });
+            localStorage.setItem('history_rcc_set12', JSON.stringify(historyLog));
+
+            alert(`Test Submitted!\nScore: ${score} / ${questions.length}\nAccuracy: ${acc}%`);
+            location.reload();
+        }
+    </script>
+</body>
+</html>
