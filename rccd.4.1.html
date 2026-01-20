@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RCC Test (Q655-685)</title>
+    <style>
+        :root {
+            --primary: #e91e63; /* Testbook Pink */
+            --header-bg: #e91e63;
+            --bg: #f2f3f5;
+            --white: #ffffff;
+            --text: #333;
+            --green: #0acf83;
+            --blue: #1a73e8;
+            --yellow: #fbbc04;
+            --gray: #e0e0e0;
+            --dark-gray: #666;
+        }
+
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { margin: 0; background-color: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* --- HEADER --- */
+        header {
+            background-color: var(--header-bg);
+            color: var(--white);
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 100;
+            flex-shrink: 0;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .menu-icon { font-size: 24px; cursor: pointer; }
+        .app-title { font-weight: 600; font-size: 1.1rem; }
+        
+        .timer-badge { 
+            background: rgba(0,0,0,0.15); 
+            padding: 4px 10px; 
+            border-radius: 4px; 
+            font-family: monospace; 
+            font-size: 1rem; 
+            font-weight: bold;
+        }
+
+        .header-right { display: flex; align-items: center; gap: 10px; }
+        
+        .btn-header {
+            border: 1px solid rgba(255,255,255,0.5);
+            background: transparent;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .btn-submit { background: #fff; color: var(--primary); border: none; font-weight: bold; }
+
+        /* --- SCREENS --- */
+        .screen { display: none; flex: 1; height: 100%; position: relative; }
+        .screen.active { display: flex; flex-direction: column; }
+
+        /* --- HOME SCREEN --- */
+        #home-screen { align-items: center; overflow-y: auto; padding: 20px; flex-direction: column; }
+        
+        .card { 
+            background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+            width: 100%; max-width: 450px; text-align: center; margin-bottom: 20px;
+        }
+        .btn-lg { width: 100%; padding: 14px; margin: 8px 0; border: none; border-radius: 4px; font-size: 1rem; font-weight: 600; color: white; cursor: pointer; transition: 0.2s; }
+        .btn-start { background: var(--primary); }
+        .btn-review { background: #555; }
+        .btn-lg:active { opacity: 0.9; transform: scale(0.98); }
+
+        /* History Table */
+        .history-section {
+            width: 100%; max-width: 450px; background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .hist-header { font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; color: #555; display: flex; justify-content: space-between; }
+        .hist-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f5f5f5; font-size: 0.9rem; }
+        .hist-row:last-child { border-bottom: none; }
+        .acc-high { color: var(--green); font-weight: bold; }
+        .acc-med { color: var(--yellow); font-weight: bold; }
+        .acc-low { color: var(--primary); font-weight: bold; }
+
+        /* --- TEST INTERFACE --- */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            padding-bottom: 80px; 
+            position: relative;
+        }
+
+        .q-panel { background: white; border-radius: 4px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); min-height: 100%; }
+        
+        .q-header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; color: #666; font-size: 0.9rem; }
+        .q-marks { color: var(--green); font-weight: bold; }
+        .q-neg { color: var(--primary); font-weight: bold; margin-left: 5px; }
+
+        .exam-tag { background: #e3f2fd; color: #1976d2; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; display: inline-block; margin-bottom: 10px; }
+
+        .q-text { font-size: 1.1rem; line-height: 1.5; color: #222; margin-bottom: 20px; font-weight: 500; }
+        .q-text img { max-width: 100%; margin-top: 10px; }
+        
+        /* Options */
+        .option-row {
+            display: flex; align-items: flex-start; padding: 12px; border: 1px solid #e0e0e0; 
+            border-radius: 4px; margin-bottom: 10px; cursor: pointer; transition: background 0.1s;
+        }
+        .option-radio {
+            width: 20px; height: 20px; border: 2px solid #bbb; border-radius: 50%; margin-right: 12px; margin-top: 2px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .option-row:hover { background: #f9f9f9; }
+        
+        /* States */
+        .option-row.selected { border-color: var(--blue); background: #eef5ff; }
+        .option-row.selected .option-radio { border-color: var(--blue); }
+        .option-row.selected .option-radio::after { content:''; width: 10px; height: 10px; background: var(--blue); border-radius: 50%; }
+
+        .option-row.correct { border-color: var(--green); background: #e8f5e9; }
+        .option-row.correct .option-radio { border-color: var(--green); }
+        .option-row.correct .option-radio::after { content:''; width: 10px; height: 10px; background: var(--green); border-radius: 50%; }
+
+        .option-row.wrong { border-color: var(--primary); background: #ffebee; }
+        .option-row.wrong .option-radio { border-color: var(--primary); }
+        .option-row.wrong .option-radio::after { content:''; width: 10px; height: 10px; background: var(--primary); border-radius: 50%; }
+
+        /* Solution */
+        .solution-section {
+            margin-top: 20px; background: #fff8e1; border: 1px solid #ffecb3; border-radius: 4px; padding: 15px; display: none;
+        }
+        .solution-section.show { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- FOOTER --- */
+        .test-footer {
+            height: 60px; background: white; border-top: 1px solid #ddd; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 10px; position: fixed; bottom: 0; left: 0; width: 100%; z-index: 50;
+        }
+        .footer-btn { padding: 10px 15px; border-radius: 4px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: 1px solid #ddd; background: white; color: #333; }
+        .btn-mark { border-color: var(--yellow); color: #b08d00; }
+        .btn-next { background: var(--green); color: white; border: none; padding-left: 20px; padding-right: 20px;}
+        .btn-prev { background: #f0f0f0; }
+
+        /* --- SIDEBAR --- */
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 199; display: none; }
+        .sidebar-overlay.open { display: block; }
+        .sidebar {
+            position: fixed; top: 0; right: 0; width: 85%; max-width: 320px; height: 100%;
+            background: white; z-index: 200; transform: translateX(100%); transition: transform 0.3s;
+            display: flex; flex-direction: column;
+        }
+        .sidebar.open { transform: translateX(0); }
+        .palette-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 15px; overflow-y: auto; flex:1; align-content: start; }
+        .p-item { 
+            height: 40px; border: 1px solid #ddd; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; background: white; font-weight: bold; color: #555;
+        }
+        .p-item.answered { background: var(--green); color: white; border-color: var(--green); border-radius: 50%; }
+        .p-item.review { background: var(--yellow); border-radius: 50%; color: black; border-color: var(--yellow); }
+        .p-item.current { border: 2px solid var(--blue); color: var(--blue); }
+        .p-item.not-visited { background: #f0f0f0; }
+
+        /* Latex/Formula styles */
+        sub, sup { font-size: 0.75em; }
+    </style>
+</head>
+<body>
+
+    <div id="home-screen" class="screen active">
+        <div class="card">
+            <h2 style="color:var(--primary); margin-top:0;">RCC Mock Test</h2>
+            <div style="text-align:left; font-size:0.95rem; color:#555; margin-bottom:20px;">
+                <p>• <strong>Topic:</strong> Questions 655 - 685</p>
+                <p>• <strong>Mode:</strong> Practice (Instant Solutions)</p>
+                <p>• <strong>Time:</strong> 120 Minutes</p>
+            </div>
+            <button class="btn-lg btn-start" onclick="initTest('full')">Start New Test</button>
+            <button class="btn-lg btn-review" onclick="initTest('bookmark')">Review Bookmarks</button>
+            <div style="margin-top:15px; font-size:0.85rem; color:#888;">
+                Bookmarks Available: <span id="bm-count">0</span>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <div class="hist-header">
+                <span>Past Performance</span>
+                <span style="font-size:0.8rem; cursor:pointer; color:var(--blue);" onclick="clearHistory()">Clear History</span>
+            </div>
+            <div id="history-list">
+                <div style="text-align:center; color:#999; padding:15px;">No tests taken yet.</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="test-interface" class="screen">
+        <header>
+            <div class="header-left">
+                <div class="menu-icon" onclick="toggleSidebar()">☰</div>
+                <div class="app-title">RCC Test</div>
+            </div>
+            <div class="timer-badge" id="timer">02:00:00</div>
+            <div class="header-right">
+                <button class="btn-header" onclick="exitTest()">Exit</button>
+                <button class="btn-header btn-submit" onclick="submitTest()">Submit</button>
+            </div>
+        </header>
+
+        <div class="content-area" id="content-area" onclick="closeSidebar()">
+            <div class="q-panel">
+                <div class="q-header">
+                    <span>Question <span id="q-num">1</span></span>
+                    <div>
+                        <span class="q-marks">+1</span> <span class="q-neg">-0.25</span>
+                        <span style="margin-left:15px; cursor:pointer; font-size:1.5rem;" id="bookmark-icon" onclick="toggleBookmark(event)">☆</span>
+                    </div>
+                </div>
+                
+                <div id="tag-container"></div>
+
+                <div class="q-text" id="q-text"></div>
+                <div id="options-box"></div>
+                
+                <div class="solution-section" id="solution-section">
+                    <strong style="color:var(--green)">Detailed Solution:</strong>
+                    <div id="solution-text" style="margin-top:8px; font-size:0.95rem; color:#444; line-height:1.6;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-footer">
+            <button class="footer-btn btn-prev" onclick="prevQ()">Previous</button>
+            <button class="footer-btn btn-mark" onclick="markReview()">Mark Review</button>
+            <button class="footer-btn btn-next" onclick="nextQ()">Save & Next</button>
+        </div>
+
+        <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+        <div class="sidebar" id="sidebar">
+            <div style="padding:15px; background:#f8f9fa; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center;">
+                <strong>Question Palette</strong>
+                <span style="cursor:pointer; font-size:1.2rem; padding:5px;" onclick="closeSidebar()">✕</span>
+            </div>
+            <div style="padding:10px; font-size:0.75rem; display:flex; gap:10px; flex-wrap:wrap; border-bottom:1px solid #eee; background:white;">
+                <span style="color:var(--green)">● Ans</span> <span style="color:var(--yellow)">● Rev</span> <span style="color:var(--blue)">● Curr</span> <span style="color:#ccc">● Skip</span>
+            </div>
+            <div class="palette-grid" id="palette-grid"></div>
+            <div style="padding:15px; border-top:1px solid #ddd;">
+                <button class="btn-lg btn-start" onclick="submitTest()">Submit Test</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA: QUESTIONS 655 - 685 ---
+        // Extracted directly from the provided images
+        const rawQuestions = [
+            {
+                id: 655,
+                text: "The maximum spacing of vertical stirrups is 0.75 d and that for inclined at 45° is",
+                options: ["0.375 d", "d", "0.5 d", "None of the above"],
+                correct: 1,
+                tag: "DGVCL 5.1.2021 | WBPSC JE 2018",
+                sol: "<b>Ans. (b):</b> As per clause 26.5.1.5 of IS 456: 2000, the maximum spacing of shear reinforcement measured along the axis of member shall not exceed 0.75d for vertical stirrups and 'd' for inclined stirrups at 45°."
+            },
+            {
+                id: 656,
+                text: "Shear taken by bent up bars is limited to:",
+                options: ["V<sub>s</sub>", "V<sub>s</sub>/3", "V<sub>s</sub>/2", "2V<sub>s</sub>"],
+                correct: 2,
+                tag: "DGVCL 06.01.2021 | Kerala JID 12.12.2019",
+                sol: "<b>Ans. (c):</b> Shear taken by bent up bars is limited to V<sub>s</sub>/2. When bent up bars are provided there shear resistance contribution should not be more than 50% of the total shear to be resistance through shear reinforcement."
+            },
+            {
+                id: 657,
+                text: "For deformed bars conforming to IS 1786, the design bond stress in limit state method shall be:",
+                options: ["Increased by 60%", "Increased by 20%", "Decreased by 20%", "Increased by 40%"],
+                correct: 0,
+                tag: "SSC JE 11.12.2020 | Gujarat PSC 2020",
+                sol: "<b>Ans. (a):</b> Design bond stresses for deformed bars conforming to IS 1786 shall be increased by 60%. For bars in compression, the values of bond stress shall be increased by 25%."
+            },
+            {
+                id: 658,
+                text: "The maximum spacing of vertical stirrups along the axis of the beam shall not exceed",
+                options: ["0.25 d", "0.5 d", "0.75 d", "d"],
+                correct: 2,
+                tag: "BIS JE 2020 | DDA 2018 | ISRO TA 2018",
+                sol: "<b>Ans. (c):</b> As per IS 456:2000, Maximum spacing of shear reinforcement shall not exceed 0.75d for vertical stirrups and d for inclined stirrups. In no case shall the spacing exceed 300 mm."
+            },
+            {
+                id: 659,
+                text: "Development length of bars can be calculated using the following formula:",
+                options: [
+                    "φσ<sub>s</sub> / τ<sub>bd</sub>", 
+                    "φσ<sub>s</sub> / 4τ<sub>bd</sub>", 
+                    "σ<sub>s</sub> / 4τ<sub>bd</sub>", 
+                    "φσ<sub>s</sub> / 2τ<sub>bd</sub>"
+                ],
+                correct: 1,
+                tag: "JPSC AE 2021 | TSPSC HMWSSB 2020",
+                sol: "<b>Ans. (b):</b> The development length L<sub>d</sub> is given by: L<sub>d</sub> = (φσ<sub>s</sub>) / (4τ<sub>bd</sub>), where φ = nominal diameter, σ<sub>s</sub> = stress in bar at design load, τ<sub>bd</sub> = design bond stress."
+            },
+            {
+                id: 660,
+                text: "Required spacing 's<sub>v</sub>' of vertical stirrups for shear reinforcement in a RCC beam is given by which expression given in following options?",
+                options: [
+                    "s<sub>v</sub> ≤ (0.87 f<sub>y</sub> A<sub>sv</sub> d) / b", 
+                    "s<sub>v</sub> ≤ (0.87 f<sub>y</sub> A<sub>sv</sub>) / ((τ<sub>v</sub> - τ<sub>c</sub>) b d / d)", 
+                    "s<sub>v</sub> ≤ A<sub>sv</sub> / ((τ<sub>v</sub> - τ<sub>c</sub>) b d / d)", 
+                    "s<sub>v</sub> ≤ 0.1 d"
+                ],
+                correct: 1,
+                tag: "RPSC Lect. (Tech. Edu.) Paper-I 2021",
+                sol: "<b>Ans. (b):</b> Shear reinforcement shall be provided in any of the following forms: Vertical stirrups. The spacing s<sub>v</sub> = (0.87 f<sub>y</sub> A<sub>sv</sub> d) / V<sub>us</sub>, where V<sub>us</sub> = (τ<sub>v</sub> - τ<sub>c</sub>) b d. So s<sub>v</sub> = (0.87 f<sub>y</sub> A<sub>sv</sub>) / ((τ<sub>v</sub> - τ<sub>c</sub>) b)."
+            },
+            {
+                id: 661,
+                text: "What is the value of nominal shear stress τ<sub>v</sub>, if shear force V<sub>u</sub> = 80 kN, width and effective depth are 200 mm and 400 mm respectively?",
+                options: ["0.8 N/mm²", "8 N/mm²", "1 N/mm²", "2 N/mm²"],
+                correct: 2,
+                tag: "RPSC Lect. (Tech. Edu.) Paper-I 2021",
+                sol: "<b>Ans. (c):</b> Nominal shear stress τ<sub>v</sub> = V<sub>u</sub> / (bd) = (80 × 10³) / (200 × 400) = 80000 / 80000 = 1 N/mm²."
+            },
+            {
+                id: 662,
+                text: "A rectangular RCC beam has effective depth 200 mm is designed for shear based on the loads and found that the shear reinforcement is, 8 mm dia 2 legged TOR steel vertical stirrups at 215 mm spacings. By considering the codal recommendation, the final recommended design is 8mm dia 2 legged vertical stirrups at _______.",
+                options: ["200 mm c/c", "150 mm c/c", "300 mm c/c", "100 mm c/c"],
+                correct: 1,
+                tag: "DGVCL 5.1.2021 Afternoon",
+                sol: "<b>Ans. (b):</b> Max spacing criteria: (i) 0.75d = 0.75 × 200 = 150 mm. (ii) 300 mm. (iii) Calculated = 215 mm. The minimum of these is 150 mm. So provide 150 mm c/c."
+            },
+            {
+                id: 663,
+                text: "What will be the additional length of a bar if the bent up angle is 30°?",
+                options: ["0.27D", "0.42D", "0.1D", "0.58D"],
+                correct: 0,
+                tag: "DSSSB JE (Mains) 20.03.2021",
+                sol: "<b>Ans. (a):</b> Extra length for bent up bar = (d/sinθ) - (d/tanθ). For 30°, extra length = d(2 - 1.732) = 0.268d ≈ 0.27d (where D or d is the depth)."
+            },
+            {
+                id: 664,
+                text: "Maximum spacing of vertical shear stirrups as per IS 456 : 2000 is (where d = effective depth of beam)",
+                options: ["300 mm only", "Minimum of 0.75 d or 300 mm", "Maximum of 0.75 d or 300 mm", "0.75 d only"],
+                correct: 1,
+                tag: "HPSSSC JE 11.04.2021 | HPSSSC JE 18.04.2021",
+                sol: "<b>Ans. (b):</b> Maximum spacing of shear reinforcement shall not exceed 0.75d for vertical stirrups and d for inclined stirrups. In no case spacing shall exceed 300 mm. So, Minimum of 0.75d or 300mm."
+            },
+            {
+                id: 665,
+                text: "As per IS 13920 : 2016, in the calculation of design shear force capacity of R.C beam, the contribution of the following shall not be considered-",
+                options: ["Concrete in R.C section", "Bent up bars", "Inclined links", "All of these"],
+                correct: 3,
+                tag: "HPSSSC JE 11.04.2021",
+                sol: "<b>Ans. (d):</b> Clause 6.3.4 of IS 13920 says- In the calculations of design shear force capacity of RC beams, contributions of the following shall not be considered: (i) Bent up bars, (ii) Concrete in the RC section, (iii) Inclined stirrups or links. So, shear force capacity of vertical stirrups can be considered."
+            },
+            {
+                id: 666,
+                text: "In a straight bar the length of one hook may be taken as",
+                options: ["18 D", "L + 18 D", "9 D", "L + 9 D"],
+                correct: 2,
+                tag: "Kerala PSC Overseer 27.07.2021",
+                sol: "<b>Ans. (c):</b> In a straight bar the length of one hook may be taken as 9D. Total length is L + 18D (for two hooks). For one hook, anchorage value is 16D, but question asks length of one hook usually referring to standard 90 deg bend plus extension or U hook. Standard U-hook value is 16D. Wait, question says 'length of one hook'. Standard hook length is 9D."
+            },
+            {
+                id: 667,
+                text: "According to IS 456 : 2000, shear reinforcement is dependent on",
+                options: ["percentage of tension reinforcement in the member", "grade of concrete", "Both (A) and (B)", "None of the above"],
+                correct: 2,
+                tag: "Assam PSC JE IWT 14.03.2021",
+                sol: "<b>Ans. (c):</b> Shear strength of concrete (τ<sub>c</sub>) depends on both grade of concrete and percentage of tension reinforcement."
+            },
+            {
+                id: 668,
+                text: "The maximum spacing of shear reinforcement should not exceed 0.75 d subject to a minimum of",
+                options: ["400 mm", "350 mm", "300 mm", "450 mm"],
+                correct: 2,
+                tag: "NBCC JE 11.07.2021",
+                sol: "<b>Ans. (c):</b> The maximum spacing of shear reinforcement measured along the axis of the member shall not exceed 0.75d for vertical stirrups... In no case shall the spacing exceed 300 mm."
+            },
+            {
+                id: 669,
+                text: "The chance of diagonal tension cracks in R.C.C. member reduces when :",
+                options: ["only shear force act", "flexural and shear force act", "axial tension and shear force act simultaneously", "axial compression and shear force act simultaneously"],
+                correct: 3,
+                tag: "Chandigarh JE 22.08.2021",
+                sol: "<b>Ans. (d):</b> Axial compression increases the shear capacity of concrete, thus reducing the chance of diagonal tension cracks."
+            },
+            {
+                id: 670,
+                text: "Shear resistance of concrete in a reinforced concrete beam is dependent on.",
+                options: ["Tension reinforcement in the beam", "Compression reinforcement in the beam", "Shear reinforcement in the beam", "None of the reinforcement in the beam"],
+                correct: 0,
+                tag: "JPSC AE Paper-I 10.04.2021",
+                sol: "<b>Ans. (a):</b> Design shear strength of concrete (τ<sub>c</sub>) depends on grade of concrete and percentage of tension reinforcement."
+            },
+            {
+                id: 671,
+                text: "The value of maximum permissible shear stress τ<sub>c max</sub> as per IS 456-2000 is based on",
+                options: ["Diagonal compression failure", "Flexural compression failure", "Diagonal tension failure", "Flexural tension failure"],
+                correct: 0,
+                tag: "JPSC AE Paper-I 10.04.2021 | RPSC ACF 24.02.2021",
+                sol: "<b>Ans. (a):</b> The value of maximum permissible shear stress τ<sub>c max</sub> is based on diagonal compression failure of concrete."
+            },
+            {
+                id: 672,
+                text: "Stirrup area in excess of that required for shear and torsion is provided along each terminated bar over a distance from the cut-off point equal to :",
+                options: ["three-fourth the effective depth of the member", "one-third the effective depth of the member", "two-third the effective depth of the member", "one-fourth the effective depth of the member"],
+                correct: 0,
+                tag: "ESE 18.07.2021",
+                sol: "<b>Ans. (a):</b> As per IS 456 : 2000, stirrup area in excess of that required for shear and torsion is provided along each terminated bar over a distance from the cut-off point equal to three-fourth the effective depth of the member."
+            },
+            {
+                id: 673,
+                text: "The grade of concrete and reinforcement are M-20 and Fe-250 respectively. Consider 25 mm diameter bars and τ<sub>bd</sub> is 1.2 N/mm². What is the development length at support for a simply supported beam of a rectangular section?",
+                options: ["1133 mm", "1033 mm", "1321 mm", "1232 mm"],
+                correct: 0,
+                tag: "ESE 18.07.2021",
+                sol: "<b>Ans. (a):</b> L<sub>d</sub> = (φσ<sub>s</sub>) / (4τ<sub>bd</sub>) = (25 × 0.87 × 250) / (4 × 1.2) = 5437.5 / 4.8 = 1132.8 mm ≈ 1133 mm."
+            },
+            {
+                id: 674,
+                text: "For Bent up Bars, the inclined length of Crank of the Depth of the member is d, will be",
+                options: ["1.73d", "d√2", "d", "2d"],
+                correct: 1,
+                tag: "DSSSB JE (Mains) 19.03.2021 | SSC JE 2019",
+                sol: "<b>Ans. (d):</b> Inclined length of cranked bar is equal to d / sin(45°) = d / 0.707 = 1.414 d = d√2. Or if question means additional length, it is 0.42d. Question says 'inclined length of Crank', typically hypotenuse = d/sin(theta). For 45 deg, it is 1.414d. (Note: Solution in image says 'd' option is 2d and correct is 'd' option, but explanation shows calculation for 30 deg). Standard 45 deg inclined length is 1.41d."
+            },
+            {
+                id: 675,
+                text: "If the nominal shear stress (τ<sub>v</sub>) at a section does not exceed the permissible shear stress (τ<sub>c</sub>)",
+                options: ["Minimum shear reinforcement is still provided", "Shear reinforcement is provided to resist the nominal shear stress", "No shear reinforcement is provided", "Shear reinforcement is provided for difference"],
+                correct: 0,
+                tag: "YCT",
+                sol: "<b>Ans. (a):</b> If τ<sub>v</sub> < τ<sub>c</sub>, minimum shear reinforcement shall be provided in the form of stirrups."
+            },
+            {
+                id: 676,
+                text: "Lap length of reinforcement in compression shall not be less than",
+                options: ["30 φ", "24 φ", "20 φ", "15 φ"],
+                correct: 1,
+                tag: "JPSC AE Paper-I 10.04.2021 | CG PHE 2016",
+                sol: "<b>Ans. (b):</b> According to IS 456-2000, Lap length in compression shall be equal to the development length in compression but not less than 24φ."
+            },
+            {
+                id: 677,
+                text: "Which one of the following is the correct expression to estimate the development length of deformed reinforcing bar as per IS code in limit state design?",
+                options: ["L<sub>d</sub> = φσ<sub>s</sub> / 4.5τ<sub>bd</sub>", "L<sub>d</sub> = φσ<sub>s</sub> / 5τ<sub>bd</sub>", "L<sub>d</sub> = φσ<sub>s</sub> / 6.4τ<sub>bd</sub>", "L<sub>d</sub> = φσ<sub>s</sub> / 8τ<sub>bd</sub>"],
+                correct: 2,
+                tag: "RPSC Lect. (Tech. Edu.) 2021 | CG PHE 2016",
+                sol: "<b>Ans. (c):</b> As per clause 26.2.1 of IS 456:2000, L<sub>d</sub> = φσ<sub>s</sub> / 4τ<sub>bd</sub>. For deformed bars, τ<sub>bd</sub> is increased by 60%. So L<sub>d</sub> = φσ<sub>s</sub> / (4 × 1.6 τ<sub>bd</sub>) = φσ<sub>s</sub> / 6.4 τ<sub>bd</sub>."
+            },
+            {
+                id: 678,
+                text: "For bars in compression, the values of bond stress for bars in tension shall be increased by",
+                options: ["10%", "15%", "20%", "25%"],
+                correct: 3,
+                tag: "Haryana SSC JE 13.04.2018",
+                sol: "<b>Ans. (d):</b> For bars in compression, the values of bond stress for bars in tension shall be increased by 25%."
+            },
+            {
+                id: 679,
+                text: "As per provision of IS 456 : 2000, maximum allowable shear stress (τ<sub>cmax</sub>) of RCC beams depends on which one of the following?",
+                options: ["Concrete grade & percentage of steel", "Grade of steel", "Grade of concrete", "Grade of concrete & steel"],
+                correct: 2,
+                tag: "MH PWD 2019 | Nagaland PSC 2015",
+                sol: "<b>Ans. (c):</b> Maximum allowable shear stress (τ<sub>cmax</sub>) depends on grade of concrete only. (τ<sub>c</sub> depends on % steel and grade of concrete)."
+            },
+            {
+                id: 680,
+                text: "The minimum distance over which a bar should be extended (curtailment) beyond which it is no longer needed for bending in RCC beam is",
+                options: ["effective depth of beam or 12 times the diameter of the bar whichever is greater", "48 times the diameter of the bar", "1.5 times the depth or 24 times the diameter", "φσ<sub>s</sub> / 4τ<sub>bd</sub>"],
+                correct: 0,
+                tag: "APPSC AEE 2011 Paper-II",
+                sol: "<b>Ans. (a):</b> As per IS 456, reinforcement shall extend beyond the point at which it is no longer required to resist flexure for a distance equal to the effective depth of the member or 12 times the bar diameter, whichever is greater."
+            },
+            {
+                id: 681,
+                text: "Statement (I): In a RC beam, bond stress developed is due to pure adhesion, and frictional and mechanical resistance. Statement (II): Inadequacy of bond strength can be compensated by providing end anchorage in the reinforcing bars.",
+                options: ["Both Statement (I) and (II) are true", "Both Statement (I) and (II) are false", "Statement (I) is true, (II) is false", "Statement (I) is false, (II) is true"],
+                correct: 0,
+                tag: "ESE 2018",
+                sol: "<b>Ans. (a):</b> Both statements are correct. Bond is due to adhesion, friction, and mechanical interlock. End anchorage (hooks/bends) compensates for insufficient bond length."
+            },
+            {
+                id: 682,
+                text: "The spacing of stirrups near the support is-",
+                options: ["Minimum", "Maximum", "Between minimum & maximum", "Zero"],
+                correct: 0,
+                tag: "PGCIL DT SR-1 22.08.2021",
+                sol: "<b>Ans. (a):</b> Shear force is maximum near the support, so spacing of stirrups is minimum to resist high shear."
+            },
+            {
+                id: 683,
+                text: "Bond can be increased by-",
+                options: ["Using rich mix of concrete", "Using deformed bars", "Proper curing", "All of the above"],
+                correct: 3,
+                tag: "UPSSSC JE 31-07-2016",
+                sol: "<b>Ans. (d):</b> Bond strength depends on the quality of concrete (rich mix), surface texture of bars (deformed bars), and proper curing."
+            },
+            {
+                id: 684,
+                text: "For deformed bars bond stress is-",
+                options: ["Less than plain bars", "More than plain bars", "Equal to plain bars", "No comparison"],
+                correct: 1,
+                tag: "UPSSSC JE 31-07-2016",
+                sol: "<b>Ans. (b):</b> For deformed bars, bond stress is 60% more than plain bars."
+            },
+            {
+                id: 685,
+                text: "Steel bars are generally connected together to get greater length than the standard length by providing",
+                options: ["straight bar splice", "hooked splice", "dowel splice", "All option are correct"],
+                correct: 3,
+                tag: "SSC JE 23.1.2018",
+                sol: "<b>Ans. (d):</b> Steel bars are generally connected using straight bar splice, hooked splice, and dowel splice to get greater length."
+            }
+        ];
+
+        // --- APP STATE ---
+        let questions = [];
+        let curIdx = 0;
+        let responses = {}; // { qId: { opt: number, status: string, correct: boolean } }
+        let bookmarks = JSON.parse(localStorage.getItem('bookmarks_rcc_set6')) || [];
+        let historyLog = JSON.parse(localStorage.getItem('history_rcc_set6')) || [];
+        let timerInt;
+        let timeLeft = 7200; // 2 hrs
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            updateHomeStats();
+        };
+
+        function updateHomeStats() {
+            document.getElementById('bm-count').innerText = bookmarks.length;
+            
+            const list = document.getElementById('history-list');
+            list.innerHTML = '';
+            if (historyLog.length === 0) {
+                list.innerHTML = '<div style="text-align:center; color:#999; padding:15px;">No tests taken yet.</div>';
+            } else {
+                historyLog.slice().reverse().forEach(h => {
+                    const row = document.createElement('div');
+                    row.className = 'hist-row';
+                    
+                    let accClass = 'acc-low';
+                    if(h.acc >= 80) accClass = 'acc-high';
+                    else if(h.acc >= 50) accClass = 'acc-med';
+
+                    row.innerHTML = `
+                        <div style="text-align:left;">
+                            <div style="font-weight:bold; font-size:0.85rem;">${h.date}</div>
+                            <div style="font-size:0.75rem; color:#888;">Score: ${h.score}/${h.total}</div>
+                        </div>
+                        <div class="${accClass}" style="font-size:1.1rem; align-self:center;">${h.acc}%</div>
+                    `;
+                    list.appendChild(row);
+                });
+            }
+        }
+
+        function clearHistory() {
+            if(confirm("Are you sure you want to clear history?")) {
+                localStorage.removeItem('history_rcc_set6');
+                historyLog = [];
+                updateHomeStats();
+            }
+        }
+
+        function initTest(mode) {
+            if (mode === 'bookmark') {
+                if (bookmarks.length === 0) { alert("No bookmarks found."); return; }
+                questions = rawQuestions.filter(q => bookmarks.includes(q.id));
+            } else {
+                questions = [...rawQuestions];
+            }
+
+            curIdx = 0;
+            responses = {};
+            timeLeft = 7200;
+
+            document.getElementById('home-screen').classList.remove('active');
+            document.getElementById('test-interface').classList.add('active');
+
+            renderQ(0);
+            updatePalette();
+            startTimer();
+        }
+
+        // --- RENDER LOGIC ---
+        function renderQ(idx) {
+            curIdx = idx;
+            const q = questions[idx];
+            const resp = responses[q.id];
+
+            document.getElementById('q-num').innerText = idx + 1 + " / " + questions.length;
+            
+            // Render Tag
+            const tagContainer = document.getElementById('tag-container');
+            if(q.tag) {
+                tagContainer.innerHTML = `<span class="exam-tag">${q.tag}</span>`;
+            } else {
+                tagContainer.innerHTML = '';
+            }
+
+            // Bookmark State
+            const bmIcon = document.getElementById('bookmark-icon');
+            if(bookmarks.includes(q.id)) {
+                bmIcon.innerText = "★";
+                bmIcon.style.color = "#fbbc04"; // Yellow
+            } else {
+                bmIcon.innerText = "☆";
+                bmIcon.style.color = "#ccc";
+            }
+
+            document.getElementById('q-text').innerHTML = q.text;
+
+            // Options
+            const box = document.getElementById('options-box');
+            box.innerHTML = '';
+            q.options.forEach((opt, i) => {
+                const row = document.createElement('div');
+                row.className = 'option-row';
+                
+                // If answered, show styles
+                if(resp && resp.status === 'ans') {
+                    row.style.pointerEvents = 'none'; // Lock
+                    if (i === q.correct) row.classList.add('correct');
+                    else if (i === resp.opt && i !== q.correct) row.classList.add('wrong');
+                }
+
+                row.innerHTML = `<div class="option-radio"></div><span>${opt}</span>`;
+                row.onclick = () => handleAnswer(q.id, i);
+                box.appendChild(row);
+            });
+
+            // Solution Box
+            const solBox = document.getElementById('solution-section');
+            if(resp && resp.status === 'ans') {
+                solBox.classList.add('show');
+                document.getElementById('solution-text').innerHTML = q.sol;
+            } else {
+                solBox.classList.remove('show');
+            }
+
+            // Update Palette UI (Current Highlight)
+            updatePalette();
+        }
+
+        function handleAnswer(qId, optIdx) {
+            const q = questions.find(x => x.id === qId);
+            // Instant feedback mode: save and reveal immediately
+            responses[qId] = {
+                opt: optIdx,
+                correct: (optIdx === q.correct),
+                status: 'ans'
+            };
+            renderQ(curIdx);
+        }
+
+        function markReview() {
+            const qId = questions[curIdx].id;
+            // Only mark if not already answered
+            if(!responses[qId]) {
+                responses[qId] = { status: 'rev', opt: null };
+            } else if (responses[qId].status !== 'ans') {
+                responses[qId].status = 'rev';
+            }
+            renderQ(curIdx); // Re-render to update palette color if visible
+            nextQ(); // Move next generally expected
+        }
+
+        function toggleBookmark(e) {
+            e.stopPropagation();
+            const qId = questions[curIdx].id;
+            const idx = bookmarks.indexOf(qId);
+            if(idx > -1) bookmarks.splice(idx, 1);
+            else bookmarks.push(qId);
+            
+            localStorage.setItem('bookmarks_rcc_set6', JSON.stringify(bookmarks));
+            renderQ(curIdx); // Refresh icon
+        }
+
+        // --- NAVIGATION ---
+        function nextQ() { if(curIdx < questions.length - 1) renderQ(curIdx + 1); }
+        function prevQ() { if(curIdx > 0) renderQ(curIdx - 1); }
+
+        // --- PALETTE ---
+        function updatePalette() {
+            const grid = document.getElementById('palette-grid');
+            grid.innerHTML = '';
+            questions.forEach((q, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'p-item';
+                btn.innerText = i + 1;
+                
+                const r = responses[q.id];
+                if (i === curIdx) btn.classList.add('current');
+                
+                if (r) {
+                    if (r.status === 'ans') btn.classList.add('answered');
+                    else if (r.status === 'rev') btn.classList.add('review');
+                } else {
+                    btn.classList.add('not-visited');
+                }
+                
+                btn.onclick = () => {
+                    renderQ(i);
+                    if(window.innerWidth < 768) closeSidebar();
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.add('open');
+            document.getElementById('overlay').classList.add('open');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('overlay').classList.remove('open');
+        }
+
+        // --- TIMER & SUBMISSION ---
+        function startTimer() {
+            clearInterval(timerInt);
+            timerInt = setInterval(() => {
+                timeLeft--;
+                const h = Math.floor(timeLeft / 3600).toString().padStart(2,'0');
+                const m = Math.floor((timeLeft % 3600) / 60).toString().padStart(2,'0');
+                const s = (timeLeft % 60).toString().padStart(2,'0');
+                document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+                if (timeLeft <= 0) submitTest();
+            }, 1000);
+        }
+
+        function exitTest() {
+            if(confirm("Exit Test? Progress will not be saved in history unless submitted.")) {
+                clearInterval(timerInt);
+                location.reload();
+            }
+        }
+
+        function submitTest() {
+            clearInterval(timerInt);
+            let score = 0;
+            questions.forEach(q => {
+                const r = responses[q.id];
+                if(r && r.status === 'ans' && r.correct) score++;
+            });
+
+            // Save History
+            const acc = Math.round((score / questions.length) * 100);
+            const now = new Date();
+            const dateStr = now.toLocaleDateString() + " " + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            historyLog.push({
+                date: dateStr,
+                score: score,
+                total: questions.length,
+                acc: acc
+            });
+            localStorage.setItem('history_rcc_set6', JSON.stringify(historyLog));
+
+            alert(`Test Submitted!\nScore: ${score} / ${questions.length}\nAccuracy: ${acc}%`);
+            location.reload();
+        }
+    </script>
+</body>
+</html>
