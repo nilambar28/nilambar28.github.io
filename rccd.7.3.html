@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RCC Practice (1226-1250)</title>
+    <style>
+        :root {
+            --primary: #E91E63; /* Testbook Pink */
+            --bg-gray: #f5f5f5;
+            --text-dark: #333;
+            --success: #00C853;
+            --error: #D32F2F;
+            --review: #7B1FA2;
+            --skipped: #9E9E9E;
+        }
+
+        * { box-sizing: border-box; font-family: Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg-gray); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* --- Header --- */
+        header {
+            background: var(--primary); color: white; height: 56px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 100;
+        }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .icon-btn { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; }
+        .timer { font-family: monospace; font-weight: bold; font-size: 1.1rem; background: rgba(0,0,0,0.1); padding: 4px 8px; border-radius: 4px; }
+        .submit-btn {
+            background: white; color: var(--primary); border: none;
+            padding: 6px 16px; border-radius: 4px; font-weight: bold; text-transform: uppercase;
+        }
+        .exit-btn {
+            background: #EF5350; color: white; border: none;
+            padding: 6px 12px; border-radius: 4px; font-weight: bold; margin-right: 8px;
+        }
+
+        /* --- Landing Page --- */
+        #landing-page {
+            position: absolute; inset: 0; background: white; z-index: 200;
+            display: flex; flex-direction: column; padding: 20px; overflow-y: auto;
+        }
+        .info-card {
+            background: white; border: 1px solid #eee; border-radius: 8px;
+            padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px;
+        }
+        .btn-start {
+            width: 100%; background: var(--primary); color: white; padding: 15px;
+            border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; margin: 10px 0;
+        }
+        .btn-bm-review {
+            background: white; border: 1px solid var(--primary); color: var(--primary);
+            padding: 10px; width: 100%; border-radius: 8px; font-weight: bold;
+        }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+        th, td { text-align: left; padding: 8px; border-bottom: 1px solid #eee; }
+
+        /* --- Quiz Area --- */
+        #quiz-interface { display: none; height: 100%; flex-direction: column; position: relative; }
+        
+        .progress-bar { height: 4px; background: #E0E0E0; width: 100%; }
+        .progress-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.3s; }
+
+        .question-scroll { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 80px; }
+        
+        .q-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+        .q-num-left { font-weight: bold; color: var(--primary); }
+        .q-num-right { color: #666; font-size: 0.9rem; font-weight: bold; }
+        .exam-tag { display: inline-block; background: #E3F2FD; color: #1976D2; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-bottom: 10px; }
+        
+        .q-text { font-size: 1.1rem; color: #222; line-height: 1.5; margin-bottom: 20px; font-weight: 500; }
+
+        .option {
+            background: white; border: 1px solid #ddd; border-radius: 8px;
+            padding: 12px 15px; margin-bottom: 12px; display: flex; gap: 12px;
+            cursor: pointer; transition: all 0.2s; align-items: center;
+        }
+        .option-circle {
+            width: 28px; height: 28px; border-radius: 50%; border: 2px solid #ccc;
+            display: flex; align-items: center; justify-content: center; font-weight: bold; color: #666; flex-shrink: 0;
+        }
+        /* Option States */
+        .option.correct { background: #E8F5E9; border-color: var(--success); }
+        .option.correct .option-circle { background: var(--success); border-color: var(--success); color: white; }
+        .option.wrong { background: #FFEBEE; border-color: var(--error); }
+        .option.wrong .option-circle { background: var(--error); border-color: var(--error); color: white; }
+        .option.disabled { opacity: 0.8; pointer-events: none; }
+
+        /* Solution Box */
+        .solution {
+            display: none; background: #F8F9FA; border: 1px solid #ddd;
+            border-radius: 8px; padding: 15px; margin-top: 20px;
+        }
+        .sol-title { font-weight: bold; color: #333; margin-bottom: 8px; }
+        .sol-content { font-size: 0.95rem; color: #444; white-space: pre-line; line-height: 1.6; }
+
+        /* --- Footer --- */
+        .footer {
+            position: fixed; bottom: 0; width: 100%; background: white;
+            border-top: 1px solid #ddd; padding: 10px 16px;
+            display: flex; justify-content: space-between; align-items: center; z-index: 50;
+        }
+        .nav-btn { background: white; border: 1px solid #ccc; padding: 8px 16px; border-radius: 4px; font-weight: bold; color: #555; }
+        .nav-btn.next { background: var(--primary); color: white; border: none; }
+        .bm-icon { font-size: 1.5rem; color: #ccc; background: none; border: none; cursor: pointer; }
+        .bm-icon.active { color: #FFC107; }
+
+        /* --- Palette Overlay --- */
+        .palette-overlay {
+            position: fixed; top: 0; right: -100%; width: 80%; max-width: 320px; height: 100%;
+            background: white; z-index: 150; transition: right 0.3s; box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column;
+        }
+        .palette-overlay.open { right: 0; }
+        .palette-header { padding: 15px; background: #eee; font-weight: bold; display: flex; justify-content: space-between; }
+        .palette-grid { padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; overflow-y: auto; flex: 1; align-content: start; }
+        .grid-item {
+            height: 35px; display: flex; align-items: center; justify-content: center;
+            background: #eee; border-radius: 4px; font-weight: bold; color: #555; cursor: pointer; border: 2px solid transparent;
+        }
+        
+        /* Palette Colors */
+        .grid-item.answered { background: var(--success); color: white; }
+        .grid-item.wrong { background: var(--error); color: white; }
+        .grid-item.review { background: var(--review); color: white; }
+        .grid-item.skipped { background: var(--skipped); color: white; }
+        .grid-item.current { border-color: var(--primary); }
+
+        .palette-legend { padding: 10px; border-top: 1px solid #eee; background: #fafafa; font-size: 0.8rem; }
+        .legend-row { display: flex; gap: 15px; margin-bottom: 5px; }
+        .dot { width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; display: inline-block; }
+
+        .backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 140; display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="landing-page">
+        <h2 style="color: var(--primary); text-align:center;">RCC Practice (1226-1250)</h2>
+        
+        <div class="info-card">
+            <div style="font-size:3rem; font-weight:bold; color:#333;">25</div>
+            <div style="color:#666;">Total Questions</div>
+            <hr style="margin: 15px 0; border:0; border-top:1px solid #eee;">
+            <div style="display:flex; justify-content:space-around;">
+                <div><small>LAST SCORE</small><br><b id="last-score" style="color:var(--primary)">-</b></div>
+                <div><small>ACCURACY</small><br><b id="last-acc" style="color:var(--primary)">-</b></div>
+            </div>
+        </div>
+
+        <button class="btn-start" onclick="startTest('full')">START TEST</button>
+        
+        <div style="margin-top:10px;">
+            <button class="btn-bm-review" onclick="startTest('bookmark')">
+                <span style="font-size:1.2rem;">&#9733;</span> REVIEW BOOKMARKS (<span id="bm-count">0</span>)
+            </button>
+        </div>
+
+        <h4 style="margin-top:30px; margin-bottom:10px;">Recent History</h4>
+        <table id="history-table"></table>
+    </div>
+
+    <div id="quiz-interface">
+        <header>
+            <div class="header-left">
+                <button class="icon-btn" onclick="togglePalette()">&#9776;</button>
+                <div class="timer" id="timer">02:00:00</div>
+            </div>
+            <div>
+                <button class="exit-btn" onclick="exitTest()">EXIT</button>
+                <button class="submit-btn" onclick="submitTest()">SUBMIT</button>
+            </div>
+        </header>
+
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div class="question-scroll" id="q-container">
+            </div>
+
+        <div class="footer">
+            <button class="nav-btn" onclick="changeQuestion(-1)">PREV</button>
+            <button class="bm-icon" id="btn-bm" onclick="toggleBookmark()">&#9734;</button>
+            <button class="nav-btn" onclick="markReview()" style="color:var(--review); border-color:var(--review)">REVIEW</button>
+            <button class="nav-btn next" onclick="changeQuestion(1)">NEXT</button>
+        </div>
+
+        <div class="backdrop" id="backdrop" onclick="togglePalette()"></div>
+        <div class="palette-overlay" id="palette">
+            <div class="palette-header">
+                <span>Questions</span>
+                <span onclick="togglePalette()" style="cursor:pointer">&times;</span>
+            </div>
+            <div class="palette-grid" id="palette-grid"></div>
+            <div class="palette-legend">
+                <div class="legend-row">
+                    <div><span class="dot" style="background:var(--success)"></span>Ans</div>
+                    <div><span class="dot" style="background:var(--error)"></span>Wrong</div>
+                </div>
+                <div class="legend-row">
+                    <div><span class="dot" style="background:var(--review)"></span>Review</div>
+                    <div><span class="dot" style="background:var(--skipped)"></span>Skip</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA: 1226 to 1250 ---
+        const db = [
+            { id: 1226, q: "The reduction coefficient of a reinforced concrete column with an effective length of 5m and size 250 × 300mm is", opts: ["0.5833", "0.625", "0.8333", "0.729"], ans: 2, tag: "Maharashtra JE 2018 (Shift-I), MH PWD 2018", exp: "Ans. (c) : Size = 250 × 300 mm\nlef = 5 m = 5000 mm\nCr = 1.25 - lef / 48b\n= 1.25 - 5000 / (48 × 250)\nCr = 1.25 - 0.4167 ⇒ 0.8333" },
+            { id: 1227, q: "The factored load carrying capacity of a reinforced concrete column (M20 concrete, Fe 415 steel) of 350 mm × 650 mm size with minimum percentage of steel is :", opts: ["2326 kN", "1536 kN", "2500 kN", "1976 kN"], ans: 0, tag: "SSC JE 23.09.2019 (Morning)", exp: "Ans. (a) : Column = 350mm × 650mm\nPu = 0.4 fck Ac + 0.67 fy Asc\n= 0.4 fck (Ag - Asc) + 0.67 fy Asc\n= 0.4 × 20 × (350 × 650 - 0.008 × 350 × 650) + 0.67 × 415 × 0.008 × 350 × 650\n= 1805440 + 506051 = 2311491 N\n[Pu = 2311.491 kN].\nNote: Commission has selected the option (b) as correct answer in revised answer key." },
+            { id: 1228, q: "The strength of compression members with helical reinforcement is........times the strength of similar member with lateral ties.", opts: ["1.0", "1.05", "1.10", "1.15"], ans: 1, tag: "PGCIL DT SR-1 22.08.2021", exp: "Ans. (b) : The strength of compression members with helical reinforcement is increased by 5% as compare to compression member with lateral ties." },
+            { id: 1229, q: "An R.C.C. short column with 300 mm × 300 mm square cross section is made of M 20 grade of concrete and has 4 numbers 20 mm diameter longitudinal bars of Fe 415 steel. It is under the action of a concentric axial compressive load. Ignoring the reduction in the area of concrete due to steel bars, the ultimate load carrying of the column is", opts: ["1659 KN", "1548 KN", "1198 KN", "1069 KN"], ans: 3, tag: "CGPSC SES exam 2016", exp: "Ans. (d) : fck = 20, Asc = π/4 × 4 × 20² = 1256mm²\nUltimate load = 0.4 fck Ac + 0.67 fy × Asc\nAs = 0.4 × 20 × 300 × 300 + 0.67 × 415 × 1256\n= 1069230 N = 1069 KN." },
+            { id: 1230, q: "The effective length of a column is a reinforced concrete building frame, as per IS 456:2000 is independent of the", opts: ["Frame type i.e. braced (no sway) or unbarred (with sway)", "Span of beam", "Height of column", "loads acting the frames", "None of above"], ans: 1, tag: "CGPSC SES exam 2016", exp: "Ans. (b) : The effective length of column in RCC building frame is independent of span of beam." },
+            { id: 1231, q: "In reinforced concrete, pedestal is defined as a compression member whose effective length does not exceed its least lateral dimension by", opts: ["12 times", "3 times", "7 times", "16 times"], ans: 1, tag: "MH PWD 2018, PGCIL 13.9.2018", exp: "Ans. (b) : • Pedestal is a compression member, the effective length of which does not exceed three times the least lateral dimension.\neffective length / least lateral dimension < 3 (Pedestal)\neffective length / least lateral dimension > 3 (Column)" },
+            { id: 1232, q: "As per IS : 456-2000, in the design of column the pitch of transverse reinforcement shall not be more than,", opts: ["Least lateral dimension of column", "16 × smallest diameter of longitudinal reinforcement bar", "300mm", "Minimum of (i) & (ii)", "Minimum of (i), (ii) & (iii)"], ans: 4, tag: "MH WCD 2019", exp: "Ans. (d) : As per IS : 456-2000,\nPitch–The pitch of transverse reinforcement shall not be more than the least of the following distances:\n• The least lateral dimension of the compression members;\n• Sixteen times the smallest diameter of the longitudinal reinforcement bar to be tied and\n• 300 mm." },
+            { id: 1233, q: "While designing structure, the column with highest equivalent length has", opts: ["Both ends fixed", "One end fixed and other end free", "Both ends hinged and pin jointed", "One end fixed and other end hinged"], ans: 1, tag: "MH Pimpri-Chinchwad MNC 2015", exp: "Ans. (b) : In a designing structure, the column with highest equivalent length has one end fixed and other end free.\nL = 2L" },
+            { id: 1234, q: "In absence of detailed design the percentage of steel in concrete columns is usually taken as----", opts: ["15 to 20", "10 to 15", "5 to 10", "1 to 5"], ans: 3, tag: "KERALA Soil Survey Engg. 21.06.2019", exp: "Ans. (d) : In absence of detailed design the percentage of steel in concrete columns is usually taken as 1 to 5.\nLongitudinal reinforcement\n• Minimum area of steel = 0.8% of the gross area of columns\n• Maximum area of steel–\n(i) when bars are not lapped Amax = 6% of the gross area of column\n(ii) when bars are lapped Amax = 4% of the gross area of column" },
+            { id: 1235, q: "What is the minimum number of longitudinal bars to be provided in a column of diameter 350 mm?", opts: ["4", "8", "10", "6"], ans: 3, tag: "DDA JE 23.04.2018 Shift-II", exp: "Ans. (d) : Diameter is given, so it is a circular column.\n• The minimum number of longitudinal bars to be provided in a circular column is 6.\n• For square or rectangular = 4." },
+            { id: 1236, q: "The spacing of lateral ties to be used as special confining reinforcement should not be greater than :", opts: ["100 mm", "75 mm", "150 mm", "120 mm"], ans: 0, tag: "Assam Power Distribution 2017", exp: "Ans. (a) :\n• The spacing of lateral ties used as special confining reinforcement shall not exceed 1/4 of minimum member dimension but need not be less than 75 mm nor more than 100 mm.\n• Column which has significant variation in stiffness along its height, should be provided with special confining reinforcement." },
+            { id: 1237, q: "The failure of a long column is happened by", opts: ["crushing", "torsion", "buckling", "shear"], ans: 2, tag: "PGCIL DT SR-1 22.08.2021", exp: "Ans. (c) : Buckling failure : Buckling failure generally occurs in long columns because they are very slenderness ratio and their least lateral dimension is greater than 12. In such condition, the load carrying capacity of the column decrease very much, the columns tend to become unstable and start buckling to sideward even under small loads." },
+            { id: 1238, q: "The minimum size of one side or diameter of column in reinforced cement concrete structure to make it earthquake resistant should not be less than:", opts: ["200 mm", "250 mm", "300 mm", "350 mm"], ans: 0, tag: "UPSSSC JE 2015 Paper-I", exp: "Ans. (a) : IS 13920 : 1993 specifies the minimum size of one side or diameter of column in reinforced cement concrete structure to make it earthquake resistance should not be less than 200 mm." },
+            { id: 1239, q: "As per IS 456:2000, the unsupported length (l) of column whose one end is unrestrained in any given plane shall not exceed (Given: b = width of the column cross-section and D = depth of cross section measured in the plane under consideration)\n(Symbols and notations carry their usual meaning)", opts: ["(100b)/D", "(100b³)/D", "(100D²)/b", "(100b²)/D"], ans: 3, tag: "DSSSB JE 05.11.2019 (Morning)", exp: "Ans. (d) : As per IS 456 : 2000 –\nIf any given plane, one end of a column is unrestrained, its unsupported length (l), shall not exceed–\n100b²/D" },
+            { id: 1240, q: "A column of size 450 mm × 600 mm has unsupported length of 3.0 m and is braced against side away in both directions. According to IS 456 : 2000, the minimum eccentricities (in mm) with respect to major and minor principle axes are", opts: ["20.0 and 20.0", "26.0 and 21.0", "26.0 and 20.0", "21.0 and 15.0"], ans: 2, tag: "HSSC JE Panchyati Raj 2015", exp: "Ans. (b) : Length = 3 m = 3000 mm\nSize of column = (450 × 600) mm\nemin with respect to major axis > l/500 + D/30\n= 3000/500 + 600/30\n= 6 + 20 = 26 mm\nemin with respect to minor axis–\nemin > 3000/500 + 450/30 = 6 + 15 = 21 mm\nBut minimum eccentricity is 20 mm. So emin for minor axis is 21 mm? (Wait, calculation gives 21mm. Option B says 26.0 and 21.0. Option C says 26.0 and 20.0. The answer block says Ans (b) but then shows calculation 21mm. Wait, IS 456 says minimum 20mm. Since 21 > 20, we use 21. So (b) 26.0 and 21.0 is correct. Wait, the book answer key says (b). But the text explanation under (b) ends with 'emin > ... = 21 mm'. So 26 and 21. Correct.)" },
+            { id: 1241, q: "When the two ends of the compression members are fixed the effective length will be–", opts: ["0.8 L", "1.0 L", "0.65 L", "2.0 L"], ans: 2, tag: "HSSC JE 10.4.2018 Shift-I", exp: "Ans. (c) :\nEnd conditions of column: Both ends are fixed\nEffective length lef = 0.65 L\n(Theoretical is 0.5L, Recommended is 0.65L)" },
+            { id: 1242, q: "All columns shall be designed for minimum eccentricity l/500 + d/30 = 20 mm.\nWhere, l =..........\nd = ............", opts: ["Effective length of column, Depth of column", "Unsupported length of column, Lateral Dimension of column", "Effective length of column, Lateral dimension ofcolumn", "Unsupported length of column, Depth of column"], ans: 1, tag: "HSSC JE 10.4.2018 Shift-I", exp: "Ans. (b) Minimum eccentricity–\nemin ≥ l/500 + D/30  Whichever is greater\nwhere,\nl = unsupported length of column\nD = lateral dimension of column" },
+            { id: 1243, q: "The load at which a column bends from its initial position and the deflection still remains is known as", opts: ["Permissible load", "Yield load", "Safe load", "Buckling load"], ans: 3, tag: "BSPHCL29.01.2019 Shift-I", exp: "Ans. (d) : Buckling load–The maximum limiting load at which the column tends to have lateral displacement or tends to buckle is called buckling or crippling load.\nSafe load–It is the load to which a column is actually subjected to and is well below the buckling load\nSafe load = Buckling load / Factor of safety" },
+            { id: 1244, q: "In RCC columns if ties are not provided, the column will likely to:", opts: ["Fail by crushing", "Fails by buckling", "Behave like a beam", "None of the above"], ans: 1, tag: "Kerala PSC Poly. Lect 2016", exp: "Ans. (b) : The main functions of lateral reinforcement in RCC column are:-\n• It prevents longitudinal reinforcement bars from buckling\n• It resists the shear force and hence contributes avoiding shear failure.\n• It confines the concrete core to provide sufficient ductility or deformability." },
+            { id: 1245, q: "Which of the following statements is incorrect ?", opts: ["Minimum X-sectional area of longitudinal reinforcement in a column is 0.8%.", "Spacing of main bars measured along periphery of column > 30 cm.", "Reinforcing bars in a column should not be less than 12 mm in dia.", "In circular column, min. no. of longitudinal bars should not be less than four."], ans: 3, tag: "HPSSC JE Code 386/2018", exp: "Ans. (d) : In circular column, min. no. of longitudinal bars should not be less than six (not four)." },
+            { id: 1246, q: "In Columns, the ratio between the buckling load and the safe load is called ___________.", opts: ["Slenderness ratio", "Factor of safety", "Buckling factor", "Design load"], ans: 1, tag: "UKSSSC JE 20.12.2020 Morning", exp: "Ans. (b) : Factor of safety = Buckling load / Safe load" },
+            { id: 1247, q: "A column of length 'L' is pinned at both the ends. The effective length of the column is", opts: ["0.8 L", "1.0L", "1.2 L", "0.65 L"], ans: 1, tag: "UKSSSC JE 20.12.2020 Evening", exp: "Ans. (b) :\nEnd Condition: Both end hinged (pinned)\nEffective length: 1.00 L" },
+            { id: 1248, q: "In a reinforced concrete compression member, the pitch of the lateral reinforcement is given by the minimum of three of the following EXCEPT:", opts: ["least lateral dimension of the compression member", "300 mm", "250 mm", "16 times the smallest diameter of longitudinal bar to be tied"], ans: 2, tag: "DDA 24.04.2018 Shift-I", exp: "Ans. (c) : Pitch of Lateral reinforcement:-\n- Least lateral dimension of compression member\n- 16φ longitudinal min dia\n- 300 mm\n(250 mm is not a criterion)" },
+            { id: 1249, q: "Which one of the following statements is correct?", opts: ["Maximum longitudinal reinforcement in an axially loaded short column is 6% of cross-sectional area", "Columns with circular section are provided transverse reinforcement of helical type only", "Spacing of lateral ties cannot be more than 16 times the diameter of the tie bar", "Longitudinal reinforcement bar need not be in contact with lateral ties"], ans: 0, tag: "SSC JE 2004", exp: "Ans. (a) : Longitudinal reinforcement of column –\nMin area of steel = 0.8% of the gross area of column\nMax area of steel = 6% of the gross area of column (not lapped)" },
+            { id: 1250, q: "A column is a compression member, the effective length of which exceeds three times of its least lateral dimension. This is applicable to:", opts: ["Rectangular and circular sections.", "I section and circular sections.", "Rectangular, circular and I section sections.", "All the shapes of sections."], ans: 3, tag: "SSC JE 2010", exp: "Ans. : (a) A column is a compression member, the effective length of which exceeds three times of its least lateral dimension. This is applicable to rectangular and circular sections." }
+        ];
+
+        // --- Logic Variables ---
+        // UNIQUE KEY FOR THIS FILE (1226-1250)
+        const STORAGE_KEY_BM = 'rcc_bookmarks_1226';
+        const STORAGE_KEY_HIST = 'rcc_history_1226';
+
+        let currentIdx = 0;
+        let answers = {}; 
+        let reviewList = {}; 
+        let bookmarks = JSON.parse(localStorage.getItem(STORAGE_KEY_BM)) || {};
+        let testQuestions = [];
+        let timerInt;
+        let timeRemaining = 7200; // 2 Hours
+
+        // --- Core Functions ---
+        function init() {
+            renderHistory();
+            const validBMs = Object.keys(bookmarks).filter(bid => db.some(q => q.id == bid));
+            document.getElementById('bm-count').innerText = validBMs.length;
+        }
+
+        function startTest(mode) {
+            if (mode === 'bookmark') {
+                const bms = Object.keys(bookmarks).filter(bid => db.some(q => q.id == bid));
+                if (bms.length === 0) {
+                    alert("No bookmarks found for this specific chapter (1226-1250)!");
+                    return;
+                }
+                testQuestions = db.filter(q => bms.includes(String(q.id)));
+            } else {
+                testQuestions = [...db];
+            }
+
+            answers = {};
+            reviewList = {};
+            currentIdx = 0;
+            timeRemaining = 7200;
+
+            document.getElementById('landing-page').style.display = 'none';
+            document.getElementById('quiz-interface').style.display = 'flex';
+            
+            renderPalette();
+            loadQuestion();
+            startTimer();
+        }
+
+        function loadQuestion() {
+            if (currentIdx >= testQuestions.length) currentIdx = 0;
+            
+            const q = testQuestions[currentIdx];
+            if (!q) return; 
+
+            const container = document.getElementById('q-container');
+            const userAns = answers[q.id];
+
+            const tagHtml = `<span class="exam-tag">${q.tag}</span>`;
+            
+            let html = `
+                <div class="q-header">
+                    <span class="q-num-left">Question ${currentIdx + 1}</span>
+                    <span class="q-num-right">Q. ${q.id}</span>
+                </div>
+                ${tagHtml}
+                <div class="q-text">${q.q}</div>
+            `;
+
+            q.opts.forEach((opt, idx) => {
+                let cls = "option";
+                if (userAns !== undefined) {
+                    if (idx === q.ans) cls += " correct";
+                    else if (idx === userAns) cls += " wrong";
+                    else cls += " disabled";
+                }
+                
+                html += `
+                    <div class="${cls}" onclick="handleAnswer(${q.id}, ${idx})">
+                        <div class="option-circle">${String.fromCharCode(65+idx)}</div>
+                        <div>${opt}</div>
+                    </div>
+                `;
+            });
+
+            if (userAns !== undefined) {
+                html += `
+                    <div class="solution" style="display:block">
+                        <div class="sol-title">Solution:</div>
+                        <div class="sol-content">${q.exp}</div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+
+            const bmBtn = document.getElementById('btn-bm');
+            bmBtn.innerHTML = bookmarks[q.id] ? "&#9733;" : "&#9734;";
+            bmBtn.classList.toggle('active', !!bookmarks[q.id]);
+
+            updatePaletteUI();
+            document.getElementById('progress-fill').style.width = `${((currentIdx+1)/testQuestions.length)*100}%`;
+        }
+
+        function handleAnswer(qId, optIdx) {
+            if (answers[qId] !== undefined) return; 
+            answers[qId] = optIdx;
+            loadQuestion();
+        }
+
+        function changeQuestion(dir) {
+            const newIdx = currentIdx + dir;
+            if (newIdx >= 0 && newIdx < testQuestions.length) {
+                currentIdx = newIdx;
+                loadQuestion();
+            }
+        }
+
+        // --- Palette ---
+        function togglePalette() {
+            const pal = document.getElementById('palette');
+            const back = document.getElementById('backdrop');
+            if (pal.classList.contains('open')) {
+                pal.classList.remove('open');
+                back.style.display = 'none';
+            } else {
+                pal.classList.add('open');
+                back.style.display = 'block';
+            }
+        }
+
+        function renderPalette() {
+            const grid = document.getElementById('palette-grid');
+            grid.innerHTML = testQuestions.map((q, idx) => 
+                `<div class="grid-item" id="p-item-${idx}" onclick="jumpTo(${idx})">${idx+1}</div>`
+            ).join('');
+        }
+
+        function updatePaletteUI() {
+            testQuestions.forEach((q, idx) => {
+                const item = document.getElementById(`p-item-${idx}`);
+                if (!item) return;
+                item.className = 'grid-item';
+                
+                if (idx === currentIdx) item.classList.add('current');
+                
+                if (answers[q.id] !== undefined) {
+                    item.classList.add('answered');
+                } else if (reviewList[q.id]) {
+                    item.classList.add('review');
+                } else {
+                    item.classList.add('skipped');
+                }
+            });
+        }
+
+        function jumpTo(idx) {
+            currentIdx = idx;
+            loadQuestion();
+            togglePalette(); 
+        }
+
+        function markReview() {
+            const qId = testQuestions[currentIdx].id;
+            reviewList[qId] = !reviewList[qId];
+            updatePaletteUI();
+        }
+
+        function toggleBookmark() {
+            const qId = testQuestions[currentIdx].id;
+            if (bookmarks[qId]) delete bookmarks[qId];
+            else bookmarks[qId] = true;
+            localStorage.setItem(STORAGE_KEY_BM, JSON.stringify(bookmarks));
+            loadQuestion();
+        }
+
+        // --- Timer & System ---
+        function startTimer() {
+            clearInterval(timerInt);
+            timerInt = setInterval(() => {
+                timeRemaining--;
+                const h = Math.floor(timeRemaining / 3600).toString().padStart(2,'0');
+                const m = Math.floor((timeRemaining % 3600) / 60).toString().padStart(2,'0');
+                const s = (timeRemaining % 60).toString().padStart(2,'0');
+                document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+                if (timeRemaining <= 0) submitTest();
+            }, 1000);
+        }
+
+        function submitTest() {
+            clearInterval(timerInt);
+            let score = 0;
+            let attempted = 0;
+            testQuestions.forEach(q => {
+                if (answers[q.id] !== undefined) {
+                    attempted++;
+                    if (answers[q.id] === q.ans) score++;
+                }
+            });
+
+            const acc = attempted === 0 ? 0 : Math.round((score/attempted)*100);
+            
+            const history = JSON.parse(localStorage.getItem(STORAGE_KEY_HIST)) || [];
+            history.unshift({
+                date: new Date().toLocaleDateString(),
+                score: `${score}/${testQuestions.length}`,
+                acc: `${acc}%`
+            });
+            localStorage.setItem(STORAGE_KEY_HIST, JSON.stringify(history));
+
+            alert(`TEST FINISHED\nScore: ${score}/${testQuestions.length}\nAccuracy: ${acc}%`);
+            location.reload();
+        }
+
+        function exitTest() {
+            if (confirm("Exit test? Progress will not be saved.")) {
+                location.reload();
+            }
+        }
+
+        function renderHistory() {
+            const history = JSON.parse(localStorage.getItem(STORAGE_KEY_HIST)) || [];
+            if(history.length > 0) {
+                document.getElementById('last-score').innerText = history[0].score;
+                document.getElementById('last-acc').innerText = history[0].acc;
+                
+                document.getElementById('history-table').innerHTML = `
+                    <tr><th>Date</th><th>Score</th><th>Acc</th></tr>
+                    ${history.slice(0,5).map(h => `
+                        <tr><td>${h.date}</td><td>${h.score}</td><td>${h.acc}</td></tr>
+                    `).join('')}
+                `;
+            } else {
+                document.getElementById('history-table').innerHTML = '<div style="padding:10px; color:#999; text-align:center">No attempts yet</div>';
+            }
+        }
+
+        init();
+
+    </script>
+</body>
+</html>
