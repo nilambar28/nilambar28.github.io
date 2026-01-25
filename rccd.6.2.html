@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Civil Engineering RCC Test (Q871-Q902)</title>
+    <style>
+        :root {
+            --primary: #d63384; 
+            --header-bg: #e91e63; /* Pink Header */
+            --text: #333;
+            --bg: #f2f2f2;
+            --white: #ffffff;
+            --green: #00c853; 
+            --red: #d50000;   
+            --blue: #2979ff;  
+            --purple: #aa00ff; 
+            --gray: #9e9e9e;  
+            --border: #e0e0e0;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            margin: 0; background: var(--bg); color: var(--text); 
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            width: 100%; height: 100%; display: flex; flex-direction: column; 
+            overflow: hidden;
+        }
+
+        /* HEADER */
+        header {
+            flex: 0 0 55px;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 25; 
+        }
+        
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        .grid-icon-btn { 
+            background: transparent; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 5px; 
+        }
+        .app-title { font-weight: bold; font-size: 1.1rem; }
+        .timer-box { background: rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 4px; font-family: monospace; font-size: 1.1rem; }
+        
+        .header-right button {
+            background: white; border: none; padding: 5px 10px; margin-left:5px;
+            border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;
+        }
+
+        /* LAYOUT */
+        .main-container { flex: 1; display: flex; overflow: hidden; position: relative; width: 100%; }
+        
+        /* BACKDROP */
+        .backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 19; 
+            display: none; opacity: 0; transition: opacity 0.3s;
+        }
+        .backdrop.visible { display: block; opacity: 1; }
+
+        /* SIDEBAR (RIGHT SIDE) */
+        .palette-sidebar {
+            position: absolute; 
+            top: 0; 
+            right: 0; 
+            bottom: 0;
+            width: 280px; 
+            background: #fafafa; 
+            border-left: 1px solid #ddd;
+            display: flex; flex-direction: column; z-index: 20;
+            transform: translateX(100%); 
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: -4px 0 15px rgba(0,0,0,0.2);
+        }
+        .palette-sidebar.open { transform: translateX(0); }
+        
+        .palette-header { padding: 15px; background: #eee; font-weight: bold; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; }
+        
+        .palette-grid { 
+            padding: 10px; display: grid; grid-template-columns: repeat(6, 1fr); 
+            gap: 8px; overflow-y: auto; flex: 1; align-content: start;
+        }
+        
+        .p-node {
+            height: 35px; display: flex; align-items: center; justify-content: center;
+            background: white; border: 1px solid #ccc; border-radius: 4px; font-weight: 600;
+            cursor: pointer; font-size: 0.85rem; 
+        }
+        .p-node.current { border: 2px solid var(--blue); }
+        .p-node.answered { background: var(--green); color: white; border-color: var(--green); }
+        .p-node.wrong { background: var(--red); color: white; border-color: var(--red); }
+        .p-node.review { background: var(--purple); color: white; border-color: var(--purple); }
+        .p-node.skipped { background: var(--gray); color: white; border-color: var(--gray); }
+
+        /* QUIZ AREA */
+        .quiz-area { 
+            flex: 1; padding: 15px; overflow-y: auto; 
+            -webkit-overflow-scrolling: touch; background: white; padding-bottom: 80px; 
+        }
+        .q-meta-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .q-badge { background: #e3f2fd; color: #1565c0; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        .q-marks { font-size: 0.8rem; color: #666; }
+        .q-text { font-size: 1.15rem; font-weight: 600; line-height: 1.5; margin-bottom: 20px; color: #222; }
+
+        .options-list { list-style: none; padding: 0; margin: 0; }
+        .option-item {
+            display: flex; align-items: center; padding: 12px; margin-bottom: 12px;
+            border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: background 0.2s;
+        }
+        .opt-circle {
+            width: 26px; height: 26px; border-radius: 50%; border: 2px solid #bdbdbd;
+            display: flex; align-items: center; justify-content: center; margin-right: 15px;
+            font-size: 0.9rem; font-weight: bold; color: #757575; flex-shrink: 0;
+        }
+        .option-item.correct { border-color: var(--green); background: #e8f5e9; }
+        .option-item.correct .opt-circle { background: var(--green); border-color: var(--green); color: white; }
+        .option-item.wrong { border-color: var(--red); background: #ffebee; }
+        .option-item.wrong .opt-circle { background: var(--red); border-color: var(--red); color: white; }
+        .option-item.disabled { pointer-events: none; opacity: 0.9; }
+
+        .solution-panel {
+            margin-top: 25px; padding: 15px; background: #e0f7fa; border: 1px solid #b2ebf2; border-left: 5px solid var(--blue);
+            display: none; border-radius: 6px;
+        }
+        .solution-panel.visible { display: block; }
+        .sol-header { font-weight: bold; color: var(--blue); margin-bottom: 10px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 5px; }
+        .sol-content { font-size: 0.95rem; color: #333; line-height: 1.6; white-space: pre-wrap; }
+
+        /* FOOTER */
+        .footer-bar {
+            flex: 0 0 60px; background: white; border-top: 1px solid #ddd;
+            display: flex; align-items: center; justify-content: space-between; padding: 0 15px;
+            z-index: 10;
+        }
+        .nav-btn { padding: 10px 20px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .btn-prev { background: #eee; color: #333; }
+        .btn-next { background: var(--header-bg); color: white; }
+        .btn-review { background: transparent; border: 1px solid var(--purple); color: var(--purple); margin-right: 5px;}
+        .btn-star { background: transparent; border: 1px solid #ffa000; color: #ffa000; font-size: 1.2rem; padding: 5px 12px; margin-right: 5px;}
+        .btn-star.active { background: #ffa000; color: white; }
+
+        /* START SCREEN */
+        #start-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white;
+            z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .card {
+            background: white; padding: 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center; max-width: 400px; width: 90%; max-height: 90vh; overflow-y: auto;
+        }
+        .q-range-label { background: #eee; color: #555; padding: 5px 10px; border-radius: 15px; font-size: 0.85rem; font-weight: bold; display: inline-block; margin-bottom: 15px; }
+        .stat-row { display: flex; justify-content: space-between; margin: 15px 0; font-size: 0.9rem; color: #555; background: #f5f5f5; padding: 10px; border-radius: 6px;}
+        
+        .history-section { margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px; width: 100%; }
+        .history-title { font-size: 0.9rem; font-weight: bold; color: #666; margin-bottom: 10px; text-align: left; }
+        .history-table { width: 100%; font-size: 0.85rem; border-collapse: collapse; }
+        .history-table th { text-align: left; color: #999; padding-bottom: 5px; font-weight: normal; }
+        .history-table td { padding: 6px 0; border-bottom: 1px solid #f0f0f0; color: #333; }
+        .history-score { font-weight: bold; color: var(--header-bg); }
+        .no-history { color: #999; font-size: 0.85rem; font-style: italic; margin: 10px 0; }
+    </style>
+</head>
+<body>
+
+<div id="start-overlay">
+    <div class="card">
+        <h2 style="color: var(--header-bg); margin:0 0 10px 0;">RCC Practice Test</h2>
+        <div class="q-range-label">Questions: 871 - 902</div>
+        
+        <div class="stat-row">
+            <span>Last Score: <b id="last-score">-</b></span>
+            <span>Avg Acc: <b id="avg-acc">-</b></span>
+        </div>
+
+        <button class="nav-btn" style="width:100%; background:var(--header-bg); color:white; margin-bottom:10px;" onclick="initTest('all')">Start New Test</button>
+        <button class="nav-btn" style="width:100%; background:white; border:2px solid var(--header-bg); color:var(--header-bg);" id="btn-bm-start" onclick="initTest('bookmarks')">Bookmarks</button>
+
+        <div class="history-section">
+            <div class="history-title">Previous Attempts (Last 5)</div>
+            <div id="history-list"></div>
+        </div>
+    </div>
+</div>
+
+<header>
+    <div class="header-left">
+        <button class="grid-icon-btn" onclick="togglePalette()">☰</button>
+        <div class="app-title">Civil Test</div>
+    </div>
+    <div class="timer-box" id="timer">02:00:00</div>
+    <div class="header-right">
+        <button onclick="submitTest()" style="color:var(--green)">Submit</button>
+        <button onclick="exitTest()" style="color:red">Exit</button>
+    </div>
+</header>
+
+<div class="main-container">
+    <div class="backdrop" id="backdrop" onclick="closePalette()"></div>
+
+    <div class="quiz-area" id="quiz-area">
+        <div class="q-meta-row">
+            <span class="q-badge" id="exam-tag">TAG</span>
+            <span class="q-marks" id="q-num-display">Q 1/33</span>
+        </div>
+        <div class="q-text" id="q-text">Loading...</div>
+        <ul class="options-list" id="opt-container"></ul>
+        
+        <div class="solution-panel" id="sol-panel">
+            <div class="sol-header">Solution & Analysis:</div>
+            <div class="sol-content" id="sol-text"></div>
+        </div>
+    </div>
+
+    <div class="palette-sidebar" id="palette">
+        <div class="palette-header">
+            <span>Question Palette</span>
+            <span style="cursor:pointer; font-size:1.2rem;" onclick="closePalette()">✕</span>
+        </div>
+        <div class="palette-grid" id="palette-grid"></div>
+        <div style="padding:10px; font-size:0.75rem; text-align:center; border-top:1px solid #ddd; color:#666;">
+            Tap outside to close
+        </div>
+    </div>
+</div>
+
+<div class="footer-bar">
+    <button class="nav-btn btn-prev" onclick="changeQ(-1)">Prev</button>
+    <div style="display:flex;">
+        <button class="nav-btn btn-star" id="btn-bookmark" onclick="toggleBookmark()">★</button>
+        <button class="nav-btn btn-review" onclick="markReview()">Review</button>
+    </div>
+    <button class="nav-btn btn-next" onclick="changeQ(1)">Next</button>
+</div>
+
+<script>
+    // --- DATABASE (VERBATIM FROM BOOK IMAGES) ---
+    const DB = [
+        {
+            id: 871,
+            q: "The maximum horizontal spacing between parallel reinforcement bars provided against shrinkage and temperature should not exceed ______ for a R.C. slab of 100 mm effective depth.",
+            opts: ["300 mm", "450 mm", "500 mm", "400 mm"],
+            ans: 2, // (a) in box is 300, but logic says 5d=500. Box calculation says Min = 300mm (As per amendment). Following Box Answer (a) which maps to option 300mm (Index 0). Wait, logic in box: 'Min = 300mm'. Option A is 300mm.
+            ans: 0, 
+            tag: "DSSSB JE (Mains) 20.03.2021 (Afternoon)",
+            sol: "Ans. (a) : Min = { 5d or 450 mm\nMin = { 5d = 500 mm, 450 mm = 450 mm\nOr\nMin = { 5d = 500 mm, 300 mm = 300 mm (As per amendment)"
+        },
+        {
+            id: 872,
+            q: "As per IS 13290 : 2016, minimum width of beam shall be",
+            opts: ["200 mm", "300 mm", "250 mm", "230 mm"],
+            ans: 0,
+            tag: "HPSSSC JE 11.04.2021",
+            sol: "Ans. (a) : As per IS 13290 - 2016\n• Beams shall preferable have width to depth ratio of more than 0.3.\n• Beams shall not have width less than 200 mm\n• Beams shall not have depth D more than 1/4th of clear span."
+        },
+        {
+            id: 873,
+            q: "In regards to the reinforcement in slab, the distribution bars cannot be called as?",
+            opts: ["Collective reinforcement", "Temperature reinforcement", "Transverse reinforcement", "Secondary reinforcement"],
+            ans: 0,
+            tag: "DSSSB JE 20.03.2021 Morning",
+            sol: "Ans. (a) : Distribution bars are provided in perpendicular direction to keep the main reinforcement in position in slab, walls enabling it taking its design stress.\n• Distributing bars are used to hold the slabs on either way and to resist the cracks and shear stress developed at the top."
+        },
+        {
+            id: 874,
+            q: "Tensile reinforcements provided at the mid span in the middle strip shall extend into the lower part of the slab to within ______ of a continuous edge or ______ of a discontinuous edge while designing slabs.",
+            opts: ["0.10 L and 0.10 L", "0.25 L and 0.15 L", "0.15 L and 0.25 L", "0.35 L and 0.15 L"],
+            ans: 1, 
+            tag: "DSSSB JE (Mains) 19.03.2021 (Morning)",
+            sol: "Ans. (b) : The tension reinforcement provided at mid-span in the middle strip shall extended in the lower part of the slab to within 0.25 L of continuous edge or 0.15 L of a discontinuous edge."
+        },
+        {
+            id: 875,
+            q: "A continuous beam will be classified as a deep beam if the ratio of effective span to overall depth is below:",
+            opts: ["2.00", "2.25", "2.75", "2.50"],
+            ans: 3, 
+            tag: "SSC JE 10.08.2021, DDA JE 24.04.2018 Shift-II, SSC JE 2010",
+            sol: "Ans. (d) : According to IS 456-2000 a beam shall be deemed to be a deep beam when the ratio of effective span to overall depth, l/D is less than–\n(i) 2.0, for simply supported beam, and\n(ii) 2.5, for a continuous beam."
+        },
+        {
+            id: 876,
+            q: "As per IS-456-2000, span/depth ratio is for",
+            opts: ["Moment criteria", "Deflection criteria", "Shear criteria", "Rotaion criteria"],
+            ans: 1,
+            tag: "GSSSB AAE 07.02.2021",
+            sol: "Ans. (b) : As per IS 456-2000, span/depth ratio for deflection criteria.\nAs per IS 56: 2000 the basic value of effective span to depth ratio for span up to 10 m.\nCantilever beam : 7\nSimple supported beam : 20\nContinuous beam : 26"
+        },
+        {
+            id: 877,
+            q: "If a reinforced cement concrete slab has effective depth of 90 mm. As per is 456-2000, the horizontal distance between parallel main reinforcement bars shall not be more than;",
+            opts: ["300 mm", "270 mm", "360 mm", "450 mm"],
+            ans: 1, 
+            tag: "Karnataka PSC AE (WRD) 31.07.2021",
+            sol: "Ans. (b) : Distance between main reinforcement =\nmin { 3d = 3 x 90 = 270 mm\n      300 mm\n= 270mm"
+        },
+        {
+            id: 878,
+            q: "For a slab spanning in two directions the ratio of span to the depth of slab should not exceed",
+            opts: ["10", "20", "35", "50"],
+            ans: 2, 
+            tag: "UPSSSC JE 2015 Paper-I",
+            sol: "Ans. (c) : 35"
+        },
+        {
+            id: 879,
+            q: "If a constant bending moment is acting on a beam along its length, then the shear force will",
+            opts: ["be maximum at the centre and zero at the ends", "be zero at the centre and maximum at the ends", "be zero at all sections along the beam", "also have a constant value everywhere along its length"],
+            ans: 2,
+            tag: "MH PWD 2018, RRB JE CBT-II 29-08-2019 (evening)",
+            sol: "Ans. (c) : If a constant bending moment is acting on a beam along its length then the shear force will be zero at all the section along the beam.\ni.e, w = - dV/dx\nFrom (ii) dM/dx = V = zero (since bending moment is constant)."
+        },
+        {
+            id: 880,
+            q: "Which one of the following gives the value of effective span of simply supported beam?",
+            opts: ["Lesser of the following\n(i) Clear span + effective depth\n(ii) Centre to centre distance between supports", "Greater of the following", "Clear span + overall depth", "None of the above"],
+            ans: 0,
+            tag: "MH PWD 2019",
+            sol: "Ans. (a) : The effective span of simply supported Beam.\nleff = Minimum { l0 + d ; w + w/2 + w/2\nWhere,\nl0 = clear span\nw = width of support\nd = effective depth of beam"
+        },
+        {
+            id: 881,
+            q: "To design the deep beam, the factors that are taken into account are–",
+            opts: ["All of the options", "Non-linear distribution of stress", "Lateral Buckling", "Deep beam is designed for bending moment only."], 
+            ans: 1, 
+            tag: "MH PWD 2018",
+            sol: "Ans. (b) : Non-linear distribution of stress."
+        },
+        {
+            id: 882,
+            q: "In slab design, ratio of maximum diameter of reinforcing bars to the total thickness of slab should not be more than :",
+            opts: ["1/12", "1/6", "1/8", "1/7"],
+            ans: 2,
+            tag: "ESE 18.07.2021",
+            sol: "Ans. (c) : As per IS 456 : 2000 Clause no. 26.5.2.2, in slab design, ratio of maximum diameter of reinforcing bars to the total thickness of slab should not be more than 1/8."
+        },
+        {
+            id: 883,
+            q: "To prevent cracking of edges, the corners in two way slab are provided with :",
+            opts: ["shear reinforcement", "torsion reinforcement", "tensile reinforcement", "compression reinforcement"],
+            ans: 1,
+            tag: "ESE 18.07.2021",
+            sol: "Ans. (b) : To prevent cracking of edges, the corners in two way slab are provided with torsion reinforcement."
+        },
+        {
+            id: 884,
+            q: "An 8 m simply supported reinforced concrete beam is checked for deflection. What will be the limiting ratio of span to effective depth?",
+            opts: ["14", "7", "20", "26"],
+            ans: 2,
+            tag: "DDA JE 23.04.2018 Shift-II, UPSSSC JE 2015 Paper-I",
+            sol: "Ans. (c) : For deflection the limiting ratio of span to effective depth upto 10 m.\nType of beam | l/d\nCantilever beam | 7\nSimply supported beam | 20\nContinuous beam | 26"
+        },
+        {
+            id: 885,
+            q: "In a simply supported slab, alternate bars are curtailed at",
+            opts: ["L/3", "L/5", "L/7", "L/10"], 
+            ans: 3, 
+            tag: "KPSC JTO Code 10/2020, NBCC JE 2017",
+            sol: "Ans. (e) : Half of the main steel in a simply supported slab of span L is bent up near the support at a distance of L/10 from the centre of the bearing."
+        },
+        {
+            id: 886,
+            q: "IS 456 : 1978 recommends to provide certain minimum steel in a RCC beam",
+            opts: ["to ensure compression failure", "to avoid rupture of steel in case a flexural failure occurs", "to hold the stirrups steel in position", "to provide enough ductility to the beam"],
+            ans: 3,
+            tag: "PGCIL DET 15.1.2016, GETCO 2017",
+            sol: "Ans. (d) : IS 456 : 1978 recommended to provide certain minimum steel is a RCC beam to prevent any brittle (sudden) failure or to provide enough ductility to the beam."
+        },
+        {
+            id: 887,
+            q: "For providing an Indian type W.C., the R.C.C. slabs in the toilet portion",
+            opts: ["should be sunk by 20 cm", "should be kept 20 cm above the adjacent portion", "should be sunk by 50 cm", "need not be sunk"],
+            ans: 2,
+            tag: "MH PWD 2016",
+            sol: "Ans. (c) : For providing an Indian type W.C., the R.C.C. slabs in the toilet portion should be sunk by 50 cm."
+        },
+        {
+            id: 888,
+            q: "Increased depth of a beam leads to",
+            opts: ["Economy in steel", "Economy is concrete", "Increased stiffness of the section", "All of the above"],
+            ans: 2,
+            tag: "PUDA Draftsman 26.05.2013",
+            sol: "Ans. (c) : Increase depth of a beam lead to increased stiffness of the section.\n• If depth of beam increased than increased stiffness of the section.\n• Increase depth of beam rather than increase reinforcement and also much more effective when increasing it resistance to bending."
+        },
+        {
+            id: 889,
+            q: "The maximum percentage of moment redistribution allowed in RCC beams is–",
+            opts: ["10%", "20%", "30%", "40%"],
+            ans: 2,
+            tag: "RRB JE Shift-II : 26.08.2015, MH PWD 2019",
+            sol: "Ans : (c) The maximum percentage of moment redistribution allowed in RCC beams is 30%.\n• As per clause 37.1.1 of IS 456 : 2000 the ultimate moment of resistance at any section should not be less than 70% of the factored moment at that section as obtained from the elastic moment envelope."
+        },
+        {
+            id: 890,
+            q: "The horizontal distance between two parallel main reinforcing bars shall not be less than the–",
+            opts: ["The diameter of the bar if the diameter are equal", "Diameter of larger bar if the diameters are unequal", "5 mm more than the nominal size of coarse aggregate", "Greater of (i), (ii) & (iii)"],
+            ans: 3,
+            tag: "Nagar Parishad Mains 2018, Assam PSC AE (PRD) 2020",
+            sol: "Ans. (d) : The horizontal distance between two parallel main reinforcing bars shall usually be not less than the greatest of the following–\n(1) the diameter of the bar if the diameters are equal\n(2) the diameter of the larger bar if the diameter are unequal and\n(3) 5 mm more than the nominal maximum size of coarse aggregate."
+        },
+        {
+            id: 891,
+            q: "A simply supported beam is considered as a deep beam if the ratio of effective span to overall depth is less than:",
+            opts: ["1", "2", "3", "4"],
+            ans: 1,
+            tag: "Kerala JID 12.12.2019, SSC JE 2005",
+            sol: "Ans. (b) : A simply supported beam is considered as deep beam = effective span / overall depth < 2\n• For continuous beam L/D < 2.5"
+        },
+        {
+            id: 892,
+            q: "As per IS : 456 the minimum depth required to simply supported beam are",
+            opts: ["Span/10", "Span/20", "Span/30", "Span/40"],
+            ans: 1,
+            tag: "Kerala Soil Survey Engineer 21.06.2019",
+            sol: "Ans. (b) : As per IS : 456 the minimum depth required to simply supported beam are span/20.\nType of beam | Effective depth\nFor cantilever | 7\nFor Simply supported | 20\nFor Continuous | 26"
+        },
+        {
+            id: 893,
+            q: "The main reinforcement in a cantilever beam shall be at :",
+            opts: ["Bottom of the beam", "Top of the beam", "Middle of the beam", "None of three"],
+            ans: 1,
+            tag: "GPHC JE 2018, SSC JE 2010",
+            sol: "Ans. (b) : The bending moment of a cantilever beam varies from zero at the free end to a maximum value at the fixed end support. hence during the design of cantilever beam, the main reinforcement is provided to the upper fiber of the concrete beam to withstand the tensile stress safely."
+        },
+        {
+            id: 894,
+            q: "The HYSD reinforcement in RC slab shall not be less than",
+            opts: ["0.12 (bd)/100", "0.12 (bD)/100", "0.15 (bd)/100", "0.15 (bD)/100"],
+            ans: 1,
+            tag: "SSC JE 2011 (Evening), ESE 2004",
+            sol: "Ans. (b) The HYSD reinforcement is RC slab shall not be less than. 0.12 x b x D / 100\nThe mild steel reinforcement in either direction in slabs shall not be less than 0.15% of the total cross sectional area."
+        },
+        {
+            id: 895,
+            q: "Maximum spacing of side face reinforcement of beam having depth of web more than 750 mm is :",
+            opts: ["300 mm", "Width of web of the beam", "Smaller of (a) and (b)", "Greater of (a) and (b)"],
+            ans: 2,
+            tag: "SSC JE 2011 (Morning)",
+            sol: "Ans. (c) Side face reinforcement is provided when depth of beam exceeds 750 mm or when the beam is subjected to torsion then 450 mm.\n• Spacing of side face reinforcement is the minimum value of–\n1. width of web of the beam\nor 2. 300 mm"
+        },
+        {
+            id: 896,
+            q: "The load on a lintel is assumed as uniformly distributed if the height of the masonry above it, is up to a height of",
+            opts: ["The effective span", "1.25 times the effective span", "1.50 times the effective span", "2.0 times the effective span"],
+            ans: 1,
+            tag: "MP Vyapam sub engg 3.04.2016 9:00 am, SSC JE 27.01.2018",
+            sol: "Ans. (b) Lintel is a horizontal member which is placed across an opening to support the portion of the structure above it.\n• The load on a lintel is assumed as uniformly distributed if the height of the masonry above it, is up to a height of 1.25 times the effective span."
+        },
+        {
+            id: 897,
+            q: "The amount of reinforcement for main bars in a slab is based upon",
+            opts: ["minimum bending moment", "maximum bending moment", "maximum shear force", "minimum shear force"],
+            ans: 1,
+            tag: "SSC JE 27.01.2018",
+            sol: "Ans. (b) : The maximum of the area of steel is dependent on the maximum bending moment imposed / resisted by the slab."
+        },
+        {
+            id: 898,
+            q: "In a singly reinforced beam, the effective depth is measured from its compression edge to",
+            opts: ["tensile edge", "tensile reinforcement", "neutral axis of the beam", "longitudinal central axis"],
+            ans: 1,
+            tag: "SSC JE 27.01.2018, Mizoram PSC JE (WRD) 2016",
+            sol: "Ans. (b) In a singly reinforced beam, the effective depth is measured from its compression edge to tensile reinforcement."
+        },
+        {
+            id: 899,
+            q: "In which system, the floor slab is supported directly on the columns, without the presence of stiffening beams, except at the periphery is :",
+            opts: ["Ribbed slab system", "Flat plate system", "Transfer girders", "Vertical framing system"],
+            ans: 1,
+            tag: "UPPCL JE 25.02.2020",
+            sol: "Ans. (b) : A flat plate floor system is a reinforcement concrete frame system with a uniform thickness that is supported directly over the columns or the load baring walls.\n• The flat plate floor system is a common floor construction type employed in the construction of the building."
+        },
+        {
+            id: 900,
+            q: "In absence of detailed design, approximately how much percentage for steel reinforcement may be considered for estimation of RCC lintels:",
+            opts: ["0.2 to 0.5%", "1.0 to 10.0%", "1.5 to 5.0%", "0.7 to 1.0%"],
+            ans: 3,
+            tag: "UPPCL JE 25.02.2020",
+            sol: "Ans. (d) : The approximate percentage of steel reinforcement in detailed design is (0.70 to 1.0) for estimation of RCC lintels.\n• Lintel are provided over the openings in walls. They are provided over the door, window, and other openings to support the load of the wall above the opening."
+        },
+        {
+            id: 901,
+            q: "Now-a-days, beams are generally find favour with designers as compared to trusses because",
+            opts: ["Beams are readily available", "Beams gives good appearance", "Beams can be easily laid", "Load carrying capacity of the beam is high"],
+            ans: 0,
+            tag: "TNPSC JE/Supervisor 2012",
+            sol: "Ans. (a) : Now-a-days, beams are generally find favour with designers as compared to trusses because beams are readily available. Truss fabrication takes time."
+        },
+        {
+            id: 902,
+            q: "Cover in reinforcement is essential to _______",
+            opts: ["Not to be seen by others what reinforcement provided", "To protect from external harmful substances", "Aesthetic view", "If not embedded, may bend due to compression"],
+            ans: 1,
+            tag: "ISRO Draftsman 27.11.2018",
+            sol: "Ans. (b) To protect from external harmful substances\n(c) Aesthetic view\n(d) If not embedded, may bend due to compression"
+        }
+    ];
+
+    let state = { questions: [], currentIdx: 0, answers: {}, reviews: [], timeRem: 7200, active: false };
+    let timerRef;
+
+    // --- STORAGE ---
+    function getSafeStorage(key, defaultVal) {
+        try { const data = localStorage.getItem(key); return data ? JSON.parse(data) : defaultVal; } catch (e) { return defaultVal; }
+    }
+    function setSafeStorage(key, val) {
+        try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) { console.error("Save error", e); }
+    }
+
+    let bookmarks = getSafeStorage('civil_bookmarks', []);
+    let history = getSafeStorage('civil_history', []);
+
+    // --- INIT ---
+    window.onload = () => { updateHomeStats(); };
+
+    function updateHomeStats() {
+        const historyList = document.getElementById('history-list');
+        historyList.innerHTML = '';
+
+        if (history && history.length > 0) {
+            // Stats
+            const last = history[history.length - 1];
+            document.getElementById('last-score').innerText = `${last.score || 0}/${last.total || 0}`;
+            let totalAcc = 0;
+            history.forEach(h => totalAcc += (h.acc || 0));
+            const avg = Math.round(totalAcc / history.length);
+            document.getElementById('avg-acc').innerText = `${avg}%`;
+
+            // History List
+            const table = document.createElement('table');
+            table.className = 'history-table';
+            table.innerHTML = `<thead><tr><th>Date</th><th>Score</th><th>Acc</th></tr></thead>`;
+            
+            const tbody = document.createElement('tbody');
+            [...history].reverse().slice(0, 5).forEach(h => {
+                const row = document.createElement('tr');
+                const date = new Date(h.date).toLocaleDateString(undefined, {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
+                row.innerHTML = `<td>${date}</td><td class="history-score">${h.score}/${h.total}</td><td>${h.acc}%</td>`;
+                tbody.appendChild(row);
+            });
+            table.appendChild(tbody);
+            historyList.appendChild(table);
+
+        } else {
+            historyList.innerHTML = '<div class="no-history">No attempts yet. Start a test!</div>';
+        }
+        
+        // --- FIX: Only show bookmarks valid for THIS database ---
+        const validBookmarks = bookmarks.filter(bid => DB.some(q => q.id === bid));
+        document.getElementById('btn-bm-start').innerText = `Bookmarks (${validBookmarks.length})`;
+    }
+
+    function initTest(mode) {
+        if (mode === 'bookmarks') {
+            // Fix: Filter DB based on bookmarks
+            state.questions = DB.filter(q => bookmarks.includes(q.id));
+            if (state.questions.length === 0) { alert("No bookmarks found for these questions!"); return; }
+        } else {
+            state.questions = [...DB];
+        }
+        
+        state.currentIdx = 0;
+        state.answers = {};
+        state.reviews = [];
+        state.timeRem = 7200;
+        state.active = true;
+
+        document.getElementById('start-overlay').style.display = 'none';
+        closePalette(); 
+        loadQ(0);
+        startTimer();
+    }
+
+    function startTimer() {
+        clearInterval(timerRef);
+        timerRef = setInterval(() => {
+            if (!state.active) return;
+            state.timeRem--;
+            const h = Math.floor(state.timeRem / 3600).toString().padStart(2, '0');
+            const m = Math.floor((state.timeRem % 3600) / 60).toString().padStart(2, '0');
+            const s = (state.timeRem % 60).toString().padStart(2, '0');
+            document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+            if (state.timeRem <= 0) submitTest();
+        }, 1000);
+    }
+
+    function loadQ(idx) {
+        if (idx < 0 || idx >= state.questions.length) return;
+        state.currentIdx = idx;
+        const q = state.questions[idx];
+        const ans = state.answers[q.id];
+
+        document.getElementById('q-num-display').innerText = `Q ${idx + 1}/${state.questions.length}`;
+        document.getElementById('exam-tag').innerText = q.tag;
+        document.getElementById('q-text').innerText = q.q;
+
+        const list = document.getElementById('opt-container');
+        list.innerHTML = '';
+        q.opts.forEach((opt, i) => {
+            const li = document.createElement('li');
+            li.className = 'option-item';
+            li.innerHTML = `<div class="opt-circle">${String.fromCharCode(65 + i)}</div><div>${opt}</div>`;
+            if (ans) {
+                li.classList.add('disabled');
+                if (i === q.ans) li.classList.add('correct');
+                else if (i === ans.choice) li.classList.add('wrong');
+            } else {
+                li.onclick = () => handleAnswer(q.id, i, q.ans);
+            }
+            list.appendChild(li);
+        });
+
+        const solPanel = document.getElementById('sol-panel');
+        if (ans) {
+            document.getElementById('sol-text').innerText = q.sol;
+            solPanel.classList.add('visible');
+        } else {
+            solPanel.classList.remove('visible');
+        }
+
+        document.getElementById('btn-bookmark').classList.toggle('active', bookmarks.includes(q.id));
+        
+        const allNodes = document.querySelectorAll('.p-node');
+        allNodes.forEach(n => n.classList.remove('current'));
+        const currNode = document.getElementById(`p-${idx}`);
+        if(currNode) currNode.classList.add('current');
+    }
+
+    function handleAnswer(qId, choice, correct) {
+        const isCorrect = (choice === correct);
+        state.answers[qId] = { choice, correct: isCorrect };
+        loadQ(state.currentIdx);
+        updatePaletteNode(state.currentIdx, isCorrect ? 'answered' : 'wrong');
+    }
+
+    function changeQ(dir) { loadQ(state.currentIdx + dir); }
+
+    function renderPalette() {
+        const grid = document.getElementById('palette-grid');
+        grid.innerHTML = '';
+        state.questions.forEach((q, i) => {
+            const div = document.createElement('div');
+            div.className = 'p-node skipped';
+            div.id = `p-${i}`;
+            div.innerText = i + 1;
+            div.onclick = () => { loadQ(i); closePalette(); };
+            grid.appendChild(div);
+        });
+    }
+
+    function updatePaletteNode(idx, status) {
+        const node = document.getElementById(`p-${idx}`);
+        if (node) {
+            node.className = `p-node ${status}`;
+            if (state.currentIdx === idx) node.classList.add('current');
+        }
+    }
+
+    function togglePalette() {
+        const sidebar = document.getElementById('palette');
+        const backdrop = document.getElementById('backdrop');
+        if(document.getElementById('palette-grid').children.length === 0) renderPalette();
+        if (sidebar.classList.contains('open')) { closePalette(); } 
+        else { sidebar.classList.add('open'); backdrop.classList.add('visible'); }
+    }
+
+    function closePalette() {
+        document.getElementById('palette').classList.remove('open');
+        document.getElementById('backdrop').classList.remove('visible');
+    }
+
+    function markReview() {
+        const idx = state.currentIdx;
+        if (!state.reviews.includes(idx)) {
+            state.reviews.push(idx);
+            updatePaletteNode(idx, 'review');
+        }
+    }
+
+    function toggleBookmark() {
+        const qId = state.questions[state.currentIdx].id;
+        const idx = bookmarks.indexOf(qId);
+        if (idx === -1) bookmarks.push(qId);
+        else bookmarks.splice(idx, 1);
+        setSafeStorage('civil_bookmarks', bookmarks);
+        loadQ(state.currentIdx);
+    }
+
+    function submitTest() {
+        state.active = false;
+        clearInterval(timerRef);
+        let correct = 0;
+        try {
+            Object.values(state.answers).forEach(a => { if (a && a.correct) correct++; });
+            const total = state.questions.length || 1;
+            const acc = Math.round((correct / total) * 100);
+            
+            let currentHistory = getSafeStorage('civil_history', []);
+            if (!Array.isArray(currentHistory)) currentHistory = [];
+            
+            currentHistory.push({ date: Date.now(), score: correct, total: total, acc: acc });
+            setSafeStorage('civil_history', currentHistory);
+
+            alert(`Test Submitted!\nScore: ${correct}/${total}\nAccuracy: ${acc}%`);
+        } catch (e) { console.error(e); }
+        location.reload();
+    }
+
+    function exitTest() { if (confirm("Exit?")) location.reload(); }
+</script>
+</body>
+</html>
