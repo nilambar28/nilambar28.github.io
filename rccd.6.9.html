@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RCC Practice Test (Final)</title>
+    <style>
+        :root {
+            --primary: #E91E63; /* Pink */
+            --primary-dark: #C2185B;
+            --bg-gray: #f5f5f5;
+            --text-dark: #333;
+            --success: #00C853;
+            --error: #FF3D00;
+            --review: #7B1FA2;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg-gray); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* --- Header --- */
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 0 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            height: 60px;
+            z-index: 100;
+        }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .header-title { font-weight: 600; font-size: 1.1rem; }
+        .timer-box { 
+            background: rgba(0,0,0,0.15); 
+            padding: 4px 10px; 
+            border-radius: 4px; 
+            font-family: monospace; 
+            font-size: 1.1rem; 
+            font-weight: 700;
+        }
+        .header-right { display: flex; gap: 10px; }
+        
+        .action-btn {
+            border: none; padding: 6px 12px; border-radius: 4px; 
+            font-weight: bold; cursor: pointer; font-size: 0.85rem; text-transform: uppercase;
+        }
+        .btn-exit { background: #FFCDD2; color: #D32F2F; } /* Light Red */
+        .btn-submit { background: white; color: var(--primary); }
+
+        /* --- Landing Page --- */
+        #landing-page {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 200; display: flex; flex-direction: column;
+            align-items: center; padding: 20px; overflow-y: auto;
+        }
+        .card {
+            background: white; width: 100%; max-width: 450px;
+            padding: 25px; border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            text-align: center; margin-bottom: 20px; border: 1px solid #eee;
+        }
+        .btn-large {
+            width: 100%; padding: 14px; background: var(--primary); color: white;
+            border: none; border-radius: 6px; font-size: 1rem; font-weight: 600;
+            margin: 8px 0; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+        .stat-item { background: #FCE4EC; padding: 15px; border-radius: 8px; }
+        
+        /* --- Quiz Area --- */
+        #quiz-interface { display: none; height: 100%; flex-direction: column; position: relative; }
+        
+        .progress-strip { height: 4px; background: #E0E0E0; width: 100%; }
+        .progress-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.3s ease; }
+
+        .question-container {
+            flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 70px;
+            background: #fff;
+        }
+
+        /* Question Header Layout */
+        .q-meta-row { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 8px;
+        }
+        .q-left-num { font-weight: 700; color: #E91E63; font-size: 1rem; }
+        .q-right-num { font-weight: 700; color: #555; font-size: 1rem; }
+        
+        .tag-row { margin-bottom: 15px; }
+        .exam-tag { 
+            background: #E3F2FD; color: #1565C0; 
+            padding: 3px 8px; border-radius: 4px; 
+            font-size: 0.75rem; font-weight: 600; border: 1px solid #BBDEFB;
+        }
+
+        .q-text { 
+            font-size: 1.05rem; line-height: 1.5; color: #212121; font-weight: 500; margin-bottom: 20px;
+        }
+
+        /* Options */
+        .option {
+            background: #fff; border: 1px solid #e0e0e0; padding: 12px 16px;
+            margin-bottom: 12px; border-radius: 8px; cursor: pointer;
+            display: flex; align-items: flex-start; transition: all 0.2s;
+        }
+        .option:active { background-color: #f5f5f5; }
+        .option-circle {
+            height: 24px; width: 24px; min-width: 24px; border-radius: 50%; border: 2px solid #bdbdbd;
+            margin-right: 15px; display: flex; justify-content: center; align-items: center; 
+            font-size: 0.85rem; color: #757575; font-weight: 600; margin-top: 2px;
+        }
+        .option.correct { border: 1px solid var(--success); background: #E8F5E9; }
+        .option.correct .option-circle { background: var(--success); border-color: var(--success); color: white; }
+        .option.wrong { border: 1px solid var(--error); background: #FFEBEE; }
+        .option.wrong .option-circle { background: var(--error); border-color: var(--error); color: white; }
+        .option.disabled { pointer-events: none; }
+
+        /* Solution Box */
+        .solution-box {
+            margin-top: 25px; background: #fcfcfc; border: 1px solid #ccc;
+            padding: 15px; border-radius: 6px; display: none; font-size: 0.9rem; color: #333;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
+        }
+        .sol-title { font-weight: bold; margin-bottom: 8px; color: #000; text-decoration: underline; }
+        .sol-text { white-space: pre-wrap; line-height: 1.5; }
+
+        /* --- Footer --- */
+        .footer-nav {
+            position: fixed; bottom: 0; width: 100%; background: white;
+            border-top: 1px solid #ddd; padding: 10px 15px; display: flex;
+            justify-content: space-between; align-items: center; z-index: 50;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+        .nav-btn {
+            background: white; border: 1px solid #ccc; padding: 8px 16px;
+            border-radius: 4px; font-weight: 600; color: #555; cursor: pointer;
+        }
+        .nav-btn.next { background: var(--primary); color: white; border: none; }
+        .btn-bookmark { background: none; border: none; font-size: 1.5rem; color: #ccc; cursor: pointer; }
+        .btn-bookmark.active { color: #FFC107; }
+
+        /* --- Palette Overlay --- */
+        .palette-overlay {
+            position: fixed; top: 0; right: -100%; width: 85%; max-width: 320px;
+            height: 100%; background: white; box-shadow: -4px 0 15px rgba(0,0,0,0.2);
+            transition: right 0.3s ease-in-out; z-index: 150; display: flex; flex-direction: column;
+        }
+        .palette-overlay.open { right: 0; }
+        
+        .palette-header { 
+            padding: 15px; background: #eee; font-weight: bold; 
+            display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ccc;
+        }
+        .palette-grid { 
+            padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; 
+            overflow-y: auto; flex: 1; align-content: start;
+        }
+        .grid-item {
+            height: 40px; display: flex; justify-content: center; align-items: center;
+            border-radius: 4px; background: #f0f0f0; cursor: pointer; 
+            font-size: 0.9rem; color: #555; font-weight: 500; border: 1px solid #e0e0e0;
+        }
+        .grid-item.current { border: 2px solid var(--primary); }
+        .grid-item.answered { background: var(--success); color: white; border-color: var(--success); }
+        .grid-item.wrong { background: var(--error); color: white; border-color: var(--error); }
+        .grid-item.review { background: var(--review); color: white; border-color: var(--review); }
+        
+        .palette-info { padding: 15px; border-top: 1px solid #eee; background: #fafafa; }
+        .legend-row { display: flex; gap: 15px; margin-bottom: 5px; font-size: 0.8rem; color: #666; }
+        .dot { width: 12px; height: 12px; border-radius: 2px; display: inline-block; margin-right: 5px; vertical-align: middle; }
+
+        /* Hamburger */
+        .hamburger { font-size: 1.4rem; cursor: pointer; padding: 5px; }
+    </style>
+</head>
+<body>
+
+    <div id="landing-page">
+        <h2 style="color: var(--primary); margin-bottom: 5px;">Civil Engineering</h2>
+        <h4 style="color: #666; margin-top: 0;">RCC Practice Test</h4>
+        
+        <div class="card">
+            <div style="font-size: 0.9rem; color: #888; margin-bottom: 10px;">TOTAL QUESTIONS</div>
+            <div style="font-size: 2rem; font-weight: bold; color: #333;">34</div>
+            <div style="font-size: 0.9rem; color: #666;">(Q.1078 - Q.1111)</div>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div style="font-size: 0.75rem; color: #666;">LAST SCORE</div>
+                    <div id="last-score" style="font-weight: bold; font-size: 1.2rem; color: var(--primary);">-</div>
+                </div>
+                <div class="stat-item">
+                    <div style="font-size: 0.75rem; color: #666;">ACCURACY</div>
+                    <div id="avg-acc" style="font-weight: bold; font-size: 1.2rem; color: var(--primary);">0%</div>
+                </div>
+            </div>
+
+            <button class="btn-large" onclick="startTest('full')">START TEST</button>
+            <button class="btn-large" style="background:white; border:1px solid var(--primary); color:var(--primary);" onclick="startTest('bookmark')">REVIEW BOOKMARKS (<span id="bm-count">0</span>)</button>
+        </div>
+
+        <div style="width: 100%; max-width: 450px;">
+            <h4 style="margin-bottom: 10px; color: #444;">Recent Attempts</h4>
+            <table id="history-table" style="width: 100%; font-size: 0.85rem; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden;"></table>
+        </div>
+    </div>
+
+    <div id="quiz-interface">
+        <header>
+            <div class="header-left">
+                <div class="hamburger" onclick="togglePalette()">&#9776;</div>
+                <div class="timer-box" id="timer">02:00:00</div>
+            </div>
+            
+            <div class="header-right">
+                <button class="action-btn btn-exit" onclick="exitTest()">Exit</button>
+                <button class="action-btn btn-submit" onclick="submitTest()">Submit</button>
+            </div>
+        </header>
+
+        <div class="progress-strip"><div class="progress-fill" id="progress-bar"></div></div>
+
+        <div class="question-container" id="q-container">
+            </div>
+
+        <div class="footer-nav">
+            <button class="nav-btn" onclick="prevQuestion()">Prev</button>
+            <button class="btn-bookmark" id="btn-bookmark" onclick="toggleBookmark()">&#9734;</button>
+            <button class="nav-btn" onclick="markForReview()" style="color: var(--review); border-color: var(--review);">Mark Review</button>
+            <button class="nav-btn next" onclick="nextQuestion()">Next</button>
+        </div>
+
+        <div class="palette-overlay" id="palette-drawer">
+            <div class="palette-header">
+                <span>Question Palette</span>
+                <span onclick="togglePalette()" style="font-size: 1.5rem; cursor: pointer;">&times;</span>
+            </div>
+            <div class="palette-grid" id="palette-grid"></div>
+            <div class="palette-info">
+                <div class="legend-row">
+                    <div><span class="dot" style="background:var(--success)"></span>Answered</div>
+                    <div><span class="dot" style="background:var(--error)"></span>Wrong</div>
+                </div>
+                <div class="legend-row">
+                    <div><span class="dot" style="background:var(--review)"></span>Review</div>
+                    <div><span class="dot" style="background:#f0f0f0; border:1px solid #ccc;"></span>Skipped</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="backdrop" onclick="togglePalette()" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 140; display:none;"></div>
+    </div>
+
+    <script>
+        // --- Data ---
+        const questionData = [
+            { id: 1078, q: "According to IS 456, when high strength deformed bars are used, the reinforcement shall not be less than P percent of the total cross sectional area of the slab, where P is:", options: ["0.12%", "0.15%", "0.20%", "0.30%"], ans: 0, tag: "CGPSC SES Exam 2014", exp: "Ans. (a) : According to IS code 456:2000 Minimum Reinforcement is either direction of slabs shall not be less than 0.15 percent of cross sectional area in case of mild steel and 0.12 percent of cross sectional area in case of High deformed bar." },
+            { id: 1079, q: "The maximum theoretical diameter (in mm) of steel reinforcement in a slab 180 mm thick shall be:", options: ["30 mm", "36 mm", "22.5 mm", "45 mm"], ans: 2, tag: "CGPSC SES Exam 2014", exp: "Ans. (c) : Theoretical diameter in reinforcement = t/8\n(where t = thickness of slab)\nFor 180 mm thick slab\nMaximum diameter = 180/8 = 22.5 mm." },
+            { id: 1080, q: "In wall supported slab system, the thickness of floor slab generally varies from", options: ["20 mm - 30 mm", "100 mm - 200 mm", "300 mm - 400 mm", "10 mm - 50 mm"], ans: 1, tag: "DSSSB JE 23.10.2019, Shift-II", exp: "Ans. (b) In wall supported slab system, the thickness of floor slab generally varies from 100 mm – 200 mm.\n• Minimum thickness of slab is 115 mm in residential building." },
+            { id: 1081, q: "In ribbed slab system, the thickness of floor slab generally varies from ______", options: ["10 mm - 30mm", "100 mm - 200 mm", "150 mm - 250mm", "50 mm - 100 mm"], ans: 3, tag: "DSSSB JE 23.10.2019, Shift-II", exp: "Ans. (d) Ribbed slabs are made up of wide band beams running between columns with narrow rib spanning the orthogonal direction.\n• A thin tapping slab completes the system.\n• Ribbed slabs are suitable for medium to heavy load.\n• The rib-slab is special in that it provides a lighter and stiffer slab than an equivalent flat slab." },
+            { id: 1082, q: "In which system, the floor slab is supported directly on the columns, without the presence of stiffening beams, except at the periphery?", options: ["Beam supported slab system", "Flat plate system", "Ribbed slab system", "Flat slab system"], ans: 3, tag: "DSSSB JE 23.10.2019, Shift-II", exp: "Ans. (d) A flat slab is a two-way reinforced concrete slab that usually does not have beams and girders and the loads are transferred directly to the supporting concrete column.\n• Major component of flat slab are capital / head, drop pond column strip and middle strip.\n• The thickness of flat slab shall not be less than 125 mm." },
+            { id: 1083, q: "The tensile reinforcement required to resist positive bending moment in any span of a deep beam shall :", options: ["extend without curtailment between support", "be embedded beyond the face of each support", "be placed with a zone of depth equal to 0.25D-0.05d adjacent to the tension face", "extend without curtailment between support, be placed with a zone of depth equal to 0.25D-0.05d adjacent to the tension face of the beam and be embedded beyond the face of each support"], ans: 3, tag: "DSSSB JE 5.11.2019, Morning", exp: "Ans. (c) : As per clause 29.3.1, positive reinforcement is the tensile reinforcement required to resist positive bending bending moment in any span of a deep beam shall–\n(i) Extend without curtailment between supports." },
+            { id: 1084, q: "Stripping time of props under slabs spanning over 4.5 m is:", options: ["7 days", "10 days", "12 days", "14 days"], ans: 3, tag: "WBPSC SAE 2001", exp: "Ans. (d) : As per IS 456 : 2000 clause 11.3\nType of formwork | Minimum period before\nProps to the slab for spanning up to 4.5 m | 7 days\nProps to the slab for spanning over 4.5 m | 14 days\nProps to beams and arches spanning upto 6 m | 14 days\nProps to beams and arches spanning over 6 m | 21 days" },
+            { id: 1085, q: "If ratio of spans in two direction of a R.C.C. roof slab is greater than 2, the slab is designed as :", options: ["One-way slab", "Two-way slab", "Three-way slab", "Four-way slab"], ans: 0, tag: "UPJAL NIGAM JE 2016, 1ST Shift", exp: "Ans. (a) If the longer span of the slab is ly and the shorter span is lx , then for a two-way slab, ly/lx is less than 2. If the ratio is greater than 2. It is identified as a one way slab. The two way slabs distribute the loads in both directions. Hence the reinforcement is provided along shorter and longer sides of the slabs." },
+            { id: 1086, q: "Reinforcement bars are generally bent :", options: ["By heating", "Welding", "Manually using lever", "By dies and jigs"], ans: 2, tag: "NBCC JE 2017", exp: "Ans. (c) : Reinforcement bars are generally bent by manual levers instead of heating because heating reduces the strength of bar. As per IS 2502 : 1963, bending of bars may be done either by improvised means or by hand-operated machines and by power operated machines and by power operated bender." },
+            { id: 1087, q: "Which type of beam is supported only at one end by being built into a wall?", options: ["Curvature beam", "Cantilever beam", "Overhanging beam", "Centroid beam"], ans: 1, tag: "DFCCIL, DT. 17-04-2016", exp: "Ans : (b) Cantilever beam supported one end and carrying a load at the other end or distributed along the unsupported portion. Cantilever are employed extensively in building construction and in machines in building only beam built into a wall and with the free end projecting forms a cantilever." },
+            { id: 1088, q: "A rectangular slab having effective lengths Lx and Ly supported along four sides on unyielding supports is subject to a uniform load 'w' per unit area. Shear of the load on a central strip of unit width parallel of Lx is given by Ly⁴/(Lx⁴ + Ly⁴) w. This method of approximate analysis was given by :", options: ["Rankine- Grashoff", "Macquorn Rankine", "Muller- Breslau", "Leonhard Euler"], ans: 0, tag: "ESIC 2019", exp: "Ans. (a)\nRankine- Grashoff – Design of two - way slab simply supported one and having no provision to prevent the corners from lifting, is made by Rankine grashoff formula.\n• It is design by Grassoff Rankine method\n• It is used for corners not held down position.\n• It is purely simply supported case." },
+            { id: 1089, q: "In a one-way continuous slab having simple support at the ends, the maximum bending moment will act at the :", options: ["support next to the end support", "mid of the interior span", "mid of the end span", "end support"], ans: 0, tag: "ESIC 2019", exp: "Ans. (a) Depth of the beam is taken as slab depth. Continuous slabs, continuous over supports in one direction are designed as continuous beam of a frame. Maximum moment of simply supported is at mid-span under self weight and uniform pressure load." },
+            { id: 1090, q: "A concrete slab increase the top flange of a beam such that the bottom surface of the concrete slab is flush with the bottom of the top flange of the beam. In this case, which of the options is a true statement?", options: ["beam is laterally unsupported against lateral torsional buckling and design bending strength is governed by lateral torsional buckling strength.", "beam is laterally supported against lateral torsional buckling and design bending strength if governed by lateral torsional buckling strength.", "beam is laterally supported against lateral torsional buckling and design bending strength is governed by yield stress", "beam is laterally unsupported against lateral torsional buckling and design bending strength is governed by yield stress"], ans: 2, tag: "ESIC 2019", exp: "Ans. (b) A concrete slab increase the top flange of a beam such that the bottom surface of the concrete slab is flush with the bottom of the top flange of the beam. In this case beam is laterally supported against lateral torsional buckling and design bending strength if governed by lateral torsional buckling strength." },
+            { id: 1091, q: "The maximum value of span/depth ratio will be highest in case of", options: ["Cantilever slabs", "simply supported slabs spanning in one direction", "Continuous slab spanning in one direction", "Continuous slab spanning in two directions"], ans: 3, tag: "HPSSC JE Code 463/2018", exp: "Ans. (d) : The maximum value of span/depth ratio will be highest in case of continuous slab spanning in two directions.\nS.N. | Type of slab | Ratio of span to depth\n1. | Continuous and spanning in one direction. | 35\n2. | Continuous and spanning in two direction. | 40" },
+            { id: 1092, q: "The minimum strain at failure in the tensile reinforcement (Fy = 400 MPa) of RCC beam as per limit state method is:", options: ["0.0020", "0.0028", "0.0037", "0.0045"], ans: 2, tag: "HPSSC JE Code 463/2018", exp: "Ans. (c) : Give,\nfy = 400 MPa, Es = 2 ×10⁵ (steel)\nMinimum strain = 0.002 + 0.87fy / Es\n= 0.002 + 0.87 × 400 / 2×10⁵ = 0.0037" },
+            { id: 1093, q: "The number of stirrups resisting shear force, in a reinforced beam is given by", options: ["Shear force / Spacing of stirrups", "Lever arm / Spacing of stirrups", "Spacing of stirrups / Lever arm", "Spacing of stirrups / Shear Force"], ans: 1, tag: "GSSSB Municipal Engineer 8.10.2017", exp: "Ans. (b) : The number of stirrups resisting shear force in a reinforced beam is lever arm/spacing of stirrups.\n• Minimum shear reinforcement in beams is provided to ensure the following.\n(I) To prevent sudden failure of the beam due to loss of bond between steel and concrete due to burning of concrete cover.\n(II) To prevent brittle shear failure due to diagonal principal tension." },
+            { id: 1094, q: "A two way slab", options: ["May be simply supported on the four edges, with corners not held down and carrying uniformly distributed load", "May be simply supported on the four edges, with corners held down and carrying uniformly distributed load.", "May have edges fixed or continuous and carrying uniformly distributed load", "All of the above"], ans: 3, tag: "GSSSB Municipal Engineer 8.10.2017", exp: "Ans. (d) : For two way slab –\nParabolic reflection along long span\nLoad carried by beams 2-3\nLoad carried by beam 1-2\nParabolic deflection along short span\nTwo way slab (ly/lx ≤ 2)" },
+            { id: 1095, q: "The ultimate moment capacity of the slab should NOT be exceeded at any points on the slab. This condition is known as ______", options: ["longitudinal condition", "yield condition", "mechanism condition", "equilibrium condition"], ans: 1, tag: "DSSSB JE -23.10.2019 Second Shift", exp: "Ans. (b): Yield condition–The ultimate of moment capacity of the slab not be exceeded at any point on the slab.\nEquilibrium condition– Equations of static equilibrium should be satisfied at all points on the slab." },
+            { id: 1096, q: "For continuous beams, the distance between two points of zero moments in the beam may be assumed as", options: ["0.5 times the effective span", "0.7 times the effective span", "0.25 times the effective span", "0.9 times the effective span"], ans: 1, tag: "Haryana SSC JE 13.04.2018, Morning", exp: "Ans. (b) : As per IS 456 ; 2000, Note mentioned in clause 23.1.2 for continuous beam and framed structures the distance between point of contra flexures may be assumed 0.7 times the effective span of the beam." },
+            { id: 1097, q: "Two way ribbed slab are also called as ______.", options: ["One way continuous slab", "Secondary slab", "Two way continuous slab", "Waffle slab"], ans: 3, tag: "DSSSB JE -23.10.2019 Third Shift", exp: "Ans. (d) : Two way ribbed slab are also known as waffle slab system.\n• Ribbed or waffle slab is a slab system which consists series of reinforced concrete T beam forming into ring concrete girders.\n• The system was designed to decrease the weight of traditional full concrete slabs. The dome-shaped forms create a matrix of voids surrounded by orthogonal ribbing producing two way configuration very suitable for large spanning slab.\n• Voids between the all the domes reduce the dead load as the width of that partition of slab is less than a flat slab." },
+            { id: 1098, q: "The minimum cover for bars in RCC slabs should be :", options: ["15 mm", "15 mm or dia of bars", "25 mm or dia of bars", "15 mm or the size of the aggregate"], ans: 1, tag: "DMRC JE 2014 PAPER-I, NBCC JE 2017", exp: "Ans. (b) : The minimum cover for bars in RCC slabs should be 15 mm or dia of bars.\nNominal cover for different members–\nBeam = 25 mm\nSlab = 20 mm\nColumn = 40 mm\nFoundation = 50 mm" },
+            { id: 1099, q: "Practically which slab is not possible to construct?", options: ["Partially supported slab", "One way slab", "Two way slab", "Purely simply supported slab"], ans: 0, tag: "NMRC JE 2019", exp: "Ans. : (d) Purely simply supported slab –\nDifference types of slabs in construction –\n• Flat slab (parking decks, commercial building, hotels etc.\n• Conventional Slab (Once way of two-way slab)\n• Hollow core slab\n• Waffle slab (auditorium, cinema halls)\n• Hardy slab\n• Dome slab (temples, mosque, palaces etc)\n• Pitch roof slab\n• Cantilever slab\n• Slab with arches." },
+            { id: 1100, q: "According to I.S. : 456, design is limited to inclination of the reinforced concrete slab for a beam :", options: ["0.45% of span", "0.20% of span", "0.4% of span", "0.25% of span"], ans: 1, tag: "UPRVUNL JE 2014", exp: "Ans. : (b) According to IS 456, design is limited to inclination of the reinforced concrete for a beam 0.20% of span." },
+            { id: 1101, q: "The design of one way reinforced concrete slab for concentrated load is achieved by –", options: ["using pigeaud's moment coefficient", "taking slab strip of width effective in resisting the deflection", "taking orthogonal slab strips of unit width containing the load", "taking slab strip of unit width containing the load"], ans: 0, tag: "UPRVUNL JE 2014", exp: "Ans. : (a) Reinforced concrete one way slabs subjected to concentrated loads are designed for shear by checking beam stress over an effective width and punching shear. Only a limited number of test data regarding the shear capacity of one way slabs subjected to concentrated loads is available." },
+            { id: 1102, q: "The length to width ratio of an RCC slab is 1.3 The slab is to be designed as", options: ["One way slab", "Two way slab", "Flat slab", "None of these"], ans: 1, tag: "ISRO TA 08.04.2018", exp: "Ans. (b) : The length to width ratio of an RCC slab is 1.3 The slab is to be designed as two way slab.\n(i) ly/lx ≤ 2\n(ii) Slab is supported on all edges\nIt is design by Grassoff Rankine method\n• H is used for corners not held down position." },
+            { id: 1103, q: "If the area of steel to provided along short span of an RCC slab is 560 mm² and dia. of bars to be provided is 10 mm, the centre to centre spacing of bars (in mm and in multiple of 10) will be :", options: ["140 mm", "130 mm", "120 mm", "112 mm"], ans: 0, tag: "HPSSC JE CODE 552/2018", exp: "Ans. (a) : Area of bar = (π/4)(10)² = 78.5 mm²\nNumber of bars = 560 / 78.5 = 7.133\nSpacing = 1000 / 7.133 = 140.17 mm\n= 140 mm centre to centre" },
+            { id: 1104, q: "A simply supported beam is having a clear span of 4 m, support width is 400 mm, overall depth of the beam is 450 mm and effective cover is 50 mm. The effective span of the beam (as in limit state method) will be :", options: ["4000 mm", "4200 mm", "4400 mm", "4700 mm"], ans: 2, tag: "HPSSC JE CODE 552/2018", exp: "Ans. (c) : Simply support beam–\nLeff = min { Lc + d ; Lc + b1/2 + b2/2\n4000 + 450 = 4450\n400/2 + 4000 + 400/2 = 4400\nWhichever is less so Leff = 4400 mm." },
+            { id: 1105, q: "A part of the slab may be considered as the flange of the T-beam if ...........", options: ["Flange has adequate reinforcement transverse to beam", "it is built integrally with the beam", "it is effectively bonded together with the beam", "all options are correct"], ans: 3, tag: "SSC JE 4.3.2017, Afternoon Shift", exp: "Ans. (d) A part of the slab may be considered as the flange of the T-beam if ........\n(i) Flange has adequate reinforcement transverse to beam\n(ii) It is built integrally with the beam.\n(iii) It is effectively bonded together with the beam." },
+            { id: 1106, q: "An RCC slab under mild exposure condition having main longitudinal tensile reinforcement of diameter 12 mm, then minimum allowable nominal cover to satisfy durability requirements as per code (IS 456 – 2000) is", options: ["10 mm", "15 mm", "20 mm", "25 mm"], ans: 1, tag: "HPSSC JE CODE 502/2018", exp: "Ans. (b) : An RCC slab under mild exposure condition having main longitudinal tensile reinforcement of diameter 12 mm, then minimum allowable nominal cover to satisfy durability requirements as per code (IS 456 – 2000) is 15mm." },
+            { id: 1107, q: "For a continuous slab of 3 m × 3.5 m the minimum over all depth of slab to satisfy vertical deflection limits is (Fe 415)", options: ["5 cm", "7.5 cm", "10 cm", "12 cm"], ans: 2, tag: "HPSSC JE CODE 502/2018, [ESE 2011]", exp: "Ans. (c) :\nFor Fe 415, safe deflection limit is span/overall depth = 32\nEffective depth = 3000/32 = 9.375 ≈ 10 cm" },
+            { id: 1108, q: "For a simply supported beam of span 15 m, the minimum effective depth to satisfy the vertical deflection limits should be", options: ["600 mm", "750 mm", "900 mm", "More than 1 m."], ans: 3, tag: "HPSSC JE CODE 502/2018", exp: "Ans. (d) : For SS beam span / depth ratio = 20\nDepth = 15000 / (10/15) × 20 = 1125 mm\nIt is more than 1 m." },
+            { id: 1109, q: "Two way slabs can be analyzed using", options: ["Pigeaud's theory", "Westergaurd's theory", "Johnson's theory", "All of the above"], ans: 3, tag: "GSSSB Surveyor 2016", exp: "Ans. (d) : Two way slabs can be analyzed using –\n• Pigeaud's theory\n• Westergaurd's theory\n• Johnson's theory" },
+            { id: 1110, q: "The minimum cover for 2.0 hour fire rating in continuous RCC beams is", options: ["30 mm", "40 mm", "50 mm", "55 mm"], ans: 0, tag: "Mizoram PSC JE (PHE.& PWD) Apr 2016 Paper I", exp: "Ans. (a) : As per IS 456 : 2000 clause 26.4.3(table-16a) suggest that 40 mm size of nominal cover used for simply supported beam and 30 mm for continuous beam with fire resistance '2' hour." },
+            { id: 1111, q: "A slab is reinforced with 8mm φ bars and development length required is 548mm. The support width should be", options: ["275mm", "183mm", "208mm", "548mm"], ans: 1, tag: "HPSSC JE 2015", exp: "Ans (b) 183mm.\nExplanation: The support width usually confines to the requirement that the bar must extend Ld/3 into the support. 548/3 = 182.6 mm, which is approx 183mm." }
+        ];
+
+        // --- Logic Variables ---
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let answers = {};
+        let reviewStatus = {};
+        let bookmarks = JSON.parse(localStorage.getItem('rcc_bookmarks')) || {};
+        let timerInterval;
+        let timeLeft = 7200; // 2 hours
+        
+        function init() {
+            updateHistory();
+            document.getElementById('bm-count').innerText = Object.keys(bookmarks).length;
+        }
+
+        function startTest(mode) {
+            answers = {};
+            reviewStatus = {};
+            timeLeft = 7200;
+            
+            if (mode === 'bookmark') {
+                const bmIds = Object.keys(bookmarks).map(Number);
+                if (bmIds.length === 0) return alert("No bookmarks found!");
+                currentQuestions = questionData.filter(q => bmIds.includes(q.id));
+            } else {
+                currentQuestions = [...questionData];
+            }
+
+            currentIndex = 0;
+            document.getElementById('landing-page').style.display = 'none';
+            document.getElementById('quiz-interface').style.display = 'flex';
+            
+            startTimer();
+            renderQuestion();
+            updatePalette();
+        }
+
+        function renderQuestion() {
+            const q = currentQuestions[currentIndex];
+            const container = document.getElementById('q-container');
+            const userAnswer = answers[q.id];
+            
+            // Bookmark Icon State
+            const bmBtn = document.getElementById('btn-bookmark');
+            bmBtn.innerHTML = bookmarks[q.id] ? "&#9733;" : "&#9734;";
+            bmBtn.classList.toggle('active', !!bookmarks[q.id]);
+
+            // Layout: Left: "Question 1", Right: "Q. 1078"
+            let html = `
+                <div class="q-meta-row">
+                    <span class="q-left-num">Question ${currentIndex + 1}</span>
+                    <span class="q-right-num">Q. ${q.id}</span>
+                </div>
+                <div class="tag-row"><span class="exam-tag">${q.tag}</span></div>
+                
+                <div class="q-text">${q.q}</div>
+                <div>
+            `;
+
+            q.options.forEach((opt, idx) => {
+                let statusClass = '';
+                if (userAnswer !== undefined) {
+                    if (idx === q.ans) statusClass = 'correct';
+                    else if (idx === userAnswer) statusClass = 'wrong';
+                    else statusClass = 'disabled';
+                }
+                
+                html += `
+                    <div class="option ${statusClass}" onclick="handleAnswer(${q.id}, ${idx})">
+                        <div class="option-circle">${String.fromCharCode(65 + idx)}</div>
+                        <div class="option-text">${opt}</div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+
+            // Solution Box
+            if (userAnswer !== undefined) {
+                html += `
+                    <div class="solution-box" style="display:block">
+                        <div class="sol-title">Solution:</div>
+                        <div class="sol-text">${q.exp}</div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+            updateProgressBar();
+            updatePalette();
+        }
+
+        function handleAnswer(qId, optIdx) {
+            if (answers[qId] !== undefined) return;
+            answers[qId] = optIdx;
+            renderQuestion();
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentIndex < currentQuestions.length - 1) {
+                currentIndex++;
+                renderQuestion();
+            }
+        }
+
+        function markForReview() {
+            const qId = currentQuestions[currentIndex].id;
+            reviewStatus[qId] = !reviewStatus[qId];
+            updatePalette();
+            // Optional Feedback
+        }
+
+        function toggleBookmark() {
+            const qId = currentQuestions[currentIndex].id;
+            if (bookmarks[qId]) delete bookmarks[qId];
+            else bookmarks[qId] = true;
+            localStorage.setItem('rcc_bookmarks', JSON.stringify(bookmarks));
+            renderQuestion();
+        }
+
+        // --- Palette ---
+        function togglePalette() {
+            const drawer = document.getElementById('palette-drawer');
+            const backdrop = document.getElementById('backdrop');
+            
+            if (drawer.classList.contains('open')) {
+                drawer.classList.remove('open');
+                backdrop.style.display = 'none';
+            } else {
+                drawer.classList.add('open');
+                backdrop.style.display = 'block';
+            }
+        }
+
+        function updatePalette() {
+            const grid = document.getElementById('palette-grid');
+            grid.innerHTML = '';
+            
+            currentQuestions.forEach((q, idx) => {
+                const item = document.createElement('div');
+                item.className = 'grid-item';
+                item.innerText = idx + 1;
+                
+                if (idx === currentIndex) item.classList.add('current');
+                
+                if (answers[q.id] !== undefined) {
+                    if (answers[q.id] === q.ans) item.classList.add('answered');
+                    else item.classList.add('wrong');
+                } else if (reviewStatus[q.id]) {
+                    item.classList.add('review');
+                }
+
+                item.onclick = () => {
+                    currentIndex = idx;
+                    renderQuestion();
+                    togglePalette(); // Auto close on click
+                };
+                grid.appendChild(item);
+            });
+        }
+
+        // --- Timer & Exit ---
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                const h = Math.floor(timeLeft / 3600).toString().padStart(2, '0');
+                const m = Math.floor((timeLeft % 3600) / 60).toString().padStart(2, '0');
+                const s = (timeLeft % 60).toString().padStart(2, '0');
+                document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+                if (timeLeft <= 0) submitTest();
+            }, 1000);
+        }
+
+        function exitTest() {
+            if(confirm("Are you sure you want to exit? Your progress will be lost.")) {
+                location.reload();
+            }
+        }
+
+        function submitTest() {
+            clearInterval(timerInterval);
+            let correct = 0;
+            let attempted = 0;
+            
+            currentQuestions.forEach(q => {
+                if (answers[q.id] !== undefined) {
+                    attempted++;
+                    if (answers[q.id] === q.ans) correct++;
+                }
+            });
+
+            const score = correct;
+            const accuracy = attempted === 0 ? 0 : Math.round((correct / attempted) * 100);
+            
+            const history = JSON.parse(localStorage.getItem('rcc_history')) || [];
+            history.unshift({
+                date: new Date().toLocaleString(),
+                score: `${score}/${currentQuestions.length}`,
+                acc: `${accuracy}%`
+            });
+            if (history.length > 5) history.pop();
+            localStorage.setItem('rcc_history', JSON.stringify(history));
+
+            alert(`TEST SUBMITTED\n\nScore: ${score} / ${currentQuestions.length}\nAccuracy: ${accuracy}%`);
+            location.reload();
+        }
+
+        function updateProgressBar() {
+            const percent = ((currentIndex + 1) / currentQuestions.length) * 100;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+        }
+
+        function updateHistory() {
+            const history = JSON.parse(localStorage.getItem('rcc_history')) || [];
+            const table = document.getElementById('history-table');
+            
+            if (history.length === 0) {
+                table.innerHTML = `<tr><td style="padding:15px; text-align:center; color:#999;">No attempts yet</td></tr>`;
+                return;
+            }
+
+            let html = `<thead style="background:#f5f5f5; color:#555;"><tr><th style="padding:10px; text-align:left;">Date</th><th>Score</th><th>Acc</th></tr></thead><tbody>`;
+            history.forEach(h => {
+                html += `
+                    <tr style="border-top:1px solid #eee;">
+                        <td style="padding:10px;">${h.date.split(',')[0]}</td>
+                        <td style="text-align:center; font-weight:bold; color:var(--primary);">${h.score}</td>
+                        <td style="text-align:center;">${h.acc}</td>
+                    </tr>
+                `;
+            });
+            html += `</tbody>`;
+            table.innerHTML = html;
+            
+            document.getElementById('last-score').innerText = history[0].score;
+            document.getElementById('avg-acc').innerText = history[0].acc;
+        }
+
+        init();
+    </script>
+</body>
+</html>
