@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Retaining Wall Mock Test (Final)</title>
+<style>
+    :root {
+        --primary: #e91e63; /* Pink */
+        --secondary: #2196f3; /* Blue */
+        --success: #2e7d32; /* Green */
+        --danger: #d32f2f; /* Red */
+        --warning: #ffc107; /* Yellow */
+        --bg-color: #f5f7fa;
+        --text: #333;
+        --border: #e0e0e0;
+    }
+
+    * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; padding: 0; background: var(--bg-color); height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--text); }
+
+    /* --- HEADER --- */
+    header {
+        height: 60px; background: white; border-bottom: 2px solid var(--primary);
+        display: flex; align-items: center; justify-content: space-between; padding: 0 15px;
+        flex-shrink: 0; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .header-left { display: flex; align-items: center; gap: 15px; }
+    .grid-icon { font-size: 24px; cursor: pointer; color: #555; padding: 5px; }
+    .brand-title { font-weight: bold; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+    .tag { background: var(--primary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+    
+    .timer { background: #fce4ec; color: var(--primary); padding: 5px 12px; border-radius: 20px; font-weight: bold; font-family: monospace; }
+    
+    .header-right { display: flex; align-items: center; }
+    .btn-submit { background: var(--success); color: white; border: none; padding: 8px 18px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .btn-submit:hover { background: #1b5e20; }
+
+    /* --- MAIN LAYOUT --- */
+    .container { display: flex; flex: 1; overflow: hidden; position: relative; }
+
+    /* Question Area */
+    .q-area { flex: 1; padding: 20px; overflow-y: auto; padding-bottom: 80px; background: white; }
+    .q-meta { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; align-items: center; }
+    .q-text { font-size: 18px; font-weight: 500; margin-bottom: 20px; line-height: 1.5; }
+    
+    /* Bookmark Icon */
+    .bm-icon { font-size: 26px; cursor: pointer; color: #ddd; transition: 0.2s; user-select: none; }
+    .bm-icon.active { color: var(--warning); text-shadow: 0 0 2px orange; }
+
+    /* Options */
+    .opts { display: flex; flex-direction: column; gap: 12px; }
+    .opt { display: flex; align-items: flex-start; padding: 12px 15px; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; background: white; transition: 0.2s; }
+    .opt:hover { background: #f9f9f9; }
+    .radio { width: 22px; height: 22px; border: 2px solid #999; border-radius: 50%; margin-right: 12px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: white; font-weight: bold; flex-shrink: 0; margin-top: 2px; }
+
+    /* States */
+    .opt.selected { background: #e3f2fd; border-color: var(--secondary); }
+    .opt.selected .radio { background: var(--secondary); border-color: var(--secondary); }
+    .opt.correct { background: #e8f5e9; border-color: var(--success); }
+    .opt.correct .radio { background: var(--success); border-color: var(--success); content: '✔'; }
+    .opt.wrong { background: #ffebee; border-color: var(--danger); }
+    .opt.wrong .radio { background: var(--danger); border-color: var(--danger); }
+    .opt.disabled { pointer-events: none; opacity: 0.8; }
+
+    /* Solution */
+    .sol-box { margin-top: 20px; background: #fff8e1; border: 1px solid #ffe082; padding: 15px; border-radius: 6px; display: none; animation: slideDown 0.3s ease; }
+    .sol-title { font-weight: bold; color: #f57c00; margin-bottom: 5px; }
+    @keyframes slideDown { from {opacity:0; transform:translateY(-10px);} to {opacity:1; transform:translateY(0);} }
+
+    /* Sidebar Palette */
+    .sidebar { width: 300px; background: white; border-right: 1px solid #ddd; display: flex; flex-direction: column; z-index: 150; position: absolute; left: -300px; top: 0; bottom: 0; transition: left 0.3s ease; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+    .sidebar.open { left: 0; }
+    
+    .sb-header { padding: 15px; background: #f5f5f5; border-bottom: 1px solid #ddd; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+    .grid { padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; overflow-y: auto; align-content: start; flex: 1; }
+    .p-btn { height: 35px; border: 1px solid #ddd; background: white; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; font-weight: 600; }
+    
+    /* Palette Colors */
+    .p-btn.ans { background: var(--success); color: white; border-color: var(--success); }
+    .p-btn.not-ans { background: var(--danger); color: white; border-color: var(--danger); }
+    .p-btn.review { background: #7b1fa2; color: white; border-color: #7b1fa2; }
+    .p-btn.cur { border: 2px solid var(--text); }
+    .p-btn.visited { background: #e0e0e0; }
+
+    /* Footer */
+    footer { height: 60px; background: white; border-top: 1px solid #ddd; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; position: fixed; bottom: 0; left: 0; width: 100%; z-index: 100; }
+    .f-btn { padding: 8px 15px; border: 1px solid #ccc; background: white; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; }
+    .f-primary { background: var(--secondary); color: white; border: none; }
+
+    /* Modal / Dashboard */
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f6f9; z-index: 200; display: flex; align-items: center; justify-content: center; }
+    .card { background: white; padding: 30px; border-radius: 8px; width: 90%; max-width: 450px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    
+    .btn-dash { width: 100%; padding: 14px; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 10px; transition: 0.2s; }
+    .btn-dash:hover { opacity: 0.9; }
+    
+    .score-circle { width: 100px; height: 100px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; margin: 0 auto 20px; }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
+    .stat-box { background: #f5f5f5; padding: 10px; border-radius: 5px; font-size: 14px; }
+    
+    .history-box { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; text-align: left; }
+    .history-item { font-size: 13px; color: #666; margin-bottom: 5px; }
+
+</style>
+</head>
+<body>
+
+<div id="dashboard" class="modal">
+    <div class="card">
+        <h2 style="color:var(--primary); margin-top:0;">Retaining Wall Mock Test</h2>
+        <p>Q1543 - Q1571 (29 Questions)</p>
+        
+        <div class="history-box" id="history-section" style="display:none; margin-bottom:20px;">
+            <div style="font-weight:bold; margin-bottom:5px;">Last Attempt:</div>
+            <div class="stat-grid" style="margin:0;">
+                <div class="stat-box">Score: <b id="hist-score">-</b></div>
+                <div class="stat-box">Accuracy: <b id="hist-acc">-</b></div>
+            </div>
+        </div>
+
+        <button class="btn-dash" style="background:var(--secondary); color:white;" onclick="startTest(false)">START NEW TEST</button>
+        <button class="btn-dash" style="background:white; border:2px solid var(--warning); color:#f57c00;" onclick="startTest(true)">
+            ★ ATTEMPT BOOKMARKS (<span id="bm-count-lbl">0</span>)
+        </button>
+    </div>
+</div>
+
+<div id="result-screen" class="modal" style="display:none; background:rgba(0,0,0,0.7);">
+    <div class="card">
+        <h2>Test Result</h2>
+        <div class="score-circle" id="final-score">0</div>
+        <div class="stat-grid">
+            <div class="stat-box" style="color:var(--success)">Correct: <b id="r-correct">0</b></div>
+            <div class="stat-box" style="color:var(--danger)">Wrong: <b id="r-wrong">0</b></div>
+            <div class="stat-box">Skipped: <b id="r-skip">0</b></div>
+            <div class="stat-box">Accuracy: <b id="r-acc">0%</b></div>
+        </div>
+        <button class="btn-dash" style="background:var(--secondary); color:white;" onclick="location.reload()">BACK TO HOME</button>
+    </div>
+</div>
+
+<div id="test-ui" style="display:none; height:100%; flex-direction:column;">
+    <header>
+        <div class="header-left">
+            <div class="grid-icon" onclick="toggleSidebar()">&#9776;</div>
+            <div class="brand-title" style="margin-left:10px;">Testbook <span class="tag">Civil</span></div>
+        </div>
+        
+        <div class="timer" id="timer">01:00:00</div>
+        
+        <div class="header-right">
+            <button class="btn-submit" onclick="confirmSubmit()">SUBMIT</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="sidebar" id="sidebar">
+            <div class="sb-header">
+                <span>Question Palette</span>
+                <span style="cursor:pointer;" onclick="toggleSidebar()">&#10006;</span>
+            </div>
+            <div class="grid" id="grid"></div>
+        </div>
+
+        <div class="q-area" id="q-area">
+            </div>
+    </div>
+
+    <footer>
+        <div style="display:flex; gap:10px;">
+            <button class="f-btn" onclick="markReview()" style="color:#7b1fa2; border-color:#7b1fa2;">Review</button>
+            <button class="f-btn" onclick="clearAns()">Clear</button>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <button class="f-btn" onclick="nav(-1)">&lt; Prev</button>
+            <button class="f-btn f-primary" onclick="nav(1)">Save & Next &gt;</button>
+        </div>
+    </footer>
+</div>
+
+<script>
+/* DATA: Questions 1543 - 1571 */
+const allQuestions = [
+    { id: 1543, q: "Minimum factor of safety against overturning for a retaining wall (dead load restoring):", opt: ["1.5", "2.0", "2.5", "3.0"], ans: 0, sol: "As per IS 456, FOS >= 1.4 for dead load restoring. With wind/seismic, FOS = 1.5." },
+    { id: 1544, q: "Counterfort retaining walls are generally used when height exceeds:", opt: ["6 m", "12 m", "10 m", "15 m"], ans: 0, sol: "Counterfort walls are economical for heights > 6-7m." },
+    { id: 1545, q: "In T-shaped cantilever walls, main reinforcement in stem is provided on:", opt: ["front face", "front face (both)", "inner face (one dir)", "inner face (both)"], ans: 2, sol: "Provided on the inner (rear) face to resist tension." },
+    { id: 1546, q: "Allowable stress based on slenderness for masonry wall uses:", opt: ["h/t", "L/t", "Lesser of L/t, h/t", "Greater of L/t, h/t"], ans: 2, sol: "Based on the lesser of the slenderness ratios." },
+    { id: 1547, q: "Major overturning force in gravity dam:", opt: ["self-weight", "water pressure", "silt pressure", "wind"], ans: 1, sol: "Water pressure is the primary overturning force." },
+    { id: 1548, q: "A buttress in a wall provides:", opt: ["roof support", "lateral support to wall", "vertical resistance", "beam support"], ans: 1, sol: "Buttress provides lateral support to the wall." },
+    { id: 1549, q: "Minimum thickness of braced walls (IS 456):", opt: ["250 mm", "100 mm", "120 mm", "80 mm"], ans: 1, sol: "Min thickness is 100 mm." },
+    { id: 1550, q: "RE wall means:", opt: ["Resistant Earth", "Reinforced Earth", "Retaining Earth", "Revertment Earth"], ans: 1, sol: "Reinforced Earth Wall." },
+    { id: 1551, q: "Main reinforcement in toe of T-shaped wall is on:", opt: ["top, parallel", "top, perpendicular", "bottom, parallel", "bottom, perpendicular"], ans: 3, sol: "Bottom face, perpendicular to wall (cantilever action upwards)." },
+    { id: 1552, q: "Wall to withstand toe pressure to back full materials:", opt: ["Breast wall", "Buttress", "Curtain wall", "Retaining wall"], ans: 3, sol: "Retaining wall." },
+    { id: 1553, q: "Design of retaining wall assumes retained earth is:", opt: ["dry", "moist", "cohesive", "non-granular"], ans: 0, sol: "Assumes dry, cohesionless, homogeneous." },
+    { id: 1554, q: "Wall to protect natural sloping ground from cutting/weathering:", opt: ["Partition", "Cavity", "Breast wall", "Retaining"], ans: 2, sol: "Breast wall protects natural slopes." },
+    { id: 1555, q: "Extra bars in RCC wall to satisfy bearing pressure:", opt: ["Torsion", "Dowel bars", "Anchor", "Main"], ans: 1, sol: "Dowel bars transfer stress to footing." },
+    { id: 1556, q: "Retaining wall with surcharge, base width is approx:", opt: ["0.70 H", "0.55 H", "0.50 H", "0.40 H"], ans: 0, sol: "With surcharge, width increases to ~0.7H." },
+    { id: 1557, q: "FOS against sliding (W=weight, P=pressure):", opt: ["1", "1.25", "1.5", "2"], ans: 2, sol: "FOS against sliding = 1.5." },
+    { id: 1558, q: "Formwork for vertical members (columns/walls):", opt: ["Staging", "Centering", "Formwork/Shuttering", "Shuttering"], ans: 3, sol: "Vertical formwork is Shuttering." },
+    { id: 1559, q: "Max vertical reinforcement spacing not exceed X times thickness:", opt: ["1", "1.5", "2", "3"], ans: 3, sol: "3 times thickness or 450mm." },
+    { id: 1560, q: "Min thickness of load bearing RCC wall:", opt: ["50", "100", "150", "200"], ans: 1, sol: "100 mm." },
+    { id: 1561, q: "T-shaped wall consists of:", opt: ["One cantilever", "Two", "Three cantilevers", "None"], ans: 2, sol: "Stem, Toe, and Heel (3 cantilevers)." },
+    { id: 1562, q: "Trapezoidal section centroid distance formula:", opt: ["a+b", "b+a", "avg", "(a^2+ab+b^2)/3(a+b)"], ans: 3, sol: "Centroid formula for trapezoid." },
+    { id: 1563, q: "Stem thickness at top usually kept at least:", opt: ["100", "200", "300", "None"], ans: 1, sol: "200 mm for practical reinforcement placement." },
+    { id: 1564, q: "Cantilever wall stem design moment:", opt: ["1/2 Ka h2", "Ka h", "1/6 Ka gamma h3", "1/12"], ans: 2, sol: "M = P * h/3 = (1/2 Ka gamma h^2) * h/3 = 1/6." },
+    { id: 1565, q: "Stem of counterfort wall designed as:", opt: ["simply supported", "cantilever", "continuous slab", "overhanging"], ans: 2, sol: "Continuous slab supported on counterforts." },
+    { id: 1566, q: "Wall designed to resist lateral forces in its own plane:", opt: ["Shear wall", "Partition", "Retaining", "Load bearing"], ans: 0, sol: "Shear wall resists lateral loads (wind/seismic)." },
+    { id: 1567, q: "Slenderness considered if height exceeds thickness by:", opt: ["16", "12", "10", "8"], ans: 1, sol: "12 times." },
+    { id: 1568, q: "Cantilever wall safe for height not more than:", opt: ["4m", "5m", "6m", "8m"], ans: 2, sol: "Economical up to 6m." },
+    { id: 1569, q: "Bar dia > 36mm in water structure:", opt: ["Lap min stress", "Lap center", "Lap not used (Weld)", "All"], ans: 2, sol: "Bars > 36mm should be welded, not lapped." },
+    { id: 1570, q: "Heel slab main reinforcement provided at:", opt: ["Bottom", "Top", "Center", "Sides"], ans: 1, sol: "Top face (tension is at top due to backfill weight)." },
+    { id: 1571, q: "Gravity wall base width ensures:", opt: ["No compression", "No tension", "No BM", "No SF"], ans: 1, sol: "Designed so no tension develops at base (resultant within middle third)." }
+];
+
+/* STATE */
+let currentQuestions = [];
+let currIdx = 0;
+let userAns = {}; 
+let status = {};
+let bookmarks = new Set(JSON.parse(localStorage.getItem('bookmarks')) || []);
+let time = 3600;
+let timerInt;
+
+// Load History & Counts
+window.onload = function() {
+    document.getElementById('bm-count-lbl').innerText = bookmarks.size;
+    let savedHist = JSON.parse(localStorage.getItem('test_history'));
+    if(savedHist) {
+        document.getElementById('history-section').style.display = 'block';
+        document.getElementById('hist-score').innerText = savedHist.score;
+        document.getElementById('hist-acc').innerText = savedHist.acc;
+    }
+}
+
+function startTest(isBookmarkMode) {
+    if(isBookmarkMode) {
+        if(bookmarks.size === 0) { alert("No bookmarks found!"); return; }
+        currentQuestions = allQuestions.filter(q => bookmarks.has(q.id));
+    } else {
+        currentQuestions = [...allQuestions];
+    }
+    
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('test-ui').style.display = 'flex';
+    
+    // Init
+    userAns = {};
+    status = {};
+    currentQuestions.forEach(q => status[q.id] = 0);
+    renderGrid();
+    loadQ(0);
+    
+    // Timer
+    clearInterval(timerInt);
+    time = 3600;
+    timerInt = setInterval(() => {
+        time--;
+        let h = Math.floor(time/3600).toString().padStart(2,'0');
+        let m = Math.floor((time%3600)/60).toString().padStart(2,'0');
+        let s = (time%60).toString().padStart(2,'0');
+        document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+        if(time <= 0) showResult();
+    }, 1000);
+}
+
+function loadQ(idx) {
+    if(idx < 0 || idx >= currentQuestions.length) return;
+    currIdx = idx;
+    let q = currentQuestions[idx];
+    
+    if(status[q.id] === 0) status[q.id] = 1; // Mark visited
+    updateGrid();
+
+    let ans = userAns[q.id];
+    let isBm = bookmarks.has(q.id);
+
+    let html = `
+        <div class="q-meta">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span><b>Q.${currIdx+1}</b></span>
+                <span class="tag">Civil</span>
+            </div>
+            <div class="bm-icon ${isBm ? 'active' : ''}" onclick="toggleBm(${q.id}, this)">
+                ${isBm ? '★' : '☆'}
+            </div>
+        </div>
+        <div class="q-text">${q.q}</div>
+        <div class="opts">
+            ${q.opt.map((o, i) => `
+                <div class="opt ${ans !== undefined ? (i===q.ans?'correct':(i===ans?'wrong':'disabled')) : ''}" 
+                     onclick="sel(${q.id}, ${i})">
+                    <div class="radio">${['A','B','C','D'][i]}</div>
+                    <span>${o}</span>
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+    if(ans !== undefined) {
+        html += `<div class="sol-box" style="display:block">
+            <div class="sol-title">Solution</div>
+            ${q.sol}
+        </div>`;
+    }
+
+    document.getElementById('q-area').innerHTML = html;
+}
+
+function toggleBm(qid, el) {
+    if(bookmarks.has(qid)) {
+        bookmarks.delete(qid);
+        el.innerText = '☆';
+        el.classList.remove('active');
+    } else {
+        bookmarks.add(qid);
+        el.innerText = '★';
+        el.classList.add('active');
+    }
+    localStorage.setItem('bookmarks', JSON.stringify(Array.from(bookmarks)));
+}
+
+function sel(qid, idx) {
+    if(userAns[qid] !== undefined) return;
+    userAns[qid] = idx;
+    status[qid] = 2; // Answered
+    loadQ(currIdx);
+    updateGrid();
+}
+
+function nav(d) { loadQ(currIdx + d); }
+
+function markReview() {
+    status[currentQuestions[currIdx].id] = 3;
+    updateGrid();
+}
+
+function clearAns() {
+    delete userAns[currentQuestions[currIdx].id];
+    status[currentQuestions[currIdx].id] = 1; // Not Ans
+    loadQ(currIdx);
+    updateGrid();
+}
+
+function renderGrid() {
+    document.getElementById('grid').innerHTML = currentQuestions.map((q, i) => 
+        `<div class="p-btn" id="p-${q.id}" onclick="loadQ(${i}); toggleSidebar()">${i+1}</div>`
+    ).join('');
+}
+
+function updateGrid() {
+    currentQuestions.forEach((q, i) => {
+        let el = document.getElementById(`p-${q.id}`);
+        let s = status[q.id];
+        el.className = 'p-btn';
+        if(i === currIdx) el.classList.add('cur');
+        if(s === 2) el.classList.add('ans');
+        else if(s === 1) el.classList.add('not-ans');
+        else if(s === 3) el.classList.add('review');
+        else el.classList.add('visited');
+    });
+}
+
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+}
+
+function confirmSubmit() {
+    if(confirm("Are you sure you want to submit the test?")) showResult();
+}
+
+function showResult() {
+    clearInterval(timerInt);
+    document.getElementById('test-ui').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'flex';
+    
+    let correct = 0;
+    let wrong = 0;
+    let skipped = 0;
+    
+    currentQuestions.forEach(q => {
+        if(userAns[q.id] === undefined) skipped++;
+        else if(userAns[q.id] === q.ans) correct++;
+        else wrong++;
+    });
+    
+    let total = currentQuestions.length;
+    let acc = (correct + wrong) > 0 ? Math.round((correct / (correct + wrong)) * 100) : 0;
+    
+    document.getElementById('final-score').innerText = `${correct}/${total}`;
+    document.getElementById('r-correct').innerText = correct;
+    document.getElementById('r-wrong').innerText = wrong;
+    document.getElementById('r-skip').innerText = skipped;
+    document.getElementById('r-acc').innerText = acc + "%";
+
+    // SAVE ACCURACY
+    localStorage.setItem('test_history', JSON.stringify({
+        score: `${correct}/${total}`,
+        acc: acc + "%"
+    }));
+}
+</script>
+</body>
+</html>
