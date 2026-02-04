@@ -3,243 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Civil Eng Test (Q1354-1384)</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Civil Engineering Exam Interface</title>
     <style>
+        /* --- CSS VARIABLES & RESET --- */
         :root {
-            --primary: #E91E63; /* Testbook Pink */
-            --primary-dark: #C2185B;
-            --green: #2ECC71;
-            --red: #E74C3C;
-            --blue: #3498DB;
-            --review: #9C27B0;
-            --gray: #9E9E9E;
-            --light-bg: #F5F5F5;
-            --text: #333;
-            --border: #E0E0E0;
+            --primary-pink: #e03e54; 
+            --header-height: 55px;
+            --sidebar-width: 300px;
+            --bg-color: #f5f5f5;
+            --text-main: #333;
+            
+            /* Status Colors */
+            --green-ans: #26a366;
+            --blue-curr: #3a8bdc;
+            --purple-mark: #7a3a99;
+            --gray-skip: #e0e0e0;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--light-bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-
-        /* --- UTILITY --- */
-        .hidden { display: none !important; }
-        .flex { display: flex; }
-        .center { align-items: center; justify-content: center; }
-
-        /* --- HOME SCREEN --- */
-        #home-screen { align-items: center; padding: 20px; overflow-y: auto; height: 100%; }
-        .card { background: white; width: 100%; max-width: 450px; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 5px solid var(--primary); margin-bottom: 20px; }
-        .btn-main { width: 100%; padding: 15px; border-radius: 50px; border: none; font-size: 1.1rem; font-weight: bold; cursor: pointer; color: white; background: var(--primary); box-shadow: 0 4px 10px rgba(233, 30, 99, 0.3); margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-sec { background: white; color: var(--primary); border: 2px solid var(--primary); }
-        .btn-clear { background: transparent; color: #999; border: 1px solid #ddd; padding: 8px 15px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; margin-top: 10px; }
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         
-        .history-box { width: 100%; max-width: 450px; background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .history-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
-
-        /* --- HEADER --- */
-        header { background: var(--primary); height: 56px; color: white; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 100; flex-shrink: 0; }
-        .header-left { display: flex; align-items: center; gap: 15px; }
-        .header-right { display: flex; align-items: center; gap: 10px; }
-        .timer { background: rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 4px; font-family: monospace; font-size: 1rem; }
-        .icon-btn { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; }
-        .submit-btn { background: white; color: var(--primary); border: none; padding: 5px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; cursor: pointer; }
-
-        /* --- TEST AREA --- */
-        .test-container { display: flex; flex: 1; overflow: hidden; position: relative; margin-bottom: 60px; /* Space for fixed footer */ }
-        .q-area { flex: 1; display: flex; flex-direction: column; background: white; overflow-y: auto; position: relative; }
-        .q-header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #fff; position: sticky; top: 0; z-index: 10; }
-        .q-badge { background: #eee; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.9rem; color: #555; }
-        .bookmark-icon { color: #ccc; font-size: 1.3rem; cursor: pointer; transition: color 0.2s; }
-        .bookmark-icon.active { color: var(--primary); }
-        
-        .q-content { padding: 20px; padding-bottom: 80px; }
-        .exam-tag { display: inline-block; background: #FFF3E0; color: #E65100; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; margin-bottom: 10px; font-weight: 600; border: 1px solid #FFE0B2; }
-        .q-text { font-size: 1.1rem; line-height: 1.6; color: var(--text); margin-bottom: 20px; font-weight: 500; }
-        
-        /* Options */
-        .option { display: flex; padding: 12px; margin-bottom: 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.2s; align-items: flex-start; }
-        .option:hover { background: #fafafa; }
-        .option.correct { border-color: var(--green); background: #E8F5E9; }
-        .option.wrong { border-color: var(--red); background: #FFEBEE; }
-        .opt-circle { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #bbb; margin-right: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; color: #bbb; }
-        .option.correct .opt-circle { border-color: var(--green); color: var(--green); background: white; }
-        .option.wrong .opt-circle { border-color: var(--red); color: var(--red); background: white; }
-
-        /* Solution */
-        .solution { margin-top: 20px; background: #E3F2FD; border: 1px solid #BBDEFB; padding: 15px; border-radius: 8px; display: none; animation: fadeIn 0.3s; }
-        .solution.show { display: block; }
-        .sol-title { font-weight: bold; color: var(--blue); margin-bottom: 8px; font-size: 0.95rem; }
-        .sol-text { font-size: 0.95rem; color: #444; line-height: 1.5; white-space: pre-wrap; }
-
-        /* Sidebar/Palette */
-        .sidebar { width: 300px; background: white; border-left: 1px solid var(--border); display: flex; flex-direction: column; transition: transform 0.3s; z-index: 90; height: 100%; }
-        .palette-header { padding: 12px; background: #f9f9f9; border-bottom: 1px solid var(--border); font-weight: bold; font-size: 0.9rem; }
-        .grid { padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; overflow-y: auto; align-content: start; flex: 1; }
-        .grid-item { height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid #ddd; font-size: 0.85rem; cursor: pointer; background: white; }
-        .grid-item.current { border: 2px solid var(--blue); box-shadow: 0 0 5px var(--blue); }
-        .grid-item.answered { background: var(--green); color: white; border-color: var(--green); }
-        .grid-item.wrong { background: var(--red); color: white; border-color: var(--red); }
-        .grid-item.review { background: var(--review); color: white; border-color: var(--review); }
-        .grid-item.skipped { background: #ddd; color: #666; }
-
-        /* FIXED FOOTER */
-        .footer { 
-            height: 60px; 
-            background: white; 
-            border-top: 1px solid var(--border); 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            padding: 0 15px; 
-            position: fixed; /* Fix: Stick to bottom always */
-            bottom: 0; 
-            left: 0; 
-            width: 100%; 
-            z-index: 200; 
+        body { 
+            margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background-color: var(--bg-color); height: 100vh; width: 100vw; 
+            overflow: hidden; display: flex; flex-direction: column;
         }
-        .f-btn { padding: 8px 16px; border-radius: 4px; border: 1px solid var(--border); background: white; font-weight: 600; font-size: 0.9rem; cursor: pointer; }
-        .btn-next { background: var(--blue); color: white; border: none; }
-        .btn-submit { background: var(--green); color: white; border: none; }
-        .btn-rev { color: var(--review); border-color: var(--review); }
 
-        /* Mobile Palette */
-        .mobile-overlay { position: fixed; top: 56px; right: 0; bottom: 60px; /* Leave space for footer */ width: 85%; background: white; transform: translateX(100%); transition: transform 0.3s; z-index: 150; display: flex; flex-direction: column; box-shadow: -2px 0 10px rgba(0,0,0,0.1); }
-        .mobile-overlay.open { transform: translateX(0); }
+        /* --- HEADER (Fixed Top) --- */
+        header {
+            height: var(--header-height); background: var(--primary-pink); color: white;
+            display: flex; align-items: center; justify-content: space-between; padding: 0 15px;
+            flex-shrink: 0; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
 
-        /* Result Screen */
-        .result-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-top: 20px; }
-        .stat-box { padding: 10px; border-radius: 8px; text-align: center; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .header-title { font-weight: 700; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .header-right { display: flex; gap: 10px; align-items: center; }
 
+        #mobile-grid-btn {
+            display: none; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);
+            color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.85rem; cursor: pointer; font-weight: bold;
+        }
+
+        .btn-exit { background: #333; color: white; border: none; padding: 5px 12px; border-radius: 4px; font-size: 0.85rem; cursor: pointer; }
+
+        /* --- MAIN LAYOUT --- */
+        .main-container { display: flex; flex: 1; height: calc(100vh - var(--header-height)); position: relative; overflow: hidden; }
+
+        /* --- QUESTION AREA --- */
+        .question-section {
+            flex: 1; padding: 15px; overflow-y: auto; background: white;
+            display: flex; flex-direction: column; position: relative;
+        }
+
+        .exam-tag { 
+            display: inline-block; background: #ffebee; color: #c62828; 
+            font-size: 0.75rem; padding: 3px 8px; border-radius: 3px; 
+            font-weight: bold; margin-bottom: 10px; border: 1px solid #ffcdd2; 
+        }
+
+        .q-text { font-size: 1.05rem; font-weight: 600; color: #222; margin-bottom: 20px; line-height: 1.5; }
+
+        .option {
+            display: flex; align-items: center; padding: 12px; border: 1px solid #ddd; border-radius: 6px; 
+            margin-bottom: 10px; cursor: pointer; background: #fff; transition: background 0.1s;
+        }
+        .option:active { background: #f0f0f0; }
+        .option.selected { background: #e3f2fd; border-color: var(--blue-curr); }
+        .option.correct { background: #e8f5e9; border-color: var(--green-ans); }
+        .option.wrong { background: #ffebee; border-color: var(--primary-pink); }
+        .circle { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #aaa; margin-right: 12px; flex-shrink: 0; }
+        .option.selected .circle { border-color: var(--blue-curr); background: var(--blue-curr); }
+
+        .solution-box { display: none; background: #fff8e1; border-left: 4px solid #fbc02d; padding: 15px; margin-top: 15px; font-size: 0.9rem; line-height: 1.5; color: #444; }
+
+        /* --- FOOTER --- */
+        .footer-controls { margin-top: auto; padding-top: 15px; display: flex; gap: 10px; background: white; border-top: 1px solid #eee; }
+        .btn { flex: 1; padding: 12px; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; color: white; font-size: 0.9rem; }
+        .btn-prev { background: #757575; flex: 0.5; }
+        .btn-mark { background: var(--purple-mark); }
+        .btn-next { background: var(--blue-curr); }
+        .btn-bm { background: transparent; border: 1px solid #ccc; color: #555; flex: 0.5; }
+        .btn-bm.active { background: #fff3e0; border-color: #ff9800; color: #e65100; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { width: var(--sidebar-width); background: white; border-left: 1px solid #ddd; display: flex; flex-direction: column; z-index: 200; }
+        .timer-box { padding: 15px; background: #fafafa; border-bottom: 1px solid #eee; text-align: center; font-size: 1.2rem; font-weight: bold; color: #333; }
+        .palette-container { flex: 1; padding: 10px; overflow-y: auto; }
+        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        .grid-item { height: 38px; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem; background: white; cursor: pointer; font-weight: 500; }
+        .grid-item.current { border: 2px solid var(--blue-curr); }
+        .grid-item.answered { background: var(--green-ans); color: white; border-color: var(--green-ans); }
+        .grid-item.marked { background: var(--purple-mark); color: white; border-color: var(--purple-mark); }
+        .grid-item.skipped { background: var(--gray-skip); color: #555; }
+        .legend { padding: 10px; font-size: 0.8rem; display: flex; flex-wrap: wrap; gap: 10px; border-top: 1px solid #eee; }
+        .dot { width: 10px; height: 10px; display: inline-block; border-radius: 2px; margin-right: 4px; }
+
+        /* --- MOBILE --- */
         @media (max-width: 768px) {
-            .sidebar { display: none; }
-            .mobile-toggle { display: block !important; }
-            /* On mobile, sidebar needs to sit above footer */
-            .mobile-overlay { bottom: 60px; }
+            #mobile-grid-btn { display: block; }
+            .sidebar { position: absolute; top: 0; right: -100%; width: 85%; height: 100%; transition: right 0.3s ease-in-out; box-shadow: -5px 0 15px rgba(0,0,0,0.2); }
+            .sidebar.open { right: 0; }
+            .overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 150; }
+            .overlay.active { display: block; }
         }
-        .mobile-toggle { display: none; }
+
+        /* --- START SCREEN --- */
+        #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .start-card { background: white; padding: 30px; border-radius: 8px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        /* NEW: Accuracy Box */
+        .stats-box {
+            background: #f0f7ff; border: 1px solid #cce5ff; border-radius: 6px; padding: 15px; margin: 15px 0;
+            display: flex; justify-content: space-around; align-items: center;
+        }
+        .stat-item { display: flex; flex-direction: column; align-items: center; }
+        .stat-val { font-size: 1.2rem; font-weight: bold; color: var(--blue-curr); }
+        .stat-label { font-size: 0.8rem; color: #666; margin-top: 5px; }
     </style>
 </head>
 <body>
 
-    <div id="home-screen" class="screen">
-        <div class="card">
-            <h1 style="color:var(--primary); margin-bottom:5px;">Civil Engineering</h1>
-            <p style="color:#666; margin-bottom:20px;">Topic: T & L Beams (Q1354 - Q1384)</p>
+    <div id="start-screen">
+        <div class="start-card">
+            <h2 style="color: var(--primary-pink); margin-top: 0;">Civil Engineering Test</h2>
+            <p>Questions: 1305 - 1336</p>
             
-            <button class="btn-main" onclick="startTest('full')">
-                <i class="fas fa-play"></i> Start Full Test
-            </button>
-            <button class="btn-main btn-sec" onclick="startTest('bookmark')">
-                <i class="fas fa-bookmark"></i> Attempt Bookmarks
-            </button>
-        </div>
-
-        <div style="width:100%; max-width:450px; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <h3 style="color:#555; margin:0;">Recent History</h3>
-            <button class="btn-clear" onclick="clearHistory()"><i class="fas fa-trash"></i> Clear Data</button>
-        </div>
-        
-        <div class="history-box" id="history-list">
-            <div style="text-align:center; color:#999; padding:10px;">No attempts yet.</div>
-        </div>
-    </div>
-
-    <div id="test-screen" class="screen hidden">
-        <header>
-            <div class="header-left">
-                <button class="icon-btn" onclick="exitTest()"><i class="fas fa-arrow-left"></i></button>
-                <span style="font-weight:600;">Testbook Mock</span>
-            </div>
-            <div class="header-right">
-                <div class="timer" id="timer">02:00:00</div>
-                <button class="submit-btn" onclick="submitTest()">Submit</button>
-                <button class="icon-btn mobile-toggle" onclick="togglePalette()"><i class="fas fa-th"></i></button>
-            </div>
-        </header>
-
-        <div class="test-container">
-            <div class="q-area" id="q-area" onclick="closePalette()">
-                <div class="q-header">
-                    <span class="q-badge" id="q-num">Q.1354</span>
-                    <div class="flex center" style="gap:10px;">
-                        <span style="font-size:0.8rem; color:var(--green); font-weight:bold;">+1.0</span>
-                        <span style="font-size:0.8rem; color:var(--red); font-weight:bold;">-0.25</span>
-                        <i class="far fa-bookmark bookmark-icon" id="bm-icon" onclick="toggleBookmark(event)"></i>
-                    </div>
+            <div class="stats-box" id="last-stats">
+                <div class="stat-item">
+                    <span class="stat-val" id="last-score">-</span>
+                    <span class="stat-label">Last Score</span>
                 </div>
-                <div class="q-content" id="q-content"></div>
-            </div>
-
-            <div class="sidebar">
-                <div class="palette-header">Question Palette</div>
-                <div class="grid" id="palette-grid-desktop"></div>
-            </div>
-
-            <div class="mobile-overlay" id="mobile-palette">
-                <div class="palette-header" style="display:flex; justify-content:space-between;">
-                    <span>Question Palette</span>
-                    <button onclick="closePalette()" style="border:none; background:none; font-size:1.2rem;">&times;</button>
+                <div style="width:1px; height:30px; background:#ddd;"></div>
+                <div class="stat-item">
+                    <span class="stat-val" id="last-accuracy">0%</span>
+                    <span class="stat-label">🏆 Accuracy</span>
                 </div>
-                <div class="grid" id="palette-grid-mobile"></div>
             </div>
-        </div>
 
-        <div class="footer">
-            <button class="f-btn btn-rev" onclick="markReview()">Mark Review</button>
-            <button class="f-btn" onclick="clearResponse()">Clear</button>
-            <div class="flex" style="gap:10px;">
-                <button class="f-btn" onclick="prevQ()" id="btn-prev" disabled>Prev</button>
-                <button class="f-btn btn-next" onclick="nextQ()" id="btn-next">Save & Next</button>
-            </div>
+            <button class="btn" style="background:var(--primary-pink); margin-bottom:10px;" onclick="initTest(false)">Start New Test</button>
+            <button class="btn" style="background:#ff9800;" onclick="initTest(true)">Resume Bookmarks</button>
         </div>
     </div>
 
-    <div id="result-screen" class="screen hidden" style="align-items:center; justify-content:center; background:white;">
-        <div class="card" style="text-align:center;">
-            <i class="fas fa-trophy" style="font-size:3rem; color:var(--primary); margin-bottom:10px;"></i>
-            <h2 style="margin-bottom:10px;">Test Submitted!</h2>
-            <div style="font-size:2.5rem; font-weight:bold; color:var(--primary);" id="final-score">0/0</div>
-            <p style="color:#666;" id="final-accuracy">Accuracy: 0%</p>
+    <header>
+        <div class="header-title">Civil Engg Exam</div>
+        <div class="header-right">
+            <button id="mobile-grid-btn" onclick="toggleSidebar()">▦ Grid</button>
+            <button class="btn-exit" onclick="exitTest()">Submit</button>
+        </div>
+    </header>
 
-            <div class="result-stats">
-                <div class="stat-box" style="background:#E8F5E9; color:var(--green);">
-                    <div style="font-weight:bold; font-size:1.2rem;" id="res-correct">0</div>
-                    <div style="font-size:0.8rem;">Correct</div>
-                </div>
-                <div class="stat-box" style="background:#FFEBEE; color:var(--red);">
-                    <div style="font-weight:bold; font-size:1.2rem;" id="res-wrong">0</div>
-                    <div style="font-size:0.8rem;">Wrong</div>
-                </div>
-                <div class="stat-box" style="background:#F3E5F5; color:var(--review);">
-                    <div style="font-weight:bold; font-size:1.2rem;" id="res-review">0</div>
-                    <div style="font-size:0.8rem;">Review</div>
-                </div>
-                <div class="stat-box" style="background:#F5F5F5; color:#777;">
-                    <div style="font-weight:bold; font-size:1.2rem;" id="res-skip">0</div>
-                    <div style="font-size:0.8rem;">Skipped</div>
-                </div>
+    <div class="main-container">
+        <div id="overlay" class="overlay" onclick="closeSidebar()"></div>
+
+        <div class="question-section">
+            <div id="q-content">
+                <span class="exam-tag" id="q-tag">Tag</span>
+                <div class="q-text" id="q-text">Question Text...</div>
+                <div id="options-container"></div>
+                <div class="solution-box" id="solution-box"></div>
             </div>
 
-            <button class="btn-main" style="margin-top:20px;" onclick="location.reload()">Back to Home</button>
+            <div class="footer-controls">
+                <button class="btn btn-prev" onclick="nav(-1)">Prev</button>
+                <button class="btn btn-bm" id="btn-bm" onclick="toggleBookmark()">🔖</button>
+                <button class="btn btn-mark" onclick="toggleMark()">Mark</button>
+                <button class="btn btn-next" onclick="nav(1)">Next</button>
+            </div>
+        </div>
+
+        <div class="sidebar" id="sidebar">
+            <div class="timer-box" id="timer">02:00:00</div>
+            <div class="palette-container">
+                <div class="grid" id="grid"></div>
+            </div>
+            <div class="legend">
+                <div style="display:flex; align-items:center"><span class="dot" style="background:var(--green-ans)"></span>Ans</div>
+                <div style="display:flex; align-items:center"><span class="dot" style="background:var(--purple-mark)"></span>Mark</div>
+                <div style="display:flex; align-items:center"><span class="dot" style="background:var(--blue-curr)"></span>Curr</div>
+                <div style="display:flex; align-items:center"><span class="dot" style="background:var(--gray-skip)"></span>Skip</div>
+            </div>
         </div>
     </div>
 
 <script>
-/* ---------------- DATA (Q1354 - Q1384) ---------------- */
-const db = [
-    
-
-/* ---------------- STATE ---------------- */
-let currentQ = 0;
-let userAnswers = []; // {idx, correct}
-let markedReview = [];
-let activeQuestions = [];
-let bookmarks = JSON.parse(localStorage.getItem('civil_bookmarks')) || [];
-let history = JSON.parse(localStorage.getItem('civil_history')) || [];
-let timerInterval;{ id: 1305, tag: "ISRO TA | DSSSB JE", q: "In case of RCC footings, the minimum cover should be:", opts: ["60 mm", "25 mm", "40 mm", "50 mm"], ans: 3, sol: "As per IS: 456-2000, minimum cover for footing is 50 mm." },
+    // --- DATA ---
+    const questions = [
+        { id: 1305, tag: "ISRO TA | DSSSB JE", q: "In case of RCC footings, the minimum cover should be:", opts: ["60 mm", "25 mm", "40 mm", "50 mm"], ans: 3, sol: "As per IS: 456-2000, minimum cover for footing is 50 mm." },
         { id: 1306, tag: "SSC JE 2018", q: "In RCC footing on soil, minimum thickness at edge should not be less than:", opts: ["100 mm", "200 mm", "150 mm", "250 mm"], ans: 2, sol: "Min thickness at edge: 150mm for soil, 300mm for piles (IS 456-2000)." },
         { id: 1307, tag: "Chandigarh JE", q: "In a combined footing, reinforcement should be placed on:", opts: ["Bottom face", "Top face", "Bottom for hogging", "Both (a) and (b)"], ans: 3, sol: "Reinforcement is placed at both faces due to sagging and hogging moments." },
         { id: 1308, tag: "RPSC Lect. 2021", q: "Depth of footing is governed by:", opts: ["Shear Force", "Bending Moment", "Punching Shear", "All of these (1, 2, 3)"], ans: 3, sol: "Governed by Max BM, One-way shear, and Punching shear." },
@@ -272,262 +221,205 @@ let timerInterval;{ id: 1305, tag: "ISRO TA | DSSSB JE", q: "In case of RCC foot
         { id: 1335, tag: "MANIPUR AE", q: "Thickness of base in no case more than:", opts: ["10cm", "15cm", "20cm", "30cm"], ans: 3, sol: "Answer key indicates 30cm as the upper limit in this context." },
         { id: 1336, tag: "RRB JE", q: "Two footings too close, convert to:", opts: ["Combined", "Strap", "Mat", "Strip"], ans: 0, sol: "Convert to Combined Footing." }
     ];
-let timeRemaining = 7200;
 
-/* ---------------- INITIALIZE ---------------- */
-function init() {
-    renderHistory();
-}
+    // --- STATE VARIABLES ---
+    let currentSet = [];
+    let currentIdx = 0;
+    let userAnswers = {}; 
+    let markedIds = new Set();
+    let bookmarkIds = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+    let timerInterval;
+    let timeRemaining = 7200;
 
-/* ---------------- CORE LOGIC ---------------- */
-function startTest(mode) {
-    if(mode === 'bookmark') {
-        if(bookmarks.length === 0) { alert("No bookmarks found!"); return; }
-        activeQuestions = db.filter(q => bookmarks.includes(q.id));
-    } else {
-        activeQuestions = db;
-    }
-    
-    // Strict Reset
-    currentQ = 0;
-    userAnswers = new Array(activeQuestions.length).fill(null);
-    markedReview = new Array(activeQuestions.length).fill(false);
-    timeRemaining = 7200;
-
-    // UI Toggle
-    document.getElementById('home-screen').classList.add('hidden');
-    document.getElementById('test-screen').classList.remove('hidden');
-    document.getElementById('result-screen').classList.add('hidden');
-    
-    renderPalette();
-    loadQuestion(0);
-    startTimer();
-}
-
-function loadQuestion(idx) {
-    currentQ = idx;
-    const qData = activeQuestions[currentQ];
-    
-    // Update Header
-    document.getElementById('q-num').innerText = `Q.${qData.id}`;
-    
-    // Bookmark State
-    const bmIcon = document.getElementById('bm-icon');
-    if(bookmarks.includes(qData.id)) {
-        bmIcon.classList.remove('far');
-        bmIcon.classList.add('fas', 'active');
-    } else {
-        bmIcon.classList.remove('fas', 'active');
-        bmIcon.classList.add('far');
+    // --- LOAD STATS ON STARTUP ---
+    window.onload = function() {
+        const lastData = JSON.parse(localStorage.getItem('lastTestResult'));
+        if(lastData) {
+            document.getElementById('last-score').innerText = lastData.score;
+            document.getElementById('last-accuracy').innerText = lastData.accuracy + "%";
+        }
     }
 
-    // Render Body
-    const contentDiv = document.getElementById('q-content');
-    let html = `<div class="exam-tag">${qData.tag}</div>
-                <div class="q-text">${qData.q}</div>
-                <div class="options-area">`;
-
-    qData.opts.forEach((opt, i) => {
-        let cls = "option";
-        const ua = userAnswers[currentQ];
-        
-        if(ua !== null) {
-            if(i === qData.ans) cls += " correct";
-            if(i === ua.idx && i !== qData.ans) cls += " wrong";
+    // --- INITIALIZATION ---
+    function initTest(isBookmarkMode) {
+        if(isBookmarkMode) {
+            currentSet = questions.filter(q => bookmarkIds.includes(q.id));
+            if(currentSet.length === 0) {
+                alert("No Bookmarks Found!");
+                return;
+            }
+        } else {
+            currentSet = [...questions];
         }
 
-        html += `<div class="${cls}" onclick="selectOption(${i})">
-                    <div class="opt-circle">${String.fromCharCode(65+i)}</div>
-                    <div>${opt}</div>
-                 </div>`;
-    });
-    html += `</div>`;
+        userAnswers = {};
+        markedIds.clear();
+        currentIdx = 0;
+        timeRemaining = 7200;
 
-    // Solution Section
-    const showSol = userAnswers[currentQ] !== null;
-    html += `<div class="solution ${showSol ? 'show' : ''}">
-                <div class="sol-title">Detailed Solution:</div>
-                <div class="sol-text">${qData.sol}</div>
-             </div>`;
-
-    contentDiv.innerHTML = html;
-    
-    // Highlight Current Palette Item
-    document.querySelectorAll('.grid-item').forEach(el => el.classList.remove('current'));
-    const pItem = document.getElementById(`p-${currentQ}`);
-    if(pItem) pItem.classList.add('current');
-
-    // Button States
-    document.getElementById('btn-prev').disabled = (currentQ === 0);
-    const nextBtn = document.getElementById('btn-next');
-    
-    if(currentQ === activeQuestions.length - 1) {
-        nextBtn.innerText = "Submit Test";
-        nextBtn.className = "f-btn btn-submit"; // Change color to green
-        nextBtn.onclick = submitTest;
-    } else {
-        nextBtn.innerText = "Save & Next";
-        nextBtn.className = "f-btn btn-next"; // Standard Blue
-        nextBtn.onclick = nextQ;
+        document.getElementById('start-screen').style.display = 'none';
+        
+        startTimer();
+        renderGrid();
+        loadQuestion(0);
     }
-}
 
-function selectOption(optIdx) {
-    if(userAnswers[currentQ] !== null) return;
-    const qData = activeQuestions[currentQ];
-    userAnswers[currentQ] = { idx: optIdx, correct: (optIdx === qData.ans) };
-    updatePaletteItem(currentQ);
-    loadQuestion(currentQ);
-}
+    function startTimer() {
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            const h = Math.floor(timeRemaining / 3600).toString().padStart(2,0);
+            const m = Math.floor((timeRemaining % 3600) / 60).toString().padStart(2,0);
+            const s = (timeRemaining % 60).toString().padStart(2,0);
+            document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+            if(timeRemaining <= 0) exitTest();
+        }, 1000);
+    }
 
-function nextQ() {
-    if(currentQ < activeQuestions.length - 1) loadQuestion(currentQ + 1);
-}
-function prevQ() {
-    if(currentQ > 0) loadQuestion(currentQ - 1);
-}
+    // --- CORE LOGIC ---
+    function loadQuestion(idx) {
+        currentIdx = idx;
+        const q = currentSet[idx];
+        const isAnswered = userAnswers[q.id] !== undefined;
 
-/* ---------------- PALETTE & BOOKMARKS ---------------- */
-function renderPalette() {
-    const gridDesk = document.getElementById('palette-grid-desktop');
-    const gridMob = document.getElementById('palette-grid-mobile');
-    let html = '';
-    activeQuestions.forEach((q, i) => {
-        html += `<div id="p-${i}" class="grid-item" onclick="jumpTo(${i})">${i+1}</div>`;
-    });
-    gridDesk.innerHTML = html;
-    gridMob.innerHTML = html;
-}
-
-function updatePaletteItem(idx) {
-    renderPaletteState();
-}
-
-function renderPaletteState() {
-    activeQuestions.forEach((q, i) => {
-        const els = document.querySelectorAll(`[id='p-${i}']`);
-        els.forEach(el => {
-            el.className = 'grid-item'; // Reset
-            if(i === currentQ) el.classList.add('current');
-            if(markedReview[i]) el.classList.add('review');
-            else if(userAnswers[i] !== null) {
-                el.classList.add(userAnswers[i].correct ? 'answered' : 'wrong');
-            } else {
-                el.classList.add('skipped');
+        document.getElementById('q-tag').innerText = `${q.tag} (ID: ${q.id})`;
+        document.getElementById('q-text').innerText = `Q${idx + 1}. ${q.q}`;
+        
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        
+        q.opts.forEach((opt, i) => {
+            const div = document.createElement('div');
+            div.className = 'option';
+            
+            if (isAnswered) {
+                div.style.pointerEvents = 'none'; 
+                if (i === q.ans) div.classList.add('correct');
+                else if (i === userAnswers[q.id]) div.classList.add('wrong');
+            } else if (i === userAnswers[q.id]) {
+                 div.classList.add('selected');
             }
+
+            div.innerHTML = `<div class="circle"></div><span>${opt}</span>`;
+            div.onclick = () => submitAnswer(q.id, i);
+            container.appendChild(div);
         });
-    });
-}
 
-function jumpTo(idx) {
-    loadQuestion(idx);
-    closePalette();
-}
+        const solBox = document.getElementById('solution-box');
+        if (isAnswered) {
+            solBox.style.display = 'block';
+            solBox.innerHTML = `<strong>💡 Solution:</strong><br>${q.sol}`;
+        } else {
+            solBox.style.display = 'none';
+        }
 
-function togglePalette() { document.getElementById('mobile-palette').classList.add('open'); }
-function closePalette() { document.getElementById('mobile-palette').classList.remove('open'); }
+        const bmBtn = document.getElementById('btn-bm');
+        if (bookmarkIds.includes(q.id)) {
+            bmBtn.classList.add('active');
+        } else {
+            bmBtn.classList.remove('active');
+        }
 
-function toggleBookmark(e) {
-    e.stopPropagation();
-    const qId = activeQuestions[currentQ].id;
-    const idx = bookmarks.indexOf(qId);
-    if(idx === -1) bookmarks.push(qId);
-    else bookmarks.splice(idx, 1);
-    localStorage.setItem('civil_bookmarks', JSON.stringify(bookmarks));
-    loadQuestion(currentQ);
-}
-
-function markReview() {
-    markedReview[currentQ] = !markedReview[currentQ];
-    renderPaletteState();
-}
-
-function clearResponse() {
-    userAnswers[currentQ] = null;
-    markedReview[currentQ] = false;
-    renderPaletteState();
-    loadQuestion(currentQ);
-}
-
-/* ---------------- TIMER & SUBMIT ---------------- */
-function startTimer() {
-    clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-        timeRemaining--;
-        if(timeRemaining <= 0) submitTest();
-        const h = Math.floor(timeRemaining / 3600).toString().padStart(2,'0');
-        const m = Math.floor((timeRemaining % 3600) / 60).toString().padStart(2,'0');
-        const s = (timeRemaining % 60).toString().padStart(2,'0');
-        document.getElementById('timer').innerText = `${h}:${m}:${s}`;
-    }, 1000);
-}
-
-function submitTest() {
-    if(!confirm("Submit Test?")) return;
-    clearInterval(timerInterval);
-    
-    let correct = 0, wrong = 0, review = 0, skip = 0;
-    userAnswers.forEach((a, i) => {
-        if(markedReview[i]) review++;
-        if(a === null) skip++;
-        else if(a.correct) correct++;
-        else wrong++;
-    });
-
-    const score = correct - (wrong * 0.25);
-    const accuracy = (correct + wrong) > 0 ? Math.round((correct/(correct+wrong))*100) : 0;
-    
-    // Save
-    const result = {
-        date: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString(),
-        score: score,
-        total: activeQuestions.length,
-        accuracy: accuracy
-    };
-    history.unshift(result);
-    if(history.length > 5) history.pop();
-    localStorage.setItem('civil_history', JSON.stringify(history));
-
-    // Show Result
-    document.getElementById('final-score').innerText = `${score}/${activeQuestions.length}`;
-    document.getElementById('final-accuracy').innerText = `Accuracy: ${accuracy}%`;
-    document.getElementById('res-correct').innerText = correct;
-    document.getElementById('res-wrong').innerText = wrong;
-    document.getElementById('res-review').innerText = review;
-    document.getElementById('res-skip').innerText = skip;
-
-    document.getElementById('test-screen').classList.add('hidden');
-    document.getElementById('result-screen').classList.remove('hidden');
-    document.getElementById('result-screen').classList.add('flex');
-}
-
-function renderHistory() {
-    const list = document.getElementById('history-list');
-    if(history.length === 0) {
-        list.innerHTML = '<div style="text-align:center; color:#999; padding:10px;">No attempts yet.</div>';
-        return;
+        updateGridStyles();
     }
-    let html = '';
-    history.forEach(h => {
-        html += `<div class="history-item">
-                    <div><b>Score: ${h.score}/${h.total}</b></div>
-                    <div style="color:#666; font-size:0.8rem;">${h.date} (Acc: ${h.accuracy}%)</div>
-                 </div>`;
-    });
-    list.innerHTML = html;
-}
 
-function clearHistory() {
-    if(confirm("Delete all history?")) {
-        localStorage.removeItem('civil_history');
-        history = [];
-        renderHistory();
+    function submitAnswer(qId, optIdx) {
+        if (userAnswers[qId] !== undefined) return; 
+        userAnswers[qId] = optIdx;
+        loadQuestion(currentIdx); 
     }
-}
 
-function exitTest() { if(confirm("Exit?")) location.reload(); }
+    function nav(step) {
+        const newIdx = currentIdx + step;
+        if (newIdx >= 0 && newIdx < currentSet.length) {
+            loadQuestion(newIdx);
+        }
+    }
 
-init();
+    function toggleMark() {
+        const qId = currentSet[currentIdx].id;
+        if (markedIds.has(qId)) markedIds.delete(qId);
+        else markedIds.add(qId);
+        updateGridStyles();
+    }
+
+    function toggleBookmark() {
+        const qId = currentSet[currentIdx].id;
+        if (bookmarkIds.includes(qId)) {
+            bookmarkIds = bookmarkIds.filter(id => id !== qId);
+        } else {
+            bookmarkIds.push(qId);
+        }
+        localStorage.setItem('bookmarks', JSON.stringify(bookmarkIds));
+        loadQuestion(currentIdx);
+    }
+
+    // --- GRID ---
+    function renderGrid() {
+        const grid = document.getElementById('grid');
+        grid.innerHTML = '';
+        currentSet.forEach((q, i) => {
+            const btn = document.createElement('div');
+            btn.className = 'grid-item';
+            btn.id = `grid-${i}`;
+            btn.innerText = i + 1;
+            btn.onclick = () => {
+                loadQuestion(i);
+                closeSidebar();
+            };
+            grid.appendChild(btn);
+        });
+        updateGridStyles();
+    }
+
+    function updateGridStyles() {
+        currentSet.forEach((q, i) => {
+            const btn = document.getElementById(`grid-${i}`);
+            btn.className = 'grid-item'; 
+
+            if (i === currentIdx) btn.classList.add('current');
+            else if (markedIds.has(q.id)) btn.classList.add('marked');
+            else if (userAnswers[q.id] !== undefined) btn.classList.add('answered');
+            else btn.classList.add('skipped');
+        });
+    }
+
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        
+        if (sidebar.classList.contains('open')) {
+            closeSidebar();
+        } else {
+            sidebar.classList.add('open');
+            overlay.classList.add('active');
+        }
+    }
+
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('overlay').classList.remove('active');
+    }
+
+    function exitTest() {
+        if(confirm("Submit Test and Save Score?")) {
+            let score = 0;
+            currentSet.forEach(q => {
+                if(userAnswers[q.id] === q.ans) score++;
+            });
+
+            // CALCULATE ACCURACY
+            let total = currentSet.length;
+            let accuracy = total === 0 ? 0 : ((score / total) * 100).toFixed(1);
+
+            // SAVE DATA
+            const resultData = { score: score + "/" + total, accuracy: accuracy };
+            localStorage.setItem('lastTestResult', JSON.stringify(resultData));
+
+            alert(`Test Ended.\nScore: ${score} / ${total}\nAccuracy: ${accuracy}%`);
+            location.reload();
+        }
+    }
 </script>
 </body>
 </html>
