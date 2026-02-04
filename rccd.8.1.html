@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RCC Footings - Testbook Practice</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --tb-pink: #E91E63;
+            --tb-pink-dark: #C2185B;
+            --tb-green: #2ECC71;
+            --tb-red: #E74C3C;
+            --tb-blue: #3498DB;
+            --text-dark: #333;
+            --text-light: #666;
+            --border: #e0e0e0;
+            --bg: #f5f5f5;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { background-color: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* --- SCREENS --- */
+        .screen { display: none; height: 100%; width: 100%; flex-direction: column; }
+        .screen.active { display: flex; }
+
+        /* --- HOME SCREEN --- */
+        #home-screen {
+            background: white; align-items: center; justify-content: center; padding: 20px; 
+            overflow-y: auto; /* Allow scrolling for history list */
+        }
+        .test-card {
+            background: white; width: 100%; max-width: 400px; padding: 25px;
+            border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-top: 5px solid var(--tb-pink);
+            margin-bottom: 20px;
+        }
+        .start-btn {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            width: 100%; padding: 15px; border-radius: 50px; border: none;
+            font-size: 1.1rem; font-weight: bold; cursor: pointer;
+            background: var(--tb-pink); color: white; margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(233, 30, 99, 0.3);
+        }
+        .bookmark-btn {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            width: 100%; padding: 15px; border-radius: 50px;
+            font-size: 1rem; font-weight: bold; cursor: pointer;
+            background: white; color: var(--tb-pink); border: 2px solid var(--tb-pink);
+        }
+
+        /* History List Styles */
+        .history-list { text-align: left; margin-top: 20px; max-height: 200px; overflow-y: auto; border-top: 1px solid #eee; padding-top: 10px; }
+        .history-item {
+            padding: 10px; border-bottom: 1px solid #eee; font-size: 0.9rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .h-score { font-weight: bold; color: var(--tb-pink); }
+        .h-date { font-size: 0.75rem; color: #999; }
+
+        /* --- HEADER --- */
+        header {
+            background-color: var(--tb-pink); color: white; height: 56px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 100;
+        }
+        .timer-box { background: rgba(0,0,0,0.2); padding: 4px 12px; border-radius: 4px; font-family: monospace; font-size: 1.1rem; }
+        .header-btn {
+            background: #fff; color: var(--tb-pink); border: none; padding: 6px 12px;
+            border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.8rem; margin-left: 8px;
+        }
+        .submit-btn {
+            background: var(--tb-green); color: white; border: none; padding: 6px 12px;
+            border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.8rem; margin-left: 8px;
+        }
+
+        /* --- MAIN LAYOUT --- */
+        .main-container { display: flex; flex: 1; overflow: hidden; position: relative; }
+        .q-area { flex: 1; display: flex; flex-direction: column; background: white; overflow-y: auto; height: 100%; }
+        
+        /* Sidebar */
+        .sidebar { width: 300px; background: white; border-left: 1px solid var(--border); display: flex; flex-direction: column; z-index: 90; }
+        .mobile-palette-overlay {
+            position: fixed; top: 56px; right: -100%; width: 85%; height: calc(100% - 56px);
+            background: white; z-index: 150; transition: right 0.3s ease;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column;
+        }
+        .mobile-palette-overlay.open { right: 0; }
+
+        /* --- QUESTION STYLES --- */
+        .q-top-bar {
+            padding: 12px 16px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            color: var(--text-dark); font-weight: bold; font-size: 1rem; background: #fff;
+        }
+        .q-id-badge {
+            background: #eee; padding: 4px 8px; border-radius: 4px; font-family: monospace; color: #333; border: 1px solid #ddd;
+        }
+        .bm-icon { font-size: 1.2rem; cursor: pointer; color: #ccc; padding: 5px; }
+        .bm-icon.active { color: var(--tb-pink); }
+
+        .q-scroll-content { padding: 16px; padding-bottom: 80px; overflow-y: auto; flex: 1; }
+        .q-text { font-size: 1.1rem; font-weight: 500; color: var(--text-dark); margin-bottom: 20px; line-height: 1.5; }
+        
+        /* Options */
+        .option-item {
+            display: flex; align-items: flex-start; padding: 12px; margin-bottom: 10px;
+            border: 1px solid var(--border); border-radius: 4px; cursor: pointer; transition: all 0.2s;
+        }
+        .option-item:hover { background: #fafafa; }
+        .option-item.correct { border-color: var(--tb-green); background: #e8f5e9; }
+        .option-item.wrong { border-color: var(--tb-red); background: #ffebee; }
+        
+        .radio-circle {
+            width: 20px; height: 20px; border-radius: 50%; border: 2px solid #999;
+            margin-right: 12px; flex-shrink: 0; position: relative; margin-top: 2px;
+        }
+        
+        /* SOLUTION BOX */
+        .solution-box {
+            margin-top: 25px; padding: 15px; background: #fff8e1; border: 1px solid #ffecb3; 
+            border-radius: 6px; display: none; animation: fadeIn 0.3s;
+        }
+        .solution-box.visible { display: block; }
+        .sol-header { font-weight: bold; margin-bottom: 8px; color: #f57c00; }
+
+        /* --- FOOTER --- */
+        .footer {
+            height: 60px; background: white; border-top: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 10px; position: sticky; bottom: 0; width: 100%; z-index: 50;
+        }
+        .ft-btn {
+            padding: 8px 16px; border-radius: 4px; font-weight: 600; font-size: 0.9rem; cursor: pointer; 
+            border: 1px solid var(--border); background: white; color: var(--text-dark);
+        }
+        .btn-primary { background: var(--tb-blue); color: white; border: none; }
+
+        /* --- PALETTE GRID --- */
+        .palette-header { padding: 10px; font-size: 0.9rem; font-weight: bold; background: #f9f9f9; border-bottom: 1px solid #eee; }
+        .grid-container { padding: 10px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; overflow-y: auto; flex: 1; align-content: start; }
+        .grid-item {
+            height: 35px; width: 100%; border-radius: 4px; background: white; border: 1px solid #ccc;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem; font-family: monospace;
+        }
+        .g-answered { background: var(--tb-green); color: white; border: none; }
+        .g-wrong { background: var(--tb-red); color: white; border: none; }
+        .g-current { border: 2px solid black; font-weight: bold; }
+
+        /* --- RESULT SCREEN --- */
+        #result-screen {
+            background: #f5f5f5; align-items: center; justify-content: center; padding: 20px;
+        }
+        .score-card {
+            background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center; width: 90%; max-width: 400px; border-top: 5px solid var(--tb-pink);
+        }
+        .big-score { font-size: 3rem; font-weight: bold; color: var(--tb-pink); margin: 10px 0; }
+        .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; text-align: left; }
+        .ag-item { padding: 10px; background: #f5f5f5; border-radius: 8px; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .mobile-toggle { display: block; }
+            .header-left { font-size: 0.9rem; }
+        }
+        @media (min-width: 769px) { .mobile-toggle { display: none; } }
+    </style>
+</head>
+<body>
+
+    <div id="home-screen" class="screen active">
+        <div class="test-card">
+            <h1 style="color:var(--tb-pink); margin-bottom:10px;">RCC Footings</h1>
+            <p style="color:#666; margin-bottom:30px;">Q.1305 to Q.1330</p>
+            <button class="start-btn" onclick="initTest('normal')"><i class="fas fa-play"></i> Start Practice</button>
+            <button class="bookmark-btn" onclick="initTest('bookmark')"><i class="fas fa-bookmark"></i> Bookmarked Qs</button>
+            
+            <h4 style="text-align:left; margin-top:25px; color:#555;">Recent Attempts</h4>
+            <div id="history-container" class="history-list">
+                <div style="color:#999; font-style:italic; padding:10px;">No attempts yet.</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="test-screen" class="screen">
+        <header>
+            <div class="header-left" id="header-title">RCC Footings Practice</div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div class="timer-box" id="timer">00:00:00</div>
+                <button class="submit-btn" onclick="submitTest()">Submit</button>
+                <button class="header-btn" onclick="exitTest()">Exit</button>
+                <button class="mobile-toggle header-btn" onclick="toggleMobilePalette()" style="background:transparent; border:1px solid white; color:white;"><i class="fas fa-th"></i></button>
+            </div>
+        </header>
+
+        <div class="main-container">
+            <div class="q-area" id="q-area" onclick="closePalette()">
+                <div class="q-top-bar">
+                    <span class="q-id-badge" id="q-number-display">Q.1305</span>
+                    <i class="far fa-bookmark bm-icon" id="bm-icon" onclick="toggleBookmark(); event.stopPropagation();"></i>
+                </div>
+                <div class="q-scroll-content" id="q-content"></div>
+            </div>
+
+            <div class="sidebar">
+                <div class="palette-header">Question Palette</div>
+                <div class="grid-container" id="palette-grid-desktop"></div>
+            </div>
+            <div class="mobile-palette-overlay" id="mobile-palette">
+                <div class="palette-header">Question Palette</div>
+                <div class="grid-container" id="palette-grid-mobile"></div>
+                <div style="padding:10px; text-align:center;">
+                    <button class="ft-btn" onclick="toggleMobilePalette()">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <button class="ft-btn" onclick="prevQ()" id="btn-prev" disabled>Previous</button>
+            <button class="ft-btn btn-primary" onclick="nextQ()">Next Question</button>
+        </div>
+    </div>
+
+    <div id="result-screen" class="screen">
+        <div class="score-card">
+            <h2>Test Summary</h2>
+            <div class="big-score" id="final-score-display">0/26</div>
+            <div id="accuracy-display" style="color:#666; margin-bottom:10px;">Accuracy: 0%</div>
+            
+            <div class="analysis-grid">
+                <div class="ag-item" style="border-left:4px solid var(--tb-green)">
+                    <div style="font-size:0.8rem; color:#666">Correct</div>
+                    <div style="font-weight:bold; font-size:1.2rem;" id="res-correct">0</div>
+                </div>
+                <div class="ag-item" style="border-left:4px solid var(--tb-red)">
+                    <div style="font-size:0.8rem; color:#666">Wrong</div>
+                    <div style="font-weight:bold; font-size:1.2rem;" id="res-wrong">0</div>
+                </div>
+                <div class="ag-item" style="border-left:4px solid var(--tb-blue)">
+                    <div style="font-size:0.8rem; color:#666">Skipped</div>
+                    <div style="font-weight:bold; font-size:1.2rem;" id="res-skip">0</div>
+                </div>
+            </div>
+            
+            <button class="bookmark-btn" style="margin-top:20px; font-size:1rem;" onclick="location.reload()">Back to Home</button>
+        </div>
+    </div>
+
+<script>
+const fullDb = [
+    {id:1305,q:"In case of RCC footings, the minimum cover should be:",opts:["60 mm","25 mm","40 mm","50 mm"],ans:3,sol:"As per IS: 456-2000, the minimum cover provided for the footing is 50 mm.",tag:"DSSSB JE 2021"},
+    {id:1306,q:"In a RCC footing on soil, the minimum thickness at edge should not be less than",opts:["100 mm","200 mm","150 mm","250 mm"],ans:2,sol:"The minimum thickness at the edge of reinforced and plain concrete footings shall be at least 150 mm for footings on soils.",tag:"SSC JE 2018"},
+    {id:1307,q:"In a combined footing, the reinforcement should be placed on the:",opts:["bottom face for sagging bending moment","top face for hogging bending moment","bottom face for hogging bending moment","both (a) and (b)"],ans:3,sol:"Combined footings experience sagging under columns and hogging between columns. Reinforcement is needed at both faces.",tag:"Chandigarh JE 2021"},
+    {id:1308,q:"How is the depth of footing for an isolated column governed?<br>1. By maximum bending moment<br>2. By shear force<br>3. By punching shear",opts:["2 and 3 only","1 and 2 only","1 and 3 only","1, 2 and 3"],ans:3,sol:"Design depth is based on: (i) Max BM at face, (ii) One way shear, (iii) Punching shear.",tag:"RPSC Lect. 2021"},
+    {id:1309,q:"While designing combined footing, the resultant of the column loads passes through the center of gravity of the footing slab such that the net soil pressure obtained is:",opts:["Parabolic","Trapezoidal","Uniform","Non-Uniform"],ans:2,sol:"When resultant passes through CG, the pressure distribution is uniform.",tag:"RPSC Lect. 2021"},
+    {id:1310,q:"A trapezoidal footing for two axially loaded columns is provided with:<br>1. Width of footing near the heavier column is restricted.<br>2. Length of footing is restricted.<br>3. Projections of footings beyond heavier column are restricted.",opts:["1 and 2","1 and 3","2 and 3","1, 2 and 3"],ans:2,sol:"Trapezoidal footing is used when length is restricted and width near heavier column is limited.",tag:"RPSC Lect. 2021"},
+    {id:1311,q:"In foundations rested on hard rock, minimum diameter of bar to be used for doweling is:",opts:["16 mm","20 mm","25 mm","32 mm"],ans:0,sol:"In rock bed with slope provide dowel bars of minimum 16 mm diameter and 225 mm embedment.",tag:"HPSSC JE 2021"},
+    {id:1312,q:"The critical section for two-way shear of footing is at the:",opts:["Face of the column","Distance d from the column face","Distance d/2 from the column face","Distance 2d from the column face"],ans:2,sol:"For two-way (punching) shear, the critical section is at d/2 from the column face.",tag:"ESE 2021"},
+    {id:1313,q:"In design of RCC isolated footing, at how much distance away from the face of a column is critical section for one way shear?",opts:["d/2","d","2d","0.1d"],ans:1,sol:"For one-way shear, the critical section is at a distance 'd' (effective depth) from the column face.",tag:"PGCIL DT 2021"},
+    {id:1314,q:"According to I.S. 456-1978, the thickness of reinforced concrete footing on piles at its edges is kept less than:",opts:["5 cm","10 cm","15 cm","20 cm"],ans:-1,sol:"<strong>Note:</strong> Correct value is 30 cm (300 mm). None of the options match the IS code. (IS 456-1978/2000).",tag:"SSC JE 2018"},
+    {id:1315,q:"Combined footing is generally used when number of column is:",opts:["Two and they are spaced close to each other","Two and they are spaced for apart","Only one","None of the above"],ans:0,sol:"Used when columns are close to each other and their footings overlap.",tag:"CG PWD"},
+    {id:1316,q:"The least horizontal dimension of plain concrete pier should not be less than ______ of its height.",opts:["1/2","1/8","1/12","1/16"],ans:2,sol:"Minimum horizontal dimension of the pier shall not be less than 1/12 times its height.",tag:"UPPCL JE 2016"},
+    {id:1317,q:"In a combined footing the bottom bars under a column should be extended into the interior of the slab. This distance should be greater of distance up to point of contra flexure and:",opts:["30 times diameter","42 times diameter","30 times diameter (inner)","42 times diameter (inner)"],ans:1,sol:"Extend 42 times diameter of main reinforcement from the outer face of the column.",tag:"MH Town Planning"},
+    {id:1318,q:"I.S. Code of practice for design of raft foundation is:",opts:["IS 2950 : 1981","IS 1904 : 1986","IS 1080 : 1985","IS 456 : 2000"],ans:0,sol:"IS 2950: 1981 - Design of raft foundation.",tag:"UPPCL JE 2020"},
+    {id:1319,q:"The dowel bars used in a R.C.C. footing is an example of:",opts:["Plastic hinge","Development bond","Redistribution of moment","Anchorage bond"],ans:1,sol:"Dowel bars transfer load via development bond.",tag:"MP VYAPAM"},
+    {id:1320,q:"Column footing is provided:",opts:["To spread load","To ensure intensity < SBC","To distribute load","All are correct"],ans:3,sol:"Footings spread load, prevent excessive settlement, and distribute pressure.",tag:"NCL Overseer"},
+    {id:1321,q:"The cantilever sheet pile ______ are suitable for small heights.",opts:["coffer","caissons","per","foundation"],ans:0,sol:"Cantilever sheet pile coffer dams are suitable for small heights.",tag:"HPSSC JE 2019"},
+    {id:1322,q:"To make the building earthquake resistant what should be the type of foundation for concrete and masonry buildings?",opts:["Continuous","Discontinuous","Shallow","Isolated"],ans:0,sol:"Continuous (raft) footing is preferred for earthquake resistance.",tag:"HPSSC JE 2018"},
+    {id:1323,q:"For a RC footing ratio of its long side to short side is 1.5. The ratio of reinforcement to be provided in the central band width to total reinforcement in short direction shall be:",opts:["1.5","1.33","1.25","0.80"],ans:3,sol:"Ratio = 2 / (Beta + 1) = 2 / (1.5 + 1) = 0.8.",tag:"Rajasthan JEn"},
+    {id:1324,q:"Reinforced concrete footing is recommended where bearing capacity of the soil is:",opts:["Low","Moderate","High","Very high"],ans:0,sol:"RC footings are used when soil bearing capacity is low to spread load over larger area.",tag:"UPPCL JE 2016"},
+    {id:1325,q:"For the purposes of the design of reinforced concrete footings, pressure distribution is assumed to be:",opts:["linear","parabolic","hyperbolic","none of these"],ans:0,sol:"For design, pressure distribution is assumed linear.",tag:"MH PWD 2016"},
+    {id:1326,q:"Top bars are extended to the projecting parts of the combined footing of two columns L distance apart for a distance of:",opts:["0.1 L from outer edge","0.1 L from centre edge","half distance","one-fourth distance"],ans:1,sol:"Extended for 0.1L from the centre edge.",tag:"SSC JE 2018"},
+    {id:1327,q:"While designing the footing according to limit state method, the permissible bearing stress is taken as K times the characteristic strength of concrete, where K is:",opts:["0.25","0.35","0.45","0.65"],ans:2,sol:"LSM: 0.45 fck. (WSM: 0.25 fck).",tag:"CGPSC SES 2014"},
+    {id:1328,q:"The maximum pressure on the concrete foundations must not exceed the fol
