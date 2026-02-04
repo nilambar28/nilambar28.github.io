@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Retaining Wall Mock Test (Q1572-1584)</title>
+<style>
+    :root {
+        --primary: #e91e63; /* Pink */
+        --secondary: #2196f3; /* Blue */
+        --success: #2e7d32; /* Green */
+        --danger: #d32f2f; /* Red */
+        --warning: #ffc107; /* Yellow */
+        --bg-color: #f5f7fa;
+        --text: #333;
+        --border: #e0e0e0;
+    }
+
+    * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; padding: 0; background: var(--bg-color); height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--text); }
+
+    /* --- HEADER --- */
+    header {
+        height: 60px; background: white; border-bottom: 2px solid var(--primary);
+        display: flex; align-items: center; justify-content: space-between; padding: 0 15px;
+        flex-shrink: 0; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .header-left { display: flex; align-items: center; gap: 15px; }
+    .grid-icon { font-size: 24px; cursor: pointer; color: #555; padding: 5px; }
+    .brand-title { font-weight: bold; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+    .tag { background: var(--primary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+    
+    .timer { background: #fce4ec; color: var(--primary); padding: 5px 12px; border-radius: 20px; font-weight: bold; font-family: monospace; }
+    
+    .header-right { display: flex; align-items: center; }
+    .btn-submit { background: var(--success); color: white; border: none; padding: 8px 18px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .btn-submit:hover { background: #1b5e20; }
+
+    /* --- MAIN LAYOUT --- */
+    .container { display: flex; flex: 1; overflow: hidden; position: relative; }
+
+    /* Question Area */
+    .q-area { flex: 1; padding: 20px; overflow-y: auto; padding-bottom: 80px; background: white; }
+    .q-meta { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; align-items: center; }
+    .q-text { font-size: 18px; font-weight: 500; margin-bottom: 20px; line-height: 1.5; }
+    
+    /* Bookmark Icon */
+    .bm-icon { font-size: 26px; cursor: pointer; color: #ddd; transition: 0.2s; user-select: none; }
+    .bm-icon.active { color: var(--warning); text-shadow: 0 0 2px orange; }
+
+    /* Options */
+    .opts { display: flex; flex-direction: column; gap: 12px; }
+    .opt { display: flex; align-items: flex-start; padding: 12px 15px; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; background: white; transition: 0.2s; }
+    .opt:hover { background: #f9f9f9; }
+    .radio { width: 22px; height: 22px; border: 2px solid #999; border-radius: 50%; margin-right: 12px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: white; font-weight: bold; flex-shrink: 0; margin-top: 2px; }
+
+    /* States */
+    .opt.selected { background: #e3f2fd; border-color: var(--secondary); }
+    .opt.selected .radio { background: var(--secondary); border-color: var(--secondary); }
+    .opt.correct { background: #e8f5e9; border-color: var(--success); }
+    .opt.correct .radio { background: var(--success); border-color: var(--success); content: '✔'; }
+    .opt.wrong { background: #ffebee; border-color: var(--danger); }
+    .opt.wrong .radio { background: var(--danger); border-color: var(--danger); }
+    .opt.disabled { pointer-events: none; opacity: 0.8; }
+
+    /* Solution */
+    .sol-box { margin-top: 20px; background: #fff8e1; border: 1px solid #ffe082; padding: 15px; border-radius: 6px; display: none; animation: slideDown 0.3s ease; }
+    .sol-title { font-weight: bold; color: #f57c00; margin-bottom: 5px; }
+    @keyframes slideDown { from {opacity:0; transform:translateY(-10px);} to {opacity:1; transform:translateY(0);} }
+
+    /* Sidebar Palette */
+    .sidebar { width: 300px; background: white; border-right: 1px solid #ddd; display: flex; flex-direction: column; z-index: 150; position: absolute; left: -300px; top: 0; bottom: 0; transition: left 0.3s ease; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+    .sidebar.open { left: 0; }
+    
+    .sb-header { padding: 15px; background: #f5f5f5; border-bottom: 1px solid #ddd; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+    .grid { padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; overflow-y: auto; align-content: start; flex: 1; }
+    .p-btn { height: 35px; border: 1px solid #ddd; background: white; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; font-weight: 600; }
+    
+    /* Palette Colors */
+    .p-btn.ans { background: var(--success); color: white; border-color: var(--success); }
+    .p-btn.not-ans { background: var(--danger); color: white; border-color: var(--danger); }
+    .p-btn.review { background: #7b1fa2; color: white; border-color: #7b1fa2; }
+    .p-btn.cur { border: 2px solid var(--text); }
+    .p-btn.visited { background: #e0e0e0; }
+
+    /* Footer */
+    footer { height: 60px; background: white; border-top: 1px solid #ddd; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; position: fixed; bottom: 0; left: 0; width: 100%; z-index: 100; }
+    .f-btn { padding: 8px 15px; border: 1px solid #ccc; background: white; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; }
+    .f-primary { background: var(--secondary); color: white; border: none; }
+
+    /* Modal / Dashboard */
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f6f9; z-index: 200; display: flex; align-items: center; justify-content: center; }
+    .card { background: white; padding: 30px; border-radius: 8px; width: 90%; max-width: 450px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    
+    .btn-dash { width: 100%; padding: 14px; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 10px; transition: 0.2s; }
+    .btn-dash:hover { opacity: 0.9; }
+    
+    .score-circle { width: 100px; height: 100px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; margin: 0 auto 20px; }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
+    .stat-box { background: #f5f5f5; padding: 10px; border-radius: 5px; font-size: 14px; }
+    
+    .history-box { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; text-align: left; }
+
+</style>
+</head>
+<body>
+
+<div id="dashboard" class="modal">
+    <div class="card">
+        <h2 style="color:var(--primary); margin-top:0;">RCC Structures Test</h2>
+        <p>Q1572 - Q1584 (13 Questions)</p>
+        
+        <div class="history-box" id="history-section" style="display:none; margin-bottom:20px;">
+            <div style="font-weight:bold; margin-bottom:5px;">Last Attempt:</div>
+            <div class="stat-grid" style="margin:0;">
+                <div class="stat-box">Score: <b id="hist-score">-</b></div>
+                <div class="stat-box">Accuracy: <b id="hist-acc">-</b></div>
+            </div>
+        </div>
+
+        <button class="btn-dash" style="background:var(--secondary); color:white;" onclick="startTest(false)">START NEW TEST</button>
+        <button class="btn-dash" style="background:white; border:2px solid var(--warning); color:#f57c00;" onclick="startTest(true)">
+            ★ ATTEMPT BOOKMARKS (<span id="bm-count-lbl">0</span>)
+        </button>
+    </div>
+</div>
+
+<div id="result-screen" class="modal" style="display:none; background:rgba(0,0,0,0.7);">
+    <div class="card">
+        <h2>Test Result</h2>
+        <div class="score-circle" id="final-score">0</div>
+        <div class="stat-grid">
+            <div class="stat-box" style="color:var(--success)">Correct: <b id="r-correct">0</b></div>
+            <div class="stat-box" style="color:var(--danger)">Wrong: <b id="r-wrong">0</b></div>
+            <div class="stat-box">Skipped: <b id="r-skip">0</b></div>
+            <div class="stat-box">Accuracy: <b id="r-acc">0%</b></div>
+        </div>
+        <button class="btn-dash" style="background:var(--secondary); color:white;" onclick="location.reload()">BACK TO HOME</button>
+    </div>
+</div>
+
+<div id="test-ui" style="display:none; height:100%; flex-direction:column;">
+    <header>
+        <div class="header-left">
+            <div class="grid-icon" onclick="toggleSidebar()">&#9776;</div>
+            <div class="brand-title" style="margin-left:10px;">Testbook <span class="tag">Civil</span></div>
+        </div>
+        
+        <div class="timer" id="timer">00:20:00</div>
+        
+        <div class="header-right">
+            <button class="btn-submit" onclick="confirmSubmit()">SUBMIT</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="sidebar" id="sidebar">
+            <div class="sb-header">
+                <span>Question Palette</span>
+                <span style="cursor:pointer;" onclick="toggleSidebar()">&#10006;</span>
+            </div>
+            <div class="grid" id="grid"></div>
+        </div>
+
+        <div class="q-area" id="q-area">
+            </div>
+    </div>
+
+    <footer>
+        <div style="display:flex; gap:10px;">
+            <button class="f-btn" onclick="markReview()" style="color:#7b1fa2; border-color:#7b1fa2;">Review</button>
+            <button class="f-btn" onclick="clearAns()">Clear</button>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <button class="f-btn" onclick="nav(-1)">&lt; Prev</button>
+            <button class="f-btn f-primary" onclick="nav(1)">Save & Next &gt;</button>
+        </div>
+    </footer>
+</div>
+
+<script>
+/* DATA: Questions 1572 - 1584 */
+const allQuestions = [
+    {
+        id: 1572,
+        q: "The maximum spacing of the reinforcement being provided in a retaining wall is—",
+        opt: ["100mm", "250 mm", "450mm", "600mm"],
+        ans: 2,
+        tag: "AAI (Aeronautical JE) 2015",
+        sol: "Maximum spacing of reinforcement should be minimum of 3d or 450 mm."
+    },
+    {
+        id: 1573,
+        q: "The minimum cement concrete grade for all RCC members of water retaining structures in touch with liquid or encasing the liquid shall be",
+        opt: ["M 25", "M 30", "M 35", "M 40"],
+        ans: 1,
+        tag: "Mizoram PSC JE 2016",
+        sol: "As per codal provisions of IS 3370: Minimum grade of concrete for the RCC water tank is M30. Minimum cement content is 400 kg/m³ to take care of shrinkage effect. Minimum nominal cover is 45 mm."
+    },
+    {
+        id: 1574,
+        q: "The Indian standard codes and provisions prescribed for designing water retaining structures is/are",
+        opt: ["IS:3370", "IS:456-2000", "IS:3370 & IS:456-2000", "IS:1893-2002 & IS:456-2000"],
+        ans: 0,
+        tag: "TSPSC HMWSSB Manager 2020",
+        sol: "IS 3370: Concrete structure for storage of liquids code of practice.<br>IS 456: Code of practice for plain and reinforced concrete.<br>IS 1893: Criteria for earthquake resistant design of structures."
+    },
+    {
+        id: 1575,
+        q: "In counterfort type retaining walls:<br>A. The vertical slab is designed as a continuous slab<br>B. The heel slab is designed as a continuous slab<br>C. The vertical slab is designed as a cantilever<br>D. The heel slab is designed as a cantilever",
+        opt: ["A & B", "A & D", "B & C", "C & D"],
+        ans: 0,
+        tag: "SSC JE 1.3.2017",
+        sol: "A counterfort retaining wall is a cantilever wall with counterforts attached to the inside face. <br>• The vertical slab is designed as a continuous slab.<br>• The heel slab is designed as a continuous slab.<br>This reduces the shear force and bending moment."
+    },
+    {
+        id: 1576,
+        q: "A shear wall of length 5m, height 3m and thickness 250 mm has to resist the forces due to horizontal earthquake in its plane. The relevant Section Modulus of the wall section is:",
+        opt: ["3.75 × 10⁸ mm³", "10.41 × 10⁸ mm³", "31.25 × 10⁶ mm³", "75 × 10⁸ mm³"],
+        ans: 0,
+        tag: "ESE 2015",
+        sol: "Section modulus Z = I/y.<br>Assuming depth d = 3000 mm (from solution context).<br>Z = (250 × 3000²) / 6<br>Z = (250 × 9000000) / 6 = 3.75 × 10⁸ mm³."
+    },
+    {
+        id: 1577,
+        q: "A wall carries an axial load, 12kN/m and also and eccentric load of 27kN/m at 72mm from the central axis of the wall. The equivalent eccentricity e is nearly:",
+        opt: ["65mm", "60mm", "55mm", "50mm"],
+        ans: 3,
+        tag: "ESE 2015",
+        sol: "Equivalent eccentricity e' = (P₁e₁ + P₂e₂) / (P₁ + P₂)<br>e' = (12×0 + 27×72) / (12 + 27)<br>e' = 1944 / 39 = 49.8 mm ≈ 50 mm."
+    },
+    {
+        id: 1578,
+        q: "How is the base-level bending moment of a cantilever retaining wall expressed as a function of its height H?",
+        opt: ["H", "H²", "H³", "H⁴"],
+        ans: 2,
+        tag: "ESE 2015",
+        sol: "Force P = (1/2) Kₐ γ H² acting at H/3 from base.<br>Bending Moment = P × H/3 = (1/6) Kₐ γ H³.<br>Thus, Bending moment ∝ H³."
+    },
+    {
+        id: 1579,
+        q: "In a reinforced concrete retaining wall, a shear key is provided, if the:",
+        opt: ["Shear stress in the vertical stem is excessive", "Shear force in the toe slab is more than that in the heel slab", "Retaining wall is not safe against sliding", "Retaining wall is not safe against overturning"],
+        ans: 2,
+        tag: "CGPSC SES exam 2014",
+        sol: "In a reinforced concrete retaining wall, a shear key is provided if the retaining wall is not safe against sliding."
+    },
+    {
+        id: 1580,
+        q: "In a cantilever type retaining wall, the factor of safety due to overturning is",
+        opt: ["Overturning moment divided by sliding moment", "Resisting moment divided by sliding moment", "Overturning moment divided by Resisting moment", "Resisting moment divided by Overturning moment"],
+        ans: 3,
+        tag: "ESE 2020",
+        sol: "FOS against overturning = Resisting Moment (M_R) / Overturning Moment (M_O).<br>A minimum FOS of 1.55 to 2.0 should be used."
+    },
+    {
+        id: 1581,
+        q: "Which of the following are the general design requirements of retaining wall?<br>1. The factor of safety against sliding should be at least 1.5<br>2. The factor of safety against overturning should be at least 2.0<br>3. The bearing pressure at toe should be less than the bearing capacity of the soil<br>4. The length of retaining wall to be coast in one go should not exceed 10 m otherwise cracks may develop",
+        opt: ["1, 2 and 3 only", "1, 3 and 4 only", "1, 2 and 4 only", "2, 3 and 4 only"],
+        ans: 1,
+        tag: "ESE 2020",
+        sol: "General criteria:<br>1. FOS against sliding and overturning should be at least 1.5 (Standard is 1.5, not strictly 2.0 as general min).<br>2. Bearing pressure at toe < SBC.<br>3. Expansion joints/length per cast should not exceed 10m."
+    },
+    {
+        id: 1582,
+        q: "An RCC structure with fundamental time period of 1.2 sec vibrates at a forcing frequency of 10 rad/sec. The maximum dynamic displacement is X% of static displacement. The value of X is",
+        opt: ["10.1", "28.9", "37.7", "50.2"],
+        ans: 2,
+        tag: "ESE 2018",
+        sol: "Natural frequency ωn = 2π/T = 2π/1.2 ≈ 5.23 rad/sec.<br>Frequency ratio r = ω/ωn = 10/5.23 = 1.91.<br>Magnification Factor (DMF) = 1 / |1 - r²| = 1 / |1 - 1.91²| = 1 / |1 - 3.65| = 1 / 2.65 = 0.377.<br>X% = 37.7%."
+    },
+    {
+        id: 1583,
+        q: "In a cantilever retaining wall, the main steel reinforcement is provided",
+        opt: ["On the backfill side, in the vertical direction", "On both, inner and outer, faces", "In horizontal as well as in vertical directions", "To counteract shear stresses"],
+        ans: 0,
+        tag: "ESE 2018",
+        sol: "Main reinforcement is provided on the backfill side (rear side) where tension is developed due to lateral pressure. It is provided in the vertical direction."
+    },
+    {
+        id: 1584,
+        q: "To have pressure wholly compressive under the base of a retaining wall if width b, the resultant of the weight of the wall and the pressure exerted by the retained, earth should have eccentricity not more than",
+        opt: ["b/3", "b/4", "b/5", "b/6"],
+        ans: 3,
+        tag: "SSC JE 23.01.2018",
+        sol: "For no tension (wholly compressive), the resultant must lie within the middle third rule.<br>Eccentricity e ≤ b/6."
+    }
+];
+
+/* STATE */
+let currentQuestions = [];
+let currIdx = 0;
+let userAns = {}; 
+let status = {};
+let bookmarks = new Set(JSON.parse(localStorage.getItem('bookmarks')) || []);
+let time = 1200; // 20 mins
+let timerInt;
+
+// Load History & Counts
+window.onload = function() {
+    document.getElementById('bm-count-lbl').innerText = bookmarks.size;
+    let savedHist = JSON.parse(localStorage.getItem('test_history_rcc'));
+    if(savedHist) {
+        document.getElementById('history-section').style.display = 'block';
+        document.getElementById('hist-score').innerText = savedHist.score;
+        document.getElementById('hist-acc').innerText = savedHist.acc;
+    }
+}
+
+function startTest(isBookmarkMode) {
+    if(isBookmarkMode) {
+        if(bookmarks.size === 0) { alert("No bookmarks found!"); return; }
+        currentQuestions = allQuestions.filter(q => bookmarks.has(q.id));
+    } else {
+        currentQuestions = [...allQuestions];
+    }
+    
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('test-ui').style.display = 'flex';
+    
+    // Init
+    userAns = {};
+    status = {};
+    currentQuestions.forEach(q => status[q.id] = 0);
+    renderGrid();
+    loadQ(0);
+    
+    // Timer
+    clearInterval(timerInt);
+    time = isBookmarkMode ? currentQuestions.length * 60 : 1200;
+    timerInt = setInterval(() => {
+        time--;
+        let h = Math.floor(time/3600).toString().padStart(2,'0');
+        let m = Math.floor((time%3600)/60).toString().padStart(2,'0');
+        let s = (time%60).toString().padStart(2,'0');
+        document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+        if(time <= 0) showResult();
+    }, 1000);
+}
+
+function loadQ(idx) {
+    if(idx < 0 || idx >= currentQuestions.length) return;
+    currIdx = idx;
+    let q = currentQuestions[idx];
+    
+    if(status[q.id] === 0) status[q.id] = 1; // Mark visited
+    updateGrid();
+
+    let ans = userAns[q.id];
+    let isBm = bookmarks.has(q.id);
+
+    let html = `
+        <div class="q-meta">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span><b>Q.${currIdx+1}</b></span>
+                <span class="tag">Civil</span>
+            </div>
+            <div class="bm-icon ${isBm ? 'active' : ''}" onclick="toggleBm(${q.id}, this)">
+                ${isBm ? '★' : '☆'}
+            </div>
+        </div>
+        <div class="q-text">${q.q}</div>
+        <div class="opts">
+            ${q.opt.map((o, i) => `
+                <div class="opt ${ans !== undefined ? (i===q.ans?'correct':(i===ans?'wrong':'disabled')) : ''}" 
+                     onclick="sel(${q.id}, ${i})">
+                    <div class="radio">${['A','B','C','D'][i]}</div>
+                    <span>${o}</span>
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+    if(ans !== undefined) {
+        html += `<div class="sol-box" style="display:block">
+            <div class="sol-title">Solution</div>
+            ${q.sol}
+        </div>`;
+    }
+
+    document.getElementById('q-area').innerHTML = html;
+}
+
+function toggleBm(qid, el) {
+    if(bookmarks.has(qid)) {
+        bookmarks.delete(qid);
+        el.innerText = '☆';
+        el.classList.remove('active');
+    } else {
+        bookmarks.add(qid);
+        el.innerText = '★';
+        el.classList.add('active');
+    }
+    localStorage.setItem('bookmarks', JSON.stringify(Array.from(bookmarks)));
+}
+
+function sel(qid, idx) {
+    if(userAns[qid] !== undefined) return;
+    userAns[qid] = idx;
+    status[qid] = 2; // Answered
+    loadQ(currIdx);
+    updateGrid();
+}
+
+function nav(d) { loadQ(currIdx + d); }
+
+function markReview() {
+    status[currentQuestions[currIdx].id] = 3;
+    updateGrid();
+}
+
+function clearAns() {
+    delete userAns[currentQuestions[currIdx].id];
+    status[currentQuestions[currIdx].id] = 1; // Not Ans
+    loadQ(currIdx);
+    updateGrid();
+}
+
+function renderGrid() {
+    document.getElementById('grid').innerHTML = currentQuestions.map((q, i) => 
+        `<div class="p-btn" id="p-${q.id}" onclick="loadQ(${i}); toggleSidebar()">${i+1}</div>`
+    ).join('');
+}
+
+function updateGrid() {
+    currentQuestions.forEach((q, i) => {
+        let el = document.getElementById(`p-${q.id}`);
+        let s = status[q.id];
+        el.className = 'p-btn';
+        if(i === currIdx) el.classList.add('cur');
+        if(s === 2) el.classList.add('ans');
+        else if(s === 1) el.classList.add('not-ans');
+        else if(s === 3) el.classList.add('review');
+        else el.classList.add('visited');
+    });
+}
+
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+}
+
+function confirmSubmit() {
+    if(confirm("Are you sure you want to submit the test?")) showResult();
+}
+
+function showResult() {
+    clearInterval(timerInt);
+    document.getElementById('test-ui').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'flex';
+    
+    let correct = 0;
+    let wrong = 0;
+    let skipped = 0;
+    
+    currentQuestions.forEach(q => {
+        if(userAns[q.id] === undefined) skipped++;
+        else if(userAns[q.id] === q.ans) correct++;
+        else wrong++;
+    });
+    
+    let total = currentQuestions.length;
+    let acc = (correct + wrong) > 0 ? Math.round((correct / (correct + wrong)) * 100) : 0;
+    
+    document.getElementById('final-score').innerText = `${correct}/${total}`;
+    document.getElementById('r-correct').innerText = correct;
+    document.getElementById('r-wrong').innerText = wrong;
+    document.getElementById('r-skip').innerText = skipped;
+    document.getElementById('r-acc').innerText = acc + "%";
+
+    // SAVE ACCURACY
+    localStorage.setItem('test_history_rcc', JSON.stringify({
+        score: `${correct}/${total}`,
+        acc: acc + "%"
+    }));
+}
+</script>
+</body>
+</html>
